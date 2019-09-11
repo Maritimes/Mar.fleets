@@ -291,7 +291,8 @@ get_OBS <- function(fn.oracle.username = "_none_",
   t0<-unique(t0)
   #aggregate only by the MATCHED_ON field and fields we know will not be NA
   #otherwise records get dropped
-  t0agg = unique(stats::aggregate(by=t0[c("MON_DOC_ID","TRIP_ID_MARF")], x = t0[c("MATCHED_ON")], paste, collapse = ", "))
+  tot0tmp = unique(t0[,c("MON_DOC_ID", "TRIP_ID_MARF", "MATCHED_ON")])
+  t0agg = unique(stats::aggregate(by=tot0tmp[c("MON_DOC_ID","TRIP_ID_MARF")], x = tot0tmp[c("MATCHED_ON")], paste, collapse = ", "))
   t0 = unique(merge(t0[,!names(t0) %in% "MATCHED_ON"],t0agg, all.x=TRUE))
   #aggregate function is dropping recs due to NA presence.
   t0=data.table::as.data.table(t0)
@@ -361,7 +362,8 @@ get_OBS <- function(fn.oracle.username = "_none_",
         }else{
             next
       }
-   }
+  }
+
   OBS_SETS2=merge(OBS_SETS,marfMap, all.x=T)
   res= list()
   res[["MAP_OBS_MARFIS_TRIPS"]] <- t0

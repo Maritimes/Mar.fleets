@@ -82,8 +82,18 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
                  AND (PS.VR_NUMBER_FISHING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),"
                       OR PS.VR_NUMBER_LANDING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),")")
     PS_df<- cxn$thecmd(cxn$channel, PSQry0)
-    PS_df <- PS_df[(paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_FISHING,"_",PS_df$GEAR_CODE) %in% all_combos |
-                      paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_LANDING,"_",PS_df$GEAR_CODE) %in% all_combos) ,]
+    PS_df <- unique(PS_df[(paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_FISHING,"_",PS_df$GEAR_CODE) %in% all_combos |
+                      paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_LANDING,"_",PS_df$GEAR_CODE) %in% all_combos) ,])
+
+    PS_df$LATITUDE <- ifelse(is.na(PS_df$ENT_LATITUDE), ifelse(is.na(PS_df$DET_LATITUDE), PS_df$PS_LATITUDE, PS_df$DET_LATITUDE), PS_df$ENT_LATITUDE)
+    PS_df$LONGITUDE <- ifelse(is.na(PS_df$ENT_LONGITUDE), ifelse(is.na(PS_df$DET_LONGITUDE), PS_df$PS_LONGITUDE, PS_df$DET_LONGITUDE), PS_df$ENT_LONGITUDE)
+    PS_df$LATITUDE[!is.na(PS_df$LATITUDE)] <- (as.numeric(substr(PS_df$LATITUDE[!is.na(PS_df$LATITUDE)], 1, 2))
+                                               + as.numeric(substr(PS_df$LATITUDE[!is.na(PS_df$LATITUDE)], 3, 4))/60
+                                               + as.numeric(substr(PS_df$LATITUDE[!is.na(PS_df$LATITUDE)], 5, 6))/3600)
+    PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)] <- -1 * (as.numeric(substr(PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)], 1, 2))
+                                                      + as.numeric(substr(PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)], 3, 4))/60
+                                                      + as.numeric(substr(PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)], 5, 6))/3600)
+
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
@@ -97,6 +107,7 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
                  AND ED.MON_DOC_ID BETWEEN ",min(mondocs), " AND ", max(mondocs))
     ED_df<- cxn$thecmd(cxn$channel, EDQry)
     ED_df <- ED_df[ED_df$MON_DOC_ID %in% mondocs ,]
+    if (nrow(ED_df)<1)return(NULL)
     ED_df<- reshape2::dcast(ED_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
     colnames(ED_df)[colnames(ED_df)=="21"] <- "OBS_PRESENT"
     colnames(ED_df)[colnames(ED_df)=="741"] <- "OBS_TRIP"
@@ -112,7 +123,7 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     HICQry<-paste0("SELECT
                     HI.TRIP_ID,
                   HI.CONF_NUMBER,
-                  HI.VR_NUMBER,
+                --  HI.VR_NUMBER,
                   HI.HAIL_OUT_ID
                   FROM MARFISSCI.HAIL_IN_CALLS HI
                   WHERE
@@ -120,7 +131,7 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     HIC_df<- cxn$thecmd(cxn$channel, HICQry)
     HIC_df <- HIC_df[HIC_df$TRIP_ID %in% trips ,]
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
-    colnames(HIC_df)[colnames(HIC_df)=="VR_NUMBER"] <- "VR_NUMBER_HI"
+   # colnames(HIC_df)[colnames(HIC_df)=="VR_NUMBER"] <- "VR_NUMBER_HI"
     colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
     return(HIC_df)
   }
@@ -129,7 +140,7 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     HOCQry<-paste0("SELECT
                    HO.TRIP_ID,
                    HO.CONF_NUMBER,
-                   HO.VR_NUMBER,
+      --             HO.VR_NUMBER,
                    HO.HAIL_OUT_ID
                    FROM MARFISSCI.HAIL_OUTS HO
                    WHERE
@@ -137,23 +148,16 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     HOC_df<- cxn$thecmd(cxn$channel, HOCQry)
     HOC_df <- HOC_df[HOC_df$TRIP_ID %in% trips ,]
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
-    colnames(HOC_df)[colnames(HOC_df)=="VR_NUMBER"] <- "VR_NUMBER_HO"
+ #   colnames(HOC_df)[colnames(HOC_df)=="VR_NUMBER"] <- "VR_NUMBER_HO"
     colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     return(HOC_df)
   }
 
-  psEff<- unique(getPSEff(dateStart, dateEnd, thisFleet))
-  psEff$LATITUDE <- ifelse(is.na(psEff$ENT_LATITUDE), ifelse(is.na(psEff$DET_LATITUDE), psEff$PS_LATITUDE, psEff$DET_LATITUDE), psEff$ENT_LATITUDE)
-  psEff$LONGITUDE <- ifelse(is.na(psEff$ENT_LONGITUDE), ifelse(is.na(psEff$DET_LONGITUDE), psEff$PS_LONGITUDE, psEff$DET_LONGITUDE), psEff$ENT_LONGITUDE)
-  psEff$LATITUDE[!is.na(psEff$LATITUDE)] <- (as.numeric(substr(psEff$LATITUDE[!is.na(psEff$LATITUDE)], 1, 2))
-                                                   + as.numeric(substr(psEff$LATITUDE[!is.na(psEff$LATITUDE)], 3, 4))/60
-                                                   + as.numeric(substr(psEff$LATITUDE[!is.na(psEff$LATITUDE)], 5, 6))/3600)
-  psEff$LONGITUDE[!is.na(psEff$LONGITUDE)] <- -1 * (as.numeric(substr(psEff$LONGITUDE[!is.na(psEff$LONGITUDE)], 1, 2))
-                                                          + as.numeric(substr(psEff$LONGITUDE[!is.na(psEff$LONGITUDE)], 3, 4))/60
-                                                          + as.numeric(substr(psEff$LONGITUDE[!is.na(psEff$LONGITUDE)], 5, 6))/3600)
+  psEff<- getPSEff(dateStart, dateEnd, thisFleet)
+
   eff <- unique(psEff[,c("TRIP_ID","MON_DOC_ID","LOG_EFRT_STD_INFO_ID","FV_FISHED_DATETIME","FV_NUM_OF_EVENTS",
-                       "FV_NUM_OF_GEAR_UNITS","FV_DURATION_IN_HOURS","GEAR_CODE",
-                       "LATITUDE","LONGITUDE")])
+                         "FV_NUM_OF_GEAR_UNITS","FV_DURATION_IN_HOURS","GEAR_CODE",
+                         "LATITUDE","LONGITUDE")])
   ps <- unique(psEff[,c("TRIP_ID", "MON_DOC_ID", "LICENCE_ID", "GEAR_CODE", "VR_NUMBER_FISHING", "VR_NUMBER_LANDING")])
 
   if (nrow(ps)<1){
@@ -170,7 +174,7 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
   colnames(eff)[colnames(eff)=="TRIP_ID"] <- "TRIP_ID_MARF"
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
-  trips <- unique(marObsMatch[, !names(marObsMatch) %in% c("LOG_EFRT_STD_INFO_ID","CONF_NUMBER_HI", "CONF_NUMBER_HO", "VR_NUMBER_HI", "VR_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO")])
+  trips <- unique(marObsMatch[, !names(marObsMatch) %in% c("LOG_EFRT_STD_INFO_ID","CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "OBS_TRIP", "OBS_ID", "OBS_PRESENT")])
   res<- list()
   res[["MARF_MATCH"]] <- marObsMatch
   res[["MARF_TRIPS"]]<-trips
