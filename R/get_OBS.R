@@ -229,7 +229,6 @@ get_OBS <- function(fn.oracle.username = "_none_",
   #t1-t3 simple
   t1 = merge(these_MARF_SETS[!is.na(these_MARF_SETS$OBS_TRIP_CLN),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$OBS_TRIP_CLN),], by = "OBS_TRIP_CLN")
   if (nrow(t1)>0){
-    #if (100046423 %in% t1$TRIP_ID_OBS)browser()
     t1$OBS_TRIP_CLN.x<- t1$OBS_TRIP_CLN
     t1$OBS_TRIP_CLN.y<- t1$OBS_TRIP_CLN
     t1$OBS_TRIP_CLN<- NULL
@@ -238,14 +237,12 @@ get_OBS <- function(fn.oracle.username = "_none_",
   t2 = merge(these_MARF_SETS[!is.na(these_MARF_SETS$CONF_NUMBER_HI),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$MARFIS_CONF_NUMBER),], by.x = "CONF_NUMBER_HI", by.y="MARFIS_CONF_NUMBER")
   if (nrow(t2)>0) {
 
-    #if (100046423 %in% t2$TRIP_ID_OBS)browser()
     t2$MARFIS_CONF_NUMBER<-t2$CONF_NUMBER_HI
     t2$MATCHED_ON<- "CONF_HI"
   }
   t3 = merge(these_MARF_SETS[!is.na(these_MARF_SETS$CONF_NUMBER_HO),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$MARFIS_CONF_NUMBER),], by.x = "CONF_NUMBER_HO", by.y="MARFIS_CONF_NUMBER")
   if (nrow(t3)>0) {
 
-    #if (100046423 %in% t3$TRIP_ID_OBS)browser()
     t3$MARFIS_CONF_NUMBER<-t3$CONF_NUMBER_HO
     t3$MATCHED_ON<- "CONF_HO"
   }
@@ -257,7 +254,6 @@ get_OBS <- function(fn.oracle.username = "_none_",
 
     t4 <- t4[t4$FV_FISHED_DATETIME >= t4$BOARD_DATE & t4$FV_FISHED_DATETIME<=t4$LANDING_DATE,]
 
-    #if (100046423 %in% t4$TRIP_ID_OBS)browser()
     t4$LIC_VR <- t4$LIC_VRF
   }
 
@@ -265,7 +261,6 @@ get_OBS <- function(fn.oracle.username = "_none_",
   if (nrow(t5)>0) {
     t5 <- t5[t5$FV_FISHED_DATETIME >= t5$BOARD_DATE & t5$FV_FISHED_DATETIME<=t5$LANDING_DATE,]
 
-    #if (100046423 %in% t5$TRIP_ID_OBS)browser()
     t5$LIC_VR <- t5$LIC_VRL
   }
 
@@ -277,7 +272,6 @@ get_OBS <- function(fn.oracle.username = "_none_",
   #bind together all matched data, and in cases where multiple matches worked,
   #collapse match reason into comma seperated field
   t0=unique(rbind(t1,t2,t3,t6))
-  #if (100046423 %in% t0$TRIP_ID_OBS)browser()
   t0 <- t0[t0$FV_FISHED_DATETIME >= t0$BOARD_DATE & t0$FV_FISHED_DATETIME<=t0$LANDING_DATE,]
   t1<-t2<-t3<-t4<-t5<-t6<-NULL
   t0=t0[!is.na(t0$MON_DOC_ID)|!is.na(t0$TRIP_ID_MARF),]
@@ -303,14 +297,13 @@ get_OBS <- function(fn.oracle.username = "_none_",
   t0$IS_SURVEY <- FALSE
   t0[t0$TRIPCD_ID>=7010,"IS_SURVEY"]<-TRUE
   t0[t0$TRIPCD_ID==7099,"IS_SURVEY"]<-FALSE #overwrite for 7099 exception
-
   if (!quiet){
     unmatched_OB_TRIPS<- sort(unique(these_MARF_SETS[!these_MARF_SETS$OBS_TRIP_CLN %in% obs_trip_df_tmp$OBS_TRIP_CLN,"OBS_TRIP"]))
     if(length(unmatched_OB_TRIPS)>0){
       cat("\n","These Obs trips were in the marfis data but were not matched:")
       cat("\n",unmatched_OB_TRIPS)
     }
-    unmatched_CONF <- sort(unique(these_MARF_SETS[!marf_CONF_all %in% obs_trip_df$MARFIS_CONF_NUMBER,"MARFIS_CONF_NUMBER"]))
+    unmatched_CONF <- sort(unique(these_MARF_SETS[!marf_CONF_all %in% na.omit(obs_trip_df_tmp$MARFIS_CONF_NUMBER),"MARFIS_CONF_NUMBER"]))
     if(length(unmatched_CONF)>0){
       cat("\n","These confirmation numbers were in the marfis data but weren't matched:")
       cat("\n",unmatched_CONF)
@@ -324,26 +317,43 @@ get_OBS <- function(fn.oracle.username = "_none_",
 
   if(!keepSurveyTrips) t0 <- t0[t0$IS_SURVEY==F,c("MON_DOC_ID","TRIP_ID_MARF","TRIP_ID_OBS", "IS_SURVEY", "MATCHED_ON")]
   t0 = t0[,c("TRIP_ID_MARF","MON_DOC_ID","TRIP_ID_OBS", "IS_SURVEY", "MATCHED_ON")]
+  OBS_TRIPS<- merge(obs_trip_df,t0,all.x=T)
+  unmatched_t = OBS_TRIPS[is.na(OBS_TRIPS$MATCHED_ON),"TRIP"]
+  if (length(unmatched_t)>0){
+    cat("\n","These Obs trips matched the criteria (date, fleet), but couldn't be matched to a marfis trip for this fleet:","\n")
+    print(sort(unique(unmatched_t)))
 
-  OBS_TRIPS<- merge(obs_trip_df,t0)
+  }
+
   OBS_SETS <- get_OBS_sets(obsTrips = obs_trip_df)
-  #if (100046423 %in% OBS_SETS$TRIP_ID)browser()
-  #join the marf trip# to each OBS set, then add the trip details (i.e. FV_FISHED_DATETIME and LOG_EFRT_STD_INFO)
-  #setMap = unique(merge(OBS_SETS, these_MARF_SETS))
 
  setMap = unique(merge(OBS_SETS, t0, all.x = T, by.x="TRIP_ID", by.y="TRIP_ID_OBS"))
- #if (100046423 %in% setMap$TRIP_ID)browser()
  setMap = unique(merge(setMap[, !names(setMap) %in% c("SET_NO", "LATITUDE", "LONGITUDE")], get_MARFIS$MARF_SETS[,!names(get_MARFIS$MARF_SETS) %in% c("FV_NUM_OF_EVENTS", "FV_NUM_OF_GEAR_UNITS", "FV_DURATION_IN_HOURS", "GEAR_CODE", "LATITUDE", "LONGITUDE")], all.x = T, by.x=c("TRIP_ID_MARF","MON_DOC_ID"), by.y=c("TRIP_ID_MARF","MON_DOC_ID")))
   #The following joins every obs fishset with every commercial set for the matched trip
   #this means it's a crossjoin within each trip (i.e. too many records)  The results are further refined by
   #only keeping the sets where an observer set board and land time sandwiches the marfis datetime
-  cat("\n", "Attempting to match Observer and MARFIS sets using by finding the timestamps of each","\n")
-
+  # cat("\n", "Attempting to match Observer and MARFIS sets using by finding the timestamps of each","\n")
    m <- unique(data.table::setDT(get_MARFIS$MARF_SETS[,c("TRIP_ID_MARF","LOG_EFRT_STD_INFO_ID","FV_FISHED_DATETIME")]))
+
    o<- unique(data.table::setDT(setMap[,c("TRIP_ID","TRIP_ID_MARF","FISHSET_ID", "SET_DATETIME")]))
+   # #drop obs records which did not map to a set
+   # o2<-o[is.na(o$TRIP_ID_MARF),]
+   # #drop marf records which did not map to a set
+   # m2<-m[is.na(m$LOG_EFRT_STD_INFO_ID),]
+   # if (!quiet){
+   #   if(nrow(m2)>0){
+   #     cat("\n","One or more sets from these MARFIS trips couldn't be matched to a Observer set (MARFIS TRIP_ID)","\n")
+   #     print(sort(unique(m2$TRIP_ID_MARF)))
+   #   }
+   #   if(nrow(o2)>0){
+   #     cat("\n","These Obs sets couldn't be matched to a Marfis Set (FISHSET_ID):","\n")
+   #     print(sort(unique(o2$FISHSET_ID)))
+   #   }
+   # }
 
-
-  allMARF = unique(setMap$TRIP_ID_MARF)
+   o<-o[!is.na(o$TRIP_ID_MARF),]
+   m<-m[!is.na(m$LOG_EFRT_STD_INFO_ID),]
+  allMARF = unique(o$TRIP_ID_MARF)
   marfMap <- data.frame(matrix(ncol = 4, nrow = 0))
   x <- c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "TRIP_ID", "FISHSET_ID")
   colnames(marfMap) <- x

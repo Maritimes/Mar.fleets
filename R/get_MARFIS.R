@@ -48,52 +48,69 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
-  getPSEff<-function(dateStart = dateStart, dateEnd=dateEnd, thisFleet = thisFleet){
+  getEff<-function(dateStart = NULL, dateEnd=NULL, trips = NULL){
+    PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID, PS.LOG_EFRT_STD_INFO_ID
+                      FROM
+                    MARFISSCI.PRO_SPC_INFO PS
+                    WHERE PS.TRIP_ID BETWEEN ",min(trips$TRIP_ID), " AND ", max(trips$TRIP_ID)," AND
+                    PS.LOG_EFRT_STD_INFO_ID IS NOT NULL")
+    PS_allsets<- cxn$thecmd(cxn$channel, PSQry0)
+    PS_allsets<-PS_allsets[PS_allsets$TRIP_ID %in% trips$TRIP_ID, ]
+
+    PSQry1 <-paste0("SELECT DISTINCT
+                        EF.LOG_EFRT_STD_INFO_ID,
+                        EF.FV_FISHED_DATETIME,
+                        EF.FV_NUM_OF_EVENTS,
+                        EF.MON_DOC_ID,
+                        EF.FV_NUM_OF_GEAR_UNITS,
+                        EF.FV_DURATION_IN_HOURS,
+                        EF.FV_GEAR_CODE,
+                        EF.DET_LATITUDE,
+                        EF.DET_LONGITUDE,
+                        EF.ENT_LATITUDE,
+                        EF.ENT_LONGITUDE
+                     FROM MARFISSCI.LOG_EFRT_STD_INFO EF
+                     WHERE
+                        EF.FV_GEAR_CODE IN (",Mar.utils::SQL_in(unique(trips$GEAR_CODE)),") AND
+                        EF.FV_FISHED_DATETIME BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD') AND
+                        EF.LOG_EFRT_STD_INFO_ID BETWEEN ",min(PS_allsets$LOG_EFRT_STD_INFO_ID), " AND ", max(PS_allsets$LOG_EFRT_STD_INFO_ID))
+    PS_sets<- cxn$thecmd(cxn$channel, PSQry1)
+    PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% PS_allsets$LOG_EFRT_STD_INFO_ID, ]
+
+
+    PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
+    PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
+    PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)] <- (as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 1, 2))
+                                               + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 3, 4))/60
+                                               + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 5, 6))/3600)
+    PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)] <- -1 * (as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 1, 2))
+                                                      + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 3, 4))/60
+                                                      + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 5, 6))/3600)
+    PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
+    PS_sets<-unique(PS_sets)
+    return(PS_sets)
+  }
+  getPS<-function(dateStart = dateStart, dateEnd=dateEnd, thisFleet = thisFleet){
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
-    cat("\n","PRO_SPC_INFO & LOG_EFF")
+    cat("\n","PRO_SPC_INFO")
     PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID,
-  PS.MON_DOC_ID,
-  PS.LICENCE_ID,
-  PS.GEAR_CODE,
-  PS.VR_NUMBER_FISHING,
-  PS.VR_NUMBER_LANDING,
-  PS.LOG_EFRT_STD_INFO_ID,
-  PS.DATE_FISHED,
-  PS.LANDED_DATE,
-  PS.LATITUDE PS_LATITUDE,
-  PS.LONGITUDE PS_LONGITUDE,
-  EF.FV_FISHED_DATETIME,
-  EF.FV_NUM_OF_EVENTS,
-  EF.FV_NUM_OF_GEAR_UNITS,
-  EF.FV_DURATION_IN_HOURS,
-  EF.FV_GEAR_CODE,
-  EF.DET_LATITUDE,
-  EF.DET_LONGITUDE,
-  EF.ENT_LATITUDE,
-  EF.ENT_LONGITUDE
-FROM MARFISSCI.PRO_SPC_INFO PS, MARFISSCI.LOG_EFRT_STD_INFO EF
-WHERE PS.LOG_EFRT_STD_INFO_ID = EF.LOG_EFRT_STD_INFO_ID(+)
-AND PS.MON_DOC_ID = EF.MON_DOC_ID(+)
-AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),") AND
-   (PS.DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD') OR
-                     PS.LANDED_DATE  BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD'))
-                   AND PS.LICENCE_ID BETWEEN ",min(thisFleet$LICENCE_ID), " AND ", max(thisFleet$LICENCE_ID),"
-                 AND (PS.VR_NUMBER_FISHING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),"
-                      OR PS.VR_NUMBER_LANDING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),")")
+                    PS.MON_DOC_ID,
+                    PS.LICENCE_ID,
+                    PS.GEAR_CODE,
+                    PS.VR_NUMBER_FISHING,
+                    PS.VR_NUMBER_LANDING
+                    FROM MARFISSCI.PRO_SPC_INFO PS
+                    WHERE
+                    PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),") AND
+                    (PS.DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD') OR
+                    PS.LANDED_DATE  BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD'))
+                    AND PS.LICENCE_ID BETWEEN ",min(thisFleet$LICENCE_ID), " AND ", max(thisFleet$LICENCE_ID),"
+                    AND (PS.VR_NUMBER_FISHING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),"
+                    OR PS.VR_NUMBER_LANDING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),")")
     PS_df<- cxn$thecmd(cxn$channel, PSQry0)
     PS_df <- unique(PS_df[(paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_FISHING,"_",PS_df$GEAR_CODE) %in% all_combos |
-                      paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_LANDING,"_",PS_df$GEAR_CODE) %in% all_combos) ,])
-
-    PS_df$LATITUDE <- ifelse(is.na(PS_df$ENT_LATITUDE), ifelse(is.na(PS_df$DET_LATITUDE), PS_df$PS_LATITUDE, PS_df$DET_LATITUDE), PS_df$ENT_LATITUDE)
-    PS_df$LONGITUDE <- ifelse(is.na(PS_df$ENT_LONGITUDE), ifelse(is.na(PS_df$DET_LONGITUDE), PS_df$PS_LONGITUDE, PS_df$DET_LONGITUDE), PS_df$ENT_LONGITUDE)
-    PS_df$LATITUDE[!is.na(PS_df$LATITUDE)] <- (as.numeric(substr(PS_df$LATITUDE[!is.na(PS_df$LATITUDE)], 1, 2))
-                                               + as.numeric(substr(PS_df$LATITUDE[!is.na(PS_df$LATITUDE)], 3, 4))/60
-                                               + as.numeric(substr(PS_df$LATITUDE[!is.na(PS_df$LATITUDE)], 5, 6))/3600)
-    PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)] <- -1 * (as.numeric(substr(PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)], 1, 2))
-                                                      + as.numeric(substr(PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)], 3, 4))/60
-                                                      + as.numeric(substr(PS_df$LONGITUDE[!is.na(PS_df$LONGITUDE)], 5, 6))/3600)
-
+                             paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_LANDING,"_",PS_df$GEAR_CODE) %in% all_combos) ,])
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
@@ -115,7 +132,6 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     if (!"OBS_PRESENT" %in%  colnames(ED_df)) ED_df$OBS_PRESENT<-NA
     if (!"OBS_TRIP" %in%  colnames(ED_df)) ED_df$OBS_TRIP<-NA
     if (!"OBS_ID" %in%  colnames(ED_df)) ED_df$OBS_ID<-NA
-
     return(ED_df)
   }
   getHIC<-function(trips = NULL){
@@ -131,7 +147,6 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     HIC_df<- cxn$thecmd(cxn$channel, HICQry)
     HIC_df <- HIC_df[HIC_df$TRIP_ID %in% trips ,]
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
-   # colnames(HIC_df)[colnames(HIC_df)=="VR_NUMBER"] <- "VR_NUMBER_HI"
     colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
     return(HIC_df)
   }
@@ -148,18 +163,13 @@ AND PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),")
     HOC_df<- cxn$thecmd(cxn$channel, HOCQry)
     HOC_df <- HOC_df[HOC_df$TRIP_ID %in% trips ,]
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
- #   colnames(HOC_df)[colnames(HOC_df)=="VR_NUMBER"] <- "VR_NUMBER_HO"
     colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     return(HOC_df)
   }
 
-  psEff<- getPSEff(dateStart, dateEnd, thisFleet)
-
-  eff <- unique(psEff[,c("TRIP_ID","MON_DOC_ID","LOG_EFRT_STD_INFO_ID","FV_FISHED_DATETIME","FV_NUM_OF_EVENTS",
-                         "FV_NUM_OF_GEAR_UNITS","FV_DURATION_IN_HOURS","GEAR_CODE",
-                         "LATITUDE","LONGITUDE")])
-  ps <- unique(psEff[,c("TRIP_ID", "MON_DOC_ID", "LICENCE_ID", "GEAR_CODE", "VR_NUMBER_FISHING", "VR_NUMBER_LANDING")])
-
+  ps <- getPS(dateStart, dateEnd, thisFleet)
+  sets<- getEff(dateStart, dateEnd, ps)
+  eff <- merge(ps, sets, all.x=T)
   if (nrow(ps)<1){
     cat("\n","No MARFIS data meets criteria")
     return(invisible(NULL))
