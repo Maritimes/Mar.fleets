@@ -2,5 +2,4 @@
 
 export(calc_Coverage)
 export(get_MARFIS)
-export(get_OBS)
 export(get_fleet)

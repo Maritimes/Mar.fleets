@@ -87,7 +87,6 @@ calc_Coverage<-function(get_OBS = NULL,
   MARF_sets_pos <- MARF_sets_pos[with(MARF_sets_pos,order(LOG_EFRT_STD_INFO_ID)),]
   MARF_sets_pos <- MARF_sets_pos[!is.na(MARF_sets_pos$LATITUDE) & !is.na(MARF_sets_pos$LONGITUDE),]
   MARF_sets_pos <-data.table::as.data.table(MARF_sets_pos)
-  browser()
   MARF_sets_pos <- MARF_sets_pos[MARF_sets_pos[, .I[LOG_EFRT_STD_INFO_ID == min(LOG_EFRT_STD_INFO_ID)], by=MON_DOC_ID]$V1]
   MARF_sets_pos <- as.data.frame(MARF_sets_pos)
   MARF_sets_pos$LOG_EFRT_STD_INFO_ID <- NULL
@@ -99,7 +98,7 @@ calc_Coverage<-function(get_OBS = NULL,
                                         agg.poly.field = agg.poly.field)
   #by_trip
   cat("\n", "Figuring out the area in which the most sets occurred during each trip.","\n")
-  O_trips = merge(get_OBS$OBS_TRIPS[,!names(get_OBS$OBS_TRIPS) %in% c("BOARD_DATE","LANDING_DATE")], get_OBS$OBS_SETS, all.y =TRUE, by.x = "TRIP_ID_OBS", by.y = "TRIP_ID")
+  O_trips = merge(get_OBS$OBS_TRIPS[,!names(get_OBS$OBS_TRIPS) %in% c("BOARD_DATE","LANDING_DATE")], get_OBS$OBS_SETS, all.y =TRUE, by = "TRIP_ID_OBS")
   OBS_area_t = Mar.utils::identify_area(O_trips,
                                       agg.poly.shp = agg.poly.shp,
                                       agg.poly.field = agg.poly.field)

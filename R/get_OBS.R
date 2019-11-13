@@ -68,6 +68,7 @@
 #' \code{LOG_EFRT_STD_INFO_ID} field - e.g.
 #' all = merge(trips, sets, all.x=T, by ="LOG_EFRT_STD_INFO_ID")
 #' @export
+#'
 get_OBS <- function(fn.oracle.username = "_none_",
                     fn.oracle.password = "_none_",
                     fn.oracle.dsn = "_none_",
@@ -77,54 +78,54 @@ get_OBS <- function(fn.oracle.username = "_none_",
                     keepSurveyTrips = FALSE,
                     quiet = FALSE){
   .I <- TRIP_ID_MARF <- FV_FISHED_DATETIME<- SET_DATETIME<- NA
+  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
+  if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
+  matchSets = TRUE
   clean_OBS_Trip <- function(df=NULL, field = "OBS_TRIP"){
     df$OBS_TRIP_CLN <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
     return(df)
   }
-  these_MARF_TRIPS <- clean_OBS_Trip(df = get_MARFIS$MARF_MATCH, field = "OBS_TRIP")
-  these_MARF_TRIPS$LIC_VRF = paste0(these_MARF_TRIPS$LICENCE_ID,"_",these_MARF_TRIPS$VR_NUMBER_FISHING)
-  these_MARF_TRIPS$LIC_VRL = paste0(these_MARF_TRIPS$LICENCE_ID,"_",these_MARF_TRIPS$VR_NUMBER_LANDING)
-  these_MARF_SETS <- merge(these_MARF_TRIPS,get_MARFIS$MARF_SETS[,!names(get_MARFIS$MARF_SETS) %in% "LOG_EFRT_STD_INFO_ID"], all.x =T, by = c("MON_DOC_ID","TRIP_ID_MARF","GEAR_CODE"))
-
-  these_MARF_SETS <- unique(these_MARF_SETS[,c("MON_DOC_ID","TRIP_ID_MARF","OBS_TRIP_CLN","CONF_NUMBER_HI","CONF_NUMBER_HO","LIC_VRF","LIC_VRL", "FV_FISHED_DATETIME")])
-  marf_CONF_all <- sort(unique(stats::na.omit(c(these_MARF_SETS$CONF_NUMBER_HI, these_MARF_SETS$CONF_NUMBER_HO))))
-
-  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
-  if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  get_OBS_trips<-function(marfTrips =NULL, dateStart=NULL, dateEnd = NULL){
+  get_OBS_trips<-function(marfTrips =NULL, dateStart=NULL, dateEnd = NULL, LIC_VR = NULL){
 
     #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet
     #the criteria of being between our start and end dates
     #exact filtering follows the SQL in R
     tripSQL = paste0("SELECT
-                      V.CFV,
-                      T.TRIP_ID TRIP_ID_OBS,
-                      T.TRIP,
-                      T.TRIPCD_ID,
-                      T.VESS_ID,
-                      T.LICENSE_NO,
-                      T.BOARD_DATE,
-                      T.LANDING_DATE,
-                      T.OBSCD_ID,
-                      T.MARFIS_LICENSE_NO,
-                      T.MARFIS_CONF_NUMBER
-                    FROM ISDB.ISTRIPS T, ISDB.ISVESSELS V
-                    WHERE T.VESS_ID = V.VESS_ID(+)
-                    AND ((NVL(T.LANDING_DATE, to_date('9999-01-01','YYYY-MM-DD')) BETWEEN
-                       to_date('",dateStart,"','YYYY-MM-DD') AND
-                       to_date('",dateEnd,"','YYYY-MM-DD'))
-                    OR
-                       (NVL(T.BOARD_DATE, to_date('9999-01-01','YYYY-MM-DD'))  BETWEEN
-                       to_date('",dateStart,"','YYYY-MM-DD') AND
-                       to_date('",dateEnd,"','YYYY-MM-DD')))")
-    obs_trip_df<- cxn$thecmd(cxn$channel, tripSQL)
-    obs_trip_df <- obs_trip_df[paste0(obs_trip_df$MARFIS_LICENSE_NO,"_",obs_trip_df$CFV) %in% these_MARF_TRIPS$LIC_VRF |
-              paste0(obs_trip_df$MARFIS_LICENSE_NO,"_",obs_trip_df$CFV) %in% these_MARF_TRIPS$LIC_VRL , ]
-    return(obs_trip_df)
+                     V.CFV,
+                     T.TRIP_ID TRIP_ID_OBS,
+                     T.TRIP,
+                     T.TRIPCD_ID,
+                     T.VESS_ID,
+                     T.LICENSE_NO,
+                     T.BOARD_DATE,
+                     T.LANDING_DATE,
+                     T.OBSCD_ID,
+                     T.MARFIS_LICENSE_NO,
+                     T.MARFIS_CONF_NUMBER
+                     FROM ISDB.ISTRIPS T, ISDB.ISVESSELS V
+                     WHERE T.VESS_ID = V.VESS_ID(+)
+                     AND ((NVL(T.LANDING_DATE, to_date('9999-01-01','YYYY-MM-DD')) BETWEEN
+                     to_date('",dateStart,"','YYYY-MM-DD') AND
+                     to_date('",dateEnd,"','YYYY-MM-DD'))
+                     OR
+                     (NVL(T.BOARD_DATE, to_date('9999-01-01','YYYY-MM-DD'))  BETWEEN
+                     to_date('",dateStart,"','YYYY-MM-DD') AND
+                     to_date('",dateEnd,"','YYYY-MM-DD')))")
+    obs_TRIPS_all<- cxn$thecmd(cxn$channel, tripSQL)
+    obs_TRIPS_all <- obs_TRIPS_all[paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$CFV) %in%
+                                     LIC_VR , ]
+    obs_TRIPS_all$IS_SURVEY <- FALSE
+    obs_TRIPS_all[obs_TRIPS_all$TRIPCD_ID>=7010,"IS_SURVEY"]<-TRUE
+    obs_TRIPS_all[obs_TRIPS_all$TRIPCD_ID==7099,"IS_SURVEY"]<-FALSE
+    if (nrow(obs_TRIPS_all)==0){
+      cat("\n","No Observer trips found")
+      return(invisible(NULL))
+    }
+    return(obs_TRIPS_all)
   }
   get_OBS_sets<-function(obsTrips=NULL){
     #again, general SQL in case more than 1000 values requested
-    setSQL <- paste0("SELECT tbl.TRIP_ID,
+    setSQL <- paste0("SELECT tbl.TRIP_ID TRIP_ID_OBS,
                      --tbl.PNTCD_ID,
                      TO_DATE(NVL(TO_CHAR(SETDATE, 'YYYY-MM-DD'), '9999-01-01')
                      ||' '
@@ -209,176 +210,222 @@ get_OBS <- function(fn.oracle.username = "_none_",
     }
     return(set_df)
   }
-  obs_trip_df = get_OBS_trips(marfTrips = these_MARF_TRIPS, dateStart = dateStart, dateEnd = dateEnd)
-  if (nrow(obs_trip_df)==0){
-    cat("\n","No Observer data found")
-    return(invisible(NULL))
-  }
+
+  these_MARF_TRIPS <- clean_OBS_Trip(df = get_MARFIS$MARF_MATCH, field = "OBS_TRIP")
+
+  marf_CONF_all <- sort(unique(stats::na.omit(c(these_MARF_TRIPS$CONF_NUMBER_HI,
+                                                these_MARF_TRIPS$CONF_NUMBER_HO))))
+  marf_LIC_VR_all <- sort(unique(stats::na.omit(c(paste0(these_MARF_TRIPS$LICENCE_ID,"_",
+                                                         these_MARF_TRIPS$VR_NUMBER_FISHING),
+                                                  paste0(these_MARF_TRIPS$LICENCE_ID,"_",
+                                                         these_MARF_TRIPS$VR_NUMBER_LANDING)))))
+
+  # match trips first -------------------------------------------------------
+  # these will be all trips for vessels with correct VRN and lic in the date range
+  obs_TRIPS_all = get_OBS_trips(marfTrips = these_MARF_TRIPS,
+                                dateStart = dateStart,
+                                dateEnd = dateEnd,
+                                LIC_VR = marf_LIC_VR_all)
 
   #ensure that fields to be joined on are numeric - warning suppressed since they show on NA fields
-  obs_trip_df$LICENSE_NO<- suppressWarnings(as.numeric(obs_trip_df$LICENSE_NO))
-  obs_trip_df$MARFIS_CONF_NUMBER<- suppressWarnings(as.numeric(obs_trip_df$MARFIS_CONF_NUMBER))
-  obs_trip_df$MARFIS_LICENSE_NO<- suppressWarnings(as.numeric(obs_trip_df$MARFIS_LICENSE_NO))
-  obs_trip_df_tmp <- clean_OBS_Trip(df = obs_trip_df, field = "TRIP")
-  obs_trip_df_tmp$LIC_VR = paste0(obs_trip_df_tmp$MARFIS_LICENSE_NO,"_",obs_trip_df_tmp$LICENSE_NO)
-
-  #merge the obs data onto the marfis recs through a variety of ways, keeping
-  #track of how OBS and MARF data were matched
-  #I re-add the columns that get removed during the merge so that my final rbind is
-  #straighforward (i.e. same column names)
-  #t1-t3 simple
-  t1 = merge(these_MARF_SETS[!is.na(these_MARF_SETS$OBS_TRIP_CLN),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$OBS_TRIP_CLN),], by = "OBS_TRIP_CLN")
+  obs_TRIPS_all$LICENSE_NO<- suppressWarnings(as.numeric(obs_TRIPS_all$LICENSE_NO))
+  obs_TRIPS_all$MARFIS_CONF_NUMBER<- suppressWarnings(as.numeric(obs_TRIPS_all$MARFIS_CONF_NUMBER))
+  obs_TRIPS_all$MARFIS_LICENSE_NO<- suppressWarnings(as.numeric(obs_TRIPS_all$MARFIS_LICENSE_NO))
+  obs_TRIPS_all <- clean_OBS_Trip(df = obs_TRIPS_all, field = "TRIP")
+  obs_TRIPS_all$LIC_VR = paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$LICENSE_NO)
+  obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
+  # t1 - trips that match on trip name
+  t1 = unique(merge(these_MARF_TRIPS[!is.na(these_MARF_TRIPS$OBS_TRIP_CLN),],
+                    obs_TRIPS_all[!is.na(obs_TRIPS_all$OBS_TRIP_CLN),], by = "OBS_TRIP_CLN"))
   if (nrow(t1)>0){
     t1$OBS_TRIP_CLN.x<- t1$OBS_TRIP_CLN
     t1$OBS_TRIP_CLN.y<- t1$OBS_TRIP_CLN
     t1$OBS_TRIP_CLN<- NULL
     t1$MATCHED_ON<- "OBS_TRIP"
   }
-  t2 = merge(these_MARF_SETS[!is.na(these_MARF_SETS$CONF_NUMBER_HI),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$MARFIS_CONF_NUMBER),], by.x = "CONF_NUMBER_HI", by.y="MARFIS_CONF_NUMBER")
+  # t2 - trips that match on HAIL_IN CONFIRMATION NUMBER
+  t2 =  unique(merge(these_MARF_TRIPS[which(!is.na(these_MARF_TRIPS$CONF_NUMBER_HI)),],
+                     obs_TRIPS_all[which(!is.na(obs_TRIPS_all$MARFIS_CONF_NUMBER)),],
+                     by.x = "CONF_NUMBER_HI", by.y="MARFIS_CONF_NUMBER"))
   if (nrow(t2)>0) {
-
     t2$MARFIS_CONF_NUMBER<-t2$CONF_NUMBER_HI
     t2$MATCHED_ON<- "CONF_HI"
   }
-  t3 = merge(these_MARF_SETS[!is.na(these_MARF_SETS$CONF_NUMBER_HO),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$MARFIS_CONF_NUMBER),], by.x = "CONF_NUMBER_HO", by.y="MARFIS_CONF_NUMBER")
+  # t3 - trips that match on HAIL_OUT CONFIRMATION NUMBER
+  t3 =  unique(merge(these_MARF_TRIPS[which(!is.na(these_MARF_TRIPS$CONF_NUMBER_HO)),],
+                     obs_TRIPS_all[which(!is.na(obs_TRIPS_all$MARFIS_CONF_NUMBER)),],
+                     by.x = "CONF_NUMBER_HO", by.y="MARFIS_CONF_NUMBER"))
   if (nrow(t3)>0) {
-
     t3$MARFIS_CONF_NUMBER<-t3$CONF_NUMBER_HO
     t3$MATCHED_ON<- "CONF_HO"
   }
-
-  #t4-t6 matches on correct combo of VR and LIC, combined with marf fishing between obs board and land dates
-  t4 <- merge(these_MARF_SETS[!is.na(these_MARF_SETS$LIC_VRF),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$LIC_VR),], by.x = "LIC_VRF", by.y="LIC_VR")
-
-  if (nrow(t4)>0) {
-
-    t4 <- t4[t4$FV_FISHED_DATETIME >= t4$BOARD_DATE & t4$FV_FISHED_DATETIME<=t4$LANDING_DATE,]
-
-    t4$LIC_VR <- t4$LIC_VRF
+  # t4 - trips that match on the combination of VRN, LICENCE and DATE RANGE
+  t4_match <-  obs_TRIPS_all[which(obs_TRIPS_all$LIC_VR %in% marf_LIC_VR_all),]
+  if(nrow(t4_match)>0){
+    t4_match<-NULL
+    tmp_1 <- these_MARF_TRIPS[which(paste0(these_MARF_TRIPS$LICENCE_ID,"_",
+                                           these_MARF_TRIPS$VR_NUMBER_FISHING) %in%
+                                      marf_LIC_VR_all),]
+    tmp_1$LIC_VR <- paste0(tmp_1$LICENCE_ID,"_",tmp_1$VR_NUMBER_FISHING)
+    tmp_2 <- these_MARF_TRIPS[which(paste0(these_MARF_TRIPS$LICENCE_ID,"_",
+                                           these_MARF_TRIPS$VR_NUMBER_LANDING) %in%
+                                      marf_LIC_VR_all),]
+    tmp_2$LIC_VR <- paste0(tmp_2$LICENCE_ID,"_",tmp_2$VR_NUMBER_LANDING)
+    tmp_3 <- unique(rbind(tmp_1, tmp_2))
+    t4 <- merge(tmp_3, obs_TRIPS_all[which(!is.na(obs_TRIPS_all$LIC_VR)),])
+    t4$OBS_TRIP_CLN.x<-t4$OBS_TRIP_CLN
+    t4$OBS_TRIP_CLN.y<-t4$OBS_TRIP_CLN
+    tmp_1 <- tmp_2<- tmp_3 <- t4$OBS_TRIP_CLN<- these_MARF_TRIPS <- NULL
+    t4 <- t4[!is.na(t4$DATE_FISHED) & !is.na(t4$BOARD_DATE) & !is.na(t4$LANDING_DATE),]
+    t4 <- t4[which(t4$DATE_FISHED >= t4$BOARD_DATE & t4$DATE_FISHED<=t4$LANDING_DATE),]
+    t4$MATCHED_ON<- "VR_LIC_DATE"
   }
 
-  t5 <- merge(these_MARF_SETS[!is.na(these_MARF_SETS$LIC_VRL),], obs_trip_df_tmp[!is.na(obs_trip_df_tmp$LIC_VR),], by.x = "LIC_VRL", by.y="LIC_VR")
-  if (nrow(t5)>0) {
-    t5 <- t5[t5$FV_FISHED_DATETIME >= t5$BOARD_DATE & t5$FV_FISHED_DATETIME<=t5$LANDING_DATE,]
-
-    t5$LIC_VR <- t5$LIC_VRL
-  }
-
-  t6=unique(rbind(t4,t5))
-  if (nrow(t6)>0) {
-    t6$MATCHED_ON <- "VR_LIC_DATE"
-  }
-
-  #bind together all matched data, and in cases where multiple matches worked,
-  #collapse match reason into comma seperated field
-  t0=unique(rbind(t1,t2,t3,t6))
-  t0 <- t0[t0$FV_FISHED_DATETIME >= t0$BOARD_DATE & t0$FV_FISHED_DATETIME<=t0$LANDING_DATE,]
-  t1<-t2<-t3<-t4<-t5<-t6<-NULL
-  t0=t0[!is.na(t0$MON_DOC_ID)|!is.na(t0$TRIP_ID_MARF),]
-  if (nrow(t0)==0){
-    cat("\n","No Observer data can be matched")
-    return(invisible(NULL))
-  }
-  t0$FV_FISHED_DATETIME<-NULL
+  t0 <- unique(rbind(t1,t2,t3,t4))
+  t1 <- t2<- t3 <-t4 <- NULL
   t0$OBS_TRIP_CLN <- ifelse(!is.na(t0$OBS_TRIP_CLN.y), t0$OBS_TRIP_CLN.y, t0$OBS_TRIP_CLN.x)
   t0$OBS_TRIP_CLN.x<-t0$OBS_TRIP_CLN.y<-NULL
   t0<-unique(t0)
   #aggregate only by the MATCHED_ON field and fields we know will not be NA
   #otherwise records get dropped
   tot0tmp = unique(t0[,c("MON_DOC_ID", "TRIP_ID_MARF", "MATCHED_ON")])
-  t0agg = unique(stats::aggregate(by=tot0tmp[c("MON_DOC_ID","TRIP_ID_MARF")], x = tot0tmp[c("MATCHED_ON")], paste, collapse = ", "))
+  t0agg = unique(stats::aggregate(by=tot0tmp[c("MON_DOC_ID","TRIP_ID_MARF")],
+                                  x = tot0tmp[c("MATCHED_ON")], paste, collapse = ", "))
   t0 = unique(merge(t0[,!names(t0) %in% "MATCHED_ON"],t0agg, all.x=TRUE))
+  tot0tmp<-t0agg<-NULL
   #aggregate function is dropping recs due to NA presence.
   t0=data.table::as.data.table(t0)
   t0 = t0[t0[, .I[which.max(length(t0$MATCHED_ON))], by=TRIP_ID_MARF]$V1]
-  t0<-as.data.frame(t0)
-  t0$LICENSE_NUMBER<-t0$MARFIS_LICENSE_NO
-  colnames(t0)[colnames(t0)=="CFV"] <- "VR_NUMBER"
-  t0$IS_SURVEY <- FALSE
-  t0[t0$TRIPCD_ID>=7010,"IS_SURVEY"]<-TRUE
-  t0[t0$TRIPCD_ID==7099,"IS_SURVEY"]<-FALSE #overwrite for 7099 exception
-  if (!quiet){
-    unmatched_OB_TRIPS<- sort(unique(these_MARF_SETS[!these_MARF_SETS$OBS_TRIP_CLN %in% obs_trip_df_tmp$OBS_TRIP_CLN,"OBS_TRIP"]))
-    if(length(unmatched_OB_TRIPS)>0){
-      cat("\n","These Obs trips were in the marfis data but were not matched:")
-      cat("\n",unmatched_OB_TRIPS)
-    }
-    unmatched_CONF <- sort(unique(these_MARF_SETS[!marf_CONF_all %in% na.omit(obs_trip_df_tmp$MARFIS_CONF_NUMBER),"MARFIS_CONF_NUMBER"]))
-    if(length(unmatched_CONF)>0){
-      cat("\n","These confirmation numbers were in the marfis data but weren't matched:")
-      cat("\n",unmatched_CONF)
-    }
-    matchedSurvey = t0[t0$IS_SURVEY==T,c("TRIP_ID_MARF","TRIP_ID_OBS","TRIP","VR_NUMBER","LICENSE_NUMBER","MATCHED_ON")]
-    if(!keepSurveyTrips & nrow(matchedSurvey)>0){
-      cat("\n","These Observed trips were matched with the MARFIS data, but were identified as survey-related, not commercial, and were removed:\n")
-      print(matchedSurvey)
-    }
-  }
 
-  if(!keepSurveyTrips) t0 <- t0[t0$IS_SURVEY==F,c("MON_DOC_ID","TRIP_ID_MARF","TRIP_ID_OBS", "IS_SURVEY", "MATCHED_ON")]
-  t0 = t0[,c("TRIP_ID_MARF","MON_DOC_ID","TRIP_ID_OBS", "IS_SURVEY", "MATCHED_ON")]
-  OBS_TRIPS<- merge(obs_trip_df,t0,all.x=T)
-  unmatched_t = OBS_TRIPS[is.na(OBS_TRIPS$MATCHED_ON),"TRIP"]
-  if (length(unmatched_t)>0){
-    cat("\n","These Obs trips matched the criteria (date, fleet), but couldn't be matched to a marfis trip for this fleet:","\n")
-    print(sort(unique(unmatched_t)))
+  MAP_OBS_MARFIS_TRIPS <- merge(obs_TRIPS_all, t0[,c("TRIP_ID_OBS", "TRIP_ID_MARF", "MATCHED_ON")],
+                                all.x = T)
+  MAP_OBS_MARFIS_TRIPS<-MAP_OBS_MARFIS_TRIPS[,c("TRIP_ID_MARF", "TRIP_ID_OBS", "MATCHED_ON")]
+  t0 <-NULL
+  posSetMatches <- NA
+  potSetMatches <- NA
+  # Have Matched Trips; now try for sets ------------------------------------
+  # find matchable marfis sets ----------------------------------------------
 
-  }
+  if (nrow(MAP_OBS_MARFIS_TRIPS[!is.na(MAP_OBS_MARFIS_TRIPS$TRIP_ID_MARF),])>0){
+    #' only want records where the trip was already matched, and only those with a valid
+    #' set identifier (i.e. LOG_EFRT_STD_INFO_ID)
+    M_Sets_Matchable <- get_MARFIS$MARF_SETS[(get_MARFIS$MARF_SETS$TRIP_ID_MARF %in%
+                                                MAP_OBS_MARFIS_TRIPS[!is.na(MAP_OBS_MARFIS_TRIPS$TRIP_ID_MARF),"TRIP_ID_MARF"])
+                                             & !is.na(get_MARFIS$MARF_SETS$LOG_EFRT_STD_INFO_ID),]
+    M_Sets_Matchable <- M_Sets_Matchable[!is.na(M_Sets_Matchable$EF_FISHED_DATETIME),]
+    #' we will use "EF_FISHED_DATETIME" to attempt to match sets with observer, so those records
+    #' that have multiple records with the same time (fo a single trip) will not be useful, and
+    #' are not matchable
+    M_Sets_dups<-data.table::as.data.table(M_Sets_Matchable)
+    M_Sets_dups <- M_Sets_dups[, .N, by = c("MON_DOC_ID", "EF_FISHED_DATETIME")]
+    M_Sets_dups <- M_Sets_dups[M_Sets_dups$N>1,]$MON_DOC_ID
+    M_Sets_Matchable <- M_Sets_Matchable[!M_Sets_Matchable$MON_DOC_ID %in% M_Sets_dups,]
+    M_Sets_Matchable <- merge(M_Sets_Matchable, MAP_OBS_MARFIS_TRIPS, all.x=T)
+    obs_Trips_Matchable <- obs_TRIPS_all[which(obs_TRIPS_all$TRIP_ID_OBS %in%
+                                                 M_Sets_Matchable$TRIP_ID_OBS),]
+    obs_Sets_Matchable = unique(merge(obs_Trips_Matchable, obs_SETS_all,
+                                      all.x = T))
+    colnames(obs_Sets_Matchable)[colnames(obs_Sets_Matchable)=="CFV"] <- "VR_NUMBER"
 
-  OBS_SETS <- get_OBS_sets(obsTrips = obs_trip_df)
+    utrips = unique(obs_Sets_Matchable$TRIP_ID_OBS)
 
- setMap = unique(merge(OBS_SETS, t0, all.x = T, by.x="TRIP_ID", by.y="TRIP_ID_OBS"))
- setMap = unique(merge(setMap[, !names(setMap) %in% c("SET_NO", "LATITUDE", "LONGITUDE")], get_MARFIS$MARF_SETS[,!names(get_MARFIS$MARF_SETS) %in% c("FV_NUM_OF_EVENTS", "FV_NUM_OF_GEAR_UNITS", "FV_DURATION_IN_HOURS", "GEAR_CODE", "LATITUDE", "LONGITUDE")], all.x = T, by.x=c("TRIP_ID_MARF","MON_DOC_ID"), by.y=c("TRIP_ID_MARF","MON_DOC_ID")))
-  #The following joins every obs fishset with every commercial set for the matched trip
-  #this means it's a crossjoin within each trip (i.e. too many records)  The results are further refined by
-  #only keeping the sets where an observer set board and land time sandwiches the marfis datetime
-  # cat("\n", "Attempting to match Observer and MARFIS sets using by finding the timestamps of each","\n")
-   m <- unique(data.table::setDT(get_MARFIS$MARF_SETS[,c("TRIP_ID_MARF","LOG_EFRT_STD_INFO_ID","FV_FISHED_DATETIME")]))
+    for (i in 1:length(utrips)){
+      #' For each set in an observed trip, find the MARFIS set that is the closest
+      #' in time (within 24 hours)
 
-   o<- unique(data.table::setDT(setMap[,c("TRIP_ID","TRIP_ID_MARF","FISHSET_ID", "SET_DATETIME")]))
-   # #drop obs records which did not map to a set
-   # o2<-o[is.na(o$TRIP_ID_MARF),]
-   # #drop marf records which did not map to a set
-   # m2<-m[is.na(m$LOG_EFRT_STD_INFO_ID),]
-   # if (!quiet){
-   #   if(nrow(m2)>0){
-   #     cat("\n","One or more sets from these MARFIS trips couldn't be matched to a Observer set (MARFIS TRIP_ID)","\n")
-   #     print(sort(unique(m2$TRIP_ID_MARF)))
-   #   }
-   #   if(nrow(o2)>0){
-   #     cat("\n","These Obs sets couldn't be matched to a Marfis Set (FISHSET_ID):","\n")
-   #     print(sort(unique(o2$FISHSET_ID)))
-   #   }
-   # }
+      this_Otrip = obs_Sets_Matchable[obs_Sets_Matchable$TRIP_ID_OBS == utrips[i],]
+      this_Otrip <- data.table::setDT(this_Otrip)
+      this_Otrip <- this_Otrip[, timeO := SET_DATETIME]
+      data.table::setkey(this_Otrip,SET_DATETIME)
 
-   o<-o[!is.na(o$TRIP_ID_MARF),]
-   m<-m[!is.na(m$LOG_EFRT_STD_INFO_ID),]
-  allMARF = unique(o$TRIP_ID_MARF)
-  marfMap <- data.frame(matrix(ncol = 4, nrow = 0))
-  x <- c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "TRIP_ID", "FISHSET_ID")
-  colnames(marfMap) <- x
-  for (i in 1:length(allMARF)){
-     m_this <- m[m$TRIP_ID_MARF == allMARF[i],]
-     o_this <- o[o$TRIP_ID_MARF == allMARF[i],]
-     if (min(m_this$FV_FISHED_DATETIME)<= max(o_this$SET_DATETIME) & max(m_this$FV_FISHED_DATETIME >= min(o_this$SET_DATETIME))){
-       #if the ranges overlap, map the sets using closest date
-       data.table::setkey(m_this,FV_FISHED_DATETIME)
-       data.table::setkey(o_this,SET_DATETIME)
-       combined <- o_this[ m_this, roll = "nearest" ]
-       combined2 <- m_this[o_this , roll = "nearest" ]
-       confident <-  merge(combined, combined2, by = c("LOG_EFRT_STD_INFO_ID","FISHSET_ID", "TRIP_ID_MARF","TRIP_ID"))
-       confident <- confident[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID", "TRIP_ID_MARF","TRIP_ID")]
-       marfMap <- unique(rbind(marfMap,as.data.frame(confident)))
+      this_Mtrip <- M_Sets_Matchable[M_Sets_Matchable$TRIP_ID_OBS == utrips[i],]
+      this_Mtrip <- data.table::setDT(this_Mtrip)
+      this_Mtrip <- this_Mtrip[, timeM := EF_FISHED_DATETIME]
+      data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
+      #matches all mtrips to nearest otrip - some otrips matched twice
+      combined <- this_Otrip[ this_Mtrip, roll = "nearest" ]
+      combined <- combined[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
+      combined$diff<- abs(difftime(combined$timeM,combined$timeO))
+      #no attempt to match when times are 24 hours apart or more
+      combined = combined[combined$diff<48,]
+      #for each duplicated otrip, find the one with the closest time match
+      combined <- combined[combined[, .I[diff == min(diff)], by=FISHSET_ID]$V1]
+      combined <- combined[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID")]
+      #matches all otrips to nearest mtrip - some mtrips matched twice
+      combined2 <- this_Mtrip[this_Otrip , roll = "nearest" ]
+      combined2 <- combined2[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID","timeM", "timeO")]
+      combined2$diff<- abs(difftime(combined2$timeM,combined2$timeO))
+      #no attempt to match when times are 24 hours apart or more
+      combined2 = combined2[combined2$diff<48,]
+      #for each duplicated mtrip, find the one with the closest time match
+      combined2<-combined2[combined2[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1]
+      combined2 <- combined2[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID")]
+
+      confident <- merge(combined, combined2, by =c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID"))
+      if (nrow(combined2) != nrow(combined)) browser()
+      potential <- dplyr::anti_join(combined, combined2, by =c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID"))
+      if (nrow(confident)>0){
+        if(is.null(nrow(posSetMatches))){
+          posSetMatches <- confident
         }else{
-            next
+          posSetMatches <- rbind(posSetMatches,confident)
+        }
       }
-  }
+      if(nrow(potential)>0) {
+        browser()
+        if(is.null(nrow(potMatches))){
+          potSetMatches<- potential
+        }else{
+          potSetMatches <- rbind(potSetMatches,potential)
+        }
+      }
+    }
 
-  OBS_SETS2=merge(OBS_SETS,marfMap, all.x=T)
+  }
+  MAP_OBS_MARFIS_SETS <- as.data.frame(posSetMatches)
+
+  if (!quiet){
+    allMarf_OBS_T = clean_OBS_Trip(df = get_MARFIS$MARF_MATCH[!is.na(get_MARFIS$MARF_MATCH$OBS_TRIP),],field = "OBS_TRIP")
+    allObs_OBS_T = clean_OBS_Trip(df = obs_TRIPS_all[!is.na(obs_TRIPS_all$TRIP),], field = "TRIP")
+    Marf_T_only = setdiff(allMarf_OBS_T$OBS_TRIP_CLN, allObs_OBS_T$OBS_TRIP_CLN)
+    Marf_T_only = sort(unique(allMarf_OBS_T[allMarf_OBS_T$OBS_TRIP_CLN %in% Marf_T_only,"OBS_TRIP"]))
+
+    Obs_T_only = setdiff(allObs_OBS_T$OBS_TRIP_CLN,allMarf_OBS_T$OBS_TRIP_CLN)
+    Obs_T_only = sort(unique(allObs_OBS_T[allObs_OBS_T$OBS_TRIP_CLN %in% Obs_T_only,"TRIP"]))
+
+    Marf_C_all <- c(allMarf_OBS_T$CONF_NUMBER_HI, allMarf_OBS_T$CONF_NUMBER_HO)
+    Marf_C_only = setdiff(Marf_C_all , allObs_OBS_T$MARFIS_CONF_NUMBER)
+    Obs_C_only = sort(unique(setdiff(allObs_OBS_T$MARFIS_CONF_NUMBER, Marf_C_all)))
+
+    Obs_unmatched <- MAP_OBS_MARFIS_TRIPS[!MAP_OBS_MARFIS_TRIPS$TRIP_ID_MARF %in% get_MARFIS$MARF_TRIPS$TRIP_ID_MARF,"TRIP_ID_OBS"]
+    obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% Obs_unmatched, "TRIP"]
+
+    if (length(Marf_T_only)>0){
+      cat("\n","These observer codes were specified in the MARFIS data but were not found in the Observer data:","\n")
+      print(Marf_T_only)
+    }
+    if (length(Obs_T_only)>0){
+      cat("\n","These trips were specified in the Observer data but were not found in the MARFIS data:","\n")
+      print(Obs_T_only)
+    }
+    if (length(Marf_C_only)>0){
+      cat("\n","These confirmation codes were specified in the MARFIS data but were not found in the Observer data:","\n")
+      print(Marf_C_only)
+    }
+    if (length(Obs_C_only)>0){
+      cat("\n","These confirmation codes were specified in the Observer data but were not found in the MARFIS data:","\n")
+      print(Obs_C_only)
+    }
+  }
   res= list()
-  res[["MAP_OBS_MARFIS_TRIPS"]] <- t0
-  res[["MAP_OBS_MARFIS_SETS"]] <- marfMap
-  res[["OBS_TRIPS"]]<- OBS_TRIPS
-  res[["OBS_SETS"]]<- OBS_SETS2
+
+  res[["MAP_OBS_MARFIS_TRIPS"]] <- MAP_OBS_MARFIS_TRIPS[!is.na(MAP_OBS_MARFIS_TRIPS$TRIP_ID_MARF),]
+  res[["MAP_OBS_MARFIS_SETS"]] <- MAP_OBS_MARFIS_SETS
+  obs_TRIPS_all$OBS_TRIP_CLN <- obs_TRIPS_all$LIC_VR <- NULL
+  res[["OBS_TRIPS"]]<- merge(obs_TRIPS_all, MAP_OBS_MARFIS_TRIPS, all.x=T)
+  obs_SETS_all = merge(obs_SETS_all, MAP_OBS_MARFIS_TRIPS, all.x=T)
+  obs_SETS_all = merge(obs_SETS_all, MAP_OBS_MARFIS_SETS, all.x=T)
+  res[["OBS_SETS"]] <- merge(obs_SETS_all, MAP_OBS_MARFIS_SETS, all.x=T)
+  # res[["OBS_SETS"]]<- OBS_SETS
   return(res)
 }

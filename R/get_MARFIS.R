@@ -56,10 +56,9 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                     PS.LOG_EFRT_STD_INFO_ID IS NOT NULL")
     PS_allsets<- cxn$thecmd(cxn$channel, PSQry0)
     PS_allsets<-PS_allsets[PS_allsets$TRIP_ID %in% trips$TRIP_ID, ]
-
     PSQry1 <-paste0("SELECT DISTINCT
                         EF.LOG_EFRT_STD_INFO_ID,
-                        EF.FV_FISHED_DATETIME,
+                        EF.FV_FISHED_DATETIME  EF_FISHED_DATETIME,
                         EF.FV_NUM_OF_EVENTS,
                         EF.MON_DOC_ID,
                         EF.FV_NUM_OF_GEAR_UNITS,
@@ -99,6 +98,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                     PS.LICENCE_ID,
                     PS.GEAR_CODE,
                     PS.VR_NUMBER_FISHING,
+                    PS.DATE_FISHED,
                     PS.VR_NUMBER_LANDING
                     FROM MARFISSCI.PRO_SPC_INFO PS
                     WHERE
@@ -169,7 +169,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
 
   ps <- getPS(dateStart, dateEnd, thisFleet)
   sets<- getEff(dateStart, dateEnd, ps)
-  eff <- merge(ps, sets, all.x=T)
+  eff <- unique(merge(ps[,!names(ps) %in% c("DATE_FISHED","VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
   if (nrow(ps)<1){
     cat("\n","No MARFIS data meets criteria")
     return(invisible(NULL))
