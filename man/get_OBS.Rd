@@ -6,8 +6,8 @@
 \usage{
 get_OBS(fn.oracle.username = "_none_", fn.oracle.password = "_none_",
   fn.oracle.dsn = "_none_", usepkg = "rodbc", dateStart = NULL,
-  dateEnd = NULL, get_MARFIS = NULL, keepSurveyTrips = FALSE,
-  quiet = FALSE)
+  dateEnd = NULL, keepSurveyTrips = FALSE, quietly = FALSE,
+  thisFleet = NULL)
 }
 \arguments{
 \item{fn.oracle.username}{default is \code{'_none_'} This is your username for
@@ -39,17 +39,17 @@ of the window of time you want to look at.}
 of the window of time you want to look at.  If this is left blank, 1 year of
 data will be returned.}
 
-\item{get_MARFIS}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
-trip and set information from MARFIS}
-
 \item{keepSurveyTrips}{default is \code{FALSE}.  This indicates whether you
 want to retain trips that were part of a survey.  These are not typical
 commercial trips and their distribution will not reflect normal
 commercial fishing patterns.}
 
-\item{quiet}{default is \code{FALSE}.  This indicates whether or not
+\item{quietly}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}
+
+\item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
+the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
+\code{Mar.bycatch::get_fleet()}}
 }
 \value{
 returns a list with 4 dataframes - "MAP_OBS_MARFIS_TRIPS",
@@ -86,16 +86,13 @@ all of the records from the observer database that can be matched using:
 * - only the alphanumeric characters of the trip names are used (e.g.
 "J18-0000B" becomes "J180000").
 }
-\note{
-The trip and gear information can be joined together using the
-\code{LOG_EFRT_STD_INFO_ID} field - e.g.
-all = merge(trips, sets, all.x=T, by ="LOG_EFRT_STD_INFO_ID")
-}
 \seealso{
 Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_MARFIS}}, \code{\link{get_fleet}}
+  \code{\link{get_MARFIS}}, \code{\link{get_fleet}},
+  \code{\link{match_sets}}, \code{\link{match_trips}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
+ @export
 }
 \concept{fleets}

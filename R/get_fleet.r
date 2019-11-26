@@ -138,18 +138,18 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_fleet<-function(fn.oracle.username = "_none_",
-                     fn.oracle.password = "_none_",
-                     fn.oracle.dsn = "_none_",
-                     usepkg = "rodbc",
-                     dateStart = NULL, dateEnd = NULL,
-                     mdCode = NULL, gearCode = NULL){
+                    fn.oracle.password = "_none_",
+                    fn.oracle.dsn = "_none_",
+                    usepkg = "rodbc",
+                    dateStart = NULL, dateEnd = NULL,
+                    mdCode = NULL, gearCode = NULL){
   cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
-# Prompt for and/or Apply Gear Filters ------------------------------------
+  # Prompt for and/or Apply Gear Filters ------------------------------------
   getGCd<-function(df = df, gearCode = gearCode){
     gDf = unique(df[,c("GEAR_DESC","GEAR_CODE")])
     gDf = gDf[with(gDf,order(GEAR_CODE)),]
@@ -159,14 +159,14 @@ get_fleet<-function(fn.oracle.username = "_none_",
       GCds = gDf[gDf$GEAR_CODE %in% gearCode,]
     }else{
 
-        choice<-utils::select.list(paste0(gDf$GEAR_DESC, " (",gDf$GEAR_CODE,")"),
-                                   preselect=NULL,
-                                   multiple=T, graphics=T,
-                                   title='Gear Codes')
-        cat("\n","gearCode choice: ",choice)
-        choice = sub(".*\\((.*)\\).*", "\\1", choice)
-        if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
-        GCds = gDf[gDf$GEAR_CODE %in% choice,]
+      choice<-utils::select.list(paste0(gDf$GEAR_DESC, " (",gDf$GEAR_CODE,")"),
+                                 preselect=NULL,
+                                 multiple=T, graphics=T,
+                                 title='Gear Codes')
+      cat("\n","gearCode choice: ",choice)
+      choice = sub(".*\\((.*)\\).*", "\\1", choice)
+      if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
+      GCds = gDf[gDf$GEAR_CODE %in% choice,]
     }
     return(GCds)
   }
@@ -213,15 +213,14 @@ get_fleet<-function(fn.oracle.username = "_none_",
                         AND MDD.MON_DOC_DEFN_ID = MD.MON_DOC_DEFN_ID
                         AND (
                           LG.START_DATE < to_date('",dateEnd,"','YYYY-MM-DD')
-                          AND LV.START_DATE < to_date('",dateEnd,"','YYYY-MM-DD')
+                          --AND LV.START_DATE < to_date('",dateEnd,"','YYYY-MM-DD')
                           AND LG.END_DATE > to_date('",dateStart,"','YYYY-MM-DD')
                           AND LV.END_DATE >  to_date('",dateStart,"','YYYY-MM-DD')
                           )
                         AND MDD.SECTOR_ID  = 7
                       ORDER BY G.GEAR_CODE"
-                      )
+    )
     theFleet = cxn$thecmd(cxn$channel, fleetQry)
-
   }
   applyFilters<-function(df = df, mdCode=mdCode, gearCode=gearCode){
     mdCheck = unique(df$MD_CODE)
@@ -255,7 +254,6 @@ get_fleet<-function(fn.oracle.username = "_none_",
   }
   #Narrow the data by only date range
   df = basicFleet(dateStart, dateEnd)
-
   # clean up the names of each md doc type
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){

@@ -5,7 +5,7 @@
 \title{calc_Coverage}
 \usage{
 calc_Coverage(get_OBS = NULL, get_MARFIS = NULL, agg.poly.shp = NULL,
-  agg.poly.field = NULL)
+  agg.poly.field = NULL, quietly = FALSE)
 }
 \arguments{
 \item{get_OBS}{default is \code{NULL}. This is the list output by the
@@ -24,6 +24,9 @@ polygon shapefile can be provided.}
 \item{agg.poly.field}{default is \code{NULL}.  This identifies the field within
 the shapefile provided to agg.poly.shp that should be used to check for
 sufficient unique values of the sens.fields.}
+
+\item{quietly}{default is \code{FALSE}.  This indicates whether or not
+information about the matching process should be shown.}
 }
 \value{
 returns a list with 2 items - \code{summary} and \code{details}.
@@ -77,7 +80,8 @@ those trips/sets will be attributed to "Other".
 }
 \seealso{
 Other fleets: \code{\link{get_MARFIS}},
-  \code{\link{get_OBS}}, \code{\link{get_fleet}}
+  \code{\link{get_OBS}}, \code{\link{get_fleet}},
+  \code{\link{match_sets}}, \code{\link{match_trips}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

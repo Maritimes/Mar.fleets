@@ -35,10 +35,7 @@
 #' "sets" contains information about individual fishing activities, including
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @note The trip and gear information can be joined together using the
-#' \code{LOG_EFRT_STD_INFO_ID} field - e.g.
-#' all = merge(trips, sets, all.x=T, by ="LOG_EFRT_STD_INFO_ID")
-#' @export
+#'  @export
 get_MARFIS<-function(fn.oracle.username = "_none_",
                      fn.oracle.password = "_none_",
                      fn.oracle.dsn = "_none_",
@@ -49,7 +46,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
   getEff<-function(dateStart = NULL, dateEnd=NULL, trips = NULL){
-    PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID, PS.LOG_EFRT_STD_INFO_ID
+    PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID, PS.LOG_EFRT_STD_INFO_ID, PS.MON_DOC_ID
                       FROM
                     MARFISSCI.PRO_SPC_INFO PS
                     WHERE PS.TRIP_ID BETWEEN ",min(trips$TRIP_ID), " AND ", max(trips$TRIP_ID)," AND
@@ -63,28 +60,29 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                         EF.MON_DOC_ID,
                         EF.FV_NUM_OF_GEAR_UNITS,
                         EF.FV_DURATION_IN_HOURS,
-                        EF.FV_GEAR_CODE,
+                      --  EF.FV_GEAR_CODE,
                         EF.DET_LATITUDE,
                         EF.DET_LONGITUDE,
                         EF.ENT_LATITUDE,
                         EF.ENT_LONGITUDE
                      FROM MARFISSCI.LOG_EFRT_STD_INFO EF
                      WHERE
-                        EF.FV_GEAR_CODE IN (",Mar.utils::SQL_in(unique(trips$GEAR_CODE)),") AND
+                        -- EF.FV_GEAR_CODE IN (",Mar.utils::SQL_in(unique(trips$GEAR_CODE)),") AND
                         EF.FV_FISHED_DATETIME BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD') AND
-                        EF.LOG_EFRT_STD_INFO_ID BETWEEN ",min(PS_allsets$LOG_EFRT_STD_INFO_ID), " AND ", max(PS_allsets$LOG_EFRT_STD_INFO_ID))
+                        EF.LOG_EFRT_STD_INFO_ID BETWEEN ",min(PS_allsets$LOG_EFRT_STD_INFO_ID), " AND ", max(PS_allsets$LOG_EFRT_STD_INFO_ID),"AND
+                        EF.MON_DOC_ID BETWEEN ",min(PS_allsets$MON_DOC_ID), " AND ", max(PS_allsets$MON_DOC_ID))
     PS_sets<- cxn$thecmd(cxn$channel, PSQry1)
-    PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% PS_allsets$LOG_EFRT_STD_INFO_ID, ]
+    PS_sets<-PS_sets[PS_sets$MON_DOC_ID %in% PS_allsets$MON_DOC_ID, ]
 
 
     PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
     PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
     PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)] <- (as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 1, 2))
-                                               + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 3, 4))/60
-                                               + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 5, 6))/3600)
+                                                   + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 3, 4))/60
+                                                   + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 5, 6))/3600)
     PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)] <- -1 * (as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 1, 2))
-                                                      + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 3, 4))/60
-                                                      + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 5, 6))/3600)
+                                                          + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 3, 4))/60
+                                                          + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 5, 6))/3600)
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
     return(PS_sets)
@@ -92,7 +90,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   getPS<-function(dateStart = dateStart, dateEnd=dateEnd, thisFleet = thisFleet){
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
-    cat("\n","PRO_SPC_INFO")
+    #cat("\n","PRO_SPC_INFO")
     PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID,
                     PS.MON_DOC_ID,
                     PS.LICENCE_ID,
@@ -114,7 +112,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
-    cat("\n","MON_DOC_ENTRD_DETS")
+    #cat("\n","MON_DOC_ENTRD_DETS")
     EDQry<-paste0("SELECT
                     ED.MON_DOC_ID,
                     ED.COLUMN_DEFN_ID,
@@ -135,7 +133,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(ED_df)
   }
   getHIC<-function(trips = NULL){
-    cat("\n","HAIL_IN_CALLS")
+    #cat("\n","HAIL_IN_CALLS")
     HICQry<-paste0("SELECT
                     HI.TRIP_ID,
                   HI.CONF_NUMBER,
@@ -151,7 +149,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(HIC_df)
   }
   getHOC<-function(trips = NULL){
-    cat("\n","HAIL_OUTS","\n")
+    #cat("\n","HAIL_OUTS","\n")
     HOCQry<-paste0("SELECT
                    HO.TRIP_ID,
                    HO.CONF_NUMBER,
@@ -166,25 +164,47 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     return(HOC_df)
   }
-
   ps <- getPS(dateStart, dateEnd, thisFleet)
   sets<- getEff(dateStart, dateEnd, ps)
   eff <- unique(merge(ps[,!names(ps) %in% c("DATE_FISHED","VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
   if (nrow(ps)<1){
     cat("\n","No MARFIS data meets criteria")
     return(invisible(NULL))
+  }else{
+    marObsMatch <- ps
   }
-  ed<- unique(getED(mondocs = stats::na.omit(ps$MON_DOC_ID)))
-  hic<- unique(getHIC(trips = ps$TRIP_ID))
-  hoc<- unique(getHOC(trips = ps$TRIP_ID))
-  marObsMatch<- unique(merge(ps,ed, all.x = T, by = "MON_DOC_ID"))
-  marObsMatch<- unique(merge(marObsMatch,hic, all.x = T, by = "TRIP_ID"))
-  marObsMatch<- unique(merge(marObsMatch,hoc, all.x = T, by = "TRIP_ID"))
+  ed <- getED(mondocs = stats::na.omit(ps$MON_DOC_ID))
+  if (!is.null(ed) && nrow(ed)>0){
+    marObsMatch<- unique(merge(marObsMatch,unique(ed), all.x = T, by = "MON_DOC_ID"))
+  }else{
+    marObsMatch$OBS_TRIP <- marObsMatch$OBS_ID <- marObsMatch$OBS_PRESENT <- NA
+  }
+
+  hic<- getHIC(trips = ps$TRIP_ID)
+  if (!is.null(hic) && nrow(hic)>0){
+    marObsMatch<- unique(merge(marObsMatch,unique(hic), all.x = T, by = "TRIP_ID"))
+  }
+  hoc<- getHOC(trips = ps$TRIP_ID)
+  if (!is.null(hoc) && nrow(hoc)>0){
+    marObsMatch<- unique(merge(marObsMatch,unique(hoc), all.x = T, by = "TRIP_ID"))
+  }
+
   colnames(marObsMatch)[colnames(marObsMatch)=="TRIP_ID"] <- "TRIP_ID_MARF"
   colnames(eff)[colnames(eff)=="TRIP_ID"] <- "TRIP_ID_MARF"
+
+  ntrips = sort(unique(eff$TRIP_ID_MARF))
+  eff$SET_PER_DAY <- F
+  for (i in 1:length(ntrips)){
+    if(length(unique(eff[eff$TRIP_ID_MARF == ntrips[i],"EF_FISHED_DATETIME"]))==nrow(eff[eff$TRIP_ID_MARF == ntrips[i],])){
+      eff[eff$TRIP_ID_MARF == ntrips[i],"SET_PER_DAY"]<-T
+    }
+  }
+  spd<- unique(eff[,c("TRIP_ID_MARF","SET_PER_DAY")])
+
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(marObsMatch[, !names(marObsMatch) %in% c("LOG_EFRT_STD_INFO_ID","CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "OBS_TRIP", "OBS_ID", "OBS_PRESENT")])
+  marObsMatch <- merge(marObsMatch, spd, all.x = T)
   res<- list()
   res[["MARF_MATCH"]] <- marObsMatch
   res[["MARF_TRIPS"]]<-trips

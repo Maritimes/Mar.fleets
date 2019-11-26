@@ -158,7 +158,8 @@ associated with a particular fleet for a particular date range.
 }
 \seealso{
 Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_MARFIS}}, \code{\link{get_OBS}}
+  \code{\link{get_MARFIS}}, \code{\link{get_OBS}},
+  \code{\link{match_sets}}, \code{\link{match_trips}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

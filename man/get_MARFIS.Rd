@@ -55,16 +55,13 @@ locations, dates, durations, gear amount, etc..
 This function extracts all of the MARFIS records for vessels with
 particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 }
-\note{
-The trip and gear information can be joined together using the
-\code{LOG_EFRT_STD_INFO_ID} field - e.g.
-all = merge(trips, sets, all.x=T, by ="LOG_EFRT_STD_INFO_ID")
-}
 \seealso{
 Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_OBS}}, \code{\link{get_fleet}}
+  \code{\link{get_OBS}}, \code{\link{get_fleet}},
+  \code{\link{match_sets}}, \code{\link{match_trips}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
+ @export
 }
 \concept{fleets}

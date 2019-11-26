@@ -16,6 +16,8 @@
 #' @param agg.poly.field default is \code{NULL}.  This identifies the field within
 #' the shapefile provided to agg.poly.shp that should be used to check for
 #' sufficient unique values of the sens.fields.
+#' @param quietly default is \code{FALSE}.  This indicates whether or not
+#' information about the matching process should be shown.
 #' @family fleets
 #' @return returns a list with 2 items - \code{summary} and \code{details}.
 #'
@@ -64,7 +66,8 @@
 calc_Coverage<-function(get_OBS = NULL,
                           get_MARFIS = NULL,
                           agg.poly.shp = NULL,
-                          agg.poly.field = NULL){
+                          agg.poly.field = NULL,
+                          quietly = FALSE){
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
       agg.poly <- rgdal::readOGR(dsn = agg.poly.shp, verbose = FALSE)
@@ -78,7 +81,8 @@ calc_Coverage<-function(get_OBS = NULL,
     allAreas = rbind(allAreas, "Other")
     allAreas = rbind(allAreas, "Bad coordinate")
     #by set
-    cat("\n", "Figuring out which area each set occurred in...")
+
+    if (!quietly)cat("\n", "Figuring out which area each set occurred in...")
     OBS_area_s = Mar.utils::identify_area(get_OBS$OBS_SETS,
                                    agg.poly.shp = agg.poly.shp,
                                    agg.poly.field = agg.poly.field)
@@ -97,8 +101,10 @@ calc_Coverage<-function(get_OBS = NULL,
                                         agg.poly.shp = agg.poly.shp,
                                         agg.poly.field = agg.poly.field)
   #by_trip
-  cat("\n", "Figuring out the area in which the most sets occurred during each trip.","\n")
-  O_trips = merge(get_OBS$OBS_TRIPS[,!names(get_OBS$OBS_TRIPS) %in% c("BOARD_DATE","LANDING_DATE")], get_OBS$OBS_SETS, all.y =TRUE, by = "TRIP_ID_OBS")
+  if (!quietly)cat("\n", "Figuring out the area in which the most sets occurred during each trip.","\n")
+
+  O_trips = merge(get_OBS$OBS_TRIPS[,!names(get_OBS$OBS_TRIPS) %in% c("BOARD_DATE","LANDING_DATE")],
+                  get_OBS$OBS_SETS, all.y =TRUE, by.x = "TRIP_ID_OBS", by.y = "TRIP_ID")
   OBS_area_t = Mar.utils::identify_area(O_trips,
                                       agg.poly.shp = agg.poly.shp,
                                       agg.poly.field = agg.poly.field)
