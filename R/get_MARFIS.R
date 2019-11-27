@@ -35,7 +35,7 @@
 #' "sets" contains information about individual fishing activities, including
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#'  @export
+#' @export
 get_MARFIS<-function(fn.oracle.username = "_none_",
                      fn.oracle.password = "_none_",
                      fn.oracle.dsn = "_none_",

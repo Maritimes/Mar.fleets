@@ -41,6 +41,5 @@ Other fleets: \code{\link{calc_Coverage}},
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
- @export
 }
 \concept{fleets}

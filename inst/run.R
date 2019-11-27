@@ -1,7 +1,7 @@
 #library(Mar.bycatch)
 R.utils::sourceDirectory("C:/git/Maritimes/Mar.bycatch/R")
-ds ="2018-01-01"
-de ="2018-12-31"
+ds ="2015-01-01"
+de ="2015-12-31"
 code = 5 #5 #5 13
 gear = 51 #51 #51 NULL
 q = TRUE

@@ -47,12 +47,5 @@ Other fleets: \code{\link{calc_Coverage}},
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
- @export
-1) Set var to NA to hold results
-2) Subset original data to ensure match field != NA to tmp df
-3) Check if merge will have records
-4) Do match, save (unique) results to var (from 1) - retain only key fields
-5) Add "MATCHED_ON" field
-6) remove tmp_df from 2)
 }
 \concept{fleets}

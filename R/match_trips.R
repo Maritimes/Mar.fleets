@@ -26,9 +26,8 @@
 #' \item "UNMATCHABLE" - contains any records from both Marfis and Observer that could not be
 #' matched to the other database using any method.
 #' }
+#' @export
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#'  @export
-
 match_trips <- function(get_MARFIS = NULL,
                         get_OBS = NULL,
                         quietly = FALSE){
@@ -46,12 +45,12 @@ match_trips <- function(get_MARFIS = NULL,
   if (is.data.frame(obs_TRIPS_all))obs_TRIPS_all$LIC_VR = paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$LICENSE_NO)
 
   # example Matching Routine ---------------------------------------------------------------------
-  #' 1) Set var to NA to hold results
-  #' 2) Subset original data to ensure match field != NA to tmp df
-  #' 3) Check if merge will have records
-  #' 4) Do match, save (unique) results to var (from 1) - retain only key fields
-  #' 5) Add "MATCHED_ON" field
-  #' 6) remove tmp_df from 2)
+  # 1) Set var to NA to hold results
+  # 2) Subset original data to ensure match field != NA to tmp df
+  # 3) Check if merge will have records
+  # 4) Do match, save (unique) results to var (from 1) - retain only key fields
+  # 5) Add "MATCHED_ON" field
+  # 6) remove tmp_df from 2)
 
   Marf_in_Obs <-NA
   Marf_in_Obs_trip <- NA

@@ -18,8 +18,7 @@
 #' @family fleets
 #' @return a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#'  @export
-
+#' @export
 match_sets <- function(get_MARFIS = NULL,
                        get_OBS = NULL,
                        match_trips = NULL,
