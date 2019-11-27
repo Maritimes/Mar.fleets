@@ -165,11 +165,21 @@ match_trips <- function(get_MARFIS = NULL,
 
   # Check if any of the unmatchable trips were found by non-trip methods ------------------------
   if (is.data.frame(unmatched_all)){
+    un<-data.frame(TRIP_ID_OBS=numeric(),
+                    MARF_TRIP = numeric(),
+                    SRC = character(),
+                    OBS_TRIP = character(),
+                    MATCH_COMMENT = character(),
+                    TRIP_ID_MARF = numeric(),
+                    MATCHED_ON = character()
+    )
   if (nrow(Marf_in_Obs[Marf_in_Obs$TRIP_ID_MARF %in% unmatched_all$TRIP_ID_MARF, ])>0){
     un1 <- merge(unmatched_all, Marf_in_Obs[Marf_in_Obs$TRIP_ID_MARF %in% unmatched_all$TRIP_ID_MARF, ],
                  by="TRIP_ID_MARF")
     colnames(un1)[colnames(un1)=="TRIP_ID_OBS.y"] <- "TRIP_ID_OBS"
     un1$TRIP_ID_OBS.x<-NULL
+  }else{
+    un1<-un
   }
   if (nrow(Marf_in_Obs[Marf_in_Obs$TRIP_ID_OBS %in% unmatched_all$TRIP_ID_OBS, ])>0){
     un2 <- merge(unmatched_all, Marf_in_Obs[Marf_in_Obs$TRIP_ID_OBS %in% unmatched_all$TRIP_ID_OBS, ],
@@ -177,6 +187,8 @@ match_trips <- function(get_MARFIS = NULL,
     colnames(un2)[colnames(un2)=="TRIP_ID_MARF.y"] <- "TRIP_ID_MARF"
 
     un2$TRIP_ID_MARF.x<-NULL
+  }else{
+    un2<- un
   }
 
   foundTrips<- rbind(un1,un2)
