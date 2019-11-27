@@ -143,6 +143,7 @@ match_sets <- function(get_MARFIS = NULL,
       matches_all <- rbind(matches_all, theseMatches)
     }
   }
+  matches_all$diff <-NULL
   res= list()
   res[["MAP_OBS_MARFIS_SETS"]] <- as.data.frame(matches_all)
   return(res)
