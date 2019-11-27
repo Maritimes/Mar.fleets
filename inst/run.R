@@ -2,9 +2,9 @@
 R.utils::sourceDirectory("C:/git/Maritimes/Mar.bycatch/R")
 ds ="2018-01-01"
 de ="2018-12-31"
-code = 13 #5 13
-gear = NULL #51 NULL
-q = FALSE
+code = 5 #5 #5 13
+gear = 51 #51 #51 NULL
+q = TRUE
 f1 = get_fleet(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',dateStart = ds, dateEnd = de, mdCode = code, gearCode = gear)
 mar1 = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',dateStart = ds, dateEnd = de,thisFleet = f1)
 obs1 = get_OBS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',dateStart = ds, dateEnd = de, thisFleet = f1, quietly = q)

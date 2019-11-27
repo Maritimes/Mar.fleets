@@ -2,7 +2,9 @@ Mar.bycatch
 ==============
 
 Changes:
-2019.10.26
+2019.11.27
+* cleaned up match_sets()
+2019.11.26
 * large get_OBS() function broken into get_OBS(), match_trips() and match_sets()
 2019.08.22
 * package created

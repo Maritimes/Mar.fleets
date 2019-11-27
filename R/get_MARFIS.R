@@ -107,8 +107,10 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                     AND (PS.VR_NUMBER_FISHING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),"
                     OR PS.VR_NUMBER_LANDING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),")")
     PS_df<- cxn$thecmd(cxn$channel, PSQry0)
+    PS_df <- PS_df[!is.na(PS_df$TRIP_ID),]
     PS_df <- unique(PS_df[(paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_FISHING,"_",PS_df$GEAR_CODE) %in% all_combos |
                              paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_LANDING,"_",PS_df$GEAR_CODE) %in% all_combos) ,])
+
     return(PS_df)
   }
   getED<-function(mondocs=NULL){

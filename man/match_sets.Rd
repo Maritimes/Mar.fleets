@@ -42,13 +42,5 @@ Other fleets: \code{\link{calc_Coverage}},
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
  @export
-For each set in an observed trip, find the MARFIS set that is the closest
-in time (within 24 hours)
-These are matches where the smallest difference in time from an observer set to a marfis set is
-identical to the smallest time difference from the that marfis set to the observer set
-There are cases where the closest match between the 2 databases is not identical. Maybe the closest
-Maybe the closest match from M -> O  had no match in O -> M.  In these cases, We check to make sure
-that these potential matches are not already in the "confident" category, and if they are not,
-we add them as potential matches.
 }
 \concept{fleets}

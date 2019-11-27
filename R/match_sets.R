@@ -52,114 +52,99 @@ match_sets <- function(get_MARFIS = NULL,
   REALISTIC_MATCHABLE_SETS =  c(length(unique(msets_m[msets_m$TRIP_ID_MARF %in% spdf[spdf$SET_PER_DAY==F,"TRIP_ID_MARF"],"LOG_EFRT_STD_INFO_ID"])),length(unique(osets_m$FISHSET_ID)))
   df = as.data.frame(rbind(TOT_TRIPS_FOUND, TOT_SETS_FOUND, TOT_TRIPS_MATCHED,TOT_MATCHABLE_SETS,LOGPERDAY_TRIPS,REALISTIC_MATCHABLE_SETS))
   names(df)<-cnames
-# browser()
-# cat("## Notes for Mike ##",
-#     "\n",
-#     "unique(osets_m$FISHSET_ID) !=  osets_m$FISHSET_ID",
-#     "\n",
-#     "TOT_TRIPS_MATCHED not same for OBS and MARF - some OBS trips duplicated",
-#     "\n")
   utrips = sort(unique(osets_m$TRIP_ID))
-  posSetMatches <- NA
-  potSetMatches <- NA
-
+  # posSetMatches <- NA
+  # potSetMatches <- NA
+  matches_all<-NA
   for (i in 1:length(utrips)){
-    #' For each set in an observed trip, find the MARFIS set that is the closest
-    #' in time (within 24 hours)
     this_Otrip = osets_m[osets_m$TRIP_ID == utrips[i],]
-    this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
-    this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
-    this_Otrip <- data.table::setDT(this_Otrip)
-    this_Otrip <- this_Otrip[, timeO := DATE_TIME]
-    data.table::setkey(this_Otrip,DATE_TIME)
     this_Mtrip <- msets_m[msets_m$TRIP_ID_OBS == utrips[i],]
 
-    if(nrow(this_Mtrip)<1){
-      cat("\n","Can't match any sets for Obs Trip ID:",this_Otrip_Name$TRIP_ID," (",this_Otrip_Name$OBS_TRIP,")")
-      next
-    }
-#  if (!quiet) cat("\n", paste0("Obs:", this_Otrip_Name$TRIP_ID," (n=",nrow(this_Otrip),") <--> Marf:",this_Mtrip$TRIP_ID_MARF[1]," (n=",nrow(this_Mtrip),")",this_Mtrip$SET_PER_DAY[1]))
+    this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
+    this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
+
+    this_Otrip <- data.table::setDT(this_Otrip)
     this_Mtrip <- data.table::setDT(this_Mtrip)
+
+    this_Otrip <- this_Otrip[, timeO := DATE_TIME]
     this_Mtrip <- this_Mtrip[, timeM := EF_FISHED_DATETIME]
+
+    data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
-    #matches all mtrips to nearest otrip - some otrips matched twice
-    mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" ]
+    #matches all mtrips to nearest otrip - some otrips matched mult
+    mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
     mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
-    #matches all otrips to nearest mtrip - some mtrips matched twice
-    otrips_match <- this_Mtrip[this_Otrip , roll = "nearest" ]
+
+    #matches all otrips to nearest mtrip - some mtrips matched mult
+    otrips_match <- this_Mtrip[this_Otrip , roll = "nearest", allow.cartesian=TRUE ]
     otrips_match <- otrips_match[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID","timeM", "timeO")]
 
 
     mtrips_match$diff<- as.numeric(abs(difftime(mtrips_match$timeM,mtrips_match$timeO)), units="hours")
     mtrips_match$timeM<-mtrips_match$timeO<-NULL
+
     otrips_match$diff<- as.numeric(abs(difftime(otrips_match$timeM,otrips_match$timeO)), units="hours")
     otrips_match$timeM<-otrips_match$timeO<-NULL
 
-    mtrips_match = mtrips_match[mtrips_match$diff<maxSetDiff_hr,]
-    otrips_match = otrips_match[otrips_match$diff<maxSetDiff_hr,]
-# High Confidence Matches ---------------------------------------------------------------------
-#' These are matches where the smallest difference in time from an observer set to a marfis set is
-#' identical to the smallest time difference from the that marfis set to the observer set
+    #retain trips within acceptable time frame -others are "unmatchable"
+    this_Mtrip_OK <- mtrips_match[mtrips_match$diff<=maxSetDiff_hr,]
+    this_Otrip_OK <- otrips_match[otrips_match$diff<=maxSetDiff_hr,]
+    this_Mtrip_nope <- mtrips_match[mtrips_match$diff>maxSetDiff_hr,]
+    if (nrow(this_Mtrip_nope)>0)this_Mtrip_nope$FISHSET_ID <- NA
+    this_Otrip_nope <- otrips_match[otrips_match$diff>maxSetDiff_hr,]
+    if (nrow(this_Otrip_nope)>0)this_Otrip_nope$LOG_EFRT_STD_INFO_ID <- NA
 
-    mtrips_conf <- mtrips_match[mtrips_match[, .I[diff == min(diff)], by=FISHSET_ID]$V1]
-    mtrips_conf <- mtrips_conf[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
-    #for each duplicated mtrip, find the one with the closest time match
-    otrips_conf<-otrips_match[otrips_match[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1]
-    otrips_conf <- otrips_conf[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
+
+    # For all msets in timeframe, calculate difference and retain closest in time
+    #for for matches for all marfis sets, then for all obs sets
+    this_Mtrip_chk1 <- this_Mtrip_OK[this_Mtrip_OK[, .I[diff == min(diff)], by=FISHSET_ID]$V1]
+    this_Mtrip_chk1 <- this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
+    this_Otrip_chk1<-this_Otrip_OK[this_Otrip_OK[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1]
+    this_Otrip_chk1 <- this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
+
     #if the same sets were matched up in both directions, they are almost certainly the same set
-    all_confident <- merge(mtrips_conf[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
-                           otrips_conf[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
-                           by =c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff"))
-    all_confident$CONF <- "High"
+    matches_high <- merge(this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
+                          this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
+                          by =c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff"))
+    matches_high$CONF<-"High"
 
-# Med Confidence Matches ----------------------------------------------------------------------
-#' There are cases where the closest match between the 2 databases is not identical. Maybe the closest
-#' Maybe the closest match from M -> O  had no match in O -> M.  In these cases, We check to make sure
-#' that these potential matches are not already in the "confident" category, and if they are not,
-#' we add them as potential matches.
-    pots = rbind(otrips_conf, mtrips_conf)
-    pots1 <- data.table::setDT(pots)[!all_confident, on = names(pots)]
-    pots1 <- pots1[!(pots1$FISHSET_ID %in% all_confident$FISHSET_ID) &
-            !(pots1$LOG_EFRT_STD_INFO_ID %in% all_confident$LOG_EFRT_STD_INFO_ID),]
-    pots1$CONF <- "Medium"
-    if (nrow(all_confident)>0){
-      if(is.null(nrow(posSetMatches))){
-        posSetMatches <- all_confident
-      }else{
-        posSetMatches <- rbind(posSetMatches,all_confident)
-      }
+    #if sets are matched in one direction with only one suggested match,
+    # there's a good chance they're the same set
+    this_Mtrip_OK2 <- this_Mtrip_chk1[!(this_Mtrip_chk1$FISHSET_ID %in% matches_high$FISHSET_ID),]
+    this_Otrip_OK2 <- this_Otrip_chk1[!(this_Otrip_chk1$LOG_EFRT_STD_INFO_ID %in% matches_high$LOG_EFRT_STD_INFO_ID),]
+    matches_tmp <- rbind(this_Mtrip_OK2, this_Otrip_OK2)
+
+    if (nrow(matches_tmp)>0){
+      matches_med <- matches_tmp[which(with(matches_tmp,ave(seq(nrow(matches_tmp)),FISHSET_ID,FUN = length)*
+                                              ave(seq(nrow(matches_tmp)),LOG_EFRT_STD_INFO_ID,FUN = length)) == 1),]
+      matches_med$CONF<-"Medium"
+    }else{
+      matches_med <- matches_high[FALSE,]
     }
 
-    if(nrow(pots1)>0) {
-      if(is.null(nrow(potSetMatches))){
-        potSetMatches<- pots1
-      }else{
-        potSetMatches <- rbind(potSetMatches,pots1)
-      }
+    this_Mtrip_OK3 <- this_Mtrip_OK2[!(this_Mtrip_OK2$FISHSET_ID %in% matches_med$FISHSET_ID),]
+    this_Otrip_OK3 <- this_Otrip_OK2[!(this_Otrip_OK2$LOG_EFRT_STD_INFO_ID %in% matches_med$LOG_EFRT_STD_INFO_ID),]
+    if (nrow(rbind(this_Mtrip_OK3, this_Otrip_OK3))>0){
+      matches_mult <- rbind(this_Mtrip_OK3, this_Otrip_OK3)
+      matches_mult$CONF <-"Multi-match"
+    }else{
+      matches_mult <- matches_high[FALSE,]
+    }
+    if(nrow(rbind(this_Mtrip_nope, this_Otrip_nope))>0){
+      matches_nope <-rbind(this_Mtrip_nope, this_Otrip_nope)
+      matches_nope$CONF<- "Unmatchable"
+    }else{
+      matches_nope <- matches_high[FALSE,]
     }
 
+    theseMatches <- rbind(matches_high, matches_med, matches_nope,matches_mult)
+    if(!is.data.frame(matches_all)){
+      matches_all <- theseMatches
+    }else{
+      matches_all <- rbind(matches_all, theseMatches)
+    }
   }
-  posSetMatches = unique(posSetMatches)
-  posSetMatches$diff<-NULL
-
-  # Assign "Low" to sets with more than 1 identified match --------------------------------------
-
-  potSetMatches_FS <- potSetMatches[, {tmp <- diff; .SD[tmp==min(diff)] }, FISHSET_ID]
-  potSetMatches_all <- potSetMatches_FS[, {tmp <- diff; .SD[tmp==min(diff)] }, LOG_EFRT_STD_INFO_ID]
-  dupFS<-potSetMatches_all$FISHSET_ID[duplicated(potSetMatches_all$FISHSET_ID)]
-  dupLE<-potSetMatches_all$LOG_EFRT_STD_INFO_ID[duplicated(potSetMatches_all$LOG_EFRT_STD_INFO_ID)]
-  potSetMatches_all[potSetMatches_all$FISHSET_ID %in% dupFS | potSetMatches_all$LOG_EFRT_STD_INFO_ID %in% dupLE,"CONF"]<-"Low"
-  potSetMatches_all$diff <-NULL
-
-  posSetMatches<-as.data.frame(posSetMatches)
-  potSetMatches_all<-as.data.frame(posSetMatches)
-  MAP_OBS_MARFIS_SETS <- unique(rbind(posSetMatches,potSetMatches_all))
-  # MAP_OBS_MARFIS_SETS <- rbind(MAP_OBS_MARFIS_SETS, as.data.frame(potSetMatches))
-
-  df<-rbind(df,MATCHED_SETS = c(length(unique(MAP_OBS_MARFIS_SETS[,"LOG_EFRT_STD_INFO_ID"])),
-                                length(unique(MAP_OBS_MARFIS_SETS[,"FISHSET_ID"])))
-  )
   res= list()
-  res[["MAP_OBS_MARFIS_SETS"]] <- MAP_OBS_MARFIS_SETS
+  res[["MAP_OBS_MARFIS_SETS"]] <- as.data.frame(matches_all)
   return(res)
 }
