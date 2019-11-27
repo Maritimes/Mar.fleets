@@ -190,7 +190,6 @@ match_trips <- function(get_MARFIS = NULL,
   }else{
     un2<- un
   }
-
   foundTrips<- rbind(un1,un2)
   foundTrips <- foundTrips[,c("SRC", "TRIP_ID_MARF", "MARF_TRIP", "TRIP_ID_OBS", "OBS_TRIP", "MATCHED_ON", "MATCH_COMMENT")]
 
