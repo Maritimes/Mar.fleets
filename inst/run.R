@@ -7,6 +7,7 @@ code = NULL #5 #5 13
 gear = NULL #51 #51 NULL
 q = TRUE
 f1 = get_fleet(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',dateStart = ds, dateEnd = de, mdCode = code, gearCode = gear)
+
 mar1 = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',dateStart = ds, dateEnd = de,thisFleet = f1)
 obs1 = get_OBS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',dateStart = ds, dateEnd = de, thisFleet = f1, quietly = q, keepSurveyTrips = F)
 trips = match_trips(get_MARFIS = mar1, get_OBS = obs1, quietly = q)

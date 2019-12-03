@@ -158,7 +158,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
   gearCode=tolower(gearCode)
   spCode=as.numeric(spCode)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- FALSE
+  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$gearSpecsDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
@@ -204,6 +204,55 @@ get_fleet<-function(fn.oracle.username = "_none_",
     }
     return(MDCds)
   }
+  # Prompt for and/or Apply Gear Description Filters ---------------------------
+  # getGearSpecs<- function(df = df, gearDesc = gearDesc, gearSize = gearSize){
+  #   assign("gearSpecsDone", TRUE, envir = keep)
+  #   browser()
+  #   # SELECT * FROM MARFISSCI.LOG_EFRT_ENTRD_DETS WHERE COLUMN_DEFN_ID IN (x)
+  #   # -- Mesh related
+  #   # --   8 = <<MESH SIZE>> (8)
+  #   # --  31 = Enter S for Square or D for Diamond.
+  #   # --  32 = MESH SIZE-MM
+  #   # --  62 = MESH SIZE (62)
+  #   # -- 120 = MESH SIZE-IN
+  #   # -- 806 = MESH SIZE-MM (806)
+  #   #
+  #   # -- Hook related
+  #   # --  4 = HOOK SIZE (4)
+  #   # --  5 = HOOK TYPE (5)
+  #   # -- 66 = HOOK SIZE (66)
+  #   # -- 67 = HOOK TYPE (67)
+  #   #
+  #   # --Trap related
+  #   # -- 114 = TRAP TYPE (114)
+  #   # -- 152 = TRAP SIZE
+  #   # -- 423 = TRAP TYPE (423)
+  #   # -- 431 = TRAP TYPE (431)
+  #   # -- 701 = TRAP TYPE (701)
+  #   gearSpecQry1 <- paste0("SELECT DISTINCT
+  #                    LOG_EFRT_STD_INFO.MON_DOC_ID,
+  #                    LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
+  #                    FROM MARFISSCI.LOG_EFRT_STD_INFO, MARFISSCI.LOG_SPC_STD_INFO
+  #                    WHERE
+  #                    LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID = LOG_SPC_STD_INFO.LOG_EFRT_STD_INFO_ID
+  #                    AND LOG_EFRT_STD_INFO.MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
+  #                    AND LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",dateStart,"','YYYY-MM-DD')
+  #                    AND to_date('",dateEnd,"','YYYY-MM-DD')")
+  #   gearSpec1 = cxn$thecmd(cxn$channel, gearSpecQry1)
+  #   gearSpec1 <- merge(gearSpec1, df)
+  #   gearSpec1<-unique(gearSpec1[,c("MON_DOC_ID", "LOG_EFRT_STD_INFO_ID" )])
+  #   if(nrow(gearSpec1)<1){
+  #     cat("\n","Can't filter by Gear specifications - aborting")
+  #     return(df)
+  #   }
+  #   meshCols <-
+  #   trapCols <-
+  #   hookCols
+  #   where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(spCode, apos = F),")")
+  #   gearSpecQry2 <- paste0("SELECT * FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
+  #                                     WHERE LOG_EFRT_STD_INFO_ID BETWEEN
+  #                    ",min(gearSpec1$LOG_EFRT_STD_INFO_ID), " AND ",max(gearSpec1$LOG_EFRT_STD_INFO_ID),"
+  # }
   # Prompt for and/or Apply Spp Filters ------------------------------------
   getSPCd<-function(df = df, spCode = spCode){
     assign("spDone", TRUE, envir = keep)
@@ -310,6 +359,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
       if (length(unique(df$MD_CODE))==1){
         if(!quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
       }else if (length(mdCode)>0 && mdCode != "all"){
+        df=df[df$MD_CODE %in% mdCode,]
       }else{
         allOptions <- c(allOptions, "Monitoring Document Type")
       }
@@ -370,7 +420,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
 
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(df = df, mdCode=mdCode, gearCode=gearCode, spCode = spCode)
-
+# browser()
   if(nrow(df)<1) {
     cat("\n","No records found")
     return(NULL)
