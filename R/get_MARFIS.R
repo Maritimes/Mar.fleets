@@ -46,7 +46,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
   getEff<-function(dateStart = NULL, dateEnd=NULL, trips = NULL){
-    PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID, PS.LOG_EFRT_STD_INFO_ID, PS.MON_DOC_ID
+PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID, PS.LOG_EFRT_STD_INFO_ID, PS.MON_DOC_ID
                       FROM
                     MARFISSCI.PRO_SPC_INFO PS
                     WHERE PS.TRIP_ID BETWEEN ",min(trips$TRIP_ID), " AND ", max(trips$TRIP_ID)," AND
@@ -167,14 +167,15 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(HOC_df)
   }
   ps <- getPS(dateStart, dateEnd, thisFleet)
-  sets<- getEff(dateStart, dateEnd, ps)
-  eff <- unique(merge(ps[,!names(ps) %in% c("DATE_FISHED","VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
   if (nrow(ps)<1){
     cat("\n","No MARFIS data meets criteria")
     return(invisible(NULL))
   }else{
     marObsMatch <- ps
   }
+  sets<- getEff(dateStart, dateEnd, ps)
+  eff <- unique(merge(ps[,!names(ps) %in% c("DATE_FISHED","VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
+
   ed <- getED(mondocs = stats::na.omit(ps$MON_DOC_ID))
   if (!is.null(ed) && nrow(ed)>0){
     marObsMatch<- unique(merge(marObsMatch,unique(ed), all.x = T, by = "MON_DOC_ID"))

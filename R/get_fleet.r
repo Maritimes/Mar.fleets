@@ -132,6 +132,15 @@
 #' \item 96 = 'HAND/HANDHELD TOOL'
 #' \item 98 = 'FIXED GEAR'
 #' }
+#' @param showSp default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
+#' members who reported a particular species at any point in the specified time period.  If this is
+#' set to T, then in addition to being able to select mdCode and gearCode from a select list, you
+#' can also select from all of the reported landed species.
+#' @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
+#' the fleet members to only those who reported the selected species at some point in the specified
+#' time frame.
+#' @param quietly default is \code{FALSE}.  This indicates whether or not
+#' information should be shown as the function proceeds.
 #' @family fleets
 #' @return returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",
 #'         "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
@@ -141,16 +150,21 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     fn.oracle.password = "_none_",
                     fn.oracle.dsn = "_none_",
                     usepkg = "rodbc",
+                    quietly = F,
                     dateStart = NULL, dateEnd = NULL,
-                    mdCode = NULL, gearCode = NULL){
+                    mdCode = NULL, gearCode = NULL, showSp = F, spCode = NULL){
   cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
+  spCode=as.numeric(spCode)
+  keep<-new.env()
+  keep$spDone <- keep$mdDone <- keep$gearDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
   # Prompt for and/or Apply Gear Filters ------------------------------------
   getGCd<-function(df = df, gearCode = gearCode){
+    assign("gearDone", TRUE, envir = keep)
     gDf = unique(df[,c("GEAR_DESC","GEAR_CODE")])
     gDf = gDf[with(gDf,order(GEAR_CODE)),]
     if (any(gearCode =="all")){
@@ -158,7 +172,6 @@ get_fleet<-function(fn.oracle.username = "_none_",
     } else if (length(gearCode)>0){
       GCds = gDf[gDf$GEAR_CODE %in% gearCode,]
     }else{
-
       choice<-utils::select.list(paste0(gDf$GEAR_DESC, " (",gDf$GEAR_CODE,")"),
                                  preselect=NULL,
                                  multiple=T, graphics=T,
@@ -170,9 +183,9 @@ get_fleet<-function(fn.oracle.username = "_none_",
     }
     return(GCds)
   }
-
-  # Prompt for and/or Apply Gear Filters ------------------------------------
+  # Prompt for and/or Apply Md Code Filters ------------------------------------
   getMDCd<-function(df = df, md = md){
+    assign("mdDone", TRUE, envir = keep)
     mdDf = unique(df[,c("MD_DESC","MD_CODE")])
     mdDf = mdDf[with(mdDf,order(MD_CODE)),]
     if (any(md =="all")){
@@ -191,6 +204,62 @@ get_fleet<-function(fn.oracle.username = "_none_",
     }
     return(MDCds)
   }
+  # Prompt for and/or Apply Spp Filters ------------------------------------
+  getSPCd<-function(df = df, spCode = spCode){
+    assign("spDone", TRUE, envir = keep)
+    if (length(spCode)>0){
+      thewhere1 <- paste0("AND SSF_SPECIES_CODE in (",Mar.utils::SQL_in(spCode, apos = F),")")
+      thewhere2 <- paste0("WHERE SPECIES_CODE in (",Mar.utils::SQL_in(spCode, apos = F),")")
+    }else{
+      thewhere1 <- "AND 1=1"
+      thewhere2 <- "WHERE 1=1"
+    }
+    spQry1 <- paste0("SELECT DISTINCT
+                     LOG_EFRT_STD_INFO.MON_DOC_ID,
+                     LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
+                     FROM MARFISSCI.LOG_EFRT_STD_INFO, MARFISSCI.LOG_SPC_STD_INFO
+                     WHERE
+                     LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID = LOG_SPC_STD_INFO.LOG_EFRT_STD_INFO_ID
+                     AND LOG_EFRT_STD_INFO.MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
+                     AND LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",dateStart,"','YYYY-MM-DD')
+                     AND to_date('",dateEnd,"','YYYY-MM-DD')")
+    sp1 = cxn$thecmd(cxn$channel, spQry1)
+    sp1 <- merge(sp1, df)
+    sp1<-unique(sp1[,c("MON_DOC_ID", "LOG_EFRT_STD_INFO_ID" )])
+    if(nrow(sp1)<1){
+      cat("\n","Can't filter by species - aborting")
+      return(df)
+    }
+    # get all of the species for all of the logs of our fleet -------------------------------------
+    spQry2 <- paste0("SELECT DISTINCT SSF_SPECIES_CODE, LOG_EFRT_STD_INFO_ID
+                     FROM MARFISSCI.LOG_SPC_STD_INFO WHERE
+                     LOG_EFRT_STD_INFO_ID BETWEEN
+                     ",min(sp1$LOG_EFRT_STD_INFO_ID), " AND ",max(sp1$LOG_EFRT_STD_INFO_ID),"
+                     ", thewhere1)
+    sp2 = cxn$thecmd(cxn$channel, spQry2)
+    sp2 <- merge(sp2, sp1)
+
+    spQry3 <- paste0("SELECT SPECIES_CODE, DESC_ENG FROM MARFISSCI.SPECIES ", thewhere2)
+    sp3 = cxn$thecmd(cxn$channel, spQry3)
+
+    all = merge(sp2, sp3, by.x= "SSF_SPECIES_CODE", by.y = "SPECIES_CODE")
+    if(length(spCode)<1){
+      spCheck = unique(all[,c("SSF_SPECIES_CODE", "DESC_ENG")])
+      choice<-utils::select.list(paste0(spCheck$DESC_ENG, " (",spCheck$SSF_SPECIES_CODE,")"),
+                                 preselect=NULL,
+                                 multiple=T, graphics=T,
+                                 title='Potential Species')
+      cat(paste0("\n","spCode choice: ",choice))
+      choice = as.numeric(sub(".*\\((.*)\\).*", "\\1", choice))
+      if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
+      # We determined a sp code, so let's keep it so other calls can know it ------------------------
+      assign(x = "spCode", value = choice, envir = parent.frame())
+      all <- all[all$SSF_SPECIES_CODE %in% choice,]
+    }
+    cat(paste0("\n","spCode choice: ",unique(all$DESC_ENG), " (",unique(all$SSF_SPECIES_CODE),")"))
+    df=df[df$MON_DOC_ID %in% all$MON_DOC_ID,]
+    return(df)
+  }
 
   basicFleet<-function(dateStart = dateStart, dateEnd=dateEnd){
     fleetQry<- paste0("SELECT DISTINCT
@@ -199,7 +268,8 @@ get_fleet<-function(fn.oracle.username = "_none_",
                         MDD.MON_DOC_DEFN_ID MD_CODE,
                         MDD.SHORT_DOC_TITLE MD_DESC,
                         LV.VR_NUMBER,
-                        LV.LICENCE_ID
+                        LV.LICENCE_ID,
+                        MD.MON_DOC_ID
                       FROM
                         MARFISSCI.GEARS G,
                         MARFISSCI.LICENCE_GEARS LG,
@@ -222,36 +292,73 @@ get_fleet<-function(fn.oracle.username = "_none_",
     )
     theFleet = cxn$thecmd(cxn$channel, fleetQry)
   }
-  applyFilters<-function(df = df, mdCode=mdCode, gearCode=gearCode){
-    mdCheck = unique(df$MD_CODE)
-    grCheck = unique(df$GEAR_CODE)
-    if (length(mdCode)>0 && mdCode != "all") df=df[df$MD_CODE %in% mdCode,]
-    if (length(gearCode)>0 && gearCode != "all")df=df[df$GEAR_CODE %in% gearCode,]
-    if (length(mdCode)<1 && length(gearCode)<1){
-      #give user option of which filter to run
-      choice<-utils::select.list(c("Monitoring Document Type","Gear Type"),
+
+  applyFilters<-function(df = df, mdCode=mdCode, gearCode=gearCode,  spCode=spCode){
+
+    allOptions<-"Done"
+    if(showSp || length(spCode)>0 ){
+    if(!keep$spDone){
+      if (length(spCode)>0){
+        df<- getSPCd(df, spCode)
+      }else{
+        allOptions <- c(allOptions, "Species Encountered")
+      }
+    }
+     }
+
+    if(!keep$mdDone){
+      if (length(unique(df$MD_CODE))==1){
+        if(!quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
+      }else if (length(mdCode)>0 && mdCode != "all"){
+      }else{
+        allOptions <- c(allOptions, "Monitoring Document Type")
+      }
+    }
+    if(!keep$gearDone){
+      if (length(unique(df$GEAR_CODE))==1){
+        if(!quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
+      }else if (length(gearCode)>0 && gearCode != "all"){
+        df=df[df$GEAR_CODE %in% gearCode,]
+      }else{
+        allOptions <- c(allOptions, "Gear Type")
+      }
+    }
+
+
+    allOptions <- allOptions[!is.na(allOptions)]
+    if (length(allOptions)>1){
+      choice<-utils::select.list(allOptions,
                                  preselect=NULL,
-                                 multiple=T, graphics=T,
+                                 multiple=F, graphics=T,
                                  title="Choose how to filter the data")
+      if (choice=="Species Encountered"){
+        df <- getSPCd(df, sp =spCode)
+        keep$spDone <-T
+        df = applyFilters(df=df, mdCode=mdCode, gearCode=gearCode, spCode=spCode)
+
+      }
       if (choice=="Monitoring Document Type"){
         mdPick <- getMDCd(df = df, mdCode)
+        df=df[df$MD_CODE %in% mdPick$MD_CODE,]
+        keep$mdDone<-T
+        df = applyFilters(df=df, mdCode=mdPick$MD_CODE, gearCode=gearCode, spCode=spCode)
 
-        df = applyFilters(df=df, mdCode=mdPick$MD_CODE, gearCode=gearCode)
-      } else {
-        gearPick <- getGCd(df = df, gearCode)
-        df = applyFilters(df=df,mdCode=mdCode, gearCode=gearPick$GEAR_CODE)
       }
-    }else{
-      if (length(mdCode)<1 && length(unique(df$MD_CODE))>1 ){
-        mdPick <- getMDCd(df = df, mdCode)
-        df = applyFilters(df=df, mdCode=mdPick$MD_CODE, gearCode=gearCode)
-      } else if (length(gearCode)<1 && length(unique(df$GEAR_CODE))>1) {
+      if (choice=="Gear Type"){
         gearPick <- getGCd(df = df, gearCode)
-        df = applyFilters(df=df, mdCode=mdCode, gearCode=gearPick$GEAR_CODE)
+        df=df[df$GEAR_CODE %in% gearPick$GEAR_CODE,]
+        keep$gearDone<-T
+        df = applyFilters(df=df,mdCode=mdCode, gearCode=gearPick$GEAR_CODE, spCode=spCode)
+
+      }
+      if (choice=="Done"){
+        cat("\nCancelled at user request")
+        return(df)
       }
     }
     return(df)
   }
+
   #Narrow the data by only date range
   df = basicFleet(dateStart, dateEnd)
   # clean up the names of each md doc type
@@ -262,7 +369,8 @@ get_fleet<-function(fn.oracle.username = "_none_",
   df$MD_DESC <- trimws(df$MD_DESC)
 
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(df = df, mdCode=mdCode, gearCode=gearCode)
+  df = applyFilters(df = df, mdCode=mdCode, gearCode=gearCode, spCode = spCode)
+
   if(nrow(df)<1) {
     cat("\n","No records found")
     return(NULL)

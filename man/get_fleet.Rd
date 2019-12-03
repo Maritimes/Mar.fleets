@@ -5,8 +5,9 @@
 \title{get_fleet}
 \usage{
 get_fleet(fn.oracle.username = "_none_", fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_", usepkg = "rodbc", dateStart = NULL,
-  dateEnd = NULL, mdCode = NULL, gearCode = NULL)
+  fn.oracle.dsn = "_none_", usepkg = "rodbc", quietly = F,
+  dateStart = NULL, dateEnd = NULL, mdCode = NULL, gearCode = NULL,
+  showSp = F, spCode = NULL)
 }
 \arguments{
 \item{fn.oracle.username}{default is \code{'_none_'} This is your username for
@@ -30,6 +31,9 @@ provided, it will take priority over your existing value.}
 \item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 roracle will extract data ~ 5x faster.}
+
+\item{quietly}{default is \code{FALSE}.  This indicates whether or not
+information should be shown as the function proceeds.}
 
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
@@ -147,6 +151,15 @@ Valid codes are shown below:
 \item 96 = 'HAND/HANDHELD TOOL'
 \item 98 = 'FIXED GEAR'
 }}
+
+\item{showSp}{default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
+members who reported a particular species at any point in the specified time period.  If this is
+set to T, then in addition to being able to select mdCode and gearCode from a select list, you
+can also select from all of the reported landed species.}
+
+\item{spCode}{default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
+the fleet members to only those who reported the selected species at some point in the specified
+time frame.}
 }
 \value{
 returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",

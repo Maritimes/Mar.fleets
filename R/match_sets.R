@@ -30,7 +30,12 @@ match_sets <- function(get_MARFIS = NULL,
   osets = get_OBS$OBS_SETS
 
   match = match_trips$MAP_OBS_MARFIS_TRIPS
-
+  if(is.null(get_MARFIS$MARF_MATCH) ||
+     is.null(get_OBS$OBS_TRIPS) ||
+     is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
+    if (!quietly)cat("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched")
+    return(NULL)
+  }
   #subset each to only those that are matchable (ie have a matched trip)
   msets_m = msets[msets$TRIP_ID %in% match$TRIP_ID_MARF,]
   osets_m = osets[osets$TRIP_ID %in% match$TRIP_ID_OBS,]
@@ -61,7 +66,8 @@ match_sets <- function(get_MARFIS = NULL,
 
     this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
     this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
-
+#print(this_Otrip[1,c("TRIP_ID","OBS_TRIP")])
+# browser(expr = {this_Otrip_Name$OBS_TRIP=='J16-0710'})
     this_Otrip <- data.table::setDT(this_Otrip)
     this_Mtrip <- data.table::setDT(this_Mtrip)
 
@@ -96,9 +102,10 @@ match_sets <- function(get_MARFIS = NULL,
 
     # For all msets in timeframe, calculate difference and retain closest in time
     #for for matches for all marfis sets, then for all obs sets
-    this_Mtrip_chk1 <- this_Mtrip_OK[this_Mtrip_OK[, .I[diff == min(diff)], by=FISHSET_ID]$V1]
+   #print(this_Otrip_OK[this_Otrip_OK[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1])
+    this_Mtrip_chk1 <- this_Mtrip_OK[this_Mtrip_OK[, .I[diff == suppressWarnings(min(diff))], by=FISHSET_ID]$V1]
     this_Mtrip_chk1 <- this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
-    this_Otrip_chk1<-this_Otrip_OK[this_Otrip_OK[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1]
+    this_Otrip_chk1<-this_Otrip_OK[this_Otrip_OK[, .I[diff == suppressWarnings(min(diff))], by=LOG_EFRT_STD_INFO_ID]$V1]
     this_Otrip_chk1 <- this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
 
     #if the same sets were matched up in both directions, they are almost certainly the same set
@@ -145,6 +152,6 @@ match_sets <- function(get_MARFIS = NULL,
   }
   matches_all$diff <-NULL
   res= list()
-  res[["MAP_OBS_MARFIS_SETS"]] <- as.data.frame(matches_all)
+  res[["MAP_OBS_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
   return(res)
 }
