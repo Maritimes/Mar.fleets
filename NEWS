@@ -2,6 +2,11 @@ Mar.bycatch
 ==============
 
 Changes:
+2019.12.05
+* moved various filters from applyFilters() into their own files, cleaning the code, but
+necessitating sending parameters to each
+2019.12.03
+*
 2019.11.27
 * cleaned up match_sets()
 2019.11.26

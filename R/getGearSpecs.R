@@ -1,7 +1,7 @@
 # Prompt for and/or Apply Gear Description Filters ---------------------------
 getGearSpecs<- function(cxn = cxn, keep=keep, df = df,  gearSpType= gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd){
   keep$gearSpecsDone <- T
-  assign("gearSpecsDone", TRUE, envir = keep)
+  # assign("gearSpecsDone", TRUE, envir = keep)
   # p <- parent.frame()
   # cxn <- p$cxn
 

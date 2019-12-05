@@ -1,7 +1,7 @@
 # Prompt for and/or Apply Md Code Filters ------------------------------------
 getMDCd<-function(keep= keep, df = df, md = md){
-
-  assign("mdDone", TRUE, envir = keep)
+  keep$mdDone <- T
+  # assign("mdDone", TRUE, envir = keep)
   mdDf = unique(df[,c("MD_DESC","MD_CODE")])
   mdDf = mdDf[with(mdDf,order(MD_CODE)),]
   if (any(md =="all")){

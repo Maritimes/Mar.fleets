@@ -7,14 +7,14 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
                        gearSpType = gearSpType,
                        gearSpSize = gearSpSize,
                        dateStart = dateStart,
-                       dateEnd = dateEnd){
+                       dateEnd = dateEnd,
+                       mainSpp = mainSpp){
 
   allOptions<-"Done"
   if(showSp || length(spCode)>0 ){
     if(!keep$spDone){
       if (length(spCode)>0){
-        browser()
-        df<- getSPCd(cxn, keep, df, spCode)
+        df<- getSPCd(cxn, keep, dateStart, dateEnd, df, spCode)
         keep$spCode <- T
       }else{
         allOptions <- c(allOptions, "Species Encountered")
@@ -32,9 +32,19 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
       allOptions <- c(allOptions, "Monitoring Document Type")
     }
   }
+  if(!keep$mainSppDone){
+    if (length(mainSpp)>0){
+      df<- getMainSpp(cxn, keep, dateStart, dateEnd, df, mainSpp)
+      keep$mainSppDone <- T
+    }else{
+      allOptions <- c(allOptions, "Main Species (by log)")
+    }
+  }
+
   if(!keep$gearDone){
     if (length(unique(df$GEAR_CODE))==1){
       if(!quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
+      keep$gearDone<-T
     }else if (length(gearCode)>0 && gearCode != "all"){
       df=df[df$GEAR_CODE %in% gearCode,]
       keep$gearDone<-T
@@ -42,10 +52,11 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
       allOptions <- c(allOptions, "Gear Type")
     }
   }
-  if (keep$gearDone){
-    test=chkGears(df)
-    if (length(test)>0) keep$canDoGearSpecs <- T
-  }
+    if (keep$gearDone){
+      test=chkGears(df)
+      if (length(test)>0) keep$canDoGearSpecs <- T
+    }
+
   if(!keep$gearSpecsDone && keep$gearDone && keep$canDoGearSpecs){ #only show if a gear selection has been made
     if (length(gearSpType)>0 | length(gearSpSize)>0){
       df<- getGearSpecs(cxn, keep, df, gearSpType, gearSpSize, dateStart, dateEnd)
@@ -61,9 +72,8 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
                                preselect=NULL,
                                multiple=F, graphics=T,
                                title="Choose how to filter the data")
-    if (choice=="Species Encountered"){
-      df <- getSPCd(cxn, keep, df, sp =spCode)
-      #keep$spDone <-T
+    if (choice=="Main Species (by log)"){
+      df <- getMainSpp(cxn, keep, dateStart, dateEnd, df, mainSpp)
       df = applyFilters(cxn = cxn,
                         keep = keep,
                         showSp = showSp,
@@ -75,7 +85,25 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
                         gearSpType = gearSpType,
                         gearSpSize = gearSpSize,
                         dateStart = dateStart,
-                        dateEnd = dateEnd)
+                        dateEnd = dateEnd,
+                        mainSpp = mainSpp)
+
+    }
+    if (choice=="Species Encountered"){
+      df <- getSPCd(cxn, keep, dateStart, dateEnd, df, spCode)
+      df = applyFilters(cxn = cxn,
+                        keep = keep,
+                        showSp = showSp,
+                        quietly = quietly,
+                        df=df,
+                        mdCode=mdCode,
+                        gearCode=gearCode,
+                        spCode=spCode,
+                        gearSpType = gearSpType,
+                        gearSpSize = gearSpSize,
+                        dateStart = dateStart,
+                        dateEnd = dateEnd,
+                        mainSpp = mainSpp)
 
     }
     if (choice=="Monitoring Document Type"){
@@ -93,7 +121,8 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
                         gearSpType = gearSpType,
                         gearSpSize = gearSpSize,
                         dateStart = dateStart,
-                        dateEnd = dateEnd)
+                        dateEnd = dateEnd,
+                        mainSpp = mainSpp)
 
     }
     if (choice=="Gear Type"){
@@ -111,7 +140,8 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
                         gearSpType = gearSpType,
                         gearSpSize = gearSpSize,
                         dateStart = dateStart,
-                        dateEnd = dateEnd)
+                        dateEnd = dateEnd,
+                        mainSpp = mainSpp)
 
     }
     if (choice=="Gear Specifications"){
@@ -128,11 +158,12 @@ applyFilters<-function(cxn=cxn, keep = keep, df = df,
                         gearSpType = gearSpType,
                         gearSpSize = gearSpSize,
                         dateStart = dateStart,
-                        dateEnd = dateEnd)
+                        dateEnd = dateEnd,
+                        mainSpp = mainSpp)
 
     }
     if (choice=="Done"){
-      cat("\nCancelled at user request")
+      cat("\nFiltering completed")
       return(df)
     }
   }

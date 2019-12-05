@@ -7,7 +7,8 @@
 get_fleet(fn.oracle.username = "_none_", fn.oracle.password = "_none_",
   fn.oracle.dsn = "_none_", usepkg = "rodbc", quietly = F,
   dateStart = NULL, dateEnd = NULL, mdCode = NULL, gearCode = NULL,
-  gearSpType = NULL, gearSpSize = NULL, showSp = F, spCode = NULL)
+  gearSpType = NULL, gearSpSize = NULL, showSp = F, spCode = NULL,
+  mainSpp = NULL)
 }
 \arguments{
 \item{fn.oracle.username}{default is \code{'_none_'} This is your username for

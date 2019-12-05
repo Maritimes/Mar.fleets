@@ -1,8 +1,6 @@
 chkGears <- function(df=df){
   allGears = tolower(unique(df$GEAR_DESC))
   allGears = allGears[!allGears %in% c("trap net")]
-
-
   matchTrap=c('trap','pot')
   matchMesh=c('trawl','seine','net','midwtr')
   matchLine=c('line','jig','anli')

@@ -154,13 +154,14 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     dateStart = NULL, dateEnd = NULL,
                     mdCode = NULL, gearCode = NULL,
                     gearSpType = NULL, gearSpSize= NULL,
-                    showSp = F, spCode = NULL){
+                    showSp = F, spCode = NULL, mainSpp = NULL){
   cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   spCode=as.numeric(spCode)
+  mainSpp=as.numeric(mainSpp)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- FALSE
+  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
@@ -175,8 +176,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
 
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(cxn = cxn, keep = keep, showSp = showSp, quietly = quietly, df = df, mdCode=mdCode, gearCode=gearCode, spCode = spCode,
-                    gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd)
-  # gearSpecPick <- getGearSpecs(df = df)
+                    gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp)
   if(nrow(df)<1) {
     cat("\n","No records found")
     return(NULL)

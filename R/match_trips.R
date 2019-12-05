@@ -87,7 +87,6 @@ match_trips <- function(get_MARFIS = NULL,
       }else{
         unmatched_Marf_trip<-NA
       }
-      browser("0")
       unmatched_all <- rbind(unmatched_Marf_trip, unmatched_Obs_trip)
       unmatched_all$MATCH_COMMENT <- "'Trip' present, but not matchable"
       Marf_in_Obs_trip$MATCHED_ON <- "OBS_TRIP"
@@ -112,7 +111,6 @@ match_trips <- function(get_MARFIS = NULL,
   }
   marf_TRIPS_all_tmp <- NULL
   obs_TRIPS_all_tmp <- NULL
-  print("1")
   if (is.data.frame(Marf_in_Obs_CONFHI)) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_CONFHI)
   # MARFIS HAILOUT CONFIRMATION NUMBER ---------------------------------------------------------
   Marf_in_Obs_CONFHO <-NA
@@ -127,7 +125,6 @@ match_trips <- function(get_MARFIS = NULL,
   }
   marf_TRIPS_all_tmp<-NULL
   obs_TRIPS_all_tmp <- NULL
-  print("2")
   if (is.data.frame(Marf_in_Obs_CONFHO)) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_CONFHO)
   # VRN (fishing), LICENCE and DATE RANGE --------------------------------------------------------
   Marf_in_Obs_VRLICDATE_F <-NA
@@ -146,7 +143,6 @@ match_trips <- function(get_MARFIS = NULL,
     Marf_in_Obs_VRLICDATE_F$MATCHED_ON <- "VR_LIC_DATE"
   }
   marf_TRIPS_all_tmp <- NULL
-  print("3")
   if (is.data.frame(Marf_in_Obs_VRLICDATE_F)) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_VRLICDATE_F)
 
   # VRN (landing), LICENCE and DATE RANGE --------------------------------------------------------
@@ -167,7 +163,6 @@ match_trips <- function(get_MARFIS = NULL,
 
   marf_TRIPS_all_tmp <- NULL
   obs_TRIPS_all_tmp <- NULL
-  print("4")
   if (is.data.frame(Marf_in_Obs_VRLICDATE_L)) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_VRLICDATE_L)
 
   Marf_in_Obs <- unique(Marf_in_Obs)
@@ -204,7 +199,6 @@ match_trips <- function(get_MARFIS = NULL,
     }else{
       un2<- un
     }
-    print("5")
     foundTrips<- rbind(un1,un2)
     foundTrips <- foundTrips[,c("SRC", "TRIP_ID_MARF", "MARF_TRIP", "TRIP_ID_OBS", "OBS_TRIP", "MATCHED_ON", "MATCH_COMMENT")]
 
@@ -224,7 +218,6 @@ match_trips <- function(get_MARFIS = NULL,
   Hail_Out_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HO", Marf_in_Obs$MATCHED_ON),])
   License_Vessel_Date_Combo = nrow(Marf_in_Obs[grep("VR_LIC_DATE", Marf_in_Obs$MATCHED_ON),])
   Total_Matches = nrow(Marf_in_Obs)
-  print("6")
   summ_df = as.data.frame(rbind(Obs_Trip_Name,
                                 Hail_In_Confirmation_Code,
                                 Hail_Out_Confirmation_Code,
