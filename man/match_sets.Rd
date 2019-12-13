@@ -4,8 +4,13 @@
 \alias{match_sets}
 \title{match_sets}
 \usage{
-match_sets(get_MARFIS = NULL, get_OBS = NULL, match_trips = NULL,
-  maxSetDiff_hr = 24, quietly = F)
+match_sets(
+  get_MARFIS = NULL,
+  get_OBS = NULL,
+  match_trips = NULL,
+  maxSetDiff_hr = 24,
+  quietly = F
+)
 }
 \arguments{
 \item{get_MARFIS}{default is \code{NULL}. This is the list output by the
@@ -35,9 +40,12 @@ This function takes the results from get_MARFIS(), get_OBS()
 and match_trips(), and attempts to match the sets for each trip.
 }
 \seealso{
-Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_MARFIS}}, \code{\link{get_OBS}},
-  \code{\link{get_fleet}}, \code{\link{match_trips}}
+Other fleets: 
+\code{\link{calc_Coverage}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
+\code{\link{get_fleet}()},
+\code{\link{match_trips}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

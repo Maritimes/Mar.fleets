@@ -4,10 +4,17 @@
 \alias{get_OBS}
 \title{get_OBS}
 \usage{
-get_OBS(fn.oracle.username = "_none_", fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_", usepkg = "rodbc", dateStart = NULL,
-  dateEnd = NULL, keepSurveyTrips = FALSE, quietly = FALSE,
-  thisFleet = NULL)
+get_OBS(
+  fn.oracle.username = "_none_",
+  fn.oracle.password = "_none_",
+  fn.oracle.dsn = "_none_",
+  usepkg = "rodbc",
+  dateStart = NULL,
+  dateEnd = NULL,
+  keepSurveyTrips = FALSE,
+  quietly = FALSE,
+  thisFleet = NULL
+)
 }
 \arguments{
 \item{fn.oracle.username}{default is \code{'_none_'} This is your username for
@@ -87,9 +94,12 @@ all of the records from the observer database that can be matched using:
 "J18-0000B" becomes "J180000").
 }
 \seealso{
-Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_MARFIS}}, \code{\link{get_fleet}},
-  \code{\link{match_sets}}, \code{\link{match_trips}}
+Other fleets: 
+\code{\link{calc_Coverage}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_fleet}()},
+\code{\link{match_sets}()},
+\code{\link{match_trips}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

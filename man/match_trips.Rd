@@ -41,9 +41,12 @@ and attempts to match trips based on:
 "J18-0000B" becomes "J180000B").
 }
 \seealso{
-Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_MARFIS}}, \code{\link{get_OBS}},
-  \code{\link{get_fleet}}, \code{\link{match_sets}}
+Other fleets: 
+\code{\link{calc_Coverage}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
+\code{\link{get_fleet}()},
+\code{\link{match_sets}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

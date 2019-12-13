@@ -4,10 +4,16 @@
 \alias{get_MARFIS}
 \title{get_MARFIS}
 \usage{
-get_MARFIS(fn.oracle.username = "_none_",
-  fn.oracle.password = "_none_", fn.oracle.dsn = "_none_",
-  usepkg = "rodbc", dateStart = NULL, dateEnd = NULL,
-  thisFleet = NULL)
+get_MARFIS(
+  fn.oracle.username = "_none_",
+  fn.oracle.password = "_none_",
+  fn.oracle.dsn = "_none_",
+  usepkg = "rodbc",
+  dateStart = NULL,
+  dateEnd = NULL,
+  thisFleet = NULL,
+  quietly = FALSE
+)
 }
 \arguments{
 \item{fn.oracle.username}{default is \code{'_none_'} This is your username for
@@ -42,6 +48,9 @@ data will be returned.}
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
 the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
+
+\item{quietly}{default is \code{FALSE}.  This indicates whether or not
+information about the matching process should be shown.}
 }
 \value{
 returns a list with 2 dataframes - "trips", and "sets".
@@ -56,9 +65,12 @@ This function extracts all of the MARFIS records for vessels with
 particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 }
 \seealso{
-Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_OBS}}, \code{\link{get_fleet}},
-  \code{\link{match_sets}}, \code{\link{match_trips}}
+Other fleets: 
+\code{\link{calc_Coverage}()},
+\code{\link{get_OBS}()},
+\code{\link{get_fleet}()},
+\code{\link{match_sets}()},
+\code{\link{match_trips}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

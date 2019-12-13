@@ -1,31 +1,50 @@
-basicFleet<-function(cxn = cxn, dateStart = dateStart, dateEnd=dateEnd){
+basicFleet<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
+                      mdCode = NULL, gearCode=NULL, nafoCode = NULL){
+
+  if (!is.null(mdCode) && length(mdCode)>0 && mdCode != 'all') {
+    where_m = paste0("AND MD.MON_DOC_DEFN_ID IN (",Mar.utils::SQL_in(mdCode),")")
+    keep$mdDone<-T
+  }else{
+    where_m = "AND 1=1"
+  }
+  if (!is.null(gearCode) && length(gearCode)>0 && gearCode != 'all') {
+    where_g = paste0("AND MD.FV_GEAR_CODE IN (",Mar.utils::SQL_in(gearCode),")")
+    keep$gearDone<-T
+  }else{
+    where_g =  "AND 1=1"
+  }
+  if (!is.null(nafoCode) && length(nafoCode)>0 && nafoCode != 'all') {
+    where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(nafoCode),")")
+    keep$nafoDone<-T
+  }else{
+    where_n =  "AND 1=1"
+  }
+
+
   fleetQry<- paste0("SELECT DISTINCT
-                    G.GEAR_CODE,
-                    G.DESC_ENG GEAR_DESC,
-                    MDD.MON_DOC_DEFN_ID MD_CODE,
-                    MDD.SHORT_DOC_TITLE MD_DESC,
-                    LV.VR_NUMBER,
-                    LV.LICENCE_ID,
-                    MD.MON_DOC_ID
+                      PS.LICENCE_ID,
+                      MD.MON_DOC_DEFN_ID MD_CODE,
+                      MDD.SHORT_DOC_TITLE MD_DESC,
+                      MD.VR_NUMBER,
+                      MD.FV_GEAR_CODE GEAR_CODE,
+                      G.DESC_ENG GEAR_DESC,
+                      MD.MON_DOC_ID,
+                      N.AREA NAFO
                     FROM
-                    MARFISSCI.GEARS G,
-                    MARFISSCI.LICENCE_GEARS LG,
-                    MARFISSCI.MON_DOCS MD,
-                    MARFISSCI.LICENCE_VESSELS LV,
-                    MARFISSCI.MON_DOC_DEFNS MDD
+                      MARFISSCI.PRO_SPC_INFO PS,
+                      MARFISSCI.MON_DOCS MD,
+                      MARFISSCI.GEARS G,
+                      MARFISSCI.MON_DOC_DEFNS MDD,
+                      MARFISSCI.NAFO_UNIT_AREAS N
                     WHERE
-                    G.GEAR_CODE = LG.GEAR_CODE
-                    AND MD.FV_GEAR_CODE = LG.GEAR_CODE
-                    AND MD.VR_NUMBER = LV.VR_NUMBER
-                    AND MDD.MON_DOC_DEFN_ID = MD.MON_DOC_DEFN_ID
-                    AND (
-                    LG.START_DATE < to_date('",dateEnd,"','YYYY-MM-DD')
-                    --AND LV.START_DATE < to_date('",dateEnd,"','YYYY-MM-DD')
-                    AND LG.END_DATE > to_date('",dateStart,"','YYYY-MM-DD')
-                    AND LV.END_DATE >  to_date('",dateStart,"','YYYY-MM-DD')
-                    )
-                    AND MDD.SECTOR_ID  = 7
-                    ORDER BY G.GEAR_CODE"
+                      MD.MON_DOC_ID = PS.MON_DOC_ID
+                      AND MD.FV_GEAR_CODE = G.GEAR_CODE
+                      AND MDD.MON_DOC_DEFN_ID = MD.MON_DOC_DEFN_ID
+                      AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID
+                      AND PS.DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD')
+                      ",where_m,"
+                      ",where_n,"
+                      ",where_g
     )
     theFleet = cxn$thecmd(cxn$channel, fleetQry)
     return(theFleet)

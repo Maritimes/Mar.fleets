@@ -4,8 +4,13 @@
 \alias{calc_Coverage}
 \title{calc_Coverage}
 \usage{
-calc_Coverage(get_OBS = NULL, get_MARFIS = NULL, agg.poly.shp = NULL,
-  agg.poly.field = NULL, quietly = FALSE)
+calc_Coverage(
+  get_OBS = NULL,
+  get_MARFIS = NULL,
+  agg.poly.shp = NULL,
+  agg.poly.field = NULL,
+  quietly = FALSE
+)
 }
 \arguments{
 \item{get_OBS}{default is \code{NULL}. This is the list output by the
@@ -79,9 +84,12 @@ those trips/sets will be attributed to "Other".
 }
 }
 \seealso{
-Other fleets: \code{\link{get_MARFIS}},
-  \code{\link{get_OBS}}, \code{\link{get_fleet}},
-  \code{\link{match_sets}}, \code{\link{match_trips}}
+Other fleets: 
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
+\code{\link{get_fleet}()},
+\code{\link{match_sets}()},
+\code{\link{match_trips}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

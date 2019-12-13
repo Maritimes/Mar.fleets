@@ -82,8 +82,8 @@ match_trips <- function(get_MARFIS = NULL,
       if (nrow(unmatched_Marf_trip)>0){
         unmatched_Marf_trip$SRC <- "MARFIS"
         unmatched_Marf_trip$TRIP_ID_OBS <- NA
-        unmatched_Marf_trip$OBS_TRIP <- NA
         colnames(unmatched_Marf_trip)[colnames(unmatched_Marf_trip)=="OBS_TRIP"] <- "MARF_TRIP"
+        unmatched_Marf_trip$OBS_TRIP <- NA
       }else{
         unmatched_Marf_trip<-NA
       }

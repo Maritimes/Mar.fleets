@@ -1,6 +1,10 @@
 # Prompt for and/or Apply Gear Description Filters ---------------------------
-getGearSpecs<- function(cxn = cxn, keep=keep, df = df,  gearSpType= gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd){
+getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
+                        gearSpType= gearSpType, gearSpSize=gearSpSize,
+                        dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
   keep$gearSpecsDone <- T
+  sizeDone<-F
+  typeDone<-F
   # assign("gearSpecsDone", TRUE, envir = keep)
   # p <- parent.frame()
   # cxn <- p$cxn
@@ -29,9 +33,10 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,  gearSpType= gearSpType, 
 
 
   gearType = chkGears(df)
+
   if(gearType =="mesh"){
     grSpType <- 31
-    grSpSize <- c(8,32,62,120,206)
+    grSpSize <- c(8,32,62,120,806)
   }else if(gearType =="trap"){
     grSpType <- 114
     grSpSize <- c(152,423,431,701)
@@ -57,12 +62,10 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,  gearSpType= gearSpType, 
                           AND to_date('",dateEnd,"','YYYY-MM-DD')")
   gearSpecDF = cxn$thecmd(cxn$channel, gearSpecDFQry)
   gearSpecDF = gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
-
   if(nrow(gearSpecDF)<1){
     cat("\n","None of these records have gear specification information - aborting filter")
     return(df)
   }
-
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
   where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
   gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
@@ -71,54 +74,128 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,  gearSpType= gearSpType, 
                                 ", where2)
   gearSpecRelevant = cxn$thecmd(cxn$channel, gearSpecRelevantQry)
   gearSpecRelevant = gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
-  availTypes = sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID == grSpType,"DATA_VALUE"]))
-  availSizes = sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID %in% grSpSize,"DATA_VALUE"]))
-  availTypes <- c(availTypes,"all")
-  availSizes <- c(availSizes,"all")
-
-
-  # Filter by gear specification type -----------------------------------------------------------
-
-  if (length(availTypes)>1){
-    choiceType<-utils::select.list(availTypes,
-                                   preselect=NULL,
-                                   multiple=T, graphics=T,
-                                   title='Available Gear Types')
-    cat(paste0("\n","Gear Type choice: ",choiceType))
-    if (choiceType == 'all'){
-      gearSpecRelevant_types<-gearSpecRelevant$LOG_EFRT_STD_INFO_ID
-    } else if (choiceType != 'all'){
-      gearSpecRelevant_types <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% choiceType,"LOG_EFRT_STD_INFO_ID"]
-    }
-  }else{
-    gearSpecRelevant_types<-NA
-  }
-
-  # Filter by gear specification size -----------------------------------------------------------
-
-  if (length(availSizes)>1){
-    choiceSize<-utils::select.list(availSizes,
-                                   preselect=NULL,
-                                   multiple=T, graphics=T,
-                                   title='Available Gear Sizes')
-    cat(paste0("\n","Gear Size choice: ",choiceSize))
-    if (choiceType == 'all'){
-      gearSpecRelevant_size <- gearSpecRelevant$LOG_EFRT_STD_INFO_ID
-    }else if (choiceType != 'all'){
-      gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% choiceSize,"LOG_EFRT_STD_INFO_ID"]
-    }
-  }else{
-    gearSpecRelevant_size<-NA
-  }
-  allSelected = unique(c(gearSpecRelevant_types,gearSpecRelevant_size))
-  allSelected = allSelected[!is.na(allSelected)]
-  mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% allSelected,"MON_DOC_ID"])
-  if (length(mon_docs)==0){
-    warning("This gear can not be filtered by gear specifications - aborting filter")
+  if(nrow(gearSpecRelevant)<1){
+    cat("\n","None of these records have gear specification information - aborting filter")
     return(df)
   }
-  cat("\n","Number of unique MON_DOCS Pre gear specs filter:",length(unique(df$MON_DOC_ID)))
-  df = df[df$MON_DOC_ID %in% mon_docs,]
-  cat("\n","Number of unique MON_DOCS Post gear specs filter:",length(unique(df$MON_DOC_ID)))
+  availTypes = sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID == grSpType,"DATA_VALUE"]))
+  availSizes = sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID %in% grSpSize,"DATA_VALUE"]))
+  # if (length(availSizes)>0)browser()
+  availTypes <- c(sort(availTypes))
+  availSizes <- sort(as.numeric(availSizes))
+  gearSpcFilt <- "Done"
+
+  if (length(availSizes)>0 && gearSpSize!='all') {
+    #we have a filter to apply
+    sizeDone <- T
+    availSizes = availSizes[availSizes %in% gearSpSize]
+    if (length(availSizes)>0){
+      gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSize,"LOG_EFRT_STD_INFO_ID"]
+      mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"MON_DOC_ID"])
+      df<-df[df$MON_DOC_ID %in% mon_docs,]
+    }else{
+      stop(paste0("\n", "Your selection of 'gearSpSize' doesn't match any of the available data.  Cancelling."))
+    }
+  }else if (gearSpSize=='all'){
+    sizeDone <- T
+  }else{
+    gearSpcFilt = c("Sizes",gearSpcFilt)
+  }
+
+  if (length(availTypes)>0 && gearSpType!='all'){
+    availTypes = availTypes[availTypes %in% toupper(gearSpType)]
+    if (length(availTypes)>0){
+      typeDone <- T
+      gearSpecRelevant_types <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% availTypes,"LOG_EFRT_STD_INFO_ID"]
+      mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"MON_DOC_ID"])
+      df<-df[df$MON_DOC_ID %in% mon_docs,]
+    }else{
+      stop(paste0("\n", "Your selection of 'gearSpType' doesn't match any of the available data.  Cancelling."))
+    }
+  }else if (gearSpType=='all'){
+    typeDone <- T
+  }else{
+    gearSpcFilt = c("Types", gearSpcFilt)
+  }
+  gearSpecRelevant_types<-NA
+  gearSpecRelevant_size<-NA
+  while (!sizeDone | !typeDone){
+    if (length(gearSpcFilt[!is.na(gearSpcFilt)])>0){
+      choice<-utils::select.list(gearSpcFilt[!is.na(gearSpcFilt)],
+                                 preselect=NULL,
+                                 multiple=F, graphics=T,
+                                 title="Choose how to filter the data")
+    }else if (length(gearSpcFilt[!is.na(gearSpcFilt)])==1){
+      choice<-gearSpcFilt[!is.na(gearSpcFilt)]
+    }
+
+    # Filter by gear specification type -----------------------------------------------------------
+
+    if (choice == "Types"){
+      typeDone<-T
+      gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Types']
+      if (length(availTypes)>1){
+        choiceType<-utils::select.list(availTypes,
+                                       preselect=NULL,
+                                       multiple=T, graphics=T,
+                                       title='Available Gear Types')
+        cat(paste0("\n","Gear Type choice: ",choiceType))
+        if ('all' %in% choiceSize){
+          #gearSpecRelevant_types<-gearSpecRelevant$LOG_EFRT_STD_INFO_ID
+        } else {
+          gearSpecRelevant_types <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% choiceType,"LOG_EFRT_STD_INFO_ID"]
+          mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"MON_DOC_ID"])
+          df<-df[df$MON_DOC_ID %in% mon_docs,]
+          mon_docs <- NA
+        }
+      }
+    }
+
+    # Filter by gear specification size -----------------------------------------------------------
+    if (choice == "Sizes"){
+      sizeDone<-T
+      gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Sizes']
+      if (length(availSizes)>1 && length(gearSpSize)<1){
+        choiceSize<-utils::select.list(c(availSizes,'all'),
+                                       preselect=NULL,
+                                       multiple=T, graphics=T,
+                                       title='Available Gear Sizes')
+        cat(paste0("\n","Gear Size choice: ",paste0(choiceSize, collapse = ",")))
+        if ('all' %in% choiceSize){
+          #gearSpecRelevant_size <- gearSpecRelevant$LOG_EFRT_STD_INFO_ID
+        }else{
+          gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% choiceSize,"LOG_EFRT_STD_INFO_ID"]
+          mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"MON_DOC_ID"])
+          df<-df[df$MON_DOC_ID %in% mon_docs,]
+          mon_docs <- NA
+        }
+      }else if (length(gearSpSize)>0){
+        gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSize,"LOG_EFRT_STD_INFO_ID"]
+        mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"MON_DOC_ID"])
+        #if (!quietly) cat("\n","Number of unique MON_DOCS Pre gear specs filter:",length(unique(df$MON_DOC_ID)))
+        df<-df[df$MON_DOC_ID %in% mon_docs,]
+      }
+    }
+    if (choice == "Done"){
+      # cat("Do something")
+      break
+    }
+    choice<-NA
+  }
+  # allSelected <- NA
+
+  # if(length(gearSpecRelevant_size[!is.na(gearSpecRelevant_size)])>0)allSelected<-c(allSelected, gearSpecRelevant_size)
+  # if(length(gearSpecRelevant_types[is.na(gearSpecRelevant_types)])>0)allSelected<-c(allSelected, gearSpecRelevant_types)
+  # allSelected<- unique(allSelected[!is.na(allSelected)])
+  # allSelected = unique(c(gearSpecRelevant_types,gearSpecRelevant_size))
+  # allSelected = allSelected[!is.na(allSelected)]
+  # mon_docs = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% allSelected,"MON_DOC_ID"])
+  # if (length(mon_docs)==0){
+  #   warning("This gear can not be filtered by gear specifications - aborting filter")
+  #   return(df)
+  # }
+  # cat("\n","Number of unique MON_DOCS Pre gear specs filter:",length(unique(df$MON_DOC_ID)))
+  # df = df[df$MON_DOC_ID %in% mon_docs,]
+  # cat("\n","Number of unique MON_DOCS Post gear specs filter:",length(unique(df$MON_DOC_ID)))
   return(df)
 }

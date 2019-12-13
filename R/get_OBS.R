@@ -83,7 +83,7 @@ get_OBS <- function(fn.oracle.username = "_none_",
     LIC_VR_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER))))
   }
   # .I <- TRIP_ID_MARF <- FV_FISHED_DATETIME<- SET_DATETIME<- NA
-  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
+  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
 
   get_OBS_trips<-function(dateStart=NULL, dateEnd = NULL, LIC_VR = NULL){
     #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet

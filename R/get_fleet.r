@@ -132,15 +132,19 @@
 #' \item 96 = 'HAND/HANDHELD TOOL'
 #' \item 98 = 'FIXED GEAR'
 #' }
-#' @param showSp default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
-#' members who reported a particular species at any point in the specified time period.  If this is
-#' set to T, then in addition to being able to select mdCode and gearCode from a select list, you
-#' can also select from all of the reported landed species.
-#' @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
-#' the fleet members to only those who reported the selected species at some point in the specified
-#' time frame.
+#' @param nafoCode default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
+#' used to limit the fleet to.
+#' @param gearSpType default is \code{NULL}. This is a vector of MARFIS codes describing the type of
+#' gear.  For example, mesh gear can be either "D" or "S" (Diamond or Square).
+#' @param gearSpSize default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
+#' may describe mesgh, hooks or traps.
+#' @param mainSpp default is \code{NULL}. This is a marfis species code.  Populating this will limit
+#' your results to only those trips where the identified species was the main species caught (by weight).
+#' @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
+#' any parameters that might otherwise be used to filter the data.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information should be shown as the function proceeds.
+#' information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
+#' embed the script into a function rather than running it interactively.
 #' @family fleets
 #' @return returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",
 #'         "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
@@ -150,23 +154,32 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     fn.oracle.password = "_none_",
                     fn.oracle.dsn = "_none_",
                     usepkg = "rodbc",
-                    quietly = F,
+                    quietly = FALSE,
                     dateStart = NULL, dateEnd = NULL,
-                    mdCode = NULL, gearCode = NULL,
+                    mdCode = NULL, gearCode = NULL,nafoCode = NULL,
                     gearSpType = NULL, gearSpSize= NULL,
-                    showSp = F, spCode = NULL, mainSpp = NULL){
-  cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn)
+                    mainSpp = NULL, noPrompts =FALSE){
+  # showSp = F, spCode = NULL,
+  # @param showSp default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
+  # members who reported a particular species at any point in the specified time period.  If this is
+  # set to T, then in addition to being able to select mdCode and gearCode from a select list, you
+  # can also select from all of the reported landed species.
+  # @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
+  # the fleet members to only those who reported the selected species at some point in the specified
+  # time frame.
+  cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
-  spCode=as.numeric(spCode)
-  mainSpp=as.numeric(mainSpp)
+  # spCode=as.numeric(spCode)
+  if (!is.null(mainSpp) && mainSpp != 'all') mainSpp=as.numeric(mainSpp)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- FALSE
+  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
   #Narrow the data by only date range
-  df = basicFleet(cxn, dateStart, dateEnd)
+  df = basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode)
+
   # clean up the names of each md doc type
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
@@ -175,13 +188,15 @@ get_fleet<-function(fn.oracle.username = "_none_",
   df$MD_DESC <- trimws(df$MD_DESC)
 
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = cxn, keep = keep, showSp = showSp, quietly = quietly, df = df, mdCode=mdCode, gearCode=gearCode, spCode = spCode,
-                    gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp)
+  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, gearCode=gearCode, nafoCode = nafoCode,
+                    # spCode = spCode,showSp = showSp,
+                    gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp, noPrompts = noPrompts)
   if(nrow(df)<1) {
     cat("\n","No records found")
     return(NULL)
   }else{
-    df <- df[with(df,order(VR_NUMBER, LICENCE_ID, MD_CODE, GEAR_CODE )),]
+    df$NAFO <-NULL
+    df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, MD_CODE, GEAR_CODE )),])
     return(df)
   }
 }

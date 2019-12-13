@@ -13,7 +13,7 @@ getGCd<-function(keep= keep, df = df, gearCode = gearCode){
                                preselect=NULL,
                                multiple=T, graphics=T,
                                title='Gear Codes')
-    cat("\n","gearCode choice: ",choice)
+    cat(paste0("\n","gearCode choice: ",paste0(choice, collapse=",")))
     choice = sub(".*\\((.*)\\).*", "\\1", choice)
     if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
     GCds = gDf[gDf$GEAR_CODE %in% choice,]

@@ -4,11 +4,22 @@
 \alias{get_fleet}
 \title{get_fleet}
 \usage{
-get_fleet(fn.oracle.username = "_none_", fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_", usepkg = "rodbc", quietly = F,
-  dateStart = NULL, dateEnd = NULL, mdCode = NULL, gearCode = NULL,
-  gearSpType = NULL, gearSpSize = NULL, showSp = F, spCode = NULL,
-  mainSpp = NULL)
+get_fleet(
+  fn.oracle.username = "_none_",
+  fn.oracle.password = "_none_",
+  fn.oracle.dsn = "_none_",
+  usepkg = "rodbc",
+  quietly = FALSE,
+  dateStart = NULL,
+  dateEnd = NULL,
+  mdCode = NULL,
+  gearCode = NULL,
+  nafoCode = NULL,
+  gearSpType = NULL,
+  gearSpSize = NULL,
+  mainSpp = NULL,
+  noPrompts = FALSE
+)
 }
 \arguments{
 \item{fn.oracle.username}{default is \code{'_none_'} This is your username for
@@ -34,7 +45,8 @@ use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to 
 roracle will extract data ~ 5x faster.}
 
 \item{quietly}{default is \code{FALSE}.  This indicates whether or not
-information should be shown as the function proceeds.}
+information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
+embed the script into a function rather than running it interactively.}
 
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
@@ -153,14 +165,20 @@ Valid codes are shown below:
 \item 98 = 'FIXED GEAR'
 }}
 
-\item{showSp}{default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
-members who reported a particular species at any point in the specified time period.  If this is
-set to T, then in addition to being able to select mdCode and gearCode from a select list, you
-can also select from all of the reported landed species.}
+\item{nafoCode}{default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
+used to limit the fleet to.}
 
-\item{spCode}{default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
-the fleet members to only those who reported the selected species at some point in the specified
-time frame.}
+\item{gearSpType}{default is \code{NULL}. This is a vector of MARFIS codes describing the type of
+gear.  For example, mesh gear can be either "D" or "S" (Diamond or Square).}
+
+\item{gearSpSize}{default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
+may describe mesgh, hooks or traps.}
+
+\item{mainSpp}{default is \code{NULL}. This is a marfis species code.  Populating this will limit
+your results to only those trips where the identified species was the main species caught (by weight).}
+
+\item{noPrompts}{default is \code{FALSE}. If set to True, the script will ignore
+any parameters that might otherwise be used to filter the data.}
 }
 \value{
 returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",
@@ -171,9 +189,12 @@ This function extracts all of the Vessel/Licence combinations
 associated with a particular fleet for a particular date range.
 }
 \seealso{
-Other fleets: \code{\link{calc_Coverage}},
-  \code{\link{get_MARFIS}}, \code{\link{get_OBS}},
-  \code{\link{match_sets}}, \code{\link{match_trips}}
+Other fleets: 
+\code{\link{calc_Coverage}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
+\code{\link{match_sets}()},
+\code{\link{match_trips}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
