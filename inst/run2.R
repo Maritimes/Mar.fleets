@@ -32,7 +32,7 @@ for (y in 1:length(yrs)){
   get_data('marfis', data.dir = data.dir,quiet = T)
   PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% Trips_MARF,]
   self_filter(quiet = T)
-  marf_catch = sum(PRO_SPC_INFO[PRO_SPC_INFO$SPECIES_CODE == mainSpp, "RND_WEIGHT_KGS"])/1000
+  marf_catch = sum(PRO_SPC_INFO[PRO_SPC_INFO$SPECIES_CODE == 130, "RND_WEIGHT_KGS"])/1000
   cat("\n","marfis ", yrs[y],":",marf_catch,length(unique(PRO_SPC_INFO$TRIP_ID)))
   cleanup('marfis')
 

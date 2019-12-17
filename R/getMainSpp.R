@@ -41,8 +41,8 @@ getMainSpp <-function(cxn = NULL, keep= NULL,
   spQry2 <- paste0("SELECT SPECIES_CODE, DESC_ENG FROM MARFISSCI.SPECIES ")
   sp2 = cxn$thecmd(cxn$channel, spQry2)
 
-  all = data.frame(merge(sp1_max, sp2))
-  allMainSpp <- unique(all[,c("SPECIES_CODE", "DESC_ENG")])
+  all1 = data.frame(merge(sp1_max, sp2))
+  allMainSpp <- unique(all1[,c("SPECIES_CODE", "DESC_ENG")])
   if (length(mainSpp)==0 && nrow(allMainSpp)>1){
     choice<-utils::select.list(paste0(allMainSpp$DESC_ENG, " (",allMainSpp$SPECIES_CODE,")"),
                                preselect=NULL,
@@ -63,7 +63,7 @@ getMainSpp <-function(cxn = NULL, keep= NULL,
     if (length(mainSpp)==0)cat(paste0("\n","All records with your criteria have a main species of ", allMainSpp$DESC_ENG," (",allMainSpp$SPECIES_CODE,")"))
   }else{
   }
-  all <- all[all$SPECIES_CODE %in% choice,]
-  df=df[df$MON_DOC_ID %in% all$MON_DOC_ID,]
+  all1 <- all1[all1$SPECIES_CODE %in% choice,]
+  df=df[df$MON_DOC_ID %in% all1$MON_DOC_ID,]
   return(df)
 }
