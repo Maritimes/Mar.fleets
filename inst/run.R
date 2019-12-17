@@ -1,10 +1,10 @@
 library(Mar.bycatch)
 ds = "2018-01-01"
 de = "2018-12-31"
-q=T
+q=F
 f1 = get_fleet(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
                dateStart = ds, dateEnd = de,
-               mdCode = 1, subLic = NULL, gearCode = 51, nafoCode = NULL, mainSpp = NULL,
+               mdCode = NULL, subLic = NULL, gearCode = NULL, nafoCode = NULL, mainSpp = NULL,
                noPrompts=F, quietly = q)
 
 mar1 = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
