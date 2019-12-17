@@ -174,7 +174,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
   ps <- getPS(mondocs = allMondocs)
   if (nrow(ps)<1){
-    cat("\n","No MARFIS data meets criteria")
+    cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
   }else{
     marObsMatch <- ps

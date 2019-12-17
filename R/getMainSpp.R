@@ -1,7 +1,7 @@
 # Prompt for and/or Apply Spp Filters ------------------------------------
 getMainSpp <-function(cxn = NULL, keep= NULL,
                       dateStart= NULL, dateEnd = NULL,
-                      df = NULL, mainSpp = NULL){
+                      df = NULL, mainSpp = NULL, quietly = F){
   MON_DOC_ID <- TOTAL <- .SD <- NULL
   if(!is.null(mainSpp) && mainSpp=="all")return(df)
   keep$mainSppDone <- T
@@ -27,7 +27,7 @@ getMainSpp <-function(cxn = NULL, keep= NULL,
   sp1=sp1[sp1$MON_DOC_ID %in% df$MON_DOC_ID,]
 
   if(nrow(sp1)<1){
-    cat("\n","Can't filter by Main species (no useful records) - aborting")
+    cat(paste0("\n","Can't filter by Main species (no useful records) - aborting"))
     return(df)
   }
   sp1_summed <- stats::aggregate(
@@ -48,9 +48,12 @@ getMainSpp <-function(cxn = NULL, keep= NULL,
                                preselect=NULL,
                                multiple=T, graphics=T,
                                title='Main Species')
-    cat(paste0("\n","Main Species choice: ",choice))
+    if (length(choice)<1 || is.na(choice)){
+      keep$mainSppDone <- FALSE
+      return(df)
+    }
+    if (!quietly)cat(paste0("\n","Main Species choice: ",choice))
     choice = as.numeric(sub(".*\\((.*)\\).*", "\\1", choice))
-    if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
     # We determined a sp code, so let's keep it so other calls can know it ------------------------
     # assign(x = "mainSpp", value = choice, envir = parent.frame())
   }else if (length(mainSpp)>0){

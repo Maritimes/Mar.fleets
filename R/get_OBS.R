@@ -73,11 +73,11 @@ get_OBS <- function(fn.oracle.username = "_none_",
                     keepSurveyTrips = FALSE, quietly = FALSE,
                     thisFleet = NULL){
   if (is.null(dateEnd)){
-    cat("\n","No end dat was provided, so one year of data will be retrieved.")
+    cat(paste0("\n","No end dat was provided, so one year of data will be retrieved."))
     dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   }
   if (is.null(thisFleet)){
-    cat("\n","No fleet value was supplied, so all records for the specified time period will be retrieved")
+    cat(paste0("\n","No fleet value was supplied, so all records for the specified time period will be retrieved"))
     LIC_VR_fleet <-NULL
   } else{
     LIC_VR_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER))))
@@ -133,7 +133,7 @@ get_OBS <- function(fn.oracle.username = "_none_",
     if (!keepSurveyTrips){
       if (nrow(obs_TRIPS_all[(obs_TRIPS_all$TRIPCD_ID > 7010 & obs_TRIPS_all$TRIPCD_ID != 7099),])>0){
         if (!quietly) {
-          cat("\n","Dropping these survey trips:","\n")
+          cat(paste0("\n","Dropping these survey trips:","\n"))
           print(obs_TRIPS_all[(obs_TRIPS_all$TRIPCD_ID > 7010 & obs_TRIPS_all$TRIPCD_ID != 7099),
                               c("VR_NUMBER", "TRIP_ID_OBS", "TRIP", "TRIPCD_ID", "MARFIS_CONF_NUMBER", "MARFIS_LICENSE_NO")])
         }
@@ -144,7 +144,7 @@ get_OBS <- function(fn.oracle.username = "_none_",
       theTripCols <- c("LICENSE_NO","MARFIS_CONF_NUMBER","MARFIS_LICENSE_NO")
       obs_TRIPS_all[,theTripCols] <- suppressWarnings(as.numeric(as.character(unlist(obs_TRIPS_all[,theTripCols]))))
     }else{
-      cat("\n","No Observer trips found")
+      cat(paste0("\n","No Observer trips found"))
       return(invisible(NULL))
     }
     return(obs_TRIPS_all)
@@ -213,18 +213,18 @@ get_OBS <- function(fn.oracle.username = "_none_",
     return(set_df2)
   }
 
-  if (!quietly)cat("\n","Retrieving trips...")
+  if (!quietly)cat(paste0("\n","Retrieving trips..."))
   obs_TRIPS_all <- get_OBS_trips(dateStart = dateStart, dateEnd = dateEnd, LIC_VR = LIC_VR_fleet)
   if (!is.null(obs_TRIPS_all)){
-    if (!quietly)cat("\n","Retrieving sets...")
+    if (!quietly)cat(paste0("\n","Retrieving sets..."))
     obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
     if (nrow(obs_SETS_all)>0){
       if (!quietly)cat("\n","Done.","\n")
     }else{
-      if (!quietly)cat("\n","No Observer sets found","\n")
+      if (!quietly)cat(paste0("\n","No Observer sets found","\n"))
     }
   }else{
-    if (!quietly)cat("\n","No Observer sets found.\n")
+    if (!quietly)cat(paste0("\n","No Observer sets found.\n"))
     obs_SETS_all <- NULL
   }
   res= list()

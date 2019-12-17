@@ -1,7 +1,7 @@
 # Prompt for and/or Apply NAFO Filters ------------------------------------
-getNAFOCd<-function(keep= keep, df = df, nafoCode = nafoCode){
+getNAFOCd<-function(keep= keep, df = df, nafoCode = nafoCode, quietly = F){
   # assign("gearDone", TRUE, envir = keep)
-  keep$nafoDone <- T
+  keep$nafoDone <- TRUE
   nDf = unique(df["NAFO"])
   nDf = nDf[order(nDf$NAFO), ,drop = FALSE]
   if (any(nafoCode =="all")){
@@ -13,9 +13,11 @@ getNAFOCd<-function(keep= keep, df = df, nafoCode = nafoCode){
                                preselect=NULL,
                                multiple=T, graphics=T,
                                title='NAFO Codes')
-    cat(paste0("\n","nafoCode choice: ",paste0(choice, collapse=",")))
-    # choice = sub(".*\\((.*)\\).*", "\\1", choice)
-    if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
+    if (choice == "" || length(choice)<1 || is.na(choice)){
+      keep$nafoDone <- FALSE
+      return(df)
+    }
+    if (!quietly)cat(paste0("\n","nafoCode choice: ",paste0(choice, collapse=",")))
     NCds = nDf[nDf$NAFO %in% choice,]
   }
   return(NCds)

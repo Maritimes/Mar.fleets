@@ -10,6 +10,7 @@ chkGears <- function(df=df){
   if (any(grepl(pattern = paste(matchLine, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"line")
   theseGears <- theseGears[!is.na(theseGears)]
   if (length(theseGears)>1){
+    gearType <-theseGears
   }else if (length(theseGears)==1){
     gearType <-theseGears
   }else{

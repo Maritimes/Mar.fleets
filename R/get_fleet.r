@@ -67,6 +67,8 @@
 #' \item 52 = 'SEA URCHIN'
 #' \item 53 = 'SCALLOP DIVE'
 #' }
+#' @param subLic default is \code{NULL}. This is the MARFIS Licence Subtype.If this is left as NULL, a popup
+#' will allow the user to select one from a list.
 #' @param gearCode default is \code{NULL}. In some cases, a fleet will contain multiple
 #' gear types. Setting this to \code{NULL} (the default) will prompt you to
 #' select gears from the available values (if there are multiple).  Setting it to
@@ -156,7 +158,8 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     usepkg = "rodbc",
                     quietly = FALSE,
                     dateStart = NULL, dateEnd = NULL,
-                    mdCode = NULL, gearCode = NULL,nafoCode = NULL,
+                    mdCode = NULL, subLic = NULL,
+                    gearCode = NULL,nafoCode = NULL,
                     gearSpType = NULL, gearSpSize= NULL,
                     mainSpp = NULL, noPrompts =FALSE){
   # showSp = F, spCode = NULL,
@@ -173,7 +176,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
   # spCode=as.numeric(spCode)
   if (!is.null(mainSpp) && mainSpp != 'all') mainSpp=as.numeric(mainSpp)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- FALSE
+  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- keep$subLicDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
@@ -188,11 +191,12 @@ get_fleet<-function(fn.oracle.username = "_none_",
   df$MD_DESC <- trimws(df$MD_DESC)
 
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, gearCode=gearCode, nafoCode = nafoCode,
-                    # spCode = spCode,showSp = showSp,
+  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic, gearCode=gearCode, nafoCode = nafoCode,
                     gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp, noPrompts = noPrompts)
+
+  # spCode = spCode,showSp = showSp,
   if(nrow(df)<1) {
-    cat("\n","No records found")
+    cat(paste0("\n","No records found"))
     return(NULL)
   }else{
     df$NAFO <-NULL

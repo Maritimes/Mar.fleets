@@ -37,7 +37,7 @@ match_trips <- function(get_MARFIS = NULL,
     return(df)
   }
   if(is.null(get_MARFIS$MARF_MATCH) || is.null(get_OBS$OBS_TRIPS) ){
-    if (!quietly)cat("\n","Either marfis of Observer did not have any trips to try match against")
+    if (!quietly)cat(paste0("\n","Either marfis of Observer did not have any trips to try match against"))
     return(NULL)
   }
   marf_TRIPS_all <- clean_OBS_Trip(df = get_MARFIS$MARF_MATCH, field = "OBS_TRIP", out_name = "OBS_TRIP_M")
@@ -212,7 +212,7 @@ match_trips <- function(get_MARFIS = NULL,
     mysteryTrips<-NA
   }
   Marf_in_Obs <- merge(Marf_in_Obs,Marf_O_lookup, all.x=T)
-  if(!quietly) cat("\n","Match Success Summary:","\n")
+  if(!quietly) cat(paste0("\n","Match Success Summary:","\n"))
   Obs_Trip_Name = nrow(Marf_in_Obs[grep("OBS_TRIP", Marf_in_Obs$MATCHED_ON),])
   Hail_In_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HI", Marf_in_Obs$MATCHED_ON),])
   Hail_Out_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HO", Marf_in_Obs$MATCHED_ON),])
@@ -225,7 +225,7 @@ match_trips <- function(get_MARFIS = NULL,
                                 Total_Matches))
   names(summ_df)<-"Num of Trips Matched"
   if(!quietly) print(summ_df)
-  if(!quietly) cat("* Note that some trips are matched on more than 1 field","\n")
+  if(!quietly) cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
   res <- list()
   res[["MAP_OBS_MARFIS_TRIPS"]] <- Marf_in_Obs
   res[["MATCH_ISSUES"]] <- foundTrips

@@ -1,5 +1,5 @@
 # Prompt for and/or Apply Md Code Filters ------------------------------------
-getMDCd<-function(keep= keep, df = df, md = md){
+getMDCd<-function(keep= keep, df = df, md = md, quietly = F){
   keep$mdDone <- T
   # assign("mdDone", TRUE, envir = keep)
   mdDf = unique(df[,c("MD_DESC","MD_CODE")])
@@ -13,9 +13,14 @@ getMDCd<-function(keep= keep, df = df, md = md){
                                preselect=NULL,
                                multiple=T, graphics=T,
                                title='Monitoring Document Codes')
-    cat("\n","mdCode choice: ",choice)
+    if (length(choice)<1 || is.na(choice)){
+      keep$mdDone <- FALSE
+      return(df)
+    }
+    if (!quietly)cat(paste0("\n","mdCode choice: ",choice))
     choice = sub(".*\\((.*)\\).*", "\\1", choice)
-    if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
+
+
     MDCds = mdDf[mdDf$MD_CODE %in% choice,]
   }
   return(MDCds)

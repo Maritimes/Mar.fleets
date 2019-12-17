@@ -1,5 +1,5 @@
 # Prompt for and/or Apply Spp Filters ------------------------------------
-getSPCd<-function(cxn = cxn, keep= keep, dateStart= dateStart, dateEnd = dateEnd, df = df, spCode = spCode){
+getSPCd<-function(cxn = cxn, keep= keep, dateStart= dateStart, dateEnd = dateEnd, df = df, spCode = spCode, quietly = F){
   # assign("spDone", TRUE, envir = keep)
   keep$spDone <- T
   if (length(spCode)>0){
@@ -23,7 +23,7 @@ getSPCd<-function(cxn = cxn, keep= keep, dateStart= dateStart, dateEnd = dateEnd
   sp1 <- merge(sp1, df)
   sp1<-unique(sp1[,c("MON_DOC_ID", "LOG_EFRT_STD_INFO_ID" )])
   if(nrow(sp1)<1){
-    cat("\n","Can't filter by species - aborting")
+    cat(paste0("\n","Can't filter by species - aborting"))
     return(df)
   }
   # get all of the species for all of the logs of our fleet -------------------------------------
@@ -45,14 +45,18 @@ getSPCd<-function(cxn = cxn, keep= keep, dateStart= dateStart, dateEnd = dateEnd
                                preselect=NULL,
                                multiple=T, graphics=T,
                                title='Potential Species')
-    cat(paste0("\n","spCode choice: ",choice))
+    if (length(choice)<1 || is.na(choice)){
+      keep$spDone <-FALSE
+      return(df)
+    }
+    if (!quietly)cat(paste0("\n","spCode choice: ",choice))
     choice = as.numeric(sub(".*\\((.*)\\).*", "\\1", choice))
-    if ((choice=="" || is.na(choice)))stop("\n\nNo selection made - Aborting.")
+
     # We determined a sp code, so let's keep it so other calls can know it ------------------------
     # assign(x = "spCode", value = choice, envir = parent.frame())
     all <- all[all$SSF_SPECIES_CODE %in% choice,]
   }
-  cat(paste0("\n","spCode choice: ",unique(all$DESC_ENG), " (",unique(all$SSF_SPECIES_CODE),")"))
+  if (!quietly)cat(paste0("\n","spCode choice: ",unique(all$DESC_ENG), " (",unique(all$SSF_SPECIES_CODE),")"))
   df=df[df$MON_DOC_ID %in% all$MON_DOC_ID,]
   return(df)
 }

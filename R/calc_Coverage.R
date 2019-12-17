@@ -82,7 +82,7 @@ calc_Coverage<-function(get_OBS = NULL,
     allAreas = rbind(allAreas, "Bad coordinate")
     #by set
 
-    if (!quietly)cat("\n", "Figuring out which area each set occurred in...")
+    if (!quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
     if (!is.null(get_OBS$OBS_SETS)){
       OBS_area_s = Mar.utils::identify_area(get_OBS$OBS_SETS,
                                      agg.poly.shp = agg.poly.shp,
@@ -111,7 +111,7 @@ calc_Coverage<-function(get_OBS = NULL,
 
 
   #by_trip
-  if (!quietly)cat("\n", "Figuring out the area in which the most sets occurred during each trip.","\n")
+  if (!quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
   if (!is.null(get_OBS$OBS_TRIPS) && !is.null(get_OBS$OBS_SETS)){
     O_trips = merge(get_OBS$OBS_TRIPS[,!names(get_OBS$OBS_TRIPS) %in% c("BOARD_DATE","LANDING_DATE")],
                     get_OBS$OBS_SETS, all.y =TRUE, by.x = "TRIP_ID_OBS", by.y = "TRIP_ID")

@@ -33,7 +33,7 @@ match_sets <- function(get_MARFIS = NULL,
   if(is.null(get_MARFIS$MARF_MATCH) ||
      is.null(get_OBS$OBS_TRIPS) ||
      is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
-    if (!quietly)cat("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched")
+    if (!quietly)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
     return(NULL)
   }
   #subset each to only those that are matchable (ie have a matched trip)

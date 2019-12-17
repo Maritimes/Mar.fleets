@@ -2,8 +2,11 @@ Mar.bycatch
 ==============
 
 Changes:
+2019.12.17
+* adds ability to filter by Licence Subtype (e.g. Mobile > 45)
+* improves response to cancelled selections
 2019.12.11
-* add ability to filter by main species, nafo areas, get specifications and more
+* adds ability to filter by main species, nafo areas, get specifications and more
 2019.12.05
 * moved various filters from applyFilters() into their own files, cleaning the code, but
 necessitating sending parameters to each

@@ -13,6 +13,7 @@ get_fleet(
   dateStart = NULL,
   dateEnd = NULL,
   mdCode = NULL,
+  subLic = NULL,
   gearCode = NULL,
   nafoCode = NULL,
   gearSpType = NULL,
@@ -98,6 +99,9 @@ Valid codes are shown below:
 \item 52 = 'SEA URCHIN'
 \item 53 = 'SCALLOP DIVE'
 }}
+
+\item{subLic}{default is \code{NULL}. This is the MARFIS Licence Subtype.If this is left as NULL, a popup
+will allow the user to select one from a list.}
 
 \item{gearCode}{default is \code{NULL}. In some cases, a fleet will contain multiple
 gear types. Setting this to \code{NULL} (the default) will prompt you to
