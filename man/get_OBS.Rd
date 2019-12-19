@@ -97,6 +97,7 @@ all of the records from the observer database that can be matched using:
 Other fleets: 
 \code{\link{calc_Coverage}()},
 \code{\link{get_MARFIS}()},
+\code{\link{get_VMSTracks}()},
 \code{\link{get_fleet}()},
 \code{\link{match_sets}()},
 \code{\link{match_trips}()}

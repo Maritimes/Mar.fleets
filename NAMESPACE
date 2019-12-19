@@ -3,6 +3,7 @@
 export(calc_Coverage)
 export(get_MARFIS)
 export(get_OBS)
+export(get_VMSTracks)
 export(get_fleet)
 export(match_sets)
 export(match_trips)
