@@ -29,12 +29,14 @@ match_sets <- function(get_MARFIS = NULL,
   msets = get_MARFIS$MARF_SETS
   osets = get_OBS$OBS_SETS
 
-  match = match_trips$MAP_OBS_MARFIS_TRIPS
+
   if(is.null(get_MARFIS$MARF_MATCH) ||
      is.null(get_OBS$OBS_TRIPS) ||
      is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
     if (!quietly)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
     return(NULL)
+  }else{
+    match = match_trips$MAP_OBS_MARFIS_TRIPS
   }
   #subset each to only those that are matchable (ie have a matched trip)
   msets_m = msets[msets$TRIP_ID %in% match$TRIP_ID_MARF,]

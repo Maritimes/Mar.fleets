@@ -14,13 +14,13 @@ mar1 = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracl
 all_obs1 = get_OBS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
                dateStart = ds, dateEnd = de, thisFleet = f1, quietly = q, keepSurveyTrips = F)
 vms1 <- get_VMSTracks(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
-                       get_MARFIS = mar1, get_OBS = obs1, quietly = q)
+                       get_MARFIS = mar1, get_OBS = all_obs1, quietly = q)
 
 vmsColors = c("grey", "cornflowerblue")
 
 trips = match_trips(get_MARFIS = mar1, get_OBS = all_obs1, quietly = q)
 sets = match_sets(get_MARFIS = mar1, get_OBS = all_obs1, match_trips = trips, quietly = q)
-# coverage = calc_Coverage(get_MARFIS = mar1, get_OBS = obs1, quietly = q)
+coverage = calc_Coverage(get_MARFIS = mar1, get_OBS = all_obs1, quietly = q)
 
 #####
 #get_OBS doesn't inherently filter for anything but a fleet, so we use the matching stuff to filter our results

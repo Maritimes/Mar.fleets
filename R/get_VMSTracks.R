@@ -53,9 +53,9 @@ get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_no
   vr_dates<-rbind(vr_dates, vr_dates2)
   if(!is.null(get_OBS))vr_dates<-rbind(vr_dates, vr_dates3)
   vr_dates<-unique(vr_dates)
+  vr_dates <- vr_dates[!is.na(vr_dates$mDate),]
   theDates<- as.Date(range(vr_dates$mDate))
   allVRs <- unique(vr_dates$VR_NUMBER)
-
   # VMS
   # get the vms data for these vessels, and convert to lines
   allVMS <- Mar.utils::VMS_get_recs(fn.oracle.username, fn.oracle.password, fn.oracle.dsn, usepkg = 'roracle',
