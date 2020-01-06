@@ -58,13 +58,13 @@ get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_no
   allVRs <- unique(vr_dates$VR_NUMBER)
   # VMS
   # get the vms data for these vessels, and convert to lines
-  allVMS <- VMS_get_recs(fn.oracle.username, fn.oracle.password, fn.oracle.dsn, usepkg = 'roracle',
+  allVMS <- Mar.utils::VMS_get_recs(fn.oracle.username, fn.oracle.password, fn.oracle.dsn, usepkg = 'roracle',
                                     dateStart = min(theDates), dateEnd = max(theDates),
                                     vrnList = allVRs,
                                     rowNum = 1000000,
                                     quietly = quietly)
   if (is.null(allVMS))return(NULL)
-  all_VMS_cln <- VMS_clean_recs(df = allVMS)
+  all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)
   all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek",
                                                seqField = "POSITION_UTC_DATE", createShp = F, plot=F)
 
