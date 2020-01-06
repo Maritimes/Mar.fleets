@@ -1,13 +1,7 @@
 #' @title get_OBS
-#' @description This function takes the results from get_MARFIS() and extracts
-#' all of the records from the observer database that can be matched using:
-#' \itemize{
-#' \item 1 = MARFIS confirmation numbers
-#' \item 2 = Observer TRIP names (e.g. J18-0000)*
-#' \item 3 = Correct combination of VRN and LICENCE and appropriate date range
-#' }
-#' * - only the alphanumeric characters of the trip names are used (e.g.
-#' "J18-0000B" becomes "J180000").
+#' @description This function extracts all of the records from the observer database that are
+#' within a particular date range, and if a fleet is provided, it will also limit the results to
+#' those vessels with particular combinations of VR and licence.
 #' @param fn.oracle.username default is \code{'_none_'} This is your username for
 #' accessing oracle objects. If you have a value for \code{oracle.username}
 #' stored in your environment (e.g. from an rprofile file), this can be left out
@@ -41,28 +35,9 @@
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
 #' @family fleets
-#' @return returns a list with 4 dataframes - "MAP_OBS_MARFIS_TRIPS",
-#' "MAP_OBS_MARFIS_SETS", "OBS_TRIPS", and "OBS_SETS".
-#' "OBS_TRIPS" contains all of the information from OBS about the trip, but also
-#' includes additional columns for the associated record in MARFIS. One column
-#' ("MATCHED_ON") identifies how marfis trips were matched to Observer trips.
-#' Valid values for this field include any combination of:
-#' \itemize{
-#' \item OBS_TRIP - this means that both databases had the same entry for OBS_TRIP
-#' (e.g. "J15-0001")
-#' \item CONF_HI - this means that the observer database value for Logbook Confirmation
-#' Number matched the value of HAIL_IN_CALLS.CONF_NUMBER.
-#' \item CONF_HO - this means that the observer database value for Logbook Confirmation
-#' Number matched the value of HAIL_OUTS.CONF_NUMBER.
-#' \item VR_LIC_DATE - this means that the observer database had a record for a
-#' specific combination
-#' }
-#' "OBS_SETS" contains all of the information from OBS about the sets, and also
-#' includes additional columns for the associated sets in MARFIS.
-#'
-#' from the HAIL_OUTS and HAIL_IN_CALLS tables (e.g. confirmation numbers).
-#' "sets" contains information about individual fishing activities, including
-#' locations, dates, durations, gear amount, etc..
+#' @return returns a list with 2 dataframes - "OBS_TRIPS", and "OBS_SETS".
+#' "OBS_TRIPS" contains information for the observer trips, while "OBS_SETS" contains information
+#' about the observer sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_OBS <- function(fn.oracle.username = "_none_",
@@ -73,12 +48,12 @@ get_OBS <- function(fn.oracle.username = "_none_",
                     keepSurveyTrips = FALSE, quietly = FALSE,
                     thisFleet = NULL){
   if (is.null(dateEnd)){
-    cat(paste0("\n","No end dat was provided, so one year of data will be retrieved."))
+    cat(paste0("\n","No end date was provided, so one year of data will be retrieved."))
     dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   }
   if (is.null(thisFleet)){
     cat(paste0("\n","No fleet value was supplied, so all records for the specified time period will be retrieved"))
-    LIC_VR_fleet <-NULL
+    LIC_VR_fleet <- NULL
   } else{
     LIC_VR_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER))))
   }
@@ -128,8 +103,6 @@ get_OBS <- function(fn.oracle.username = "_none_",
     obs_TRIPS_all <- obs_TRIPS_all[paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$VR_NUMBER) %in% LIC_VR,]
     obs_TRIPS_all$LIC_TMP1 <- obs_TRIPS_all$LIC_TMP2 <- NULL
     ####
-
-
     if (!keepSurveyTrips){
       if (nrow(obs_TRIPS_all[(obs_TRIPS_all$TRIPCD_ID > 7010 & obs_TRIPS_all$TRIPCD_ID != 7099),])>0){
         if (!quietly) {
@@ -206,7 +179,7 @@ get_OBS <- function(fn.oracle.username = "_none_",
     # done ------------------------------------------------------------------------------------------
     tmp<-set_df2$DATE_TIME1<-set_df2$DATE_TIME2<-set_df2$DATE_TIME3<-set_df2$DATE_TIME4<-set_df2$LAT1<-set_df2$LAT2<-set_df2$LAT3<-set_df2$LAT4<-set_df2$LONG1<-set_df2$LONG2<-set_df2$LONG3<-set_df2$LONG4<-NULL
     if (nrow(set_df2)==0){
-      cat("\n","No Observer sets")
+      cat(paste0("\n","No Observer sets"))
       return(invisible(NULL))
     }
     set_df2 <- merge (set_df,set_df2, all.y=T)
@@ -216,10 +189,11 @@ get_OBS <- function(fn.oracle.username = "_none_",
   if (!quietly)cat(paste0("\n","Retrieving trips..."))
   obs_TRIPS_all <- get_OBS_trips(dateStart = dateStart, dateEnd = dateEnd, LIC_VR = LIC_VR_fleet)
   if (!is.null(obs_TRIPS_all)){
+    obs_TRIPS_all$VR_NUMBER<-as.numeric(obs_TRIPS_all$VR_NUMBER)
     if (!quietly)cat(paste0("\n","Retrieving sets..."))
     obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
     if (nrow(obs_SETS_all)>0){
-      if (!quietly)cat("\n","Done.","\n")
+      if (!quietly)cat(paste0("\n","Done.","\n"))
     }else{
       if (!quietly)cat(paste0("\n","No Observer sets found","\n"))
     }
@@ -227,8 +201,12 @@ get_OBS <- function(fn.oracle.username = "_none_",
     if (!quietly)cat(paste0("\n","No Observer sets found.\n"))
     obs_SETS_all <- NULL
   }
-  res= list()
-  res[["OBS_TRIPS"]]<- obs_TRIPS_all
-  res[["OBS_SETS"]] <- obs_SETS_all
-  return(res)
+  if(!is.null(obs_TRIPS_all)){
+    res= list()
+    res[["OBS_TRIPS"]]<- obs_TRIPS_all
+    res[["OBS_SETS"]] <- obs_SETS_all
+    return(res)
+  }else{
+    return(NULL)
+  }
 }

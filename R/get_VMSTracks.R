@@ -32,32 +32,41 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_none_", fn.oracle.dsn = "_none_", usepkg = 'roracle',
-                  get_MARFIS = NULL, get_OBS = NULL, quietly = FALSE){
+                        get_MARFIS = NULL, get_OBS = NULL, quietly = FALSE){
   vr_dates<-data.frame(VESSEL = integer(), DATE1 = as.Date(character()))
-  vr_dates1 <- get_MARFIS$MARF_TRIPS[,c("VR_NUMBER_FISHING", "DATE_FISHED")]
+
+  marDat<-merge(mar1$MARF_SETS, mar1$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
+
+  vr_dates1 <- marDat[,c("VR_NUMBER_FISHING", "EF_FISHED_DATETIME")]
   colnames(vr_dates1)<-c("VR_NUMBER","mDate")
   vr_dates1$OBS<- 0
-  vr_dates2 <- get_MARFIS$MARF_TRIPS[,c("VR_NUMBER_LANDING", "DATE_FISHED")]
+  vr_dates2 <- marDat[,c("VR_NUMBER_LANDING", "EF_FISHED_DATETIME")]
   colnames(vr_dates2)<-c("VR_NUMBER","mDate")
   vr_dates2$OBS<- 0
-  vr_dates3 <- get_OBS$OBS_TRIPS[,c("VR_NUMBER","BOARD_DATE","LANDING_DATE")]
-  vr_dates3[,"mDATE"] = as.Date((as.numeric(as.Date(vr_dates3$BOARD_DATE, origin = "1970-01-01"))+
-                                   as.numeric(as.Date(vr_dates3$LANDING_DATE, origin = "1970-01-01")))/2
-                                , origin = "1970-01-01")
-  vr_dates3 <- vr_dates3[, c("VR_NUMBER","mDATE")]
-  colnames(vr_dates3)<-c("VR_NUMBER","mDate")
-  vr_dates3$OBS<- 1
+  if(!is.null(get_OBS)){
+    obsDat<-merge(get_OBS$OBS_SETS, get_OBS$OBS_TRIPS, by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
+    vr_dates3 <- obsDat[,c("VR_NUMBER","DATE_TIME")]
+    colnames(vr_dates3)<-c("VR_NUMBER","mDate")
+    vr_dates3$OBS<- 1
+  }
   vr_dates<-rbind(vr_dates, vr_dates1)
   vr_dates<-rbind(vr_dates, vr_dates2)
-  vr_dates<-rbind(vr_dates, vr_dates3)
+  if(!is.null(get_OBS))vr_dates<-rbind(vr_dates, vr_dates3)
   vr_dates<-unique(vr_dates)
   theDates<- as.Date(range(vr_dates$mDate))
   allVRs <- unique(vr_dates$VR_NUMBER)
+
   # VMS
   # get the vms data for these vessels, and convert to lines
-  allVMS <- Mar.utils::VMS_get_recs(fn.oracle.username, fn.oracle.password, fn.oracle.dsn, usepkg = 'roracle', dateStart = min(theDates), dateEnd = max(theDates), vrnList = allVRs, quietly = quietly)
+  allVMS <- Mar.utils::VMS_get_recs(fn.oracle.username, fn.oracle.password, fn.oracle.dsn, usepkg = 'roracle',
+                                    dateStart = min(theDates), dateEnd = max(theDates),
+                                    vrnList = allVRs,
+                                    rowNum = 1000000,
+                                    quietly = quietly)
   all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)
-  all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek", seqField = "POSITION_UTC_DATE", createShp = F, plot=F)
+  all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek",
+                                               seqField = "POSITION_UTC_DATE", createShp = F, plot=F)
+
   all_VMS_cln_segs <- all_VMS_cln_segs[[2]]
   all_VMS_cln_segs<-sf::st_as_sf(all_VMS_cln_segs)
   # merge all of the fishing dates and vrs to the VMS data

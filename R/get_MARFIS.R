@@ -49,13 +49,6 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
   getEff<-function(mondocs=NULL){
-    # PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID, PS.LOG_EFRT_STD_INFO_ID, PS.MON_DOC_ID
-    #                   FROM
-    #                 MARFISSCI.PRO_SPC_INFO PS
-    #                 WHERE PS.TRIP_ID BETWEEN ",min(trips$TRIP_ID), " AND ", max(trips$TRIP_ID)," AND
-    #                 PS.LOG_EFRT_STD_INFO_ID IS NOT NULL")
-    # PS_allsets<- cxn$thecmd(cxn$channel, PSQry0)
-    # PS_allsets<-PS_allsets[PS_allsets$TRIP_ID %in% trips$TRIP_ID, ]
     PSQry1 <-paste0("SELECT DISTINCT
                         EF.LOG_EFRT_STD_INFO_ID,
                         EF.FV_FISHED_DATETIME  EF_FISHED_DATETIME,
@@ -101,24 +94,11 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                     FROM MARFISSCI.PRO_SPC_INFO PS
                     WHERE
                     PS.MON_DOC_ID BETWEEN ",min(mondocs), " AND ", max(mondocs))
-                    # AND
-                    # PS.GEAR_CODE         IN (",Mar.utils::SQL_in(unique(thisFleet$GEAR_CODE)),") AND
-                    # (PS.DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD') OR
-                    # PS.LANDED_DATE  BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD'))
-                    # AND PS.LICENCE_ID BETWEEN ",min(thisFleet$LICENCE_ID), " AND ", max(thisFleet$LICENCE_ID),"
-                    # AND (PS.VR_NUMBER_FISHING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),"
-                    # OR PS.VR_NUMBER_LANDING BETWEEN ",min(thisFleet$VR_NUMBER), " AND ", max(thisFleet$VR_NUMBER),")")
-    PS_df<- cxn$thecmd(cxn$channel, PSQry0)
+                    PS_df<- cxn$thecmd(cxn$channel, PSQry0)
     PS_df <- PS_df[PS_df$MON_DOC_ID %in% mondocs,]
-
-    # PS_df <- PS_df[!is.na(PS_df$TRIP_ID),]
-    # PS_df <- unique(PS_df[(paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_FISHING,"_",PS_df$GEAR_CODE) %in% all_combos |
-    #                          paste0(PS_df$LICENCE_ID,"_",PS_df$VR_NUMBER_LANDING,"_",PS_df$GEAR_CODE) %in% all_combos) ,])
-
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
-    #cat("\n","MON_DOC_ENTRD_DETS")
     EDQry<-paste0("SELECT
                     ED.MON_DOC_ID,
                     ED.COLUMN_DEFN_ID,
@@ -140,7 +120,6 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(ED_df)
   }
   getHIC<-function(trips = NULL){
-    #cat("\n","HAIL_IN_CALLS")
     HICQry<-paste0("SELECT
                     HI.TRIP_ID,
                   HI.CONF_NUMBER,
@@ -156,7 +135,6 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(HIC_df)
   }
   getHOC<-function(trips = NULL){
-    #cat("\n","HAIL_OUTS","\n")
     HOCQry<-paste0("SELECT
                    HO.TRIP_ID,
                    HO.CONF_NUMBER,

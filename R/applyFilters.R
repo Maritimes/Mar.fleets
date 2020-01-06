@@ -41,7 +41,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
   if(!keep$subLicDone){
     if (length(subLic)>0 && subLic != 'all'){
       df<- getSubLic(cxn, keep, df, dateStart, dateEnd,  subLic, quietly)
-      browser()
+
     }else if (is.null(subLic)){
       allOptions <- c(allOptions, "Licence Subtype")
     }else if (subLic == 'all'){
