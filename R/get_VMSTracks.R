@@ -35,7 +35,7 @@ get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_no
                         get_MARFIS = NULL, get_OBS = NULL, quietly = FALSE){
   vr_dates<-data.frame(VESSEL = integer(), DATE1 = as.Date(character()))
 
-  marDat<-merge(mar1$MARF_SETS, mar1$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
+  marDat<-merge(get_MARFIS$MARF_SETS, get_MARFIS$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
 
   vr_dates1 <- marDat[,c("VR_NUMBER_FISHING", "EF_FISHED_DATETIME")]
   colnames(vr_dates1)<-c("VR_NUMBER","mDate")

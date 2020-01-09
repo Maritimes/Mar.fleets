@@ -14,6 +14,17 @@ basicFleet<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
     where_g =  "AND 1=1"
   }
   if (!is.null(nafoCode) && length(nafoCode)>0 && nafoCode != 'all') {
+    # NAFOQry = "SELECT AREA FROM MARFISSCI.NAFO_UNIT_AREAS"
+    # theNAFOS = cxn$thecmd(cxn$channel, NAFOQry)
+    # theNAFOS = theNAFOS[theNAFOS$AREA %in% nafoCode,,drop=F]
+    # browser()
+    # nafoLen <- range(nchar(nafoCode))
+    # nafoCode = unique(substring(nafoCode,1,min(nafoLen)))
+    # if(max(nafoLen)!=min(nafoLen)){
+    #   cat(paste0("\n","All nafo codes were clipped to the number of characters of the shortest one provided - i.e. ",min(nafoLen),"\n",
+    #              paste0(nafoCode, collapse = ',')))
+    # }
+
     where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(nafoCode),")")
     keep$nafoDone<-T
   }else{

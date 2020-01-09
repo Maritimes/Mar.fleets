@@ -170,16 +170,20 @@ Valid codes are shown below:
 }}
 
 \item{nafoCode}{default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
-used to limit the fleet to.}
+used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
+valid values from a list.}
 
 \item{gearSpType}{default is \code{NULL}. This is a vector of MARFIS codes describing the type of
-gear.  For example, mesh gear can be either "D" or "S" (Diamond or Square).}
+gear.  For example, mesh gear can be either "D" or "S" (Diamond or Square).  If this is left as
+NULL, a popup will allow the user to select valid values from a list.}
 
 \item{gearSpSize}{default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
-may describe mesgh, hooks or traps.}
+may describe mesh, hooks or traps.  If this is left as NULL, a popup will allow the user to select
+valid values from a list.}
 
 \item{mainSpp}{default is \code{NULL}. This is a marfis species code.  Populating this will limit
-your results to only those trips where the identified species was the main species caught (by weight).}
+your results to only those trips where the identified species was the main species caught (by weight).
+If this is left as NULL, a popup will allow the user to select valid values from a list.}
 
 \item{noPrompts}{default is \code{FALSE}. If set to True, the script will ignore
 any parameters that might otherwise be used to filter the data.}

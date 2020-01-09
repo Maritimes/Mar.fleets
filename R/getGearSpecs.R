@@ -92,9 +92,9 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
   availSizes <- sort(as.numeric(availSizes))
   gearSpcFilt <- "Done"
   if (length(availSizes)>0){
-    if (gearSpSize=='all'){
+    if (any(gearSpSize %in% 'all')){
       sizeDone <- T
-    }else if (gearSpSize==""){
+    }else if (length(gearSpSize) && gearSpSize==""){
       #no choice, prompt
       gearSpcFilt = c("Sizes",gearSpcFilt)
     }else {
@@ -115,9 +115,9 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
     sizeDone <- T
   }
   if (length(availTypes)>0){
-    if (gearSpType=='all'){
+    if (any(gearSpType %in% 'all')){
       typeDone <- T
-    }else if (gearSpType==""){
+    }else if (length(gearSpType) && gearSpType==""){
       #no choice, prompt
       gearSpcFilt = c("Types",gearSpcFilt)
     }else {

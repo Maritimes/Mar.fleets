@@ -72,10 +72,12 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     }
   }
   if(!keep$nafoDone){
+
     if (length(unique(df$NAFO))==1){
       if(!quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       keep$nafoDone<-T
     }else if (length(nafoCode)>0 && nafoCode != "all"){
+     # browser()
       df=df[df$NAFO %in% nafoCode,]
       keep$nafoDone<-T
     }else{

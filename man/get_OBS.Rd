@@ -59,39 +59,14 @@ the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
 }
 \value{
-returns a list with 4 dataframes - "MAP_OBS_MARFIS_TRIPS",
-"MAP_OBS_MARFIS_SETS", "OBS_TRIPS", and "OBS_SETS".
-"OBS_TRIPS" contains all of the information from OBS about the trip, but also
-includes additional columns for the associated record in MARFIS. One column
-("MATCHED_ON") identifies how marfis trips were matched to Observer trips.
-Valid values for this field include any combination of:
-\itemize{
-\item OBS_TRIP - this means that both databases had the same entry for OBS_TRIP
-(e.g. "J15-0001")
-\item CONF_HI - this means that the observer database value for Logbook Confirmation
-Number matched the value of HAIL_IN_CALLS.CONF_NUMBER.
-\item CONF_HO - this means that the observer database value for Logbook Confirmation
-Number matched the value of HAIL_OUTS.CONF_NUMBER.
-\item VR_LIC_DATE - this means that the observer database had a record for a
-specific combination
-}
-"OBS_SETS" contains all of the information from OBS about the sets, and also
-includes additional columns for the associated sets in MARFIS.
-
-from the HAIL_OUTS and HAIL_IN_CALLS tables (e.g. confirmation numbers).
-"sets" contains information about individual fishing activities, including
-locations, dates, durations, gear amount, etc..
+returns a list with 2 dataframes - "OBS_TRIPS", and "OBS_SETS".
+"OBS_TRIPS" contains information for the observer trips, while "OBS_SETS" contains information
+about the observer sets.
 }
 \description{
-This function takes the results from get_MARFIS() and extracts
-all of the records from the observer database that can be matched using:
-\itemize{
-\item 1 = MARFIS confirmation numbers
-\item 2 = Observer TRIP names (e.g. J18-0000)*
-\item 3 = Correct combination of VRN and LICENCE and appropriate date range
-}
-* - only the alphanumeric characters of the trip names are used (e.g.
-"J18-0000B" becomes "J180000").
+This function extracts all of the records from the observer database that are
+within a particular date range, and if a fleet is provided, it will also limit the results to
+those vessels with particular combinations of VR and licence.
 }
 \seealso{
 Other fleets: 
