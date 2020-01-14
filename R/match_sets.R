@@ -28,8 +28,6 @@ match_sets <- function(get_MARFIS = NULL,
   `:=` <- function (x, value) value
   msets = get_MARFIS$MARF_SETS
   osets = get_OBS$OBS_SETS
-
-
   if(is.null(get_MARFIS$MARF_MATCH) ||
      is.null(get_OBS$OBS_TRIPS) ||
      is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
@@ -48,7 +46,6 @@ match_sets <- function(get_MARFIS = NULL,
                  by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all.x=T)
   spdf = unique(msets[,c("TRIP_ID_MARF","SET_PER_DAY")])
   msets_m = merge(msets_m, spdf,all.x=T)
-
   cnames = c("MARFIS", "OBSERVER")
   TOT_TRIPS_FOUND = c(length(unique(get_MARFIS$MARF_TRIPS$TRIP_ID_MARF)), length(unique(get_OBS$OBS_TRIPS$TRIP_ID_OBS)))
   TOT_SETS_FOUND = c(length(unique(get_MARFIS$MARF_SETS$LOG_EFRT_STD_INFO_ID)), length(unique(get_OBS$OBS_SETS$FISHSET_ID)))
