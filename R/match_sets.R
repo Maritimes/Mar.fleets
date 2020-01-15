@@ -61,21 +61,15 @@ match_sets <- function(get_MARFIS = NULL,
   # potSetMatches <- NA
   matches_all<-NA
   for (i in 1:length(utrips)){
-    cat(paste0("\n",i ,": ", utrips[i]))
-    cat(paste0("\n A"))
     this_Otrip = osets_m[osets_m$TRIP_ID == utrips[i],]
     this_Mtrip <- msets_m[msets_m$TRIP_ID_OBS == utrips[i],]
 
     this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
     this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
-
+    this_Mtrip$timeM<-this_Mtrip$EF_FISHED_DATETIME
+    this_Otrip$timeO<-this_Otrip$DATE_TIME
     this_Otrip <- data.table::setDT(this_Otrip)
     this_Mtrip <- data.table::setDT(this_Mtrip)
-    cat(paste0("\n A1"))
-
-    this_Mtrip <- this_Mtrip[, `:=`(timeM,EF_FISHED_DATETIME)]
-    this_Otrip <- this_Otrip[, `:=`(timeO,DATE_TIME)]
-
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
     #matches all mtrips to nearest otrip - some otrips matched mult
@@ -85,7 +79,6 @@ match_sets <- function(get_MARFIS = NULL,
     #matches all otrips to nearest mtrip - some mtrips matched mult
     otrips_match <- this_Mtrip[this_Otrip , roll = "nearest", allow.cartesian=TRUE ]
     otrips_match <- otrips_match[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID","timeM", "timeO")]
-    cat(paste0("\n B"))
     mtrips_match$diff<- as.numeric(abs(difftime(mtrips_match$timeM,mtrips_match$timeO)), units="hours")
     mtrips_match$timeM<-mtrips_match$timeO<-NULL
 
@@ -96,7 +89,6 @@ match_sets <- function(get_MARFIS = NULL,
     this_Mtrip_OK <- mtrips_match[mtrips_match$diff<=maxSetDiff_hr,]
     this_Otrip_OK <- otrips_match[otrips_match$diff<=maxSetDiff_hr,]
     this_Mtrip_nope <- mtrips_match[mtrips_match$diff>maxSetDiff_hr,]
-    cat(paste0("\n C"))
     if (nrow(this_Mtrip_nope)>0)this_Mtrip_nope$FISHSET_ID <- NA
     this_Otrip_nope <- otrips_match[otrips_match$diff>maxSetDiff_hr,]
     if (nrow(this_Otrip_nope)>0)this_Otrip_nope$LOG_EFRT_STD_INFO_ID <- NA
@@ -108,20 +100,17 @@ match_sets <- function(get_MARFIS = NULL,
     this_Mtrip_chk1 <- this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
     this_Otrip_chk1<-this_Otrip_OK[this_Otrip_OK[, .I[diff == suppressWarnings(min(diff))], by=LOG_EFRT_STD_INFO_ID]$V1]
     this_Otrip_chk1 <- this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
-    cat(paste0("\n D"))
     #if the same sets were matched up in both directions, they are almost certainly the same set
     matches_high <- merge(this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
                           this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
                           by =c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff"))
     matches_high$CONF<-"High"
-    cat(paste0("\n E"))
     #if sets are matched in one direction with only one suggested match,
     # there's a good chance they're the same set
 
     this_Mtrip_OK2 <- this_Mtrip_chk1[!(this_Mtrip_chk1$FISHSET_ID %in% matches_high$FISHSET_ID),]
     this_Otrip_OK2 <- this_Otrip_chk1[!(this_Otrip_chk1$LOG_EFRT_STD_INFO_ID %in% matches_high$LOG_EFRT_STD_INFO_ID),]
     matches_tmp <- rbind(this_Mtrip_OK2, this_Otrip_OK2)
-    cat(paste0("\n F"))
     if (nrow(matches_tmp)>0){
       matches_med <- matches_tmp[which(with(matches_tmp,ave(seq(nrow(matches_tmp)),FISHSET_ID,FUN = length)*
                                               ave(seq(nrow(matches_tmp)),LOG_EFRT_STD_INFO_ID,FUN = length)) == 1),]
@@ -129,7 +118,6 @@ match_sets <- function(get_MARFIS = NULL,
     }else{
       matches_med <- matches_high[FALSE,]
     }
-    cat(paste0("\n G"))
     this_Mtrip_OK3 <- this_Mtrip_OK2[!(this_Mtrip_OK2$FISHSET_ID %in% matches_med$FISHSET_ID),]
     this_Otrip_OK3 <- this_Otrip_OK2[!(this_Otrip_OK2$LOG_EFRT_STD_INFO_ID %in% matches_med$LOG_EFRT_STD_INFO_ID),]
     if (nrow(rbind(this_Mtrip_OK3, this_Otrip_OK3))>0){
@@ -144,7 +132,6 @@ match_sets <- function(get_MARFIS = NULL,
     }else{
       matches_nope <- matches_high[FALSE,]
     }
-    cat(paste0("\n H"))
     theseMatches <- rbind(matches_high, matches_med, matches_nope,matches_mult)
     if(!is.data.frame(matches_all)){
       matches_all <- theseMatches
