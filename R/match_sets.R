@@ -75,6 +75,7 @@ match_sets <- function(get_MARFIS = NULL,
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
 
     cat("\n A1")
+    browser()
     #matches all mtrips to nearest otrip - some otrips matched mult
     mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
     mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
