@@ -26,6 +26,7 @@ match_sets <- function(get_MARFIS = NULL,
                        quietly=F){
 
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
+  `:=`<- function (x, value) value
   msets = get_MARFIS$MARF_SETS
   osets = get_OBS$OBS_SETS
   if(is.null(get_MARFIS$MARF_MATCH) ||
@@ -72,8 +73,8 @@ match_sets <- function(get_MARFIS = NULL,
     this_Mtrip <- data.table::setDT(this_Mtrip)
     cat(paste0("\n A1"))
 
-    this_Mtrip <- this_Mtrip[, timeM:=EF_FISHED_DATETIME]
-    this_Otrip <- this_Otrip[, timeO:=DATE_TIME]
+    this_Mtrip <- this_Mtrip[, `:=`(timeM,EF_FISHED_DATETIME)]
+    this_Otrip <- this_Otrip[, `:=`(timeO,DATE_TIME)]
 
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
