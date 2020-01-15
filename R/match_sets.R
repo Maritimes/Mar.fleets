@@ -72,8 +72,9 @@ match_sets <- function(get_MARFIS = NULL,
     this_Otrip <- data.table::setDT(this_Otrip)
     this_Mtrip <- data.table::setDT(this_Mtrip)
     cat(paste0("\n A1"))
-    this_Otrip <- this_Otrip[, timeO := DATE_TIME]
+
     this_Mtrip <- this_Mtrip[, timeM := EF_FISHED_DATETIME]
+    this_Otrip <- this_Otrip[, timeO := DATE_TIME]
 
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
