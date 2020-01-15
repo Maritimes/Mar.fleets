@@ -69,18 +69,22 @@ match_sets <- function(get_MARFIS = NULL,
     this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
     this_Mtrip$timeM<-this_Mtrip$EF_FISHED_DATETIME
     this_Otrip$timeO<-this_Otrip$DATE_TIME
-    this_Otrip <- data.table::setDT(this_Otrip)
-    this_Mtrip <- data.table::setDT(this_Mtrip)
+    data.table::setDT(this_Otrip)
+    data.table::setDT(this_Mtrip)
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
 
-    cat("\n A1")
+    cat("\nthis_Otrip\n")
+    print(this_Otrip)
+    cat("\nthis_Mtrip\n")
+    print(this_Mtrip)
     browser()
     #matches all mtrips to nearest otrip - some otrips matched mult
     mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
-    mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
-
     cat("\n A2")
+    mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
+    cat("\n A21")
+
     #matches all otrips to nearest mtrip - some mtrips matched mult
     otrips_match <- this_Mtrip[this_Otrip , roll = "nearest", allow.cartesian=TRUE ]
     otrips_match <- otrips_match[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID","timeM", "timeO")]
