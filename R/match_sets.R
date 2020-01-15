@@ -67,18 +67,27 @@ match_sets <- function(get_MARFIS = NULL,
 
     this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
     this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
-    this_Mtrip$timeM<-this_Mtrip$EF_FISHED_DATETIME
-    this_Otrip$timeO<-this_Otrip$DATE_TIME
-    data.table::setDT(this_Otrip)
-    data.table::setDT(this_Mtrip)
+
+    # this_Mtrip$timeM<-this_Mtrip$EF_FISHED_DATETIME
+    # this_Otrip$timeO<-this_Otrip$DATE_TIME
+    # data.table::setDT(this_Otrip)
+    # data.table::setDT(this_Mtrip)
+    # data.table::setkey(this_Otrip,DATE_TIME)
+    # data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
+    #
+    # cat("\nthis_Otrip\n")
+    # print(this_Otrip)
+    # cat("\nthis_Mtrip\n")
+    # print(this_Mtrip)
+    # browser()
+    this_Otrip <- data.table::setDT(this_Otrip)
+    this_Mtrip <- data.table::setDT(this_Mtrip)
+
+    this_Otrip <- this_Otrip[, timeO:=DATE_TIME]
+    this_Mtrip <- this_Mtrip[, timeM:=EF_FISHED_DATETIME]
+
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
-
-    cat("\nthis_Otrip\n")
-    print(this_Otrip)
-    cat("\nthis_Mtrip\n")
-    print(this_Mtrip)
-    browser()
     #matches all mtrips to nearest otrip - some otrips matched mult
     mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
     cat("\n A2")
