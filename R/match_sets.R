@@ -68,8 +68,7 @@ match_sets <- function(get_MARFIS = NULL,
 
     this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
     this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
-#print(this_Otrip[1,c("TRIP_ID","OBS_TRIP")])
-# browser(expr = {this_Otrip_Name$OBS_TRIP=='J16-0710'})
+    cat(paste0("\n A1"))
     this_Otrip <- data.table::setDT(this_Otrip)
     this_Mtrip <- data.table::setDT(this_Mtrip)
 
