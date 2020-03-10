@@ -83,7 +83,8 @@ get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_no
   agg<-sf::st_drop_geometry(all_VMS_cln_segs)
   # aggregate the data so that we can tell which lines were observed,
   # marf data flagged with 0 and OBS with 1, since the aggregate sums
-  # stuff, only values >0 were observed\
+  # stuff, only values >0 were observed
+
   agg = unique(stats::aggregate(by=agg[!names(agg) %in% c("OBS")],
                                 x = agg[c("OBS")], sum))
   agg = agg[,c("trek", "OBS")]

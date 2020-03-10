@@ -12,18 +12,18 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                        dateEnd = NULL,
                        mainSpp = NULL,
                        noPrompts = F){
-  # cat(noPrompts)
-  # if(showSp || length(spCode)>0 ){
-  #   if(!keep$spDone){
-  #     if (length(spCode)>0){
-  #       df<- getSPCd(cxn, keep, dateStart, dateEnd, df, spCode)
-  #       keep$spCode <- T
-  #     }else{
-  #       allOptions <- c(allOptions, "Species Encountered")
-  #     }
-  #   }
-  # }
-  allOptions<-"Done"
+  if(noPrompts){
+    if (is.null(mdCode)) mdCode<- 'all'
+    if (is.null(subLic)) subLic<- 'all'
+    if (is.null(gearCode)) gearCode<- 'all'
+    if (is.null(nafoCode)) nafoCode<- 'all'
+    #if (is.null(spCode)) spCode<- 'all'
+    if (is.null(gearSpType)) gearSpType<- 'all'
+    if (is.null(gearSpSize)) gearSpSize<- 'all'
+    if (is.null(mainSpp)) mainSpp<- 'all'
+  }
+
+  allOptions<-"Done" #this will be a vector that gets populated with available filters
 
   if(!keep$mdDone){
     if (length(mdCode)>0 && mdCode != "all"){
@@ -72,12 +72,11 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     }
   }
   if(!keep$nafoDone){
-
+#browser()
     if (length(unique(df$NAFO))==1){
       if(!quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       keep$nafoDone<-T
     }else if (length(nafoCode)>0 && nafoCode != "all"){
-     # browser()
       df=df[df$NAFO %in% nafoCode,]
       keep$nafoDone<-T
     }else{
@@ -89,18 +88,18 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     test=chkGears(df)
     if (length(test)>0) keep$canDoGearSpecs <- T
   }
-
-
-
-  if(!keep$gearSpecsDone && keep$gearDone && keep$canDoGearSpecs){ #only show if a gear selection has been made
-    if (length(gearSpType)>0 | length(gearSpSize)>0){
-      df<- getGearSpecs(cxn, keep, df, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
-      keep$gearSpecsDone <- T
-    }else{
-      allOptions <- c(allOptions, "Gear Specifications")
+  if(keep$canDoGearSpecs){#only show if a gear selection has been made
+    if(!keep$gearSpecsDone){
+      if (length(gearSpType)>0 | length(gearSpSize)>0){
+        # cat("Pre-nrow(df):",nrow(df),"\n")
+        df<- getGearSpecs(cxn, keep, df, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
+        keep$gearSpecsDone <- T
+        # cat("Post-nrow(df):",nrow(df),"\n")
+      }else{
+        allOptions <- c(allOptions, "Gear Specifications")
+      }
     }
   }
-
   allOptions <- allOptions[!is.na(allOptions)]
 
   if (length(allOptions)>1 && noPrompts == F){
@@ -210,21 +209,21 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       if (keep$gearDone){
         df=df[df$GEAR_CODE %in% gearPick$GEAR_CODE,]
         df = applyFilters(cxn = cxn,
-                        keep = keep,
-                        #showSp = showSp,
-                        quietly = quietly,
-                        df=df,
-                        mdCode=mdCode,
-                        subLic = subLic,
-                        gearCode=gearPick$GEAR_CODE,
-                        nafoCode = nafoCode,
-                        #spCode=spCode,
-                        gearSpType = gearSpType,
-                        gearSpSize = gearSpSize,
-                        dateStart = dateStart,
-                        dateEnd = dateEnd,
-                        mainSpp = mainSpp,
-                        noPrompts = noPrompts)
+                          keep = keep,
+                          #showSp = showSp,
+                          quietly = quietly,
+                          df=df,
+                          mdCode=mdCode,
+                          subLic = subLic,
+                          gearCode=gearPick$GEAR_CODE,
+                          nafoCode = nafoCode,
+                          #spCode=spCode,
+                          gearSpType = gearSpType,
+                          gearSpSize = gearSpSize,
+                          dateStart = dateStart,
+                          dateEnd = dateEnd,
+                          mainSpp = mainSpp,
+                          noPrompts = noPrompts)
       }else{
         df = applyFilters(cxn = cxn,
                           keep = keep,
@@ -247,23 +246,23 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     if (choice=="NAFO Areas"){
       nafoPick <- getNAFOCd(keep= keep, df = df, nafoCode, quietly)
       if (keep$nafoDone){
-      df=df[df$NAFO %in% nafoPick,]
-      df = applyFilters(cxn = cxn,
-                        keep = keep,
-                        #showSp = showSp,
-                        quietly = quietly,
-                        df=df,
-                        mdCode=mdCode,
-                        subLic = subLic,
-                        gearCode=gearCode,
-                        nafoCode = nafoPick,
-                        #spCode=spCode,
-                        gearSpType = gearSpType,
-                        gearSpSize = gearSpSize,
-                        dateStart = dateStart,
-                        dateEnd = dateEnd,
-                        mainSpp = mainSpp,
-                        noPrompts = noPrompts)
+        df=df[df$NAFO %in% nafoPick,]
+        df = applyFilters(cxn = cxn,
+                          keep = keep,
+                          #showSp = showSp,
+                          quietly = quietly,
+                          df=df,
+                          mdCode=mdCode,
+                          subLic = subLic,
+                          gearCode=gearCode,
+                          nafoCode = nafoPick,
+                          #spCode=spCode,
+                          gearSpType = gearSpType,
+                          gearSpSize = gearSpSize,
+                          dateStart = dateStart,
+                          dateEnd = dateEnd,
+                          mainSpp = mainSpp,
+                          noPrompts = noPrompts)
       }else{
         df = applyFilters(cxn = cxn,
                           keep = keep,
@@ -308,5 +307,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       return(df)
     }
   }
+  #df$MON_DOC_ID
   return(df)
 }

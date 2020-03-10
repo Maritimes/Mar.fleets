@@ -186,7 +186,9 @@ your results to only those trips where the identified species was the main speci
 If this is left as NULL, a popup will allow the user to select valid values from a list.}
 
 \item{noPrompts}{default is \code{FALSE}. If set to True, the script will ignore
-any parameters that might otherwise be used to filter the data.}
+any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
+and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
+will be returned that match your other filters.}
 }
 \value{
 returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",

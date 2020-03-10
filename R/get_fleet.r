@@ -147,7 +147,9 @@
 #' your results to only those trips where the identified species was the main species caught (by weight).
 #' If this is left as NULL, a popup will allow the user to select valid values from a list.
 #' @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
-#' any parameters that might otherwise be used to filter the data.
+#' any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
+#' and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
+#' will be returned that match your other filters.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
 #' embed the script into a function rather than running it interactively.
@@ -193,11 +195,14 @@ get_fleet<-function(fn.oracle.username = "_none_",
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
-
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic, gearCode=gearCode, nafoCode = nafoCode,
                     gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp, noPrompts = noPrompts)
-
+   if (cxn$usepkg =='rodbc') {
+    RODBC::odbcClose(cxn$channel)
+  }else{
+    ROracle::dbDisconnect(cxn$channel)
+  }
   # spCode = spCode,showSp = showSp,
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))

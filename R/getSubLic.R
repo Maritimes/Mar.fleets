@@ -1,5 +1,6 @@
 # Prompt for and/or Apply Md Code Filters ------------------------------------
 getSubLic<-function(cxn = cxn, keep=keep, df = df, dateStart = NULL, dateEnd=NULL, subLic = NULL, quietly = F){
+
   keep$subLicDone <- T
   stQuery <- paste0("SELECT DISTINCT L.LICENCE_ID,
   L.START_DATE_TIME,
@@ -22,17 +23,22 @@ WHERE LS.LICENCE_SUBTYPE_ID IN (",Mar.utils::SQL_in(unique(df_subT$LICENCE_SUBTY
     cat(paste0("\n","Can't filter by Sub licence - aborting"))
     return(df)
   }
-  choice<-utils::select.list(paste0(stRelevantDets$LIC_SUB_DESC," (",stRelevantDets$LICENCE_SUBTYPE_ID,")"),
-                             preselect=NULL,
-                             multiple=F, graphics=T,
-                             title="Choose how to filter the data")
-  if (choice =="" || length(choice)<1 || is.na(choice)){
-    keep$subLicDone <- FALSE
-    return(df)
+  if (is.null(subLic)){
+    choice<-utils::select.list(paste0(stRelevantDets$LIC_SUB_DESC," (",stRelevantDets$LICENCE_SUBTYPE_ID,")"),
+                               preselect=NULL,
+                               multiple=F, graphics=T,
+                               title="Choose how to filter the data")
+    if (choice =="" || length(choice)<1 || is.na(choice)){
+      keep$subLicDone <- FALSE
+      return(df)
+    }
+
+    if (!quietly)cat(paste0("\n","Sublicence choice: ",choice))
+    choice = as.numeric(sub(".*\\((.*)\\).*", "\\1", choice))
+    subLic <- choice
   }
-  if (!quietly)cat(paste0("\n","Sublicence choice: ",choice))
-  choice = as.numeric(sub(".*\\((.*)\\).*", "\\1", choice))
-  df_subT = df_subT[df_subT$LICENCE_SUBTYPE_ID %in% choice,"LICENCE_ID"]
+
+  df_subT = df_subT[df_subT$LICENCE_SUBTYPE_ID %in% subLic,"LICENCE_ID"]
   df <- df[df$LICENCE_ID %in% df_subT,]
   return(df)
 }

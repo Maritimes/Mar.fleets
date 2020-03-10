@@ -48,7 +48,8 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
-  getEff<-function(mondocs=NULL){
+
+  getEff<-function(log_efrt=NULL){
     PSQry1 <-paste0("SELECT DISTINCT
                         EF.LOG_EFRT_STD_INFO_ID,
                         EF.FV_FISHED_DATETIME  EF_FISHED_DATETIME,
@@ -63,9 +64,9 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                         EF.ENT_LONGITUDE
                      FROM MARFISSCI.LOG_EFRT_STD_INFO EF
                      WHERE
-                       EF.MON_DOC_ID BETWEEN ",min(mondocs), " AND ", max(mondocs))
+                       EF.LOG_EFRT_STD_INFO_ID BETWEEN ",min(log_efrt), " AND ", max(log_efrt))
     PS_sets<- cxn$thecmd(cxn$channel, PSQry1)
-    PS_sets<-PS_sets[PS_sets$MON_DOC_ID %in% mondocs, ]
+    PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% log_efrt, ]
 
 
     PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
@@ -80,7 +81,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     PS_sets<-unique(PS_sets)
     return(PS_sets)
   }
-  getPS<-function(mondocs=NULL){
+  getPS<-function(log_efrt=NULL){
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
     #cat("\n","PRO_SPC_INFO")
@@ -90,12 +91,13 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                     PS.GEAR_CODE,
                     PS.VR_NUMBER_FISHING,
                     PS.DATE_FISHED,
-                    PS.VR_NUMBER_LANDING
+                    PS.VR_NUMBER_LANDING,
+                    PS.LOG_EFRT_STD_INFO_ID
                     FROM MARFISSCI.PRO_SPC_INFO PS
                     WHERE
-                    PS.MON_DOC_ID BETWEEN ",min(mondocs), " AND ", max(mondocs))
-                    PS_df<- cxn$thecmd(cxn$channel, PSQry0)
-    PS_df <- PS_df[PS_df$MON_DOC_ID %in% mondocs,]
+                    PS.LOG_EFRT_STD_INFO_ID BETWEEN ",min(log_efrt), " AND ", max(log_efrt))
+    PS_df<- cxn$thecmd(cxn$channel, PSQry0)
+    PS_df <- PS_df[PS_df$LOG_EFRT_STD_INFO_ID %in% log_efrt,]
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
@@ -149,8 +151,10 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     return(HOC_df)
   }
+  allLogEff <-  unique(stats::na.omit(thisFleet$LOG_EFRT_STD_INFO))
+
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
-  ps <- getPS(mondocs = allMondocs)
+  ps <- getPS(log_efrt = allLogEff)
   if (nrow(ps)<1){
     cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
@@ -158,11 +162,11 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     marObsMatch <- ps
   }
 
-  sets<- getEff(mondocs = allMondocs)
+  sets<- getEff(log_efrt = allLogEff)
   eff <- unique(merge(ps[,!names(ps) %in% c("DATE_FISHED","VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
-
   ed <- getED(mondocs =allMondocs)
-    if (!is.null(ed) && nrow(ed)>0){
+
+  if (!is.null(ed) && nrow(ed)>0){
     marObsMatch<- merge(marObsMatch, ed, all.x = T)
   }else{
     marObsMatch$OBS_TRIP <- marObsMatch$OBS_ID <- marObsMatch$OBS_PRESENT <- NA
@@ -182,6 +186,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
 
   ntrips = sort(unique(eff$TRIP_ID_MARF))
   eff$SET_PER_DAY <- F
+
   for (i in 1:length(ntrips)){
     if(length(unique(eff[eff$TRIP_ID_MARF == ntrips[i],"EF_FISHED_DATETIME"]))==nrow(eff[eff$TRIP_ID_MARF == ntrips[i],])){
       eff[eff$TRIP_ID_MARF == ntrips[i],"SET_PER_DAY"]<-T
