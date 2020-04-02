@@ -1,17 +1,23 @@
 # Prompt for and/or Apply Spp Filters ------------------------------------
 getMainSpp <-function(cxn = NULL, keep= NULL,
                       dateStart= NULL, dateEnd = NULL,
-                      df = NULL, mainSpp = NULL, quietly = F){
+                      df = NULL, mainSpp = NULL, useDate = "fished", quietly = F){
   MON_DOC_ID <- TOTAL <- .SD <- NULL
   if(!is.null(mainSpp) && mainSpp=="all")return(df)
   keep$mainSppDone <- T
 
+  if (useDate =="fished"){
+    where_d = paste0("AND DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD')")
+  }else{
+    where_d =paste0("AND LANDED_DATE BETWEEN to_date('",dateStart,"','YYYY-MM-DD')")
+  }
+
   spQry1 <- paste0("SELECT MON_DOC_ID, RND_WEIGHT_KGS, SPECIES_CODE
                     FROM MARFISSCI.PRO_SPC_INFO
                     WHERE
-                    MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID)," AND
-                    DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND
-                    to_date('",dateEnd,"','YYYY-MM-DD')")
+                    MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
+                    ",where_d,"
+                    AND to_date('",dateEnd,"','YYYY-MM-DD')")
   # spQry1 <- paste0("SELECT
   #                  LOG_EFRT_STD_INFO.MON_DOC_ID,
   #                  LOG_SPC_STD_INFO.LOG_EFRT_STD_INFO_ID,

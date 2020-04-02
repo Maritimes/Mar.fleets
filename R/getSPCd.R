@@ -1,6 +1,5 @@
 # Prompt for and/or Apply Spp Filters ------------------------------------
 getSPCd<-function(cxn = cxn, keep= keep, dateStart= dateStart, dateEnd = dateEnd, df = df, spCode = spCode, quietly = F){
-  # assign("spDone", TRUE, envir = keep)
   keep$spDone <- T
   if (length(spCode)>0){
     thewhere1 <- paste0("AND SSF_SPECIES_CODE in (",Mar.utils::SQL_in(spCode, apos = F),")")

@@ -7,22 +7,36 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
     return(df)
   }
   gearSpcFilt <- c("Types","Sizes")
-  if ("all" %in% gearSpSize|length(gearSpSize)==0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
-  if ("all" %in% gearSpType|length(gearSpType)==0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
+  #|length(gearSpSize)==0
+  #|length(gearSpType)==0
+  if ("all" %in% gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
+  if ("all" %in% gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
   #if (length(gearSpSize)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
   #if (length(gearSpType)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
   # Get all of the records for our df that might link to gear info ----------------------------------------
-  gearSpecDFQry <- paste0("SELECT DISTINCT
+  if (cxn == -1){
+    quarantine <- new.env()
+    get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
+    quarantine$LOG_EFRT_STD_INFO = quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
+    quarantine$LOG_EFRT_STD_INFO <- quarantine$LOG_EFRT_STD_INFO[which(quarantine$LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
+                                                                       & quarantine$LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
+    gearSpecDF<-  quarantine$LOG_EFRT_STD_INFO[ quarantine$LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
+    rm(quarantine)
+  }else{
+    #ripped out of sql below as unecessary addition of LOG_SPC_STD_INFO
+    #, MARFISSCI.LOG_SPC_STD_INFO
+    #LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID = LOG_SPC_STD_INFO.LOG_EFRT_STD_INFO_ID AND
+    gearSpecDFQry <- paste0("SELECT DISTINCT
                           LOG_EFRT_STD_INFO.MON_DOC_ID,
                           LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
-                          FROM MARFISSCI.LOG_EFRT_STD_INFO, MARFISSCI.LOG_SPC_STD_INFO
+                          FROM MARFISSCI.LOG_EFRT_STD_INFO
                           WHERE
-                          LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID = LOG_SPC_STD_INFO.LOG_EFRT_STD_INFO_ID
-                          AND LOG_EFRT_STD_INFO.MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
+                          LOG_EFRT_STD_INFO.MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
                           AND LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",dateStart,"','YYYY-MM-DD')
                           AND to_date('",dateEnd,"','YYYY-MM-DD')")
-  gearSpecDF<- cxn$thecmd(cxn$channel, gearSpecDFQry)
-  gearSpecDF<- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
+    gearSpecDF<- cxn$thecmd(cxn$channel, gearSpecDFQry)
+    gearSpecDF<- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
+  }
   if(nrow(gearSpecDF)<1){
     cat(paste0("\n","None of these records have gear specification information - aborting filter"))
     return(df)
@@ -54,13 +68,20 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
   grSpCols <- c(grSpType, grSpSize)
 
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-  where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
-  gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
+  if (cxn == -1){
+    quarantine <- new.env()
+    get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = quarantine, quiet = T)
+    quarantine$LOG_EFRT_ENTRD_DETS = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
+    gearSpecRelevant = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
+  }else{
+    where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
+    gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
                                 WHERE LOG_EFRT_STD_INFO_ID BETWEEN
                                 ",min(gearSpecDF$LOG_EFRT_STD_INFO_ID), " AND ",max(gearSpecDF$LOG_EFRT_STD_INFO_ID),"
                                 ", where2)
-  gearSpecRelevant<- cxn$thecmd(cxn$channel, gearSpecRelevantQry)
-  gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
+    gearSpecRelevant<- cxn$thecmd(cxn$channel, gearSpecRelevantQry)
+    gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
+  }
   if(nrow(gearSpecRelevant)<1){
     cat(paste0("\n","None of these records have gear specification information - aborting filter"))
     return(df)

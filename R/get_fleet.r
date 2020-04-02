@@ -68,7 +68,59 @@
 #' \item 53 = 'SCALLOP DIVE'
 #' }
 #' @param subLic default is \code{NULL}. This is the MARFIS Licence Subtype.If this is left as NULL, a popup
-#' will allow the user to select one from a list.
+#' will allow the user to select one from a list. Valid codes are shown below:
+#' \itemize{
+#' \item 1 = "EXPLORATORY"
+#' \item 2 = "COMMERCIAL COMMUNAL"
+#' \item 3 = "CATEGORY A"
+#' \item 4 = "CATEGORY B"
+#' \item 5 = "PARTNERSHIP A"
+#' \item 6 = "PARTNERSHIP B"
+#' \item 7 = "PARTNERSHIP"
+#' \item 8 = "DEVELOPMENT"
+#' \item 9 = "EXPERIMENTAL"
+#' \item 10	= "EDUCATIONAL"
+#' \item 11	= "PUBLIC DISPLAY"
+#' \item 12	= "OYSTER PICKING"
+#' \item 13	= "OYSTER SPECIAL"
+#' \item 14	= "MIDSHORE"
+#' \item 15	= "OFFSHORE"
+#' \item 16	= "MID BAY OF FUNDY SCALLOPS"
+#' \item 17	= "UPPER BAY OF FUNDY SCALLOPS"
+#' \item 18	= "FULL BAY OF FUNDY SCALLOPS"
+#' \item 19	= "INSHORE"
+#' \item 20	= "PREDATOR"
+#' \item 21	= "LANDSMAN - PROFESSIONAL"
+#' \item 22	= "LANDSMAN - ASSISTANT"
+#' \item 23	= "OBSERVATION"
+#' \item 24	= "FIXED GEAR GROUNDFISH <45'"
+#' \item 25	= "TEMPORARY"
+#' \item 26	= "TEMPORARY COMMUNAL"
+#' \item 27	= "SILVER HAKE"
+#' \item 28	= "FIXED GEAR 45-65 FEET - GROUNDFISH"
+#' \item 29	= "GULF - TEST FISHERY"
+#' \item 30	= "GULF - EXP COMMUNAL"
+#' \item 31	= "GULF - COMMUNAL"
+#' \item 32	= "GULF - OFFSHORE TEMPORARY"
+#' \item 33	= "SNOW CRAB COMPANIES"
+#' \item 34	= "ELVERS"
+#' \item 35	= "SCIENTIFIC"
+#' \item 36	= "MCFR"
+#' \item 37	= "LIVE FISH TRANSFER"
+#' \item 38	= "GENERAL TRANSFER LICENCE"
+#' \item 39	= "NUISANCE"
+#' \item 40	= "BROODSTOCK COLLECTION"
+#' \item 41	= "FOREIGN VESSEL FISHING"
+#' \item 42	= "FOREIGN VESSEL LOAD/OFFLOAD"
+#' \item 43	= "FOREIGN VESSEL RESEARCH"
+#' \item 44	= "PERSONAL USE"
+#' \item 45	= "USE OF FISH - SECTION 10"
+#' \item 46	= "REPLANTING LICENCE"
+#' \item 47	= "DALIWHAL 10"
+#' \item 48	= "TOBIN 10"
+#' \item 49	= "PORCUPINE BROOK"
+#' \item 50	= "INVASIVE SPECIES"
+#' }
 #' @param gearCode default is \code{NULL}. In some cases, a fleet will contain multiple
 #' gear types. Setting this to \code{NULL} (the default) will prompt you to
 #' select gears from the available values (if there are multiple).  Setting it to
@@ -167,7 +219,8 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     mdCode = NULL, subLic = NULL,
                     gearCode = NULL,nafoCode = NULL,
                     gearSpType = NULL, gearSpSize= NULL,
-                    mainSpp = NULL, noPrompts =FALSE){
+                    mainSpp = NULL, useDate = NULL,vessLen = NULL,
+                    noPrompts =FALSE){
   # showSp = F, spCode = NULL,
   # @param showSp default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
   # members who reported a particular species at any point in the specified time period.  If this is
@@ -176,19 +229,43 @@ get_fleet<-function(fn.oracle.username = "_none_",
   # @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
   # the fleet members to only those who reported the selected species at some point in the specified
   # time frame.
-  cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+  cxn = make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   # spCode=as.numeric(spCode)
   if (!is.null(mainSpp) && mainSpp != 'all') mainSpp=as.numeric(mainSpp)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- keep$subLicDone <- FALSE
+  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- keep$subLicDone <- keep$vessLenDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
 
   #Narrow the data by only date range
-  df = basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode)
+  if (cxn != -1){
+    df <- basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+  }else{
+    cat("Initiating COVID-19 Protocols....\n(i.e. using local data)\n")
+    tables = c(file.path(data.dir,"MARFIS.GEARS.rdata"),
+               file.path(data.dir,"MARFIS.LICENCE_SUBTYPES.rdata"),
+               file.path(data.dir,"MARFIS.LICENCES.rdata"),
+               file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.rdata"),
+               file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.rdata"),
+               file.path(data.dir,"MARFIS.MON_DOCS.rdata"),
+               file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.rdata"),
+               file.path(data.dir,"MARFIS.PRO_SPC_INFO.rdata"),
+               file.path(data.dir,"MARFIS.VESSELS.rdata")
+    )
 
+    COVIDCheck <- all(sapply(X =tables, file.exists))
+    if (COVIDCheck){
+      cat("Access to all required MARFIS data confirmed.  Proceeding...\n")
+    }else{
+      cat("Cannot proceed with all of the following files in your data.dir:\n")
+      paste0(tables)
+      return(NULL)
+    }
+    df<- basicFleet_local(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+  }
   # clean up the names of each md doc type
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
@@ -196,12 +273,16 @@ get_fleet<-function(fn.oracle.username = "_none_",
   }
   df$MD_DESC <- trimws(df$MD_DESC)
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic, gearCode=gearCode, nafoCode = nafoCode,
-                    gearSpType = gearSpType, gearSpSize = gearSpSize, dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp, noPrompts = noPrompts)
-   if (cxn$usepkg =='rodbc') {
-    RODBC::odbcClose(cxn$channel)
-  }else{
-    ROracle::dbDisconnect(cxn$channel)
+  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic,
+                    gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
+                    dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp, noPrompts = noPrompts, useDate = useDate,
+                    debug=F)
+  if (cxn != -1){
+    if (cxn$usepkg =='rodbc') {
+      RODBC::odbcClose(cxn$channel)
+    }else if (cxn$usepkg =='roracle'){
+      ROracle::dbDisconnect(cxn$channel)
+    }
   }
   # spCode = spCode,showSp = showSp,
   if(nrow(df)<1) {

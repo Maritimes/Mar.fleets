@@ -17,7 +17,7 @@ getNAFOCd<-function(keep= keep, df = df, nafoCode = nafoCode, quietly = F){
     if (!quietly)cat(paste0("\n","nafoCode choice: ",paste0(choice, collapse=",")))
     NCds = nDf[nDf$NAFO %in% choice,]
   }else{
-    #if nafocodes were provided, filtering shoul have occurred in basicFleet()
+    #if nafocodes were provided, filtering should have occurred in basicFleet()
     cat(paste0("\n","Should never see this"))
   }
   return(NCds)
