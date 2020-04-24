@@ -59,7 +59,7 @@ get_OBS <- function(fn.oracle.username = "_none_",
   }
   # .I <- TRIP_ID_MARF <- FV_FISHED_DATETIME<- SET_DATETIME<- NA
   cxn<- make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
-  if (cxn ==-1){
+  if (!class(cxn) =="list"){
     cat("\nCan't do this without a DB connection.  Aborting.\n")
     return(NULL)
   }

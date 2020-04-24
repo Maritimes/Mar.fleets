@@ -195,9 +195,6 @@
 #' @param gearSpSize default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
 #' may describe mesh, hooks or traps.  If this is left as NULL, a popup will allow the user to select
 #' valid values from a list.
-#' @param mainSpp default is \code{NULL}. This is a marfis species code.  Populating this will limit
-#' your results to only those trips where the identified species was the main species caught (by weight).
-#' If this is left as NULL, a popup will allow the user to select valid values from a list.
 #' @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
 #' any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
 #' and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
@@ -217,9 +214,9 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     quietly = FALSE,
                     dateStart = NULL, dateEnd = NULL,
                     mdCode = NULL, subLic = NULL,
-                    gearCode = NULL,nafoCode = NULL,
+                    gearCode = NULL, nafoCode = NULL,
                     gearSpType = NULL, gearSpSize= NULL,
-                    mainSpp = NULL, useDate = NULL,vessLen = NULL,
+                    useDate = NULL, vessLen = NULL,
                     noPrompts =FALSE){
   # showSp = F, spCode = NULL,
   # @param showSp default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
@@ -229,22 +226,17 @@ get_fleet<-function(fn.oracle.username = "_none_",
   # @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
   # the fleet members to only those who reported the selected species at some point in the specified
   # time frame.
-  cxn = make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
 
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   # spCode=as.numeric(spCode)
-  if (!is.null(mainSpp) && mainSpp != 'all') mainSpp=as.numeric(mainSpp)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$mainSppDone <- keep$subLicDone <- keep$vessLenDone <- FALSE
+  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$subLicDone <- keep$vessLenDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-
-  #Narrow the data by only date range
-  if (cxn != -1){
-    df <- basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
-  }else{
-    cat("Initiating COVID-19 Protocols....\n(i.e. using local data)\n")
+  if (exists("isolated")){
+    cat("Using local data\n")
+    cxn = -1
     tables = c(file.path(data.dir,"MARFIS.GEARS.rdata"),
                file.path(data.dir,"MARFIS.LICENCE_SUBTYPES.rdata"),
                file.path(data.dir,"MARFIS.LICENCES.rdata"),
@@ -255,36 +247,40 @@ get_fleet<-function(fn.oracle.username = "_none_",
                file.path(data.dir,"MARFIS.PRO_SPC_INFO.rdata"),
                file.path(data.dir,"MARFIS.VESSELS.rdata")
     )
-
-    COVIDCheck <- all(sapply(X =tables, file.exists))
-    if (COVIDCheck){
+    localDataCheck <- all(sapply(X =tables, file.exists))
+    if (localDataCheck){
       cat("Access to all required MARFIS data confirmed.  Proceeding...\n")
     }else{
       cat("Cannot proceed with all of the following files in your data.dir:\n")
       paste0(tables)
       return(NULL)
     }
-    df<- basicFleet_local(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+    df <- basicFleet_local(keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+    # print(nrow(df))
+    # write.csv(df,"basicFleet_local.csv", row.names = F)
+  }else{
+    cat("Querying the DB\n")
+    cxn = make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+    df <- basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
   }
+  # write.csv(df,"basicFleet_db.csv", row.names = F)
+  # print(nrow(df))
   # clean up the names of each md doc type
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
+
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
-                    dateStart = dateStart, dateEnd = dateEnd, mainSpp = mainSpp, noPrompts = noPrompts, useDate = useDate,
+                    dateStart = dateStart, dateEnd = dateEnd, noPrompts = noPrompts, useDate = useDate,
                     debug=F)
-  if (cxn != -1){
-    if (cxn$usepkg =='rodbc') {
-      RODBC::odbcClose(cxn$channel)
-    }else if (cxn$usepkg =='roracle'){
-      ROracle::dbDisconnect(cxn$channel)
-    }
-  }
-  # spCode = spCode,showSp = showSp,
+
+  if (class(cxn) =="list" && cxn$usepkg =='rodbc') RODBC::odbcClose(cxn$channel)
+  if (class(cxn) =="list" && cxn$usepkg =='roracle') ROracle::dbDisconnect(cxn$channel)
+
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))
     return(NULL)

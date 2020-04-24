@@ -6,6 +6,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
     #if both have 'all' no need to filter
     return(df)
   }
+  #browser()
   gearSpcFilt <- c("Types","Sizes")
   #|length(gearSpSize)==0
   #|length(gearSpType)==0
@@ -14,7 +15,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
   #if (length(gearSpSize)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
   #if (length(gearSpType)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
   # Get all of the records for our df that might link to gear info ----------------------------------------
-  if (cxn == -1){
+  if (!class(cxn) =="list"){
     quarantine <- new.env()
     get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
     quarantine$LOG_EFRT_STD_INFO = quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
@@ -38,7 +39,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
     gearSpecDF<- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
   }
   if(nrow(gearSpecDF)<1){
-    cat(paste0("\n","None of these records have gear specification information - aborting filter"))
+    cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
     return(df)
   }
 
@@ -58,7 +59,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
     grSpSize <- c(grSpSize, 4,66,67)
   }
   if (all(is.na(gearType))){
-    cat(paste0("\n","None of these records have gear specification information - aborting filter"))
+    cat(paste0("\n","None of these records have gear specification information - aborting filter (2)"))
     return(df)
   }
   #check if types exist at all for selection
@@ -68,7 +69,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
   grSpCols <- c(grSpType, grSpSize)
 
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-  if (cxn == -1){
+  if (!class(cxn) =="list"){
     quarantine <- new.env()
     get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = quarantine, quiet = T)
     quarantine$LOG_EFRT_ENTRD_DETS = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
@@ -83,7 +84,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
     gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
   }
   if(nrow(gearSpecRelevant)<1){
-    cat(paste0("\n","None of these records have gear specification information - aborting filter"))
+    cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
     return(df)
   }
   availTypes<- sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID %in% grSpType,"DATA_VALUE"]))

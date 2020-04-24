@@ -1,4 +1,4 @@
-basicFleet_local<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
+basicFleet_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL,
                            mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL){
   quarantine <- new.env()
   get_data_custom(schema = "MARFISSCI", data.dir = data.dir,
@@ -20,18 +20,15 @@ basicFleet_local<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NUL
     keep$nafoDone<-T
   }
   if (useDate =="fished"){
-    quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[which(quarantine$PRO_SPC_INFO$DATE_FISHED >= as.POSIXct(dateStart, origin = "1970-01-01")
-                                                            & quarantine$PRO_SPC_INFO$DATE_FISHED <= as.POSIXct(dateEnd)),]
+    quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[which(quarantine$PRO_SPC_INFO$DATE_FISHED >= as.POSIXct(dateStart, origin = "1970-01-01") & quarantine$PRO_SPC_INFO$DATE_FISHED <= as.POSIXct(dateEnd)),]
     dtField = "DATE_FISHED"
   }else{
-    quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[which(quarantine$PRO_SPC_INFO$LANDED_DATE >= as.POSIXct(dateStart, origin = "1970-01-01")
-                                                            & quarantine$PRO_SPC_INFO$LANDED_DATE <= as.POSIXct(dateEnd)),]
+    quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[which(quarantine$PRO_SPC_INFO$LANDED_DATE >= as.POSIXct(dateStart, origin = "1970-01-01") & quarantine$PRO_SPC_INFO$LANDED_DATE <= as.POSIXct(dateEnd)),]
     dtField = "LANDED_DATE"
   }
 
   if (!is.null(vessLen) && length(vessLen)>0 && vessLen != 'all') {
-    quarantine$VESSELS = quarantine$VESSELS[quarantine$VESSELS$LOA>= min(vessLen) &
-                                              quarantine$VESSELS$LOA<= max(vessLen),"VR_NUMBER"]
+    quarantine$VESSELS = quarantine$VESSELS[quarantine$VESSELS$LOA>= min(vessLen) & quarantine$VESSELS$LOA<= max(vessLen),"VR_NUMBER"]
     quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[quarantine$PRO_SPC_INFO$VR_NUMBER_FISHING %in% quarantine$VESSELS,]
     keep$vessLenDone<-T
   }
@@ -42,9 +39,8 @@ basicFleet_local<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NUL
 
   if (!('DESC_ENG' %in% names(quarantine$GEARS))) names(quarantine$GEARS)[names(quarantine$GEARS) == "GEAR"] <- "DESC_ENG"
   quarantine$GEARS =quarantine$GEARS[,c("GEAR_CODE", "DESC_ENG")]
-
   theFleet = merge(quarantine$PRO_SPC_INFO, quarantine$GEARS, all.x = T)
-  theFleet = merge(theFleet, quarantine$NAFO_UNIT_AREAS, all.x = T, by.x="NAFO_UNIT_AREA_ID", by.y = "AREA_ID" )
+  theFleet = merge(theFleet, quarantine$NAFO_UNIT_AREAS, by.x="NAFO_UNIT_AREA_ID", by.y = "AREA_ID" )
   theFleet = merge(theFleet, quarantine$MON_DOCS)
   theFleet$NAFO_UNIT_AREA_ID<-NULL
   colnames(theFleet)[colnames(theFleet)=="DESC_ENG"] <- "GEAR_DESC"

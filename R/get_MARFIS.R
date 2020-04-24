@@ -53,8 +53,9 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn<- make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+
   getEff<-function(log_efrt=NULL){
-    if (cxn==-1){
+    if (!class(cxn) =="list"){
       quarantine <- new.env()
       get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
       PS_sets <- quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_FISHED_DATETIME','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE')]
@@ -95,8 +96,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   getPS<-function(allProSpc=NULL, marfSpp=NULL, nafoCode = NULL){
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
-
-    if (cxn==-1){
+    if (!class(cxn) =="list"){
       quarantine <- new.env()
       get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS"), env = quarantine, quiet = T)
       PS_df <- quarantine$PRO_SPC_INFO[quarantine$PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc &
@@ -104,16 +104,26 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                                        c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                                          'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                                          'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS')]
+      if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
       PS_df = merge(PS_df, quarantine$NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
       nafoCodeSimp <- gsub(pattern = "%", x=nafoCode, replacement = "",ignore.case = T)
       PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
-      PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
+      if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
+      PS_df = merge(PS_df, quarantine$VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
       rm(quarantine)
     }else{
-      cat("check this - added pro_spc info and marfspp as params!, need to add NAFO ","\n")
-      cat("Also need to add pro_spc_info_id as output to keep otherwise duplicate recs from disappearing duplicate ","\n")
-      cat("Added vessel.LOA for use in length filters","\n")
+
+      if (length(nafoCode)>0){
+        chk <- grepl(pattern = "%", x = paste0(nafoCode,collapse = ''))
+        if (chk){
+          where_n = paste0("AND (", paste0("N.AREA LIKE ('",nafoCode,"')", collapse = " OR "),")")
+        }else {
+          where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(nafoCode),")")
+        }
+      }
+
       PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID,
+                    PS.PRO_SPC_INFO_ID,
                     PS.MON_DOC_ID,
                     PS.LICENCE_ID,
                     PS.GEAR_CODE,
@@ -122,18 +132,22 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                     PS.LANDED_DATE,
                     PS.VR_NUMBER_LANDING,
                     PS.LOG_EFRT_STD_INFO_ID,
-                    PS.RND_WEIGHT_KGS
-                    FROM MARFISSCI.PRO_SPC_INFO PS
-                    WHERE
+                    PS.RND_WEIGHT_KGS,
+                    N.AREA NAFO_AREA,
+                    V.LOA
+                    FROM MARFISSCI.PRO_SPC_INFO PS, MARFISSCI.VESSELS V, MARFISSCI.NAFO_UNIT_AREAS N
+                    WHERE PS.VR_NUMBER_FISHING = V.VR_NUMBER AND
+                    PS.NAFO_UNIT_AREA_ID = N.AREA_ID AND
                     PS.PRO_SPC_INFO_ID BETWEEN ",min(allProSpc), " AND ", max(allProSpc), "
-                    AND PS.SPECIES_CODE IN ",Mar.utils::SQL_in(marfSpp, apo=F)    )
+                    AND PS.SPECIES_CODE IN ",Mar.utils::SQL_in(marfSpp, apo=F)," ",
+                      where_n    )
       PS_df<- cxn$thecmd(cxn$channel, PSQry0)
       PS_df <- PS_df[PS_df$PRO_SPC_INFO_ID %in% allProSpc,]
     }
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
-    if (cxn==-1){
+    if (!class(cxn) =="list"){
       quarantine <- new.env()
       get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("MON_DOC_ENTRD_DETS"), env = quarantine, quiet = T)
       ED_df <- quarantine$MON_DOC_ENTRD_DETS[quarantine$MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & quarantine$MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
@@ -161,7 +175,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(ED_df)
   }
   getHIC<-function(trips = NULL){
-    if (cxn==-1){
+    if (!class(cxn) =="list"){
       quarantine <- new.env()
       get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_IN_CALLS"), env = quarantine, quiet = T)
       HIC_df <- quarantine$HAIL_IN_CALLS[quarantine$HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
@@ -183,7 +197,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     return(HIC_df)
   }
   getHOC<-function(trips = NULL){
-    if (cxn==-1){
+    if (!class(cxn) =="list"){
       quarantine <- new.env()
       get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_OUTS"), env = quarantine, quiet = T)
       HOC_df <- quarantine$HAIL_OUTS[quarantine$HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
@@ -210,6 +224,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
 
   ps <- getPS(allProSpc = allProSpc, marfSpp = marfSpp, nafoCode = nafoCode)
+
   if (nrow(ps)<1){
     cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
@@ -224,9 +239,16 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   }
 
   eff <- unique(merge(ps[,!names(ps) %in% c(theDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
+
   ed <- getED(mondocs =allMondocs)
   if (!is.null(ed) && nrow(ed)>0){
     ps<- merge(ps, ed, all.x = T)
+
+    if (nrow(ps)<1){
+      cat(paste0("\n","No MARFIS data meets criteria"))
+      return(invisible(NULL))
+    }
+
   }else{
     ps$OBS_TRIP <- ps$OBS_ID <- ps$OBS_PRESENT <- NA
   }
@@ -234,6 +256,11 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   hic<- getHIC(trips = ps$TRIP_ID)
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
+
+    if (nrow(ps)<1){
+      cat(paste0("\n","No MARFIS data meets criteria"))
+      return(invisible(NULL))
+    }
   }
   hoc<- getHOC(trips = ps$TRIP_ID)
   if (!is.null(hoc) && nrow(hoc)>0){
@@ -256,6 +283,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "OBS_TRIP", "OBS_ID", "OBS_PRESENT")])
+
   ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
 
