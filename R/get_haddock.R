@@ -11,6 +11,7 @@ get_haddock <- function(year=NULL, type = NULL, area= NULL){
     mdCode = c(2)
     gearCode = c(12)
     gearSpSize = seq(130,999,1)
+    #gearSpSize = 'all'
   }else if (toupper(type) == "FIXED"){
     mdCode = c(1, 29)
     gearCode = c(50,51)
@@ -21,6 +22,7 @@ get_haddock <- function(year=NULL, type = NULL, area= NULL){
     nafoCode=c('4X%', '5Y%')
   }else if (toupper(area) == "5ZJM"){
     nafoCode=c('5ZEJ%', '5ZEM%', '5ZEU%')
+    if (toupper(type) == "MOBILE") gearSpSize="all"
   }
   f1 = get_fleet(dateStart = dateStart,
                  dateEnd = dateEnd,

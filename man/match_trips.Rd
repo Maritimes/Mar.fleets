@@ -4,7 +4,12 @@
 \alias{match_trips}
 \title{match_trips}
 \usage{
-match_trips(get_MARFIS = NULL, get_OBS = NULL, quietly = FALSE)
+match_trips(
+  get_MARFIS = NULL,
+  get_OBS = NULL,
+  useDate = "fished",
+  quietly = FALSE
+)
 }
 \arguments{
 \item{get_MARFIS}{default is \code{NULL}. This is the list output by the

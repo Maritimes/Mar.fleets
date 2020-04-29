@@ -9,8 +9,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                        dateStart = NULL,
                        dateEnd = NULL,
                        noPrompts = F,
-                       useDate = NULL,
-                       debug=T){
+                       useDate = NULL){
   if(noPrompts){
     if (is.null(mdCode)) mdCode<- 'all'
     if (is.null(subLic)) subLic<- 'all'
@@ -23,8 +22,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
   allOptions<-"Done" #this will be a vector that gets populated with available filters
 
   if(!keep$mdDone){
-    if(debug)cat("\n","Starting mdDone: (remaining MDs): ", setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
-    if (length(mdCode)>0 && mdCode != "all"){
+       if (length(mdCode)>0 && mdCode != "all"){
       df=df[df$MD_CODE %in% mdCode,]
       keep$mdDone <- T
     }else if (length(unique(df$MD_CODE))==1 ){
@@ -35,11 +33,9 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     }else if (mdCode == 'all'){
       keep$mdDone <- T
     }
-    if(debug)cat("\n","Finishing mdDone: (remaining MDs): ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
   }
 
   if(!keep$subLicDone){
-    if(debug)cat("\n","Starting subLic: (remaining MDs): ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
     if (length(subLic)>0 && subLic != 'all'){
       df<- getSubLic(cxn, keep, df, dateStart, dateEnd,  subLic, quietly)
     }else if (is.null(subLic)){
@@ -47,16 +43,13 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     }else if (subLic == 'all'){
       keep$subLicDone <- T
     }
-    if(debug)cat("\n","Finishing subLic: (remaining MDs):" ,setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
   }
 
   if(!keep$gearDone){
-    if(debug)cat("\n","Starting gear: (remaining MDs): ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
     if (length(unique(df$GEAR_CODE))==1){
       if(!quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
       keep$gearDone<-T
     }else if (length(gearCode)>0 && gearCode != "all"){
-      if(debug)cat("\n","Starting gearCode")
       df=df[df$GEAR_CODE %in% gearCode,]
       keep$gearDone<-T
     }else if (length(gearCode)==0) {
@@ -64,22 +57,18 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     } else if (gearCode == "all"){
       keep$gearDone<-T
     }
-    if(debug)cat("\n","Finishing gear: (remaining MDs):  ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
   }
 
   if(!keep$nafoDone){
-    if(debug)cat("\n","Starting nafo: (remaining MDs):  ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
     if (length(unique(df$NAFO))==1){
       if(!quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       keep$nafoDone<-T
     }else if (length(nafoCode)>0 && nafoCode != "all"){
-      if(debug)cat("\n","Starting NAFO")
       df=df[df$NAFO %in% nafoCode,]
       keep$nafoDone<-T
     }else{
       allOptions <- c(allOptions, "NAFO Areas")
     }
-    if(debug)cat("\n","Finishing nafo: (remaining MDs):  ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
   }
 
   if (keep$gearDone){
@@ -88,7 +77,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
   }
 
   if(keep$canDoGearSpecs){#only show if a gear selection has been made
-    if(debug)cat("\n","Starting GearSpecs: (remaining MDs):  ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
     if(!keep$gearSpecsDone){
       if (!(gearSpType=="all" && gearSpSize=="all")){
         df<- getGearSpecs(cxn, keep, df, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
@@ -97,7 +85,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
         allOptions <- c(allOptions, "Gear Specifications")
       }
     }
-    if(debug)cat("\n","Finishing GearSpecs: (remaining MDs):  ",setdiff(debugMDs, unique(df[df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
   }
 
   allOptions <- allOptions[!is.na(allOptions)]

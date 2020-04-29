@@ -2,10 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-*.prj
-*.shp
-*.shx
-*.dbf
-*.pdf
-*.png
-
+*.xlsx
+/temp
+.Rprofile

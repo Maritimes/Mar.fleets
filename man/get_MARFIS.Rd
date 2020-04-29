@@ -12,6 +12,10 @@ get_MARFIS(
   dateStart = NULL,
   dateEnd = NULL,
   thisFleet = NULL,
+  useDate = "fished",
+  marfSpp = NULL,
+  nafoCode = NULL,
+  vessLen = NULL,
   quietly = FALSE
 )
 }
@@ -48,6 +52,36 @@ data will be returned.}
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
 the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
+
+\item{useDate}{default is \code{"fished"}. Some MARFIS tables have 2 different dates
+that are used for recording when fishing activity took place.  One is "DATE_FISHED",
+and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
+subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
+
+\item{marfSpp}{default is \code{NULL}.  This is the marfis species code for the species you want
+records for. There are literally hundreds of codes, but here are some of the more commonly used:
+\itemize{
+\item 100 = Cod
+\item 110 = Haddock
+\item 120 = Redfish
+\item 130 = Halibut
+\item 141 = Yellowtail Flounder
+\item 142 = Witch Flounder
+\item 143 = Winter Flounder
+\item 144 = Turbot
+\item 170 = Pollock
+\item 172 = Silver Hake
+\item 200 = Herring
+\item 251 = Swordfish
+\item 608 = Surf Clam
+\item 619 = Sea Cucumber
+\item 623 = Sea Scallop
+\item 700 = Lobster
+}}
+
+\item{nafoCode}{default is \code{NULL}.  This}
+
+\item{vessLen}{default is \code{NULL}}
 
 \item{quietly}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}

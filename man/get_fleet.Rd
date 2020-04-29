@@ -18,7 +18,8 @@ get_fleet(
   nafoCode = NULL,
   gearSpType = NULL,
   gearSpSize = NULL,
-  mainSpp = NULL,
+  useDate = NULL,
+  vessLen = NULL,
   noPrompts = FALSE
 )
 }
@@ -232,10 +233,6 @@ NULL, a popup will allow the user to select valid values from a list.}
 \item{gearSpSize}{default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
 may describe mesh, hooks or traps.  If this is left as NULL, a popup will allow the user to select
 valid values from a list.}
-
-\item{mainSpp}{default is \code{NULL}. This is a marfis species code.  Populating this will limit
-your results to only those trips where the identified species was the main species caught (by weight).
-If this is left as NULL, a popup will allow the user to select valid values from a list.}
 
 \item{noPrompts}{default is \code{FALSE}. If set to True, the script will ignore
 any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}

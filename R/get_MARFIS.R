@@ -27,6 +27,32 @@
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
 #' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 #' \code{Mar.bycatch::get_fleet()}
+#' @param useDate default is \code{"fished"}. Some MARFIS tables have 2 different dates
+#' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
+#' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
+#' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
+#' @param marfSpp default is \code{NULL}.  This is the marfis species code for the species you want
+#' records for. There are literally hundreds of codes, but here are some of the more commonly used:
+#' \itemize{
+#' \item 100 = Cod
+#' \item 110 = Haddock
+#' \item 120 = Redfish
+#' \item 130 = Halibut
+#' \item 141 = Yellowtail Flounder
+#' \item 142 = Witch Flounder
+#' \item 143 = Winter Flounder
+#' \item 144 = Turbot
+#' \item 170 = Pollock
+#' \item 172 = Silver Hake
+#' \item 200 = Herring
+#' \item 251 = Swordfish
+#' \item 608 = Surf Clam
+#' \item 619 = Sea Cucumber
+#' \item 623 = Sea Scallop
+#' \item 700 = Lobster
+#' }
+#' @param nafoCode default is \code{NULL}.  This
+#' @param vessLen default is \code{NULL}
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
 #' @family fleets
@@ -58,7 +84,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     if (!class(cxn) =="list"){
       quarantine <- new.env()
       get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
-      PS_sets <- quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_FISHED_DATETIME','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE')]
+      PS_sets <- quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE')] #'FV_FISHED_DATETIME',
       colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
       rm(quarantine)
     }else{
@@ -104,11 +130,11 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                                        c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                                          'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                                          'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS')]
-      if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
+     # if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
       PS_df = merge(PS_df, quarantine$NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
       nafoCodeSimp <- gsub(pattern = "%", x=nafoCode, replacement = "",ignore.case = T)
       PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
-      if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
+     # if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
       PS_df = merge(PS_df, quarantine$VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
       rm(quarantine)
     }else{
@@ -273,18 +299,18 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   ntrips = sort(unique(eff$TRIP_ID_MARF))
   eff$SET_PER_DAY <- F
 
-  for (i in 1:length(ntrips)){
-    if(length(unique(eff[eff$TRIP_ID_MARF == ntrips[i],"EF_FISHED_DATETIME"]))==nrow(eff[eff$TRIP_ID_MARF == ntrips[i],])){
-      eff[eff$TRIP_ID_MARF == ntrips[i],"SET_PER_DAY"]<-T
-    }
-  }
-  spd<- unique(eff[,c("TRIP_ID_MARF","SET_PER_DAY")])
+  # for (i in 1:length(ntrips)){
+  #   if(length(unique(eff[eff$TRIP_ID_MARF == ntrips[i],"EF_FISHED_DATETIME"]))==nrow(eff[eff$TRIP_ID_MARF == ntrips[i],])){
+  #     eff[eff$TRIP_ID_MARF == ntrips[i],"SET_PER_DAY"]<-T
+  #   }
+  # }
+  # spd<- unique(eff[,c("TRIP_ID_MARF","SET_PER_DAY")])
 
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "OBS_TRIP", "OBS_ID", "OBS_PRESENT")])
 
-  ps <- merge(ps, spd, all.x = T)
+  # ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
 
   res<- list()

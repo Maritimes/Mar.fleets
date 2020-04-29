@@ -243,6 +243,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
                file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.rdata"),
                file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.rdata"),
                file.path(data.dir,"MARFIS.MON_DOCS.rdata"),
+               file.path(data.dir,"MARFIS.MON_DOC_DEFNS.rdata"),
                file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.rdata"),
                file.path(data.dir,"MARFIS.PRO_SPC_INFO.rdata"),
                file.path(data.dir,"MARFIS.VESSELS.rdata")
@@ -256,12 +257,15 @@ get_fleet<-function(fn.oracle.username = "_none_",
       return(NULL)
     }
     df <- basicFleet_local(keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
-    # print(nrow(df))
+    # cat("Initial: ",nrow(df),"\n")
+    # cat(sort(unique(df$NAFO)),"\n")
     # write.csv(df,"basicFleet_local.csv", row.names = F)
   }else{
     cat("Querying the DB\n")
     cxn = make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
     df <- basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+    # cat("Initial: ",nrow(df),"\n")
+    # cat(sort(unique(df$NAFO)),"\n")
   }
   # write.csv(df,"basicFleet_db.csv", row.names = F)
   # print(nrow(df))
@@ -275,8 +279,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
-                    dateStart = dateStart, dateEnd = dateEnd, noPrompts = noPrompts, useDate = useDate,
-                    debug=F)
+                    dateStart = dateStart, dateEnd = dateEnd, noPrompts = noPrompts, useDate = useDate)
 
   if (class(cxn) =="list" && cxn$usepkg =='rodbc') RODBC::odbcClose(cxn$channel)
   if (class(cxn) =="list" && cxn$usepkg =='roracle') ROracle::dbDisconnect(cxn$channel)
@@ -287,6 +290,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
   }else{
     df$NAFO <-NULL
     df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, MD_CODE, GEAR_CODE )),])
+    # cat("Final: ",nrow(df),"\n")
     return(df)
   }
 }
