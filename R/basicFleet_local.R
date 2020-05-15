@@ -1,8 +1,8 @@
-basicFleet_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL,
+basicFleet_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL, data.dir = NULL,
                            mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL){
 
   quarantine <- new.env()
-  get_data_custom(schema = "MARFISSCI", data.dir = data.dir,
+  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir,
                   tables = c("PRO_SPC_INFO","MON_DOCS","GEARS","NAFO_UNIT_AREAS", "VESSELS","MON_DOC_DEFNS"),
                   env = quarantine, quiet = T)
   if (useDate =="fished"){

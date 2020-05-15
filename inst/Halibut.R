@@ -7,9 +7,9 @@ yr =c(2015:2018)
  Halibut_45_999<-list()
  Halibut_all<-list()
 for (y in 1:length(yr)){
-   Halibut_0_45[[paste0("halibut_",yr[y])]]<- get_halibut(year = yr[y], vessLen = c(0,45))
-   Halibut_45_999[[paste0("halibut_",yr[y])]]<- get_halibut(year = yr[y], vessLen = c(45,999))
-   Halibut_all[[paste0("halibut_",yr[y])]]<- get_halibut(year = yr[y], vessLen = c(0,999))
+   Halibut_0_45[[paste0("halibut_",yr[y])]]<- sp_halibut(data.dir = data.dir, year = yr[y], vessLen = c(0,45))
+   Halibut_45_999[[paste0("halibut_",yr[y])]]<- sp_halibut(data.dir = data.dir, year = yr[y], vessLen = c(45,999))
+   Halibut_all[[paste0("halibut_",yr[y])]]<- sp_halibut(data.dir = data.dir, year = yr[y], vessLen = c(0,999))
 }
 
 # rm(isolated)
@@ -18,7 +18,7 @@ for (y in 1:length(yr)){
 # # Halibut_45_999_db<-list()
 # Halibut_all_db<-list()
 # for (y in 1:length(yr)){
-#   Halibut_0_45_db[[paste0("halibut_",yr[y])]]<- get_halibut(year = yr[y], vessLen = c(0,45))
-#   Halibut_45_999_db[[paste0("halibut_",yr[y])]]<- get_halibut(year = yr[y], vessLen = c(45,999))
-#   Halibut_all_db[[paste0("halibut_",yr[y])]]<- get_halibut(year = yr[y], vessLen = c(0,999))
+#   Halibut_0_45_db[[paste0("halibut_",yr[y])]]<- sp_halibut(data.dir = data.dir, year = yr[y], vessLen = c(0,45))
+#   Halibut_45_999_db[[paste0("halibut_",yr[y])]]<- sp_halibut(data.dir = data.dir, year = yr[y], vessLen = c(45,999))
+#   Halibut_all_db[[paste0("halibut_",yr[y])]]<- sp_halibut(data.dir = data.dir, year = yr[y], vessLen = c(0,999))
 # }

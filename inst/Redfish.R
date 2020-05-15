@@ -6,6 +6,6 @@ yr =c(2015:2018)
 Redfish_II<-list()
 for (y in 1:length(yr)){
   #unit should be 2 or 3
-  Redfish_II[[paste0("redfish",yr[y])]]<- get_redfish(year = yr[y], unit=2)
+  Redfish_II[[paste0("redfish",yr[y])]]<- sp_redfish(data.dir = data.dir, year = yr[y], unit=2)
 }
 

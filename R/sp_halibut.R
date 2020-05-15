@@ -1,4 +1,4 @@
-get_halibut <- function(year=NULL, vessLen = c(0,999)){
+get_halibut <- function(data.dir = NULL, year=NULL, vessLen = c(0,999)){
   dateStart =paste0(year,"-01-01")
   dateEnd =paste0(year,"-12-31")
 
@@ -13,7 +13,8 @@ get_halibut <- function(year=NULL, vessLen = c(0,999)){
   mdCode = c(1, 29) #added 29 (international)
 
 # Get the Fleet -------------------------------------------------------------------------------
-  f1 <- get_fleet(dateStart = dateStart,
+  f1 <- get_fleet(data.dir=NULL,
+                  dateStart = dateStart,
                  dateEnd = dateEnd,
                  mdCode = mdCode,
                  subLic = subLic,

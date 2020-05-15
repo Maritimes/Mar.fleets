@@ -9,6 +9,7 @@ get_MARFIS(
   fn.oracle.password = "_none_",
   fn.oracle.dsn = "_none_",
   usepkg = "rodbc",
+  data.dir = NULL,
   dateStart = NULL,
   dateEnd = NULL,
   thisFleet = NULL,

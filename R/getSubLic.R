@@ -1,5 +1,5 @@
 # Prompt for and/or Apply Md Code Filters ------------------------------------
-getSubLic<-function(cxn = cxn, keep=keep, df = df, dateStart = NULL, dateEnd=NULL, subLic = NULL, useDate = NULL, quietly = F){
+getSubLic<-function(cxn = cxn, data.dir = NULL, keep=keep, df = df, dateStart = NULL, dateEnd=NULL, subLic = NULL, useDate = NULL, quietly = F){
   cat("Applying sublics - might not work as expected","\n")
   keep$subLicDone <- T
   dtField <- ifelse(useDate == "fished","DATE_FISHED","LANDED_DATE")
@@ -7,7 +7,7 @@ getSubLic<-function(cxn = cxn, keep=keep, df = df, dateStart = NULL, dateEnd=NUL
     debugMDs = c(310584,311044,312818,312829,313412,313282,315037,314839,315098,315292,315888,315871,319821,317346,316927,316929,319831,317676,317841,369108,318401,320573,369138,369122,325777)
 
     quarantine <- new.env()
-    get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LICENCES","LICENCE_SUBTYPES"), env = quarantine, quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LICENCES","LICENCE_SUBTYPES"), env = quarantine, quiet = T)
 
     quarantine$LICENCES <- quarantine$LICENCES[quarantine$LICENCES <- quarantine$LICENCES$LICENCE_ID %in% df$LICENCE_ID,]
     cat("\n","Starting 1: (remaining MDs): ",

@@ -9,6 +9,7 @@ get_fleet(
   fn.oracle.password = "_none_",
   fn.oracle.dsn = "_none_",
   usepkg = "rodbc",
+  data.dir = NULL,
   quietly = FALSE,
   dateStart = NULL,
   dateEnd = NULL,

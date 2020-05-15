@@ -1,5 +1,5 @@
 localCheck<-function(){
-  get_data_custom(schema = "MARFISSCI", data.dir = data.dir,
+  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir,
                   tables = c("GEARS",
                              "LICENCE_SUBTYPES",
                              "LICENCES",

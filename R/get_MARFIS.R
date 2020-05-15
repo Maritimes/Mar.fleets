@@ -68,6 +68,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
                      fn.oracle.password = "_none_",
                      fn.oracle.dsn = "_none_",
                      usepkg = "rodbc",
+                     data.dir = NULL,
                      dateStart = NULL, dateEnd = NULL,
                      thisFleet = NULL,
                      useDate = "fished",
@@ -78,12 +79,12 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  cxn<- make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
 
   getEff<-function(log_efrt=NULL){
     if (!class(cxn) =="list"){
       quarantine <- new.env()
-      get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
+      Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
       PS_sets <- quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE')] #'FV_FISHED_DATETIME',
       colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
       rm(quarantine)
@@ -124,7 +125,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
     if (!class(cxn) =="list"){
       quarantine <- new.env()
-      get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS"), env = quarantine, quiet = T)
+      Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS"), env = quarantine, quiet = T)
       PS_df <- quarantine$PRO_SPC_INFO[quarantine$PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc &
                                          quarantine$PRO_SPC_INFO$SPECIES_CODE %in% marfSpp,
                                        c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
@@ -175,7 +176,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   getED<-function(mondocs=NULL){
     if (!class(cxn) =="list"){
       quarantine <- new.env()
-      get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("MON_DOC_ENTRD_DETS"), env = quarantine, quiet = T)
+      Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("MON_DOC_ENTRD_DETS"), env = quarantine, quiet = T)
       ED_df <- quarantine$MON_DOC_ENTRD_DETS[quarantine$MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & quarantine$MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
       rm(quarantine)
     }else{
@@ -203,7 +204,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   getHIC<-function(trips = NULL){
     if (!class(cxn) =="list"){
       quarantine <- new.env()
-      get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_IN_CALLS"), env = quarantine, quiet = T)
+      Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_IN_CALLS"), env = quarantine, quiet = T)
       HIC_df <- quarantine$HAIL_IN_CALLS[quarantine$HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
       rm(quarantine)
     }else{
@@ -225,7 +226,7 @@ get_MARFIS<-function(fn.oracle.username = "_none_",
   getHOC<-function(trips = NULL){
     if (!class(cxn) =="list"){
       quarantine <- new.env()
-      get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_OUTS"), env = quarantine, quiet = T)
+      Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_OUTS"), env = quarantine, quiet = T)
       HOC_df <- quarantine$HAIL_OUTS[quarantine$HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
       rm(quarantine)
     }else{

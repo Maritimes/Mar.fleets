@@ -64,6 +64,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       if(!quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       keep$nafoDone<-T
     }else if (length(nafoCode)>0 && nafoCode != "all"){
+
       df=df[df$NAFO %in% nafoCode,]
       keep$nafoDone<-T
     }else{
@@ -79,7 +80,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
   if(keep$canDoGearSpecs){#only show if a gear selection has been made
     if(!keep$gearSpecsDone){
       if (!(gearSpType=="all" && gearSpSize=="all")){
-        df<- getGearSpecs(cxn, keep, df, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
+        df<- getGearSpecs(cxn, keep, df, data.dir, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
         keep$gearSpecsDone <- T
       }else{
         allOptions <- c(allOptions, "Gear Specifications")

@@ -1,12 +1,11 @@
 # Prompt for and/or Apply Gear Description Filters ---------------------------
-getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
+getGearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
                         gearSpType= gearSpType, gearSpSize=gearSpSize,
                         dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
   if(all('all' %in% gearSpSize && 'all' %in% gearSpType  )){
     #if both have 'all' no need to filter
     return(df)
   }
-  #browser()
   gearSpcFilt <- c("Types","Sizes")
   #|length(gearSpSize)==0
   #|length(gearSpType)==0
@@ -17,7 +16,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
   # Get all of the records for our df that might link to gear info ----------------------------------------
   if (!class(cxn) =="list"){
     quarantine <- new.env()
-    get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
     quarantine$LOG_EFRT_STD_INFO = quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
     quarantine$LOG_EFRT_STD_INFO <- quarantine$LOG_EFRT_STD_INFO[which(quarantine$LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
                                                                        & quarantine$LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
@@ -71,7 +70,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
   if (!class(cxn) =="list"){
     quarantine <- new.env()
-    get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = quarantine, quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = quarantine, quiet = T)
     quarantine$LOG_EFRT_ENTRD_DETS = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
     gearSpecRelevant = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
   }else{
@@ -98,7 +97,18 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df,
       gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
     }else if (length(gearSpSize)>0){
       #apply the requested filter
-      gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSize,"LOG_EFRT_STD_INFO_ID"]
+      if (all(length(gearSpSize)==length(seq(130,999,1))) && all(gearSpSize==seq(130,999,1))){
+      #if (all(gearSpSize %in% seq(130,999,1))){
+        cat("\n","Large mesh is found indirectly, by getting all data, and subtracting small mesh","\n")
+        #this is weird because HS finds the large gear indirectly
+        #he gets all gear, and subtracts the small gear - this leaves the large gear (and some NAs)
+        gearSpSizeSm <- seq(1,129,1)
+        smGear <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSizeSm,"LOG_EFRT_STD_INFO_ID"]
+        gearSpecRelevant_size <- gearSpecRelevant[!(gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% smGear),"LOG_EFRT_STD_INFO_ID"]
+      }else{
+        gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSize,"LOG_EFRT_STD_INFO_ID"]
+      }
+
       log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
       df<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
       log_eff <- NA

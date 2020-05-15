@@ -6,7 +6,7 @@ yr =c(2015:2018)
 WinterFlounder<-list()
 for (y in 1:length(yr)){
   #unit should be 2 or 3
-  WinterFlounder[[paste0("WinterFlounder",yr[y])]]<- get_winterflounder(year = yr[y])
+  WinterFlounder[[paste0("WinterFlounder",yr[y])]]<- sp_winterflounder(data.dir = data.dir, year = yr[y])
 }
 
 # WinterFlounder$WinterFlounder2015$catch_T

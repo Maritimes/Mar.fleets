@@ -1,38 +1,49 @@
-get_redfish <- function(year=NULL, unit = NULL){
+sp_pollock <- function(data.dir = NULL, year=NULL, type = NULL, mesh=NULL, component = NULL){
   dateStart =paste0(year,"-01-01")
   dateEnd =paste0(year,"-12-31")
 
-  # Set up the redfish-specific variables -------------------------------------------------------
-  marfSpp = 120
-  if (unit==2){
-    nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
-    gearSpSize = seq(90,115,1)
-  } else {
-    nafoCode= c('4X%','5YF%','4WD%','4WE%','4WH%','4WK%','4WL%')
-    gearSpSize = seq(110,115,1)
-  }
+  # Set up the Pollock-specific variables -------------------------------------------------------
+  marfSpp = 170
   useDate = "landed" #fished" #landed
   yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
-  gearCode = c(12)
-  subLic = "all" #was c(24, 28,14,15), but was dropping NAs
-  mdCode = c(2)
-  vessLen = "all"
 
+  if (toupper(component)=="WESTERN"){
+    nafoCode= c('4XO%','4XP%','4XQ%','4XR%','4XS%','5%') #'4XU%' intentionally excluded as directed by HS
+    if (toupper(type) == "FIXED") nafoCode <-c(nafoCode, '4XU%')
+  } else {
+    nafoCode= c('4XM%','4XN%','4V%','4W%')
+  }
+
+  if (toupper(type) == "MOBILE"){
+    mdCode = c(2)
+    gearCode = c(12)
+    #gearSpSize = seq(130,999,1)#lgmesh
+    if (mesh=="SMALL") {
+      gearSpSize = seq(1,129,1)#smmesh
+    }else{
+      gearSpSize = seq(130,999,1)
+    }
+  }else if (toupper(type) == "FIXED"){
+    mdCode = c(1, 29)
+    gearCode = c(40,41)
+    gearSpSize = 'all'
+  }
   # Get the Fleet -------------------------------------------------------------------------------
-  f1 = get_fleet(dateStart = dateStart,
+  f1 = get_fleet(data.dir= data.dir,
+                 dateStart = dateStart,
                  dateEnd = dateEnd,
                  mdCode = mdCode,
-                 subLic = subLic,
+                 subLic = "all",
                  nafoCode= nafoCode,
                  gearCode = gearCode,
                  useDate = useDate,
-                 vessLen = vessLen,
-                 gearSpSize =gearSpSize,
+                 gearSpSize = gearSpSize,
+                 vessLen = "all",
                  noPrompts = T,
                  quietly = T)
 
   # Get the MARFIS linkage data for this fleet (trip_ids, mon_docs, etc) ------------------------
-  mar = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
+  mar = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle', data.dir = data.dir,
                    dateStart = dateStart, dateEnd = dateEnd,thisFleet = f1, marfSpp = marfSpp, nafoCode= nafoCode,
                    useDate = useDate, quietly = T)
 

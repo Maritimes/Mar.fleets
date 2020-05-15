@@ -211,6 +211,7 @@ get_fleet<-function(fn.oracle.username = "_none_",
                     fn.oracle.password = "_none_",
                     fn.oracle.dsn = "_none_",
                     usepkg = "rodbc",
+                    data.dir=NULL,
                     quietly = FALSE,
                     dateStart = NULL, dateEnd = NULL,
                     mdCode = NULL, subLic = NULL,
@@ -226,7 +227,6 @@ get_fleet<-function(fn.oracle.username = "_none_",
   # @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
   # the fleet members to only those who reported the selected species at some point in the specified
   # time frame.
-
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   # spCode=as.numeric(spCode)
@@ -256,14 +256,14 @@ get_fleet<-function(fn.oracle.username = "_none_",
       paste0(tables)
       return(NULL)
     }
-    df <- basicFleet_local(keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+    df <- basicFleet_local(keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
     # cat("Initial: ",nrow(df),"\n")
     # cat(sort(unique(df$NAFO)),"\n")
     # write.csv(df,"basicFleet_local.csv", row.names = F)
   }else{
     cat("Querying the DB\n")
-    cxn = make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
-    df <- basicFleet(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+    cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+    df <- basicFleet(cxn, keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
     # cat("Initial: ",nrow(df),"\n")
     # cat(sort(unique(df$NAFO)),"\n")
   }
@@ -275,7 +275,6 @@ get_fleet<-function(fn.oracle.username = "_none_",
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
-
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
