@@ -35,7 +35,6 @@ basicFleet_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL, data.dir
     quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[quarantine$PRO_SPC_INFO$VR_NUMBER_FISHING %in% quarantine$VESSELS$VR_NUMBER,]
     keep$vessLenDone<-T
   }
-
   quarantine$GEARS =quarantine$GEARS[,c("GEAR_CODE", "GEAR")]
   names(quarantine$GEARS)[names(quarantine$GEARS) == "GEAR"] <- "DESC_ENG"
   quarantine$MON_DOCS= quarantine$MON_DOCS[,c("MON_DOC_DEFN_ID","VR_NUMBER", "MON_DOC_ID")]

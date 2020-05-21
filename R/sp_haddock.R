@@ -1,4 +1,4 @@
-get_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
+sp_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
   dateStart =paste0(year,"-01-01")
   dateEnd =paste0(year,"-12-31")
 
@@ -24,7 +24,7 @@ get_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
     nafoCode=c('5ZEJ%', '5ZEM%', '5ZEU%')
     if (toupper(type) == "MOBILE") gearSpSize="all"
   }
-  f1 = get_fleet(data.dir=NULL,
+  f1 = get_fleet(data.dir=data.dir,
                  dateStart = dateStart,
                  dateEnd = dateEnd,
                  mdCode = mdCode,
@@ -37,7 +37,7 @@ get_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
                  quietly = T)
 
   # Get the MARFIS linkage data for this fleet (trip_ids, mon_docs, etc) ------------------------
-  mar = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
+  mar = get_MARFIS(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle', data.dir = data.dir,
                    dateStart = dateStart, dateEnd = dateEnd,thisFleet = f1, marfSpp = marfSpp, nafoCode= nafoCode,
                    useDate = useDate, quietly = T)
 

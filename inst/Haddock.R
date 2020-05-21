@@ -2,10 +2,10 @@ R.utils::sourceDirectory("C:/git/Maritimes/Mar.utils/R/")
 R.utils::sourceDirectory("C:/git/Maritimes/Mar.bycatch/R/")
 
 isolated=T
-yr =c(2015:2018)
+yr =c(2018:2018)
 Haddock_m_5Z_ng <-list()
-Haddock_f_5Z <-list()
-Haddock_m_4X <-list()
+# Haddock_f_5Z <-list()
+# Haddock_m_4X <-list()
 
 for (y in 1:length(yr)){
   Haddock_m_5Z_ng[[paste0("haddock_",yr[y])]]<- sp_haddock(data.dir = data.dir, year = yr[y], type = "mobile", area = "5Zjm")
