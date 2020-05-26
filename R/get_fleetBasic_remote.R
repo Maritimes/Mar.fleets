@@ -1,4 +1,4 @@
-basicFleet<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
+get_fleetBasic_remote<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
                      mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL){
 
   if (!is.null(mdCode) && length(mdCode)>0 && mdCode != 'all') {
@@ -33,11 +33,7 @@ basicFleet<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
   }else{
     where_vl = "AND 1=1"
   }
-  #   quarantine$VESSELS = quarantine$VESSELS[quarantine$VESSELS$LOA>= min(vessLen) &
-  #                                             quarantine$VESSELS$LOA<= max(vessLen),"VR_NUMBER"]
-  #   quarantine$PRO_SPC_INFO = quarantine$PRO_SPC_INFO[quarantine$PRO_SPC_INFO$VR_NUMBER_FISHING %in% quarantine$VESSELS,]
-  #   keep$vessLenDone<-T
-  # }
+
   if (useDate =="fished"){
     dtField = "PS.DATE_FISHED"
     where_d = paste0("AND PS.DATE_FISHED BETWEEN to_date('",dateStart,"','YYYY-MM-DD') AND to_date('",dateEnd,"','YYYY-MM-DD')")

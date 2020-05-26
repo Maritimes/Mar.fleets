@@ -1,5 +1,5 @@
 # Prompt for and/or Apply Gear Description Filters ---------------------------
-getGearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
+get_GearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
                         gearSpType= gearSpType, gearSpSize=gearSpSize,
                         dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
   if(all('all' %in% gearSpSize && 'all' %in% gearSpType  )){
@@ -15,13 +15,12 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
   #if (length(gearSpType)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
   # Get all of the records for our df that might link to gear info ----------------------------------------
   if (!class(cxn) =="list"){
-    quarantine <- new.env()
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = quarantine, quiet = T)
-    quarantine$LOG_EFRT_STD_INFO = quarantine$LOG_EFRT_STD_INFO[quarantine$LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
-    quarantine$LOG_EFRT_STD_INFO <- quarantine$LOG_EFRT_STD_INFO[which(quarantine$LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
-                                                                       & quarantine$LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
-    gearSpecDF<-  quarantine$LOG_EFRT_STD_INFO[ quarantine$LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
-    rm(quarantine)
+
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = T)
+    LOG_EFRT_STD_INFO = LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
+    LOG_EFRT_STD_INFO <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
+                                                                       & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
+    gearSpecDF<-  LOG_EFRT_STD_INFO[ LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
   }else{
     #ripped out of sql below as unecessary addition of LOG_SPC_STD_INFO
     #, MARFISSCI.LOG_SPC_STD_INFO
@@ -42,7 +41,7 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
     return(df)
   }
 
-  gearType <- chkGears(df)
+  gearType <- chk_Gears(df)
   grSpType <- NA
   grSpSize <- NA
   if('mesh' %in% gearType){
@@ -69,10 +68,9 @@ getGearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
 
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
   if (!class(cxn) =="list"){
-    quarantine <- new.env()
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = quarantine, quiet = T)
-    quarantine$LOG_EFRT_ENTRD_DETS = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
-    gearSpecRelevant = quarantine$LOG_EFRT_ENTRD_DETS[quarantine$LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quiet = T)
+    LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
+    gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
   }else{
     where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
     gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS

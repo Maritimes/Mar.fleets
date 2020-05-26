@@ -1,4 +1,4 @@
-#' @title get_fleet
+#' @title get_fleet_remote
 #' @description This function extracts all of the Vessel/Licence combinations
 #' associated with a particular fleet for a particular date range.
 #' @param fn.oracle.username default is \code{'_none_'} This is your username for
@@ -66,60 +66,6 @@
 #' \item 50 = 'SHRIMP TRANSPORT'
 #' \item 52 = 'SEA URCHIN'
 #' \item 53 = 'SCALLOP DIVE'
-#' }
-#' @param subLic default is \code{NULL}. This is the MARFIS Licence Subtype.If this is left as NULL, a popup
-#' will allow the user to select one from a list. Valid codes are shown below:
-#' \itemize{
-#' \item 1 = "EXPLORATORY"
-#' \item 2 = "COMMERCIAL COMMUNAL"
-#' \item 3 = "CATEGORY A"
-#' \item 4 = "CATEGORY B"
-#' \item 5 = "PARTNERSHIP A"
-#' \item 6 = "PARTNERSHIP B"
-#' \item 7 = "PARTNERSHIP"
-#' \item 8 = "DEVELOPMENT"
-#' \item 9 = "EXPERIMENTAL"
-#' \item 10	= "EDUCATIONAL"
-#' \item 11	= "PUBLIC DISPLAY"
-#' \item 12	= "OYSTER PICKING"
-#' \item 13	= "OYSTER SPECIAL"
-#' \item 14	= "MIDSHORE"
-#' \item 15	= "OFFSHORE"
-#' \item 16	= "MID BAY OF FUNDY SCALLOPS"
-#' \item 17	= "UPPER BAY OF FUNDY SCALLOPS"
-#' \item 18	= "FULL BAY OF FUNDY SCALLOPS"
-#' \item 19	= "INSHORE"
-#' \item 20	= "PREDATOR"
-#' \item 21	= "LANDSMAN - PROFESSIONAL"
-#' \item 22	= "LANDSMAN - ASSISTANT"
-#' \item 23	= "OBSERVATION"
-#' \item 24	= "FIXED GEAR GROUNDFISH <45'"
-#' \item 25	= "TEMPORARY"
-#' \item 26	= "TEMPORARY COMMUNAL"
-#' \item 27	= "SILVER HAKE"
-#' \item 28	= "FIXED GEAR 45-65 FEET - GROUNDFISH"
-#' \item 29	= "GULF - TEST FISHERY"
-#' \item 30	= "GULF - EXP COMMUNAL"
-#' \item 31	= "GULF - COMMUNAL"
-#' \item 32	= "GULF - OFFSHORE TEMPORARY"
-#' \item 33	= "SNOW CRAB COMPANIES"
-#' \item 34	= "ELVERS"
-#' \item 35	= "SCIENTIFIC"
-#' \item 36	= "MCFR"
-#' \item 37	= "LIVE FISH TRANSFER"
-#' \item 38	= "GENERAL TRANSFER LICENCE"
-#' \item 39	= "NUISANCE"
-#' \item 40	= "BROODSTOCK COLLECTION"
-#' \item 41	= "FOREIGN VESSEL FISHING"
-#' \item 42	= "FOREIGN VESSEL LOAD/OFFLOAD"
-#' \item 43	= "FOREIGN VESSEL RESEARCH"
-#' \item 44	= "PERSONAL USE"
-#' \item 45	= "USE OF FISH - SECTION 10"
-#' \item 46	= "REPLANTING LICENCE"
-#' \item 47	= "DALIWHAL 10"
-#' \item 48	= "TOBIN 10"
-#' \item 49	= "PORCUPINE BROOK"
-#' \item 50	= "INVASIVE SPECIES"
 #' }
 #' @param gearCode default is \code{NULL}. In some cases, a fleet will contain multiple
 #' gear types. Setting this to \code{NULL} (the default) will prompt you to
@@ -207,89 +153,44 @@
 #'         "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_fleet<-function(fn.oracle.username = "_none_",
-                    fn.oracle.password = "_none_",
-                    fn.oracle.dsn = "_none_",
-                    usepkg = "rodbc",
-                    data.dir=NULL,
-                    quietly = FALSE,
-                    dateStart = NULL, dateEnd = NULL,
-                    mdCode = NULL, subLic = NULL,
-                    gearCode = NULL, nafoCode = NULL,
-                    gearSpType = NULL, gearSpSize= NULL,
-                    useDate = NULL, vessLen = NULL,
-                    noPrompts =FALSE){
-  # showSp = F, spCode = NULL,
-  # @param showSp default is \code{FALSE} This tool can be used to narrow down fleets to those fleet
-  # members who reported a particular species at any point in the specified time period.  If this is
-  # set to T, then in addition to being able to select mdCode and gearCode from a select list, you
-  # can also select from all of the reported landed species.
-  # @param spCode default is \code{NULL} If this is set to a valid MARFIS species code, it will filter
-  # the fleet members to only those who reported the selected species at some point in the specified
-  # time frame.
+get_fleet_remote<-function(fn.oracle.username = "_none_",
+                           fn.oracle.password = "_none_",
+                           fn.oracle.dsn = "_none_",
+                           usepkg = "rodbc",
+                           data.dir=NULL,
+                           quietly = FALSE,
+                           dateStart = NULL, dateEnd = NULL,
+                           mdCode = NULL,
+                           gearCode = NULL, nafoCode = NULL,
+                           gearSpType = NULL, gearSpSize= NULL,
+                           useDate = NULL, vessLen = NULL,
+                           noPrompts =FALSE){
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
-  # spCode=as.numeric(spCode)
   keep<-new.env()
-  keep$spDone <- keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$subLicDone <- keep$vessLenDone <- FALSE
+  keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$vessLenDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  if (exists("isolated")){
-    cat("Using local data\n")
-    cxn = -1
-    tables = c(file.path(data.dir,"MARFIS.GEARS.rdata"),
-               file.path(data.dir,"MARFIS.LICENCE_SUBTYPES.rdata"),
-               file.path(data.dir,"MARFIS.LICENCES.rdata"),
-               file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.rdata"),
-               file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.rdata"),
-               file.path(data.dir,"MARFIS.MON_DOCS.rdata"),
-               file.path(data.dir,"MARFIS.MON_DOC_DEFNS.rdata"),
-               file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.rdata"),
-               file.path(data.dir,"MARFIS.PRO_SPC_INFO.rdata"),
-               file.path(data.dir,"MARFIS.VESSELS.rdata")
-    )
-    localDataCheck <- all(sapply(X =tables, file.exists))
-    if (localDataCheck){
-      cat("Access to all required MARFIS data confirmed.  Proceeding...\n")
-    }else{
-      cat("Cannot proceed with all of the following files in your data.dir:\n")
-      paste0(tables)
-      return(NULL)
-    }
-    df <- basicFleet_local(keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
-    # cat("Initial: ",nrow(df),"\n")
-    # cat(sort(unique(df$NAFO)),"\n")
-    # write.csv(df,"basicFleet_local.csv", row.names = F)
-  }else{
-    cat("Querying the DB\n")
-    cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
-    df <- basicFleet(cxn, keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
-    # cat("Initial: ",nrow(df),"\n")
-    # cat(sort(unique(df$NAFO)),"\n")
-  }
-  # write.csv(df,"basicFleet_db.csv", row.names = F)
-  # print(nrow(df))
-  # clean up the names of each md doc type
+  cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+  df <- get_fleetBasic_remote(cxn, keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode, subLic= subLic,
+  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
                     dateStart = dateStart, dateEnd = dateEnd, noPrompts = noPrompts, useDate = useDate)
 
   if (class(cxn) =="list" && cxn$usepkg =='rodbc') RODBC::odbcClose(cxn$channel)
   if (class(cxn) =="list" && cxn$usepkg =='roracle') ROracle::dbDisconnect(cxn$channel)
-
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))
     return(NULL)
   }else{
     df$NAFO <-NULL
     df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, MD_CODE, GEAR_CODE )),])
-    # cat("Final: ",nrow(df),"\n")
     return(df)
   }
 }

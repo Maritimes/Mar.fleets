@@ -78,7 +78,7 @@ self_filter(quiet = T)
 
 toProcess = summarize_catches()
 toProcess = toProcess[,c("EST_COMBINED_WT", "COMMON")]
-ByCatchSpec = aggregate(
+ByCatchSpec = stats::aggregate(
   x = list(TOT_KG = toProcess$EST_COMBINED_WT),
   by = list(SPEC = toProcess$COMMON
   ),

@@ -1,7 +1,6 @@
 applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                        quietly = NULL,
                        mdCode=NULL,
-                       subLic= NULL,
                        gearCode=NULL,
                        nafoCode= NULL,
                        gearSpType = NULL,
@@ -12,7 +11,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                        useDate = NULL){
   if(noPrompts){
     if (is.null(mdCode)) mdCode<- 'all'
-    if (is.null(subLic)) subLic<- 'all'
     if (is.null(gearCode)) gearCode<- 'all'
     if (is.null(nafoCode)) nafoCode<- 'all'
     if (is.null(gearSpType)) gearSpType<- 'all'
@@ -32,16 +30,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       allOptions <- c(allOptions, "Monitoring Document Type")
     }else if (mdCode == 'all'){
       keep$mdDone <- T
-    }
-  }
-
-  if(!keep$subLicDone){
-    if (length(subLic)>0 && subLic != 'all'){
-      df<- getSubLic(cxn, keep, df, dateStart, dateEnd,  subLic, quietly)
-    }else if (is.null(subLic)){
-      allOptions <- c(allOptions, "Licence Subtype")
-    }else if (subLic == 'all'){
-      keep$subLicDone <- T
     }
   }
 
@@ -73,14 +61,14 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
   }
 
   if (keep$gearDone){
-    test=chkGears(df)
+    test=chk_Gears(df)
     if (length(test)>0) keep$canDoGearSpecs <- T
   }
 
   if(keep$canDoGearSpecs){#only show if a gear selection has been made
     if(!keep$gearSpecsDone){
       if (!(gearSpType=="all" && gearSpSize=="all")){
-        df<- getGearSpecs(cxn, keep, df, data.dir, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
+        df<- get_GearSpecs(cxn, keep, df, data.dir, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
         keep$gearSpecsDone <- T
       }else{
         allOptions <- c(allOptions, "Gear Specifications")
@@ -96,7 +84,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                                multiple=F, graphics=T,
                                title="Choose how to filter the data")
     if (choice=="Monitoring Document Type"){
-      mdPick <- getMDCd(keep= keep, df = df, mdCode, quietly)
+      mdPick <- get_MDCd(keep= keep, df = df, mdCode, quietly)
       if (keep$mdDone){
         df=df[df$MD_CODE %in% mdPick$MD_CODE,]
         df <- applyFilters(cxn = cxn,
@@ -104,7 +92,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           quietly = quietly,
                           df=df,
                           mdCode=mdPick$MD_CODE,
-                          subLic = subLic,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
                           gearSpType = gearSpType,
@@ -119,7 +106,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           quietly = quietly,
                           df=df,
                           mdCode=mdCode,
-                          subLic = subLic,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
                           gearSpType = gearSpType,
@@ -130,37 +116,18 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           noPrompts = noPrompts)
       }
     }
-    if (choice=="Licence Subtype"){
-      df<- getSubLic(cxn, keep, df, dateStart, dateEnd,  subLic, useDate, quietly)
-      df <- applyFilters(cxn = cxn,
-                        keep = keep,
-                        quietly = quietly,
-                        df=df,
-                        mdCode=mdCode,
-                        subLic = subLic,
-                        gearCode=gearCode,
-                        nafoCode = nafoCode,
-                        gearSpType = gearSpType,
-                        gearSpSize = gearSpSize,
-                        dateStart = dateStart,
-                        dateEnd = dateEnd,
-                        useDate = useDate,
-                        noPrompts = noPrompts)
-    }
+
     if (choice=="Gear Type"){
-      gearPick <- getGCd(keep= keep, df = df, gearCode, quietly)
+      gearPick <- get_GCd(keep= keep, df = df, gearCode, quietly)
       if (keep$gearDone){
         df=df[df$GEAR_CODE %in% gearPick$GEAR_CODE,]
         df <- applyFilters(cxn = cxn,
                           keep = keep,
-                          #showSp = showSp,
                           quietly = quietly,
                           df=df,
                           mdCode=mdCode,
-                          subLic = subLic,
                           gearCode=gearPick$GEAR_CODE,
                           nafoCode = nafoCode,
-                          #spCode=spCode,
                           gearSpType = gearSpType,
                           gearSpSize = gearSpSize,
                           dateStart = dateStart,
@@ -170,14 +137,11 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       }else{
         df <- applyFilters(cxn = cxn,
                           keep = keep,
-                          #showSp = showSp,
                           quietly = quietly,
                           df=df,
                           mdCode=mdCode,
-                          subLic = subLic,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
-                          #spCode=spCode,
                           gearSpType = gearSpType,
                           gearSpSize = gearSpSize,
                           dateStart = dateStart,
@@ -187,7 +151,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       }
     }
     if (choice=="NAFO Areas"){
-      nafoPick <- getNAFOCd(keep= keep, df = df, nafoCode, quietly)
+      nafoPick <- get_NAFOCd(keep= keep, df = df, nafoCode, quietly)
       if (keep$nafoDone){
         df=df[df$NAFO %in% nafoPick,]
         df <- applyFilters(cxn = cxn,
@@ -195,7 +159,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           quietly = quietly,
                           df=df,
                           mdCode=mdCode,
-                          subLic = subLic,
                           gearCode=gearCode,
                           nafoCode = nafoPick,
                           gearSpType = gearSpType,
@@ -210,7 +173,6 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           quietly = quietly,
                           df=df,
                           mdCode=mdCode,
-                          subLic = subLic,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
                           gearSpType = gearSpType,
@@ -222,13 +184,12 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       }
     }
     if (choice=="Gear Specifications"){
-      df <- getGearSpecs(cxn = cxn, keep=keep, df = df, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+      df <- get_GearSpecs(cxn = cxn, keep=keep, df = df, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
       df <- applyFilters(cxn = cxn,
                         keep = keep,
                         quietly = quietly,
                         df=df,
                         mdCode=mdCode,
-                        subLic = subLic,
                         gearCode=gearPick$GEAR_CODE,
                         nafoCode = nafoCode,
                         gearSpType = gearSpType,

@@ -1,4 +1,4 @@
-chkGears <- function(df=df){
+chk_Gears <- function(df=df){
   allGears = tolower(unique(df$GEAR_DESC))
   allGears = allGears[!allGears %in% c("trap net")]
   matchTrap=c('trap','pot')

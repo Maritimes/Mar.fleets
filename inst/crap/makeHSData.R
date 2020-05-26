@@ -7,7 +7,7 @@ tt$LANDED_DATE<-NULL
 tt$RND_WEIGHT_T <-  tt$RND_WEIGHT_KGS/1000
 tt$RND_WEIGHT_KGS<-NULL
 
-tt2<- aggregate(
+tt2<- stats::aggregate(
   x = list(RND_WEIGHT_T = tt$RND_WEIGHT_T),
   by = list(VR_NUMBER_FISHING = tt$VR_NUMBER_FISHING,
             TRIP_ID = tt$TRIP_ID,

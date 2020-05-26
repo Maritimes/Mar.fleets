@@ -1,5 +1,5 @@
 # Prompt for and/or Apply NAFO Filters ------------------------------------
-getNAFOCd<-function(keep= keep, df = df, nafoCode = nafoCode, quietly = F){
+get_NAFOCd<-function(keep= keep, df = df, nafoCode = nafoCode, quietly = F){
   keep$nafoDone <- TRUE
   nDf = unique(df["NAFO"])
   nDf = nDf[order(nDf$NAFO), ,drop = FALSE]

@@ -1,5 +1,5 @@
 # Prompt for and/or Apply Gear Filters ------------------------------------
-getGCd<-function(keep= keep, df = df, gearCode = gearCode, quietly = F){
+get_GCd<-function(keep= keep, df = df, gearCode = gearCode, quietly = F){
   keep$gearDone <- T
   gDf = unique(df[,c("GEAR_DESC","GEAR_CODE")])
   gDf = gDf[with(gDf,order(GEAR_CODE)),]

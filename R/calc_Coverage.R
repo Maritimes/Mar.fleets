@@ -67,7 +67,15 @@ calc_Coverage<-function(get_OBS = NULL,
                           get_MARFIS = NULL,
                           agg.poly.shp = NULL,
                           agg.poly.field = NULL,
+                          use.matched =T,
                           quietly = FALSE){
+  if (use.matched){
+    oTrips <- get_OBS$OBS_TRIPS_MATCHED
+    oSets <- get_OBS$OBS_SETS_MATCHED
+  }else{
+    oTrips <- get_OBS$OBS_TRIPS
+    oSets <- get_OBS$OBS_SETS
+  }
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
       agg.poly <- rgdal::readOGR(dsn = agg.poly.shp, verbose = FALSE)
@@ -83,8 +91,8 @@ calc_Coverage<-function(get_OBS = NULL,
     #by set
 
     if (!quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
-    if (!is.null(get_OBS$OBS_SETS)){
-      OBS_area_s = Mar.utils::identify_area(get_OBS$OBS_SETS,
+    if (!is.null(oSets)){
+      OBS_area_s = Mar.utils::identify_area(oSets,
                                      agg.poly.shp = agg.poly.shp,
                                      agg.poly.field = agg.poly.field)
     }else{
@@ -113,9 +121,9 @@ calc_Coverage<-function(get_OBS = NULL,
   #by_trip
   if (!quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
 
-  if (!is.null(get_OBS$OBS_TRIPS) && !is.null(get_OBS$OBS_SETS)){
-    O_trips = merge(get_OBS$OBS_TRIPS[,!names(get_OBS$OBS_TRIPS) %in% c("BOARD_DATE","LANDING_DATE")],
-                    get_OBS$OBS_SETS, all.y =TRUE, by.x = "TRIP_ID_OBS", by.y = "TRIP_ID")
+  if (!is.null(oTrips) && !is.null(oSets)){
+    O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
+                    oSets, all.y =TRUE, by.x = "TRIP_ID_OBS", by.y = "TRIP_ID")
     OBS_area_t = Mar.utils::identify_area(O_trips,
                                         agg.poly.shp = agg.poly.shp,
                                         agg.poly.field = agg.poly.field)

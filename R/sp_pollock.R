@@ -33,7 +33,6 @@ sp_pollock <- function(data.dir = NULL, year=NULL, type = NULL, mesh=NULL, compo
                  dateStart = dateStart,
                  dateEnd = dateEnd,
                  mdCode = mdCode,
-                 subLic = "all",
                  nafoCode= nafoCode,
                  gearCode = gearCode,
                  useDate = useDate,
@@ -49,7 +48,7 @@ sp_pollock <- function(data.dir = NULL, year=NULL, type = NULL, mesh=NULL, compo
 
   # For convenience and comparison, return breakdown by NAFO ------------------------------------
   aggNAFO<- mar$MARF_TRIPS[,c("NAFO_AREA", "RND_WEIGHT_KGS")]
-  aggNAFO = aggregate(
+  aggNAFO = stats::aggregate(
     x = list(TOT_WGT = aggNAFO$RND_WEIGHT_KGS/1000),
     by = list(NAFO = aggNAFO$NAFO_AREA
     ),

@@ -9,7 +9,6 @@ sp_silverhake <- function(data.dir = NULL, year=NULL){
   useDate = "landed" #fished" #landed
   yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
   gearCode = c(12)
-  subLic = 'all'
   mdCode = c(2)
   vessLen = "all"
 
@@ -18,7 +17,6 @@ sp_silverhake <- function(data.dir = NULL, year=NULL){
                  dateStart = dateStart,
                  dateEnd = dateEnd,
                  mdCode = mdCode,
-                 subLic = NULL,
                  nafoCode = nafoCode,
                  gearCode = gearCode,
                  useDate = useDate,
@@ -33,7 +31,7 @@ sp_silverhake <- function(data.dir = NULL, year=NULL){
 
   # For convenience and comparison, return breakdown by NAFO ------------------------------------
   aggNAFO<- mar$MARF_TRIPS[,c("NAFO_AREA", "RND_WEIGHT_KGS")]
-  aggNAFO = aggregate(
+  aggNAFO = stats::aggregate(
     x = list(TOT_WGT = aggNAFO$RND_WEIGHT_KGS/1000),
     by = list(NAFO = aggNAFO$NAFO_AREA
     ),

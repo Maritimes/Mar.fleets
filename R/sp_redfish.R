@@ -14,17 +14,14 @@ sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
   useDate = "landed" #fished" #landed
   yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
   gearCode = c(12)
-  subLic = "all" #was c(24, 28,14,15), but was dropping NAs
   mdCode = c(2)
   vessLen = "all"
 
   # Get the Fleet -------------------------------------------------------------------------------
-  f1 = get_fleet(data.dir=NULL,
-                 data.dir= data.dir,
+  f1 = get_fleet(data.dir= data.dir,
                  dateStart = dateStart,
                  dateEnd = dateEnd,
                  mdCode = mdCode,
-                 subLic = subLic,
                  nafoCode= nafoCode,
                  gearCode = gearCode,
                  useDate = useDate,
@@ -40,7 +37,7 @@ sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
 
   # For convenience and comparison, return breakdown by NAFO ------------------------------------
   aggNAFO<- mar$MARF_TRIPS[,c("NAFO_AREA", "RND_WEIGHT_KGS")]
-  aggNAFO = aggregate(
+  aggNAFO = stats::aggregate(
     x = list(TOT_WGT = aggNAFO$RND_WEIGHT_KGS/1000),
     by = list(NAFO = aggNAFO$NAFO_AREA
     ),

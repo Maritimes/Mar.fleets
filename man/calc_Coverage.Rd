@@ -85,9 +85,15 @@ those trips/sets will be attributed to "Other".
 }
 \seealso{
 Other fleets: 
+\code{\link{get_MARFIS_local}()},
+\code{\link{get_MARFIS_remote}()},
 \code{\link{get_MARFIS}()},
+\code{\link{get_OBS_local}()},
+\code{\link{get_OBS_remote}()},
 \code{\link{get_OBS}()},
 \code{\link{get_VMSTracks}()},
+\code{\link{get_fleet_local}()},
+\code{\link{get_fleet_remote}()},
 \code{\link{get_fleet}()},
 \code{\link{match_sets}()},
 \code{\link{match_trips}()}
