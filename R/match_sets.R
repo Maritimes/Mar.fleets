@@ -25,6 +25,7 @@ match_sets <- function(get_MARFIS = NULL,
                        maxSetDiff_hr =24,
                        quietly=F){
   if (all(is.na(get_OBS)))return(NA)
+  if(is.na(match_trips$MAP_OBS_MARFIS_TRIPS))return(NA)
   if(class(get_OBS)=="list"){
     osets <- get_OBS$OBS_SETS_ALL
   }else if(class(get_OBS)=="data.frame"){

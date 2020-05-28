@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.xlsx
+*.png
 /temp
 /crap
 .Rprofile

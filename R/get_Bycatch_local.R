@@ -1,8 +1,9 @@
 get_Bycatch_local<-function(get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
+  if (is.na(got_OBS$OBS_TRIPS_MATCHED))return(NA)
   spLookups = read.csv("data/spLookups.csv")
   get_data(db="isdb", data.dir = "C:/git/wrangledData", env = environment(), quiet = T )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
-  self_filter(env = environment())
+  self_filter(quiet = T, env = environment())
 
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==dir_Spp),c("SPECCD_ID")]
 
@@ -18,5 +19,11 @@ get_Bycatch_local<-function(get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
     sum
   )
   breakdown <- merge(breakdown, spLookups[,c("SPECCD_ID","COMMON", "SCIENTIFIC")], by.x="SPEC", by.y = "SPECCD_ID", all.x=T)
-  res=list(breakdown)
+  breakdown <- breakdown[with(breakdown, order(-EST_NUM_CAUGHT, EST_KEPT_WT,EST_DISCARD_WT)), ]
+  dir_Spp_row <- breakdown[breakdown$SPEC ==isdbSPP,]
+  breakdown <- breakdown[breakdown$SPEC !=isdbSPP,]
+
+  breakdown <- rbind(dir_Spp_row, breakdown)
+
+  return(breakdown)
 }

@@ -1,20 +1,11 @@
 R.utils::sourceDirectory("C:/git/Maritimes/Mar.utils/R/")
 R.utils::sourceDirectory("C:/git/Maritimes/Mar.bycatch/R/")
 
+yr =2018
 
-yr =c(2015:2018)
-WinterFlounder<-list()
-for (y in 1:length(yr)){
-  #unit should be 2 or 3
-  WinterFlounder[[paste0("WinterFlounder",yr[y])]]<- sp_winterflounder(data.dir = data.dir, year = yr[y])
-}
-
-# WinterFlounder$WinterFlounder2015$catch_T
-# WinterFlounder$WinterFlounder2016$catch_T
-# WinterFlounder$WinterFlounder2017$catch_T
-# WinterFlounder$WinterFlounder2018$catch_T
-#
-# WinterFlounder$WinterFlounder2015$ntrips
-# WinterFlounder$WinterFlounder2016$ntrips
-# WinterFlounder$WinterFlounder2017$ntrips
-# WinterFlounder$WinterFlounder2018$ntrips
+WinterFlounder <- sp_winterflounder(data.dir = data.dir, year = yr)
+plot_Bycatch(obsSpp = WinterFlounder$bycatch[1,1],
+             df = WinterFlounder$bycatch,
+             showXSpp = 20,
+             title ="WinterFlounder", subtitle = yr)
+coverage = calc_Coverage(get_MARFIS = WinterFlounder$marf, get_OBS = WinterFlounder$obs, quietly = T)

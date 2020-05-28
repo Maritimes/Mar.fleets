@@ -26,9 +26,7 @@ sp_halibut <- function(data.dir = NULL, year=NULL, vessLen = c(0,999)){
 
     marf <- get_MARFIS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
                              thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T)
-
     obs <- get_OBS_local( dateStart = dateStart, dateEnd = dateEnd,keepSurveyTrips = T, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T)
-
     bycatch <- get_Bycatch_local(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
   }else{
     # Get the Fleet (remote) ----------------------------------------------------------------------
@@ -42,25 +40,22 @@ sp_halibut <- function(data.dir = NULL, year=NULL, vessLen = c(0,999)){
                               vessLen = vessLen,
                               noPrompts = T,
                               quietly = T)
-
-    # Get the MARFIS linkage data for this fleet (trip_ids, mon_docs, etc) ------------------------
     marf <- get_MARFIS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',data.dir = data.dir,
                               dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode,
                               useDate = useDate, quietly = T)
-
     obs = get_OBS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
                          dateStart = dateStart, dateEnd = dateEnd,
                          thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T)
     bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
   }
-
-  # bycatch <- get_Bycatch()
-  #coverage = calc_Coverage(get_MARFIS = marf, get_OBS = obs, quietly = T)
-  #   # Capture the results in a list and return them ------------------------------------------------
+  # Capture the results in a list and return them ------------------------------------------------
+  cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
+  cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
+  cat("\n")
   res=list()
   res[["fleet"]]<- fleet
-  res[["get_MARFIS"]]<- marf
-  res[["get_OBS"]]<- obs
+  res[["marf"]]<- marf
+  res[["obs"]]<- obs
   res[["bycatch"]]<- bycatch
   return(res)
 }

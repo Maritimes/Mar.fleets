@@ -8,8 +8,10 @@ get_OBS_local(
   dateStart = NULL,
   dateEnd = NULL,
   keepSurveyTrips = FALSE,
+  useDate = "fished",
   quietly = FALSE,
-  thisFleet = NULL
+  thisFleet = NULL,
+  get_MARFIS = NULL
 )
 }
 \arguments{
@@ -25,12 +27,21 @@ want to retain trips that were part of a survey.  These are not typical
 commercial trips and their distribution will not reflect normal
 commercial fishing patterns.}
 
+\item{useDate}{default is \code{"fished"}. Some MARFIS tables have 2 different dates
+that are used for recording when fishing activity took place.  One is "DATE_FISHED",
+and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
+subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
+
 \item{quietly}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}
 
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
 the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
+
+\item{get_MARFIS}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
+trip and set information from MARFIS related to the specified fleet}
 }
 \value{
 returns a list with 2 dataframes - "OBS_TRIPS", and "OBS_SETS".
@@ -47,13 +58,10 @@ Other fleets:
 \code{\link{calc_Coverage}()},
 \code{\link{get_MARFIS_local}()},
 \code{\link{get_MARFIS_remote}()},
-\code{\link{get_MARFIS}()},
 \code{\link{get_OBS_remote}()},
-\code{\link{get_OBS}()},
 \code{\link{get_VMSTracks}()},
 \code{\link{get_fleet_local}()},
 \code{\link{get_fleet_remote}()},
-\code{\link{get_fleet}()},
 \code{\link{match_sets}()},
 \code{\link{match_trips}()}
 }
