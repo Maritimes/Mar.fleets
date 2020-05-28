@@ -54,7 +54,6 @@ get_MARFIS_local<-function(data.dir = NULL,
                            nafoCode= NULL,
                            vessLen = NULL,
                            quietly = FALSE){
-
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   getEff<-function(log_efrt=NULL){
@@ -83,9 +82,11 @@ get_MARFIS_local<-function(data.dir = NULL,
                             'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                             'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS')]
     # if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
-    PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
-    nafoCodeSimp <- gsub(pattern = "%", x=nafoCode, replacement = "",ignore.case = T)
-    PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
+    if (!is.null(nafoCode) && length(nafoCode)>0 && nafoCode != 'all'){
+      PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
+      nafoCodeSimp <- gsub(pattern = "%", x=nafoCode, replacement = "",ignore.case = T)
+      PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
+    }
     # if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
     PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
     return(PS_df)

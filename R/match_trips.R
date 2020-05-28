@@ -179,7 +179,7 @@ match_trips <- function(get_MARFIS = NULL,
   if (is.data.frame(Marf_in_Obs_VRLICDATE_L) && nrow(Marf_in_Obs_VRLICDATE_L)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_VRLICDATE_L)
 
   Marf_in_Obs <- unique(Marf_in_Obs)
-if(is.na(Marf_in_Obs)){
+if(all(is.na(Marf_in_Obs))){
   if(!quietly) cat(paste0("\n","Match Success Summary:","\n"))
   Obs_Trip_Name = 0
   Hail_In_Confirmation_Code = 0
