@@ -1,5 +1,5 @@
 get_Bycatch_local<-function(get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
-  if (is.na(got_OBS$OBS_TRIPS_MATCHED))return(NA)
+  if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
   spLookups = read.csv("data/spLookups.csv")
   get_data(db="isdb", data.dir = "C:/git/wrangledData", env = environment(), quiet = T )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]

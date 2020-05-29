@@ -29,7 +29,7 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   s<- ggplot(data=dfLong, aes(x = reorder(COMMON, ORD), y = WT, fill = CATCH_TYPE))
   s <- s + geom_bar(stat = "identity")
   s <- s + geom_text(data=subset(dfLong, WT !=0), aes(label=WT), colour="black", size=3.5, angle=90, position = position_stack(vjust = 0.5)) #position = position_stack(vjust = 0.5),
-  s <- s + labs(y="Weight (T)", x = NULL, fill = "CATCH TYPE",title = title, subtitle = subtitle)
+  s <- s + labs(y="Weight (kgs)", x = NULL, fill = "CATCH TYPE",title = title, subtitle = subtitle)
   s <- s + theme_minimal()
   s <- s + theme(axis.text.x = element_text(size=7.5, angle = 90, hjust=1))
     s <- s + theme(title = element_text(hjust=0.5))
