@@ -1,6 +1,6 @@
-#' @title sp_redfish
+#' @title sp_surfclam
 #' @description This function is a wrapper function that facilitates extracting the following
-#' information for the redfish fleets:
+#' information for the surfclam fleet:
 #' \describe{
 #'   \item{fleet}{This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)}
@@ -19,33 +19,27 @@
 #' *.rdata files.
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
-#' @param unit default is \code{NULL}. This is either "2" or "3".
-#' @examples Redfish <- sp_redfish(data.dir = "C:/myData",
-#'                                 year = 2018,
-#'                                 unit = 2)
+#' @examples Surfclam <- sp_surfclam(data.dir = "C:/myData",
+#'                                   year = 2018)
 #' @family species
 #' @return
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
+sp_surfclam <- function(data.dir = NULL, year=NULL){
+
+
   dateStart =paste0(year,"-01-01")
   dateEnd =paste0(year,"-12-31")
 
-  # Set up the redfish-specific variables -------------------------------------------------------
-  marfSpp = 120
-  if (unit==2){
-    nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
-    gearSpSize = seq(90,115,1)
-  } else if (unit==3){
-    nafoCode= c('4X%','5YF%','4WD%','4WE%','4WH%','4WK%','4WL%')
-    gearSpSize = seq(110,115,1)
-  }
+  # Set up the Halibut-specific variables -----------------------------------------------------
+  marfSpp = 608
+  nafoCode='all'
+  #nafoCode = NULL
   useDate = "landed" #fished" #landed
   yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
-  gearCode = c(12)
-  mdCode = c(2)
-  vessLen = "all"
-
+  gearCode = 'all'
+  mdCode = c(13) #added 29 (international)
+  vessLen = 'all'
   if(!dbAccess(data.dir=data.dir)){
     fleet <- get_fleet_local(data.dir=data.dir,
                              dateStart = dateStart,
@@ -55,7 +49,6 @@ sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
                              gearCode = gearCode,
                              useDate = useDate,
                              vessLen = vessLen,
-                             gearSpSize =gearSpSize,
                              noPrompts = T,
                              quietly = T)
 
@@ -72,7 +65,6 @@ sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
                               gearCode = gearCode,
                               useDate = useDate,
                               vessLen = vessLen,
-                              gearSpSize =gearSpSize,
                               noPrompts = T,
                               quietly = T)
     marf <- get_MARFIS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',data.dir = data.dir,

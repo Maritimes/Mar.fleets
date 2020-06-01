@@ -9,7 +9,6 @@ get_MARFIS_remote(
   fn.oracle.password = "_none_",
   fn.oracle.dsn = "_none_",
   usepkg = "rodbc",
-  data.dir = NULL,
   dateStart = NULL,
   dateEnd = NULL,
   thisFleet = NULL,
@@ -80,9 +79,16 @@ records for. There are literally hundreds of codes, but here are some of the mor
 \item 700 = Lobster
 }}
 
-\item{nafoCode}{default is \code{NULL}.  This}
+\item{nafoCode}{default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
+used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
+valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
+with the specified code are returned.  For example c('5%') would return all of the areas within
+5Z and 5Y, c('5Z%'), would only return the areas within 5Z (e.g. 5ZE, 5ZU,...), and c('5Z') (no
+wildcard) would only return 5Z - no subareas.}
 
-\item{vessLen}{default is \code{NULL}}
+\item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
+"all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
+including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
 
 \item{quietly}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}

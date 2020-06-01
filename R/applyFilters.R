@@ -1,4 +1,4 @@
-applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
+applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
                        quietly = NULL,
                        mdCode=NULL,
                        gearCode=NULL,
@@ -16,6 +16,11 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
     if (is.null(gearSpType)) gearSpType<- 'all'
     if (is.null(gearSpSize)) gearSpSize<- 'all'
     if (is.null(useDate)) useDate<- 'landed'
+  }
+  if (!dbAccess(data.dir=data.dir)){
+    gearspecfn <- "get_GearSpecs_local"
+  }else{
+    gearspecfn <- "get_GearSpecs_remote"
   }
   allOptions<-"Done" #this will be a vector that gets populated with available filters
 
@@ -67,8 +72,14 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
 
   if(keep$canDoGearSpecs){#only show if a gear selection has been made
     if(!keep$gearSpecsDone){
-      if (!(gearSpType=="all" && gearSpSize=="all")){
-        df<- get_GearSpecs(cxn, keep, df, data.dir, gearSpType, gearSpSize, dateStart, dateEnd, quietly)
+      if (!(is.null(gearSpType) || gearSpType=="all") && (is.null(gearSpSize) || gearSpSize=="all")){
+        if (gearspecfn=="get_GearSpecs_local"){
+          df <- get_GearSpecs_local(cxn = NULL, keep=keep, df = df, data.dir = data.dir, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+          keep$gearSpecsDone <- T
+        }else{
+          df <- get_GearSpecs_remote(cxn = cxn, keep=keep, df = df, data.dir =NULL, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+          keep$gearSpecsDone <- T
+        }
         keep$gearSpecsDone <- T
       }else{
         allOptions <- c(allOptions, "Gear Specifications")
@@ -91,6 +102,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           keep = keep,
                           quietly = quietly,
                           df=df,
+                          data.dir = data.dir,
                           mdCode=mdPick$MD_CODE,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
@@ -105,6 +117,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           keep = keep,
                           quietly = quietly,
                           df=df,
+                          data.dir = data.dir,
                           mdCode=mdCode,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
@@ -125,6 +138,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           keep = keep,
                           quietly = quietly,
                           df=df,
+                          data.dir = data.dir,
                           mdCode=mdCode,
                           gearCode=gearPick$GEAR_CODE,
                           nafoCode = nafoCode,
@@ -139,6 +153,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           keep = keep,
                           quietly = quietly,
                           df=df,
+                          data.dir = data.dir,
                           mdCode=mdCode,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
@@ -158,6 +173,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           keep = keep,
                           quietly = quietly,
                           df=df,
+                          data.dir = data.dir,
                           mdCode=mdCode,
                           gearCode=gearCode,
                           nafoCode = nafoPick,
@@ -172,6 +188,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
                           keep = keep,
                           quietly = quietly,
                           df=df,
+                          data.dir = data.dir,
                           mdCode=mdCode,
                           gearCode=gearCode,
                           nafoCode = nafoCode,
@@ -184,11 +201,19 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL,
       }
     }
     if (choice=="Gear Specifications"){
-      df <- get_GearSpecs(cxn = cxn, keep=keep, df = df, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
-      df <- applyFilters(cxn = cxn,
+
+      if (gearspecfn=="get_GearSpecs_local"){
+        df <- get_GearSpecs_local(cxn = NULL, keep=keep, df = df, data.dir = data.dir, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+        keep$gearSpecsDone <- T
+        }else{
+        df <- get_GearSpecs_remote(cxn = cxn, keep=keep, df = df, data.dir =NULL, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+        keep$gearSpecsDone <- T
+        }
+            df <- applyFilters(cxn = cxn,
                         keep = keep,
                         quietly = quietly,
                         df=df,
+                        data.dir = data.dir,
                         mdCode=mdCode,
                         gearCode=gearPick$GEAR_CODE,
                         nafoCode = nafoCode,

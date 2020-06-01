@@ -2,6 +2,9 @@
 #' @description This function extracts all of the records from the observer database that are
 #' within a particular date range, and if a fleet is provided, it will also limit the results to
 #' those vessels with particular combinations of VR and licence.
+#' @param data.dir  The default is your working directory. If you are hoping to
+#' load existing data, this folder should identify the folder containing your
+#' *.rdata files.
 #' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
 #' of the window of time you want to look at.
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
@@ -29,7 +32,7 @@
 #' about the observer sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_OBS_local <- function(dateStart = NULL, dateEnd = NULL,
+get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
                           keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
                           thisFleet = NULL, get_MARFIS = NULL){
   if (is.null(dateEnd)){
@@ -68,10 +71,12 @@ get_OBS_local <- function(dateStart = NULL, dateEnd = NULL,
     LICENCE_VESSELS <- LICENCE_VESSELS[paste0(LICENCE_VESSELS$LICENCE_ID,"_",LICENCE_VESSELS$VR_NUMBER) %in% LIC_VR,
                                        c("VR_NUMBER","LICENCE_ID")]
     colnames(LICENCE_VESSELS)[colnames(LICENCE_VESSELS)=="LICENCE_ID"] <- "LIC_tmp2"
+
     obs_TRIPS_all <- merge(obs_TRIPS_all, LICENCE_VESSELS, all.x=T)
     obs_TRIPS_all$MARFIS_LICENSE_NO <- ifelse(is.na(obs_TRIPS_all$LIC_tmp2),obs_TRIPS_all$LIC_tmp1, obs_TRIPS_all$LIC_tmp2)
-
+#this line is dropping the lobster trips (below)
     obs_TRIPS_all <- obs_TRIPS_all[paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$VR_NUMBER) %in% LIC_VR,]
+    if (nrow(obs_TRIPS_all)<1) return(NA)
     obs_TRIPS_all$LIC_tmp1 <- obs_TRIPS_all$LIC_tmp2 <- NULL
     if (!keepSurveyTrips){
       if (nrow(obs_TRIPS_all[(obs_TRIPS_all$TRIPCD_ID > 7010 & obs_TRIPS_all$TRIPCD_ID != 7099),])>0){
@@ -149,45 +154,4 @@ get_OBS_local <- function(dateStart = NULL, dateEnd = NULL,
   res[["OBS_TRIPS_MATCHED"]]<- obs_TRIPS_matched
   res[["OBS_SETS_MATCHED"]] <- obs_SETS_matched
   return(res)
-
-  # if (is.null(obs_TRIPS_all)) obs_TRIPS_all[] <- NA
-  # if(is.null(obs_TRIPS_all)){
-  #   if (!quietly)cat(paste0("\n","No Observer trips or sets found","\n"))
-  #   obs_TRIPS_all <- NA
-  #   obs_SETS_all <- NA
-  #   obs_TRIPS_matched <- NA
-  #   obs_SETS_matched <- NA
-  # }else{
-  #   if (nrow(trips$MAP_OBS_MARFIS_TRIPS)>0){
-  #   }
-  #   if (is.null(obs_SETS_all)){
-  #     if (!quietly)cat(paste0("\n","No Observer sets found","\n"))
-  #     obs_SETS_all <- NA
-  #     obs_SETS_matched <- NA
-  #   }
-  # }
-  # if (!is.null(thisFleet) & !is.null(get_MARFIS)){
-  #   if (nrow(sets$MAP_OBS_MARFIS_SETS)>0){
-  #     res[["OBS_SETS_MATCHED"]] <- obs_SETS_matched
-  #   }
-  # }
-
-  # if (!is.null(thisFleet) & !is.null(get_MARFIS)){
-  #   trips = match_trips(get_MARFIS = get_MARFIS, get_OBS = res, useDate = useDate, quietly = T)
-  #   if (nrow(trips$MAP_OBS_MARFIS_TRIPS)>0){
-  # obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
-  #   res[["OBS_TRIPS_MATCHED"]]<- obs_TRIPS_matched
-  # }
-  # sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = res, match_trips = trips, quietly = T)
-  #     if (nrow(sets$MAP_OBS_MARFIS_SETS)>0){
-  #       obs_SETS_matched <- obs_SETS_all[obs_SETS_all$FISHSET_ID %in% sets$MAP_OBS_MARFIS_SETS$FISHSET_ID,]
-  #       res[["OBS_SETS_MATCHED"]] <- obs_SETS_matched
-  #     }
-  #   }else{
-  #     cat("\n","Can't match Obs trips and sets without values for parameters 'thisFleet' and 'get_MARFIS'")
-  #   }
-  #   return(res)
-  # }else{
-  #   return(NULL)
-  # }
 }

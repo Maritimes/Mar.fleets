@@ -14,6 +14,10 @@
 #' @param get_OBS default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
 #' trip and set information from the observer database.
+#' @param useDate default is \code{"fished"}. Some MARFIS tables have 2 different dates
+#' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
+#' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
+#' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
 #' @family fleets

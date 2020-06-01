@@ -134,13 +134,23 @@
 #' }
 #' @param nafoCode default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
 #' used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
-#' valid values from a list.
+#' valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
+#' with the specified code are returned.  For example c('5%') would return all of the areas within
+#' 5Z and 5Y, c('5Z%'), would only return the areas within 5Z (e.g. 5ZE, 5ZU,...), and c('5Z') (no
+#' wildcard) would only return 5Z - no subareas.
 #' @param gearSpType default is \code{NULL}. This is a vector of MARFIS codes describing the type of
 #' gear.  For example, mesh gear can be either "D" or "S" (Diamond or Square).  If this is left as
 #' NULL, a popup will allow the user to select valid values from a list.
 #' @param gearSpSize default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
 #' may describe mesh, hooks or traps.  If this is left as NULL, a popup will allow the user to select
 #' valid values from a list.
+#' @param useDate default is \code{"fished"}. Some MARFIS tables have 2 different dates
+#' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
+#' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
+#' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
+#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
+#' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
+#' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
 #' @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
 #' any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
 #' and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
@@ -157,13 +167,12 @@ get_fleet_remote<-function(fn.oracle.username = "_none_",
                            fn.oracle.password = "_none_",
                            fn.oracle.dsn = "_none_",
                            usepkg = "rodbc",
-                           data.dir=NULL,
                            quietly = FALSE,
                            dateStart = NULL, dateEnd = NULL,
                            mdCode = NULL,
                            gearCode = NULL, nafoCode = NULL,
                            gearSpType = NULL, gearSpSize= NULL,
-                           useDate = NULL, vessLen = NULL,
+                           useDate = "landed", vessLen = NULL,
                            noPrompts =FALSE){
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
@@ -172,7 +181,7 @@ get_fleet_remote<-function(fn.oracle.username = "_none_",
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
-  df <- get_fleetBasic_remote(cxn, keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
+  df <- get_fleetBasic_remote(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)

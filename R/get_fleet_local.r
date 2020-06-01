@@ -1,6 +1,9 @@
 #' @title get_fleet_local
 #' @description This function extracts all of the Vessel/Licence combinations
 #' associated with a particular fleet for a particular date range.
+#' @param data.dir  The default is your working directory. If you are hoping to
+#' load existing data, this folder should identify the folder containing your
+#' *.rdata files.
 #' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
 #' of the window of time you want to look at.
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
@@ -116,13 +119,23 @@
 #' }
 #' @param nafoCode default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
 #' used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
-#' valid values from a list.
+#' valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
+#' with the specified code are returned.  For example c('5%') would return all of the areas within
+#' 5Z and 5Y, c('5Z%'), would only return the areas within 5Z (e.g. 5ZE, 5ZU,...), and c('5Z') (no
+#' wildcard) would only return 5Z - no subareas.
 #' @param gearSpType default is \code{NULL}. This is a vector of MARFIS codes describing the type of
 #' gear.  For example, mesh gear can be either "D" or "S" (Diamond or Square).  If this is left as
 #' NULL, a popup will allow the user to select valid values from a list.
 #' @param gearSpSize default is \code{NULL}.This is a vector of acceptable sizes for the gear.  This
 #' may describe mesh, hooks or traps.  If this is left as NULL, a popup will allow the user to select
 #' valid values from a list.
+#' @param useDate default is \code{"fished"}. Some MARFIS tables have 2 different dates
+#' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
+#' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
+#' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
+#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
+#' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
+#' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
 #' @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
 #' any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
 #' and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
@@ -141,7 +154,7 @@ get_fleet_local<-function(data.dir=NULL,
                           mdCode = NULL,
                           gearCode = NULL, nafoCode = NULL,
                           gearSpType = NULL, gearSpSize= NULL,
-                          useDate = NULL, vessLen = NULL,
+                          useDate = "landed", vessLen = NULL,
                           noPrompts =FALSE){
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
@@ -156,7 +169,7 @@ get_fleet_local<-function(data.dir=NULL,
   }
   df$MD_DESC <- trimws(df$MD_DESC)
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = -1, keep = keep, quietly = quietly, df = df, mdCode=mdCode,
+  df = applyFilters(cxn = -1, keep = keep, quietly = quietly, df = df, data.dir = data.dir, mdCode=mdCode,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
                     dateStart = dateStart, dateEnd = dateEnd, noPrompts = noPrompts, useDate = useDate)
   if(nrow(df)<1) {

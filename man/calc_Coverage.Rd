@@ -9,7 +9,6 @@ calc_Coverage(
   get_MARFIS = NULL,
   agg.poly.shp = NULL,
   agg.poly.field = NULL,
-  use.matched = T,
   quietly = FALSE
 )
 }

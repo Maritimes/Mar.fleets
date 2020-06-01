@@ -67,15 +67,11 @@ calc_Coverage<-function(get_OBS = NULL,
                           get_MARFIS = NULL,
                           agg.poly.shp = NULL,
                           agg.poly.field = NULL,
-                          use.matched =T,
                           quietly = FALSE){
-  if (use.matched){
+
     oTrips <- get_OBS$OBS_TRIPS_MATCHED
     oSets <- get_OBS$OBS_SETS_MATCHED
-  }else{
-    oTrips <- get_OBS$OBS_TRIPS
-    oSets <- get_OBS$OBS_SETS
-  }
+
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
       agg.poly <- rgdal::readOGR(dsn = agg.poly.shp, verbose = FALSE)

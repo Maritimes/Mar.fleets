@@ -5,6 +5,7 @@
 \title{get_OBS_local}
 \usage{
 get_OBS_local(
+  data.dir = NULL,
   dateStart = NULL,
   dateEnd = NULL,
   keepSurveyTrips = FALSE,
@@ -15,6 +16,10 @@ get_OBS_local(
 )
 }
 \arguments{
+\item{data.dir}{The default is your working directory. If you are hoping to
+load existing data, this folder should identify the folder containing your
+*.rdata files.}
+
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
 

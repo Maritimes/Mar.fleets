@@ -1,3 +1,32 @@
+#' @title sp_haddock
+#' @description This function is a wrapper function that facilitates extracting the following
+#' information for the haddock fleets:
+#' \describe{
+#'   \item{fleet}{This is a dataframe of identifiers for all of the various trips undertaken by the
+#'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)}
+#'   \item{marf}{This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
+#'   the trips, the sets, and a special dataframe containing information that can be used to link
+#'   the commercial data to the observer data}
+#'   \item{obs}{This is a list of 4 data objects - 2 of which are all of the discovered observer data
+#'   TRIPS and SETS for the fleet, as well as the TRIPS and SETS from teh observer data that were
+#'   sucessfully matched with the MARFIS data}
+#'   \item{bycatch}{This is a dataframe with the various species that were observed during observed
+#'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
+#'   estimated discarded wt(kg) are all captured}
+#' }
+#' @param data.dir  The default is your working directory. If you are hoping to
+#' load existing data, this folder should identify the folder containing your
+#' *.rdata files.
+#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
+#' observer and bycatch data.
+#' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
+#' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
+#' @examples Haddock_5ZJM_m <- sp_haddock(data.dir = "C:/myData", year = 2018, type = "MOBILE", area = "5ZJM")
+#' Haddock_4X5Y_f <- sp_haddock(data.dir = "C:/myData", year = 2018, type = "FIXED", area = "4X5Y")
+#' @family species
+#' @return
+#' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @export
 sp_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
   dateStart =paste0(year,"-01-01")
   dateEnd =paste0(year,"-12-31")
@@ -25,7 +54,7 @@ sp_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
     if (toupper(type) == "MOBILE") gearSpSize="all"
   }
   vessLen = "all"
-  if(!dbAccess()){
+  if(!dbAccess(data.dir=data.dir)){
     fleet <- get_fleet_local(data.dir=data.dir,
                              dateStart = dateStart,
                              dateEnd = dateEnd,
@@ -40,12 +69,11 @@ sp_haddock <- function(data.dir = NULL, year=NULL, type = NULL, area= NULL){
 
     marf <- get_MARFIS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
                              thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T)
-    obs <- get_OBS_local( dateStart = dateStart, dateEnd = dateEnd,keepSurveyTrips = T, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T)
-    bycatch <- get_Bycatch_local(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
+    obs <- get_OBS_local(data.dir = data.dir,  dateStart = dateStart, dateEnd = dateEnd,keepSurveyTrips = T, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T)
+    bycatch <- get_Bycatch_local(data.dir = data.dir, get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
   }else{
     # Get the Fleet (remote) ----------------------------------------------------------------------
-    fleet <- get_fleet_remote(data.dir=data.dir,
-                              dateStart = dateStart,
+    fleet <- get_fleet_remote(dateStart = dateStart,
                               dateEnd = dateEnd,
                               mdCode = mdCode,
                               nafoCode= nafoCode,

@@ -1,6 +1,9 @@
 #' @title get_MARFIS_local
 #' @description This function extracts all of the MARFIS records for vessels with
 #' particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
+#' @param data.dir  The default is your working directory. If you are hoping to
+#' load existing data, this folder should identify the folder containing your
+#' *.rdata files.
 #' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
 #' of the window of time you want to look at.
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
@@ -33,8 +36,15 @@
 #' \item 623 = Sea Scallop
 #' \item 700 = Lobster
 #' }
-#' @param nafoCode default is \code{NULL}.  This
-#' @param vessLen default is \code{NULL}
+#' @param nafoCode default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
+#' used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
+#' valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
+#' with the specified code are returned.  For example c('5%') would return all of the areas within
+#' 5Z and 5Y, c('5Z%'), would only return the areas within 5Z (e.g. 5ZE, 5ZU,...), and c('5Z') (no
+#' wildcard) would only return 5Z - no subareas.
+#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
+#' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
+#' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
 #' @family fleets
@@ -57,6 +67,7 @@ get_MARFIS_local<-function(data.dir = NULL,
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   getEff<-function(log_efrt=NULL){
+    LOG_EFRT_STD_INFO<-NA
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = T)
     PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
     colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
@@ -73,6 +84,7 @@ get_MARFIS_local<-function(data.dir = NULL,
     return(PS_sets)
   }
   getPS<-function(allProSpc=NULL, marfSpp=NULL, nafoCode = NULL){
+    PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- NA
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS"), env = environment(), quiet = T)
@@ -92,6 +104,7 @@ get_MARFIS_local<-function(data.dir = NULL,
     return(PS_df)
   }
   getED<-function(mondocs=NULL){
+    MON_DOC_ENTRD_DETS <- NA
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("MON_DOC_ENTRD_DETS"), env = environment(), quiet = T)
     ED_df <- MON_DOC_ENTRD_DETS[MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
     if (nrow(ED_df)<1)return(NULL)
@@ -106,6 +119,7 @@ get_MARFIS_local<-function(data.dir = NULL,
     return(ED_df)
   }
   getHIC<-function(trips = NULL){
+    HAIL_IN_CALLS <- HAIL_OUTS <- NA
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_IN_CALLS"), env = environment(), quiet = T)
     HIC_df <- HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
@@ -113,6 +127,7 @@ get_MARFIS_local<-function(data.dir = NULL,
     return(HIC_df)
   }
   getHOC<-function(trips = NULL){
+    HAIL_OUTS <- NA
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_OUTS"), env = environment(), quiet = T)
     HOC_df <- HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"

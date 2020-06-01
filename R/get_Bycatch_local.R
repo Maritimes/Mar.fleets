@@ -1,16 +1,17 @@
-get_Bycatch_local<-function(get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
+get_Bycatch_local<-function(data.dir = data.dir, get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
+  ISCATCHES <- ISTRIPS <- NA
   if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
-  spLookups = read.csv("data/spLookups.csv")
-  get_data(db="isdb", data.dir = "C:/git/wrangledData", env = environment(), quiet = T )
+  load("data/spLookups.rda")
+  Mar.datawrangling::get_data(db="isdb", data.dir = data.dir, env = environment(), quiet = T )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
-  self_filter(quiet = T, env = environment())
+  Mar.datawrangling::self_filter(quiet = T, env = environment())
 
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==dir_Spp),c("SPECCD_ID")]
 
   df<-ISCATCHES
   df<-df[,c("SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT")]
   df[is.na(df)] <- 0
-  breakdown = aggregate(
+  breakdown = stats::aggregate(
     x = list(EST_NUM_CAUGHT = df$EST_NUM_CAUGHT,
              EST_KEPT_WT = df$EST_KEPT_WT,
              EST_DISCARD_WT = df$EST_DISCARD_WT),

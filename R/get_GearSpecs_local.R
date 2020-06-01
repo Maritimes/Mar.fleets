@@ -1,41 +1,27 @@
+#' @title get_GearSpecs_local
+#' @description Certain gears can have different specifications.  Mesh gears can have different mesh
+#' sizes or shapes, hooks can be different sizes, and traps can have different configurations.
+#' This function filters the data to the specified size and/or type, and if no filters were initially
+#' specified, can prompt the user to decide if and how to filter the data.
+#' @noRd
 # Prompt for and/or Apply Gear Description Filters ---------------------------
-get_GearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
-                        gearSpType= gearSpType, gearSpSize=gearSpSize,
-                        dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
+get_GearSpecs_local<- function(cxn = NULL, keep=keep, df = df, data.dir = NULL,
+                               gearSpType= gearSpType, gearSpSize=gearSpSize,
+                               dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
   if(all('all' %in% gearSpSize && 'all' %in% gearSpType  )){
     #if both have 'all' no need to filter
     return(df)
   }
   gearSpcFilt <- c("Types","Sizes")
-  #|length(gearSpSize)==0
-  #|length(gearSpType)==0
   if ("all" %in% gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
   if ("all" %in% gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
-  #if (length(gearSpSize)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
-  #if (length(gearSpType)>0) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
   # Get all of the records for our df that might link to gear info ----------------------------------------
-  if (!class(cxn) =="list"){
+  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = T)
+  LOG_EFRT_STD_INFO = LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
+  LOG_EFRT_STD_INFO <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
+                                               & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
+  gearSpecDF<-  LOG_EFRT_STD_INFO[ LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
 
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = T)
-    LOG_EFRT_STD_INFO = LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
-    LOG_EFRT_STD_INFO <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
-                                                                       & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
-    gearSpecDF<-  LOG_EFRT_STD_INFO[ LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
-  }else{
-    #ripped out of sql below as unecessary addition of LOG_SPC_STD_INFO
-    #, MARFISSCI.LOG_SPC_STD_INFO
-    #LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID = LOG_SPC_STD_INFO.LOG_EFRT_STD_INFO_ID AND
-    gearSpecDFQry <- paste0("SELECT DISTINCT
-                          LOG_EFRT_STD_INFO.MON_DOC_ID,
-                          LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
-                          FROM MARFISSCI.LOG_EFRT_STD_INFO
-                          WHERE
-                          LOG_EFRT_STD_INFO.MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
-                          AND LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",dateStart,"','YYYY-MM-DD')
-                          AND to_date('",dateEnd,"','YYYY-MM-DD')")
-    gearSpecDF<- cxn$thecmd(cxn$channel, gearSpecDFQry)
-    gearSpecDF<- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
-  }
   if(nrow(gearSpecDF)<1){
     cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
     return(df)
@@ -67,19 +53,10 @@ get_GearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
   grSpCols <- c(grSpType, grSpSize)
 
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-  if (!class(cxn) =="list"){
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quiet = T)
-    LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
-    gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
-  }else{
-    where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
-    gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
-                                WHERE LOG_EFRT_STD_INFO_ID BETWEEN
-                                ",min(gearSpecDF$LOG_EFRT_STD_INFO_ID), " AND ",max(gearSpecDF$LOG_EFRT_STD_INFO_ID),"
-                                ", where2)
-    gearSpecRelevant<- cxn$thecmd(cxn$channel, gearSpecRelevantQry)
-    gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
-  }
+
+  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quiet = T)
+  LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
+  gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
   if(nrow(gearSpecRelevant)<1){
     cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
     return(df)
@@ -96,7 +73,7 @@ get_GearSpecs<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
     }else if (length(gearSpSize)>0){
       #apply the requested filter
       if (all(length(gearSpSize)==length(seq(130,999,1))) && all(gearSpSize==seq(130,999,1))){
-      #if (all(gearSpSize %in% seq(130,999,1))){
+        #if (all(gearSpSize %in% seq(130,999,1))){
         cat("\n","Large mesh is found indirectly, by getting all data, and subtracting small mesh","\n")
         #this is weird because HS finds the large gear indirectly
         #he gets all gear, and subtracts the small gear - this leaves the large gear (and some NAs)
