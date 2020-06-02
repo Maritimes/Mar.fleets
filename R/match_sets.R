@@ -60,7 +60,8 @@ match_sets <- function(get_MARFIS = NULL,
   for (i in 1:length(utrips)){
     this_Otrip = osets_m[osets_m$TRIP_ID == utrips[i],]
     this_Mtrip <- msets_m[msets_m$TRIP_ID_OBS == utrips[i],]
-
+print(head(this_Otrip))
+print(head(this_Mtrip))
     this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
     this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
 
