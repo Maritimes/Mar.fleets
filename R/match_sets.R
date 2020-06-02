@@ -15,6 +15,7 @@
 #' will never be matched.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
+#' @import data.table
 #' @family fleets
 #' @return a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
@@ -72,9 +73,6 @@ match_sets <- function(get_MARFIS = NULL,
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
     #matches all mtrips to nearest otrip - some otrips matched mult
-    cat(this_Otrip_Name,"\n")
-    cat(nrow(this_Mtrip),"\n")
-    cat(nrow(this_Otrip),"\n") #: ",class(this_Mtrip)," ",class(this_Mtrip),"\n")
     mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
     mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
 
