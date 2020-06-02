@@ -1,6 +1,6 @@
 get_Bycatch_remote<-function(get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
   if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
-  spLookups = utils::read.csv("data/spLookups.csv")
+  # spLookups = utils::read.csv("data/spLookups.csv")
 
   cat("This is just a placeholder for a remote version of this function")
 

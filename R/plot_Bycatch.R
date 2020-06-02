@@ -70,7 +70,7 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
     df$COMMON <- factor(df$COMMON, levels = df$COMMON)
   # Plot the total number caught ----------------------------------------------------------------
   p <- ggplot2::ggplot(df, ggplot2::aes(x= "COMMON", y="EST_NUM_CAUGHT", fill = "COMMON"))
-  p<-p + scale_y_continuous(trans = 'log10')
+  p<-p + ggplot2::scale_y_continuous(trans = 'log10')
   p<-p + ggplot2::annotation_logticks(sides="l")
   p<-p + ggplot2::geom_bar(stat="identity")
   p<-p + ggplot2::labs(y="EST_NUM_CAUGHT (log)", x = NULL, fill = "COMMON", title = title, subtitle = subtitle)
