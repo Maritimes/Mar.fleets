@@ -35,8 +35,6 @@
 get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
                           keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
                           thisFleet = NULL, get_MARFIS = NULL){
-  cat("in get_OBS_local","\n")
-  browser()
   if (is.null(dateEnd)){
     cat(paste0("\n","No end date was provided, so one year of data will be retrieved."))
     dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
@@ -133,17 +131,13 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
     return(ISSETPROFILE_WIDE)
   }
-  cat("getting trips","\n")
   obs_TRIPS_all <- get_OBS_trips(dateStart = dateStart, dateEnd = dateEnd, LIC_VR = LIC_VR_fleet)
-  cat("got trips","\n")
       trips <- match_trips(get_MARFIS = get_MARFIS, get_OBS = obs_TRIPS_all, useDate = useDate, quietly = F)
-      cat("matched trips","\n")
            if (all(is.na(trips))){
         obs_TRIPS_matched <- NA
       }else{
         obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
       }
-      cat("getting sets","\n")
   obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
   cat("got sets","\n")
       sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = obs_SETS_all, match_trips = trips, quietly = F)

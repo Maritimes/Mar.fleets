@@ -35,6 +35,7 @@ match_sets <- function(get_MARFIS = NULL,
 
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
+  browser()
   msets = get_MARFIS$MARF_SETS
   # osets = get_OBS$OBS_SETS_ALL
   if(is.null(get_MARFIS$MARF_MATCH) ||
@@ -54,18 +55,7 @@ match_sets <- function(get_MARFIS = NULL,
                  by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all.x=T)
   spdf = unique(msets[,c("TRIP_ID_MARF","SET_PER_DAY")])
   msets_m = merge(msets_m, spdf,all.x=T)
-  cnames = c("MARFIS", "OBSERVER")
-  # TOT_TRIPS_FOUND = c(length(unique(get_MARFIS$MARF_TRIPS$TRIP_ID_MARF)), length(unique(get_OBS$OBS_TRIPS_ALL$TRIP_ID_OBS)))
-  # TOT_SETS_FOUND = c(length(unique(get_MARFIS$MARF_SETS$LOG_EFRT_STD_INFO_ID)), length(unique(get_OBS$OBS_SETS_ALL$FISHSET_ID)))
-  # TOT_TRIPS_MATCHED = c(length(unique(match$TRIP_ID_MARF)), length(unique(match$TRIP_ID_OBS)))
-  # TOT_MATCHABLE_SETS = c(nrow(msets_m), nrow(osets_m))
-  # LOGPERDAY_TRIPS = c(length(unique(match[match$TRIP_ID_MARF %in% spdf[spdf$SET_PER_DAY==T,"TRIP_ID_MARF"],"TRIP_ID_MARF"])),NA)
-  # REALISTIC_MATCHABLE_SETS =  c(length(unique(msets_m[msets_m$TRIP_ID_MARF %in% spdf[spdf$SET_PER_DAY==F,"TRIP_ID_MARF"],"LOG_EFRT_STD_INFO_ID"])),length(unique(osets_m$FISHSET_ID)))
-  # df = as.data.frame(rbind(TOT_TRIPS_FOUND, TOT_SETS_FOUND, TOT_TRIPS_MATCHED,TOT_MATCHABLE_SETS,LOGPERDAY_TRIPS,REALISTIC_MATCHABLE_SETS))
-  # names(df)<-cnames
   utrips = sort(unique(osets_m$TRIP_ID))
-  # posSetMatches <- NA
-  # potSetMatches <- NA
   matches_all<-NA
   for (i in 1:length(utrips)){
     this_Otrip = osets_m[osets_m$TRIP_ID == utrips[i],]
