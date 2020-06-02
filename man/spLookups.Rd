@@ -4,13 +4,15 @@
 \name{spLookups}
 \alias{spLookups}
 \title{spLookups Metadata}
-\format{rda
+\format{
+rda
 \describe{
 \item{SPECCD_ID}{observer species code}
 \item{SCIENTIFIC}{Scientifi name}
 \item{COMMON}{Common name}
 \item{MARFIS_CODE}{marfis species code}
-}}
+}
+}
 \usage{
 spLookups
 }
