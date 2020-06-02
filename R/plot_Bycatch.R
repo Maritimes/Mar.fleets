@@ -1,3 +1,26 @@
+#' @title plot_Bycatch
+#' @description This function generates simple pdf plots for the output from Mar.bycatch species
+#' functions.
+#' @param obsSpp  This is the observer db species code ID for the main species.
+#' @param df default is \code{NULL}. This is the \code{bycatch} object from the \code{get_Bycatch_*()}
+#' function.  Alternative, a data.frame with the following codes would work as well - "SPEC" (the code),
+#' EST_NUM_CAUGHT (numeric), EST_KEPT_WT (numeric), EST_DISCARD_WT (numeric) and COMMON (species
+#' common name).
+#' @param showXSpp  default is \code{NULL}. This is the total number of species that will be shown
+#' on the plots.  Some datasets have so many species, that it is impossible to see them all.  When
+#' clipping the data to the top species, it is sorted such that those species with the largest combined
+#' EST_KEPT_WT and EST_DISCARD_WT are retained.
+#' @param title default is \code{NULL}. This will be the title of your plots.
+#' @param subtitle default is \code{NULL}. This will be the subtitle of your plots.
+#' @examples \dontrun{
+#' plot_Bycatch(obsSpp = swordfish2018$bycatch[1,1],
+#'              df = swordfish2018$bycatch, showXSpp = 20,
+#'              title ="Swordfish",
+#'              subtitle =2018)
+#'                                 }
+#' @return nothing, but png files will be generated in your working directory.
+#' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @export
 plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
   COMMON <- ORD <- WT <- CATCH_TYPE <- NA
   ts = format(Sys.time(), "%Y%m%d_%H%M")
@@ -47,7 +70,7 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
     df$COMMON <- factor(df$COMMON, levels = df$COMMON)
   # Plot the total number caught ----------------------------------------------------------------
   p <- ggplot2::ggplot(df, ggplot2::aes(x= "COMMON", y="EST_NUM_CAUGHT", fill = "COMMON"))
-  p<-p + ggplot2::scale_y_continuous(trans = 'log10')
+  p<-p + scale_y_continuous(trans = 'log10')
   p<-p + ggplot2::annotation_logticks(sides="l")
   p<-p + ggplot2::geom_bar(stat="identity")
   p<-p + ggplot2::labs(y="EST_NUM_CAUGHT (log)", x = NULL, fill = "COMMON", title = title, subtitle = subtitle)
@@ -61,5 +84,6 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
 
   cat("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_tot",ts,".png")))
   cat("\n")
+  browser()
   }
 }

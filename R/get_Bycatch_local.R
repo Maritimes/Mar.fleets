@@ -1,7 +1,7 @@
 get_Bycatch_local<-function(data.dir = data.dir, get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
-  ISCATCHES <- ISTRIPS <- spLookups <- NA
+  ISCATCHES <- ISTRIPS <- NA
   if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
-  load("data/spLookups.rda")
+
   Mar.datawrangling::get_data(db="isdb", data.dir = data.dir, env = environment(), quiet = T )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
   Mar.datawrangling::self_filter(quiet = T, env = environment())
