@@ -58,7 +58,11 @@ sp_swordfish <- function(data.dir = NULL, year=NULL){
     marf <- get_MARFIS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
                              thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T)
     cat("got marfis","\n")
-    obs <- get_OBS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,keepSurveyTrips = T, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T)
+    # data.dir = NULL, dateStart = NULL, dateEnd = NULL,
+    # keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
+    # thisFleet = NULL, get_MARFIS = NULL
+    obs <- get_OBS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
+                         keepSurveyTrips = T, useDate = useDate, quietly = T, thisFleet = fleet, get_MARFIS = marf)
     cat("got observer","\n")
     bycatch <- get_Bycatch_local(data.dir = data.dir, get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
     cat("got bycatch","\n")
