@@ -56,6 +56,7 @@ match_sets <- function(get_MARFIS = NULL,
   msets_m = merge(msets_m, spdf,all.x=T)
   utrips = sort(unique(osets_m$TRIP_ID))
   matches_all<-NA
+  cat("matching","\n")
   for (i in 1:length(utrips)){
     this_Otrip = osets_m[osets_m$TRIP_ID == utrips[i],]
     this_Mtrip <- msets_m[msets_m$TRIP_ID_OBS == utrips[i],]
@@ -65,6 +66,7 @@ match_sets <- function(get_MARFIS = NULL,
 
     this_Otrip <- data.table::setDT(this_Otrip)
     this_Mtrip <- data.table::setDT(this_Mtrip)
+    cat("1","\n")
     this_Otrip$timeO <- this_Otrip$DATE_TIME
     this_Mtrip$timeM <- this_Otrip$EF_FISHED_DATETIME
     # this_Otrip <- this_Otrip[, timeO:=DATE_TIME]
@@ -72,27 +74,31 @@ match_sets <- function(get_MARFIS = NULL,
 
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
+    cat("2","\n")
     #matches all mtrips to nearest otrip - some otrips matched mult
     mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
     mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
+    cat("3","\n")
 
     #matches all otrips to nearest mtrip - some mtrips matched mult
     otrips_match <- this_Mtrip[this_Otrip , roll = "nearest", allow.cartesian=TRUE ]
     otrips_match <- otrips_match[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID","timeM", "timeO")]
+    cat("4","\n")
     mtrips_match$diff<- as.numeric(abs(difftime(mtrips_match$timeM,mtrips_match$timeO)), units="hours")
     mtrips_match$timeM<-mtrips_match$timeO<-NULL
 
     otrips_match$diff<- as.numeric(abs(difftime(otrips_match$timeM,otrips_match$timeO)), units="hours")
     otrips_match$timeM<-otrips_match$timeO<-NULL
-
+    cat("5","\n")
     #retain trips within acceptable time frame -others are "unmatchable"
     this_Mtrip_OK <- mtrips_match[mtrips_match$diff<=maxSetDiff_hr,]
     this_Otrip_OK <- otrips_match[otrips_match$diff<=maxSetDiff_hr,]
     this_Mtrip_nope <- mtrips_match[mtrips_match$diff>maxSetDiff_hr,]
+    cat("6","\n")
     if (nrow(this_Mtrip_nope)>0)this_Mtrip_nope$FISHSET_ID <- NA
     this_Otrip_nope <- otrips_match[otrips_match$diff>maxSetDiff_hr,]
     if (nrow(this_Otrip_nope)>0)this_Otrip_nope$LOG_EFRT_STD_INFO_ID <- NA
-
+    cat("7","\n")
     # For all msets in timeframe, calculate difference and retain closest in time
     #for for matches for all marfis sets, then for all obs sets
    #print(this_Otrip_OK[this_Otrip_OK[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1])
@@ -140,6 +146,7 @@ match_sets <- function(get_MARFIS = NULL,
     }
   }
 
+  cat("done matching","\n")
   matches_all$diff <-NULL
   res= list()
   res[["MAP_OBS_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
