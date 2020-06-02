@@ -85,7 +85,7 @@ sp_swordfish <- function(data.dir = NULL, year=NULL){
                          thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T)
     bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
   }
-  if (!quietly)("Rolling it up","\n")
+  if (!quietly)cat("Rolling it up","\n")
   # Capture the results in a list and return them ------------------------------------------------
   cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
