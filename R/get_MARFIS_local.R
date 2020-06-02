@@ -147,7 +147,6 @@ get_MARFIS_local<-function(data.dir = NULL,
   }
 
   sets<- getEff(log_efrt = allLogEff)
-
   if (useDate =="fished"){
     theDate = "DATE_FISHED"
   }else{

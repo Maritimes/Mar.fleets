@@ -132,21 +132,19 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     return(ISSETPROFILE_WIDE)
   }
   obs_TRIPS_all <- get_OBS_trips(dateStart = dateStart, dateEnd = dateEnd, LIC_VR = LIC_VR_fleet)
-      trips <- match_trips(get_MARFIS = get_MARFIS, get_OBS = obs_TRIPS_all, useDate = useDate, quietly = F)
-           if (all(is.na(trips))){
-        obs_TRIPS_matched <- NA
-      }else{
-        obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
-      }
+  trips <- match_trips(get_MARFIS = get_MARFIS, get_OBS = obs_TRIPS_all, useDate = useDate, quietly = F)
+  if (all(is.na(trips))){
+    obs_TRIPS_matched <- NA
+  }else{
+    obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
+  }
   obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
-  cat("got sets","\n")
-      sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = obs_SETS_all, match_trips = trips, quietly = F)
-      cat("matched sets","\n")
-            if (is.na(sets)){
-        obs_SETS_matched <- NA
-      }else{
-        obs_SETS_matched <- obs_SETS_all[obs_SETS_all$FISHSET_ID %in% sets$MAP_OBS_MARFIS_SETS$FISHSET_ID,]
-      }
+  sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = obs_SETS_all, match_trips = trips, quietly = F)
+  if (is.na(sets)){
+    obs_SETS_matched <- NA
+  }else{
+    obs_SETS_matched <- obs_SETS_all[obs_SETS_all$FISHSET_ID %in% sets$MAP_OBS_MARFIS_SETS$FISHSET_ID,]
+  }
 
   res= list()
   res[["OBS_TRIPS_ALL"]]<- obs_TRIPS_all
