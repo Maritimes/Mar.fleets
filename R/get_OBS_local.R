@@ -74,7 +74,7 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
 
     obs_TRIPS_all <- merge(obs_TRIPS_all, LICENCE_VESSELS, all.x=T)
     obs_TRIPS_all$MARFIS_LICENSE_NO <- ifelse(is.na(obs_TRIPS_all$LIC_tmp2),obs_TRIPS_all$LIC_tmp1, obs_TRIPS_all$LIC_tmp2)
-#this line is dropping the lobster trips (below)
+    #this line is dropping the lobster trips (below)
     obs_TRIPS_all <- obs_TRIPS_all[paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$VR_NUMBER) %in% LIC_VR,]
     if (nrow(obs_TRIPS_all)<1) return(NA)
     obs_TRIPS_all$LIC_tmp1 <- obs_TRIPS_all$LIC_tmp2 <- NULL
@@ -131,18 +131,22 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
     return(ISSETPROFILE_WIDE)
   }
-
+  cat("getting trips","\n")
   obs_TRIPS_all <- get_OBS_trips(dateStart = dateStart, dateEnd = dateEnd, LIC_VR = LIC_VR_fleet)
+  cat("got trips","\n")
       trips <- match_trips(get_MARFIS = get_MARFIS, get_OBS = obs_TRIPS_all, useDate = useDate, quietly = F)
-      if (all(is.na(trips))){
+      cat("matched trips","\n")
+           if (all(is.na(trips))){
         obs_TRIPS_matched <- NA
       }else{
         obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
       }
-
+      cat("getting sets","\n")
   obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
+  cat("got sets","\n")
       sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = obs_SETS_all, match_trips = trips, quietly = F)
-      if (is.na(sets)){
+      cat("matched sets","\n")
+            if (is.na(sets)){
         obs_SETS_matched <- NA
       }else{
         obs_SETS_matched <- obs_SETS_all[obs_SETS_all$FISHSET_ID %in% sets$MAP_OBS_MARFIS_SETS$FISHSET_ID,]
