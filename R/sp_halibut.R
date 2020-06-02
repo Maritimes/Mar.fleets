@@ -1,18 +1,18 @@
 #' @title sp_halibut
 #' @description This function is a wrapper function that facilitates extracting the following
 #' information for the halibut fleets:
-#' \describe{
-#'   \item{fleet}{This is a dataframe of identifiers for all of the various trips undertaken by the
-#'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)}
-#'   \item{marf}{This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
+#' \itemize{
+#'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
+#'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
+#'   \item \code{marf} - This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
 #'   the trips, the sets, and a special dataframe containing information that can be used to link
-#'   the commercial data to the observer data}
-#'   \item{obs}{This is a list of 4 data objects - 2 of which are all of the discovered observer data
+#'   the commercial data to the observer data
+#'   \item \code{obs} - This is a list of 4 data objects - 2 of which are all of the discovered observer data
 #'   TRIPS and SETS for the fleet, as well as the TRIPS and SETS from teh observer data that were
-#'   sucessfully matched with the MARFIS data}
-#'   \item{bycatch}{This is a dataframe with the various species that were observed during observed
+#'   sucessfully matched with the MARFIS data
+#'   \item \code{bycatch} - This is a dataframe with the various species that were observed during observed
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
-#'   estimated discarded wt(kg) are all captured}
+#'   estimated discarded wt(kg) are all captured
 #' }
 #' @param data.dir  The default is your working directory. If you are hoping to
 #' load existing data, this folder should identify the folder containing your
@@ -22,11 +22,14 @@
 #' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 #' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 #' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
-#' @examples Halibut <- sp_halibut(data.dir = "C:/myData",
-#'                                 year = 2018,
-#'                                vessLen = c(0,45))
+#' @examples \dontrun{
+#' Halibut <- sp_halibut(data.dir = "C:/myData",
+#'                       year = 2018,
+#'                       vessLen = c(0,45))
+#' }
 #' @family species
-#' @return
+#' @return list of objects, including marfis data, observer data, information for matching observer
+#' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_halibut <- function(data.dir = NULL, year=NULL, vessLen = c(0,999)){
@@ -70,7 +73,7 @@ sp_halibut <- function(data.dir = NULL, year=NULL, vessLen = c(0,999)){
                               vessLen = vessLen,
                               noPrompts = T,
                               quietly = T)
-    marf <- get_MARFIS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',data.dir = data.dir,
+    marf <- get_MARFIS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
                               dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode,
                               useDate = useDate, quietly = T)
     obs = get_OBS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',

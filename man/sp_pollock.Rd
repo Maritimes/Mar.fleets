@@ -27,36 +27,41 @@ observer and bycatch data.}
 \item{component}{default is \code{NULL}. This is either "WESTERN" or "EASTERN".}
 }
 \value{
-
+list of objects, including marfis data, observer data, information for matching observer
+and marfis data, and a summary of bycatch
 }
 \description{
 This function is a wrapper function that facilitates extracting the following
 information for the pollock fleets:
-\describe{
-  \item{fleet}{This is a dataframe of identifiers for all of the various trips undertaken by the
-  selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)}
-  \item{marf}{This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
+\itemize{
+  \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
+  selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
+  \item \code{marf} - This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
   the trips, the sets, and a special dataframe containing information that can be used to link
-  the commercial data to the observer data}
-  \item{obs}{This is a list of 4 data objects - 2 of which are all of the discovered observer data
+  the commercial data to the observer data
+  \item \code{obs} - This is a list of 4 data objects - 2 of which are all of the discovered observer data
   TRIPS and SETS for the fleet, as well as the TRIPS and SETS from teh observer data that were
-  sucessfully matched with the MARFIS data}
-  \item{bycatch}{This is a dataframe with the various species that were observed during observed
+  sucessfully matched with the MARFIS data
+  \item \code{bycatch} - This is a dataframe with the various species that were observed during observed
   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
-  estimated discarded wt(kg) are all captured}
+  estimated discarded wt(kg) are all captured
 }
 }
 \examples{
+\dontrun{
 Pollock_West_m_sm <- sp_pollock(data.dir = "C:/myData",
-                                          year = 2018,
-                                          type = "MOBILE",
-                                          mesh="SMALL",
-                                         component = "WESTERN")
+                                year = 2018,
+                                type = "MOBILE",
+                                mesh="SMALL",
+                                component = "WESTERN")
+                                }
+\dontrun{
 Pollock_East_m_lg <- sp_pollock(data.dir = "C:/myData",
                                 year = 2018,
                                 type = "MOBILE",
                                 mesh="LARGE",
                                 component = "EASTERN")
+                                }
 }
 \seealso{
 Other species: 

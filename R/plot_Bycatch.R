@@ -28,7 +28,7 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   s <- s + ggplot2::labs(y="Weight (kgs)", x = NULL, fill = "CATCH TYPE",title = title, subtitle = subtitle)
   s <- s + ggplot2::theme_minimal()
   s <- s + ggplot2::theme(axis.text.x =  ggplot2::element_text(size=7.5, angle = 90, hjust=1))
-  s <- s + ggplot2::theme(title = element_text(hjust=0.5))
+  s <- s + ggplot2::theme(title = ggplot2::element_text(hjust=0.5))
   s
 
   ggplot2::ggsave(plot = s, filename = paste0(fn,"_stacked_",ts,".png"), width = 14, height=8.5)

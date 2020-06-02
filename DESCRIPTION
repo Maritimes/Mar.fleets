@@ -1,7 +1,7 @@
 Package: Mar.bycatch
 Type: Package
 Title: Facilitates Extraction of Commercial Fisheries Data for the Maritimes
-Version: 2020.06.01
+Version: 2020.06.02
 Author: Mike McMahon <mike.mcmahon@dfo-mpo.gc.ca>
 Maintainer: Mike McMahon <mike.mcmahon@dfo-mpo.gc.ca>
 Description: This package facilitates the extraction of commerical logbook and observer data associated with commercial fisheries for the Maritimes region.
@@ -12,6 +12,7 @@ Imports:
     lubridate,
     rgdal,
     sf,
+    Mar.datawrangling,
     Mar.utils,
     Mar.data,
     ggplot2,
@@ -20,7 +21,7 @@ Imports:
     stats,
     utils,
     data.table
-Remotes:,
+Remotes:
   Maritimes/Mar.datawrangling,
   Maritimes/Mar.utils,
   Maritimes/Mar.data
