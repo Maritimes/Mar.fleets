@@ -54,18 +54,17 @@ sp_swordfish <- function(data.dir = NULL, year=NULL){
                              vessLen = vessLen,
                              noPrompts = T,
                              quietly = T)
-    if (!quietly)cat("Got fleet","\n")
     marf <- get_MARFIS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
                              thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T)
-    if (!quietly)cat("Got marfis","\n")
+
     # data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     # keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
     # thisFleet = NULL, get_MARFIS = NULL
     obs <- get_OBS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
                          keepSurveyTrips = T, useDate = useDate, quietly = T, thisFleet = fleet, get_MARFIS = marf)
-    if (!quietly)cat("Got observer","\n")
+
     bycatch <- get_Bycatch_local(data.dir = data.dir, get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
-    if (!quietly)cat("Got bycatch","\n")
+
   }else{
     # Get the Fleet (remote) ----------------------------------------------------------------------
     fleet <- get_fleet_remote(dateStart = dateStart,
@@ -85,12 +84,12 @@ sp_swordfish <- function(data.dir = NULL, year=NULL){
                          thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T)
     bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
   }
-  if (!quietly)cat("Rolling it up","\n")
+
   # Capture the results in a list and return them ------------------------------------------------
   cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
   cat("\n")
-  cat("Last bits","\n")
+
   res=list()
   res[["fleet"]]<- fleet
   res[["marf"]]<- marf
