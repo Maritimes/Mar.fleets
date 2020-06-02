@@ -35,6 +35,8 @@
 get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
                           keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
                           thisFleet = NULL, get_MARFIS = NULL){
+  cat("in get_OBS_local","\n")
+  browser()
   if (is.null(dateEnd)){
     cat(paste0("\n","No end date was provided, so one year of data will be retrieved."))
     dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
