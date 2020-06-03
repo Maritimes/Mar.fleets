@@ -67,23 +67,24 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   df$ORD <- seq(1:nrow(df))
   df = df[df$EST_NUM_CAUGHT>0,]
   if (nrow(df)>0){
-    df$COMMON <- factor(df$COMMON, levels = df$COMMON)
-  # Plot the total number caught ----------------------------------------------------------------
-  p <- ggplot2::ggplot(df, ggplot2::aes(x= "COMMON", y="EST_NUM_CAUGHT", fill = "COMMON"))
-  p<-p + ggplot2::scale_y_continuous(trans = 'log10')
-  p<-p + ggplot2::annotation_logticks(sides="l")
-  p<-p + ggplot2::geom_bar(stat="identity")
-  p<-p + ggplot2::labs(y="EST_NUM_CAUGHT (log)", x = NULL, fill = "COMMON", title = title, subtitle = subtitle)
-  p<-p + ggplot2::geom_text(ggplot2::aes(label="EST_NUM_CAUGHT"), position = ggplot2::position_stack(vjust = 0.5), colour="black", size=4, angle=90)
-  p<-p + ggplot2::scale_fill_manual(values =c("#FF0000", randomcoloR::distinctColorPalette(nrow(df))))
-  p<-p + ggplot2::theme_minimal()
-  p<-p + ggplot2::theme(axis.text.x = ggplot2::element_text(size=7.5, angle = 90, hjust=1))
-  p
-  ggplot2::ggsave(plot = p, filename = paste0(fn,"_tot_",ts,".png"), width = 14, height=8.5)
-  gc()
+    df$COMMON_fact <- factor(df$COMMON, levels = df$COMMON)
+    # # Plot the total number caught ----------------------------------------------------------------
+    p <- ggplot2::ggplot(df, ggplot2::aes(x= COMMON_fact, y=EST_NUM_CAUGHT, fill = COMMON_fact))
+    p<-p + ggplot2::scale_y_continuous(trans = 'log10')
+    p<-p + ggplot2::annotation_logticks(sides="l")
+    p<-p + ggplot2::geom_bar(stat="identity")
+    p<-p + ggplot2::labs(y="Est Number Caught (log)", x = NULL, title = title, subtitle = subtitle)
+    p<-p + ggplot2::geom_text(ggplot2::aes(label=EST_NUM_CAUGHT), position = ggplot2::position_stack(vjust = 0.5), colour="black", size=4, angle=90)
+    p<-p + ggplot2::scale_fill_manual(values =c("#FF0000",  randomcoloR::distinctColorPalette(nrow(df))))
+    p<-p + ggplot2::theme_minimal()
+    p<-p + ggplot2::theme(axis.text.x = ggplot2::element_text(size=7.5, angle = 90, hjust=1))
+    p<-p + ggplot2::theme(legend.position = "none")
+    p
+    #
+    ggplot2::ggsave(plot = p, filename = paste0(fn,"_tot_",ts,".png"), width = 14, height=8.5)
+    gc()
 
-  cat("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_tot",ts,".png")))
-  cat("\n")
-  browser()
+    cat("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_tot",ts,".png")))
+    cat("\n")
   }
 }
