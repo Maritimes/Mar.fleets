@@ -27,7 +27,8 @@ chk_Gears <- function(df=df){
 }
 #' @title dbAccess
 #' @description rolls up chk_OfflineData and chk_OracleAvail to check if the database is accessible,
-#' and if all of the necessary data is available locally, returning TRUE or FALSE only.
+#' and if not, verifies that all of the necessary data is available locally, returning TRUE or FALSE
+#'  only.
 #' @noRd
 dbAccess<-function(data.dir = NULL){
   if(!chk_OracleAvail()){
@@ -47,17 +48,17 @@ dbAccess<-function(data.dir = NULL){
   }
 }
 #' @title chk_OracleAvail
-#' @description This sees if the script can find Oracle.  If connected to the maritimesdfo network,
-#' it should be available, but if working from home, it won't be.  This will be used to help decide
-#' whether to proceed with sql queries to the db, or use of offline files
+#' @description This script checks to see if the the computer running the analysis is on  the dfo
+#' network simply by hitting an intranet site. This is used to help decide whether to proceed with
+#' sql queries to the db, or use of offline files
 #' @param url_in url to try to hit to verify network access
 #' @param t the time in seconds before timeout
 #' @noRd
-chk_OracleAvail <- function(url_in = "http://vsnsbioxp74.ent.dfo-mpo.ca/",t=2){
+chk_OracleAvail <- function(url_in = "https://intranet.ent.dfo-mpo.ca/",t=2){
   con <- url(url_in)
   check <- suppressWarnings(try(open.connection(con,open="rt",timeout=t),silent=T)[1])
-  suppressWarnings(try(close.connection(con),silent=T))
-  ifelse(is.null(check),TRUE,FALSE)
+  this <- ifelse(is.null(check),TRUE,FALSE)
+  return(this)
 }
 #' @title chk_OfflineData
 #' @description This function verifies that all of the necessary local files exist before embarking
@@ -69,30 +70,30 @@ chk_OracleAvail <- function(url_in = "http://vsnsbioxp74.ent.dfo-mpo.ca/",t=2){
 chk_OfflineData <- function(data.dir = NULL, check = NULL){
   check = tolower(check)
   tables = switch(check,
-                  "get_fleet" = c(file.path(data.dir,"MARFIS.GEARS.rdata"),
-                                  file.path(data.dir,"MARFIS.LICENCE_SUBTYPES.rdata"),
-                                  file.path(data.dir,"MARFIS.LICENCES.rdata"),
-                                  file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.rdata"),
-                                  file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.rdata"),
-                                  file.path(data.dir,"MARFIS.MON_DOCS.rdata"),
-                                  file.path(data.dir,"MARFIS.MON_DOC_DEFNS.rdata"),
-                                  file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.rdata"),
-                                  file.path(data.dir,"MARFIS.PRO_SPC_INFO.rdata"),
-                                  file.path(data.dir,"MARFIS.VESSELS.rdata")),
-                  "get_marfis" = c(file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.rdata"),
-                                   file.path(data.dir,"MARFIS.PRO_SPC_INFO.rdata"),
-                                   file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.rdata"),
-                                   file.path(data.dir,"MARFIS.VESSELS.rdata"),
-                                   file.path(data.dir,"MARFIS.MON_DOC_ENTRD_DETS.rdata"),
-                                   file.path(data.dir,"MARFIS.HAIL_IN_CALLS.rdata"),
-                                   file.path(data.dir,"MARFIS.HAIL_OUTS.rdata")),
-                  "get_gearspecs" = c(file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.rdata"),
-                                      file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.rdata")),
-                  "get_obs" = c(file.path(data.dir,"ISDB.ISTRIPS.rdata"),
-                                file.path(data.dir,"ISDB.ISFISHSETS.rdata"),
-                                file.path(data.dir,"ISDB.ISSETPROFILE_WIDE.rdata"),
-                                file.path(data.dir,"ISDB.ISVESSELS.rdata"),
-                                file.path(data.dir,"MARFIS.LICENCE_VESSELS.rdata"))
+                  "get_fleet" = c(file.path(data.dir,"MARFIS.GEARS.RData"),
+                                  file.path(data.dir,"MARFIS.LICENCE_SUBTYPES.RData"),
+                                  file.path(data.dir,"MARFIS.LICENCES.RData"),
+                                  file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.RData"),
+                                  file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.RData"),
+                                  file.path(data.dir,"MARFIS.MON_DOCS.RData"),
+                                  file.path(data.dir,"MARFIS.MON_DOC_DEFNS.RData"),
+                                  file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.RData"),
+                                  file.path(data.dir,"MARFIS.PRO_SPC_INFO.RData"),
+                                  file.path(data.dir,"MARFIS.VESSELS.RData")),
+                  "get_marfis" = c(file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.RData"),
+                                   file.path(data.dir,"MARFIS.PRO_SPC_INFO.RData"),
+                                   file.path(data.dir,"MARFIS.NAFO_UNIT_AREAS.RData"),
+                                   file.path(data.dir,"MARFIS.VESSELS.RData"),
+                                   file.path(data.dir,"MARFIS.MON_DOC_ENTRD_DETS.RData"),
+                                   file.path(data.dir,"MARFIS.HAIL_IN_CALLS.RData"),
+                                   file.path(data.dir,"MARFIS.HAIL_OUTS.RData")),
+                  "get_gearspecs" = c(file.path(data.dir,"MARFIS.LOG_EFRT_STD_INFO.RData"),
+                                      file.path(data.dir,"MARFIS.LOG_EFRT_ENTRD_DETS.RData")),
+                  "get_obs" = c(file.path(data.dir,"ISDB.ISTRIPS.RData"),
+                                file.path(data.dir,"ISDB.ISFISHSETS.RData"),
+                                file.path(data.dir,"ISDB.ISSETPROFILE_WIDE.RData"),
+                                file.path(data.dir,"ISDB.ISVESSELS.RData"),
+                                file.path(data.dir,"MARFIS.LICENCE_VESSELS.RData"))
   )
   localDataCheck <- all(sapply(X =tables, file.exists))
   if (localDataCheck){

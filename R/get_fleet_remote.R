@@ -151,10 +151,10 @@
 #' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 #' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 #' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
-#' @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
-#' any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
-#' and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
-#' will be returned that match your other filters.
+## @param noPrompts default is \code{FALSE}. If set to True, the script will ignore
+## any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
+## and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
+## will be returned that match your other filters.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
 #' embed the script into a function rather than running it interactively.
@@ -172,8 +172,9 @@ get_fleet_remote<-function(fn.oracle.username = "_none_",
                            mdCode = NULL,
                            gearCode = NULL, nafoCode = NULL,
                            gearSpType = NULL, gearSpSize= NULL,
-                           useDate = "landed", vessLen = NULL,
-                           noPrompts =FALSE){
+                           useDate = "landed", vessLen = NULL){
+                           # ,noPrompts =FALSE){
+  cat("REEEEEEEEEE!","\n")
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   keep<-new.env()
@@ -190,7 +191,8 @@ get_fleet_remote<-function(fn.oracle.username = "_none_",
   #Further narrow the data using md and gear - prompting if needed
   df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
-                    dateStart = dateStart, dateEnd = dateEnd, noPrompts = noPrompts, useDate = useDate)
+                    dateStart = dateStart, dateEnd = dateEnd, useDate = useDate)
+  # noPrompts = noPrompts,
 
   if (class(cxn) =="list" && cxn$usepkg =='rodbc') RODBC::odbcClose(cxn$channel)
   if (class(cxn) =="list" && cxn$usepkg =='roracle') ROracle::dbDisconnect(cxn$channel)

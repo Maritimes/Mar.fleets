@@ -7,32 +7,32 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
                        gearSpSize = NULL,
                        dateStart = NULL,
                        dateEnd = NULL,
-                       noPrompts = F,
+                       # noPrompts = F,
                        useDate = NULL){
-  if(noPrompts){
+  # if(noPrompts){
     if (is.null(mdCode)) mdCode<- 'all'
     if (is.null(gearCode)) gearCode<- 'all'
     if (is.null(nafoCode)) nafoCode<- 'all'
     if (is.null(gearSpType)) gearSpType<- 'all'
     if (is.null(gearSpSize)) gearSpSize<- 'all'
     if (is.null(useDate)) useDate<- 'landed'
-  }
+  # }
   if (!dbAccess(data.dir=data.dir)){
     gearspecfn <- "get_GearSpecs_local"
   }else{
     gearspecfn <- "get_GearSpecs_remote"
   }
-  allOptions<-"Done" #this will be a vector that gets populated with available filters
+  # allOptions<-"Done" #this will be a vector that gets populated with available filters
 
   if(!keep$mdDone){
-       if (length(mdCode)>0 && mdCode != "all"){
+    if (length(mdCode)>0 && mdCode != "all"){
       df=df[df$MD_CODE %in% mdCode,]
       keep$mdDone <- T
     }else if (length(unique(df$MD_CODE))==1 ){
       if(!quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
       keep$mdDone <- T
-    }else if (length(mdCode) == 0){
-      allOptions <- c(allOptions, "Monitoring Document Type")
+      # }else if (length(mdCode) == 0){
+      #   allOptions <- c(allOptions, "Monitoring Document Type")
     }else if (mdCode == 'all'){
       keep$mdDone <- T
     }
@@ -45,8 +45,8 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
     }else if (length(gearCode)>0 && gearCode != "all"){
       df=df[df$GEAR_CODE %in% gearCode,]
       keep$gearDone<-T
-    }else if (length(gearCode)==0) {
-      allOptions <- c(allOptions, "Gear Type")
+      # }else if (length(gearCode)==0) {
+      #   allOptions <- c(allOptions, "Gear Type")
     } else if (gearCode == "all"){
       keep$gearDone<-T
     }
@@ -60,8 +60,8 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
 
       df=df[df$NAFO %in% nafoCode,]
       keep$nafoDone<-T
-    }else{
-      allOptions <- c(allOptions, "NAFO Areas")
+      # }else{
+      #   allOptions <- c(allOptions, "NAFO Areas")
     }
   }
 
@@ -81,153 +81,153 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
           keep$gearSpecsDone <- T
         }
         keep$gearSpecsDone <- T
-      }else{
-        allOptions <- c(allOptions, "Gear Specifications")
+      # }else{
+      #   allOptions <- c(allOptions, "Gear Specifications")
       }
     }
   }
 
-  allOptions <- allOptions[!is.na(allOptions)]
+  # allOptions <- allOptions[!is.na(allOptions)]
 
-  if (length(allOptions)>1 && noPrompts == F){
-    choice<-utils::select.list(allOptions,
-                               preselect=NULL,
-                               multiple=F, graphics=T,
-                               title="Choose how to filter the data")
-    if (choice=="Monitoring Document Type"){
-      mdPick <- get_MDCd(keep= keep, df = df, mdCode, quietly)
-      if (keep$mdDone){
-        df=df[df$MD_CODE %in% mdPick$MD_CODE,]
-        df <- applyFilters(cxn = cxn,
-                          keep = keep,
-                          quietly = quietly,
-                          df=df,
-                          data.dir = data.dir,
-                          mdCode=mdPick$MD_CODE,
-                          gearCode=gearCode,
-                          nafoCode = nafoCode,
-                          gearSpType = gearSpType,
-                          gearSpSize = gearSpSize,
-                          dateStart = dateStart,
-                          dateEnd = dateEnd,
-                          useDate = useDate,
-                          noPrompts = noPrompts)
-      }else{
-        df <- applyFilters(cxn = cxn,
-                          keep = keep,
-                          quietly = quietly,
-                          df=df,
-                          data.dir = data.dir,
-                          mdCode=mdCode,
-                          gearCode=gearCode,
-                          nafoCode = nafoCode,
-                          gearSpType = gearSpType,
-                          gearSpSize = gearSpSize,
-                          dateStart = dateStart,
-                          dateEnd = dateEnd,
-                          useDate = useDate,
-                          noPrompts = noPrompts)
-      }
-    }
-
-    if (choice=="Gear Type"){
-      gearPick <- get_GCd(keep= keep, df = df, gearCode, quietly)
-      if (keep$gearDone){
-        df=df[df$GEAR_CODE %in% gearPick$GEAR_CODE,]
-        df <- applyFilters(cxn = cxn,
-                          keep = keep,
-                          quietly = quietly,
-                          df=df,
-                          data.dir = data.dir,
-                          mdCode=mdCode,
-                          gearCode=gearPick$GEAR_CODE,
-                          nafoCode = nafoCode,
-                          gearSpType = gearSpType,
-                          gearSpSize = gearSpSize,
-                          dateStart = dateStart,
-                          dateEnd = dateEnd,
-                          useDate = useDate,
-                          noPrompts = noPrompts)
-      }else{
-        df <- applyFilters(cxn = cxn,
-                          keep = keep,
-                          quietly = quietly,
-                          df=df,
-                          data.dir = data.dir,
-                          mdCode=mdCode,
-                          gearCode=gearCode,
-                          nafoCode = nafoCode,
-                          gearSpType = gearSpType,
-                          gearSpSize = gearSpSize,
-                          dateStart = dateStart,
-                          dateEnd = dateEnd,
-                          useDate = useDate,
-                          noPrompts = noPrompts)
-      }
-    }
-    if (choice=="NAFO Areas"){
-      nafoPick <- get_NAFOCd(keep= keep, df = df, nafoCode, quietly)
-      if (keep$nafoDone){
-        df=df[df$NAFO %in% nafoPick,]
-        df <- applyFilters(cxn = cxn,
-                          keep = keep,
-                          quietly = quietly,
-                          df=df,
-                          data.dir = data.dir,
-                          mdCode=mdCode,
-                          gearCode=gearCode,
-                          nafoCode = nafoPick,
-                          gearSpType = gearSpType,
-                          gearSpSize = gearSpSize,
-                          dateStart = dateStart,
-                          dateEnd = dateEnd,
-                          useDate = useDate,
-                          noPrompts = noPrompts)
-      }else{
-        df <- applyFilters(cxn = cxn,
-                          keep = keep,
-                          quietly = quietly,
-                          df=df,
-                          data.dir = data.dir,
-                          mdCode=mdCode,
-                          gearCode=gearCode,
-                          nafoCode = nafoCode,
-                          gearSpType = gearSpType,
-                          gearSpSize = gearSpSize,
-                          dateStart = dateStart,
-                          dateEnd = dateEnd,
-                          useDate = useDate,
-                          noPrompts = noPrompts)
-      }
-    }
-    if (choice=="Gear Specifications"){
-
-      if (gearspecfn=="get_GearSpecs_local"){
-        df <- get_GearSpecs_local(cxn = NULL, keep=keep, df = df, data.dir = data.dir, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
-        keep$gearSpecsDone <- T
-        }else{
-        df <- get_GearSpecs_remote(cxn = cxn, keep=keep, df = df, data.dir =NULL, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
-        keep$gearSpecsDone <- T
-        }
-            df <- applyFilters(cxn = cxn,
-                        keep = keep,
-                        quietly = quietly,
-                        df=df,
-                        data.dir = data.dir,
-                        mdCode=mdCode,
-                        gearCode=gearPick$GEAR_CODE,
-                        nafoCode = nafoCode,
-                        gearSpType = gearSpType,
-                        gearSpSize = gearSpSize,
-                        dateStart = dateStart,
-                        dateEnd = dateEnd,
-                        useDate = useDate,
-                        noPrompts = noPrompts)
-    }
-    if (choice=="Done"){
-      cat(paste0("\n","Filtering completed","\n"))
-      return(df)
-    }
-  }
+  # if (length(allOptions)>1 && noPrompts == F){
+  #   choice<-utils::select.list(allOptions,
+  #                              preselect=NULL,
+  #                              multiple=F, graphics=T,
+  #                              title="Choose how to filter the data")
+  #   if (choice=="Monitoring Document Type"){
+  #     mdPick <- get_MDCd(keep= keep, df = df, mdCode, quietly)
+  #     if (keep$mdDone){
+  #       df=df[df$MD_CODE %in% mdPick$MD_CODE,]
+  #       df <- applyFilters(cxn = cxn,
+  #                          keep = keep,
+  #                          quietly = quietly,
+  #                          df=df,
+  #                          data.dir = data.dir,
+  #                          mdCode=mdPick$MD_CODE,
+  #                          gearCode=gearCode,
+  #                          nafoCode = nafoCode,
+  #                          gearSpType = gearSpType,
+  #                          gearSpSize = gearSpSize,
+  #                          dateStart = dateStart,
+  #                          dateEnd = dateEnd,
+  #                          useDate = useDate,
+  #                          noPrompts = noPrompts)
+  #     }else{
+  #       df <- applyFilters(cxn = cxn,
+  #                          keep = keep,
+  #                          quietly = quietly,
+  #                          df=df,
+  #                          data.dir = data.dir,
+  #                          mdCode=mdCode,
+  #                          gearCode=gearCode,
+  #                          nafoCode = nafoCode,
+  #                          gearSpType = gearSpType,
+  #                          gearSpSize = gearSpSize,
+  #                          dateStart = dateStart,
+  #                          dateEnd = dateEnd,
+  #                          useDate = useDate,
+  #                          noPrompts = noPrompts)
+  #     }
+  #   }
+  #
+  #   if (choice=="Gear Type"){
+  #     gearPick <- get_GCd(keep= keep, df = df, gearCode, quietly)
+  #     if (keep$gearDone){
+  #       df=df[df$GEAR_CODE %in% gearPick$GEAR_CODE,]
+  #       df <- applyFilters(cxn = cxn,
+  #                          keep = keep,
+  #                          quietly = quietly,
+  #                          df=df,
+  #                          data.dir = data.dir,
+  #                          mdCode=mdCode,
+  #                          gearCode=gearPick$GEAR_CODE,
+  #                          nafoCode = nafoCode,
+  #                          gearSpType = gearSpType,
+  #                          gearSpSize = gearSpSize,
+  #                          dateStart = dateStart,
+  #                          dateEnd = dateEnd,
+  #                          useDate = useDate,
+  #                          noPrompts = noPrompts)
+  #     }else{
+  #       df <- applyFilters(cxn = cxn,
+  #                          keep = keep,
+  #                          quietly = quietly,
+  #                          df=df,
+  #                          data.dir = data.dir,
+  #                          mdCode=mdCode,
+  #                          gearCode=gearCode,
+  #                          nafoCode = nafoCode,
+  #                          gearSpType = gearSpType,
+  #                          gearSpSize = gearSpSize,
+  #                          dateStart = dateStart,
+  #                          dateEnd = dateEnd,
+  #                          useDate = useDate,
+  #                          noPrompts = noPrompts)
+  #     }
+  #   }
+  #   if (choice=="NAFO Areas"){
+  #     nafoPick <- get_NAFOCd(keep= keep, df = df, nafoCode, quietly)
+  #     if (keep$nafoDone){
+  #       df=df[df$NAFO %in% nafoPick,]
+  #       df <- applyFilters(cxn = cxn,
+  #                          keep = keep,
+  #                          quietly = quietly,
+  #                          df=df,
+  #                          data.dir = data.dir,
+  #                          mdCode=mdCode,
+  #                          gearCode=gearCode,
+  #                          nafoCode = nafoPick,
+  #                          gearSpType = gearSpType,
+  #                          gearSpSize = gearSpSize,
+  #                          dateStart = dateStart,
+  #                          dateEnd = dateEnd,
+  #                          useDate = useDate,
+  #                          noPrompts = noPrompts)
+  #     }else{
+  #       df <- applyFilters(cxn = cxn,
+  #                          keep = keep,
+  #                          quietly = quietly,
+  #                          df=df,
+  #                          data.dir = data.dir,
+  #                          mdCode=mdCode,
+  #                          gearCode=gearCode,
+  #                          nafoCode = nafoCode,
+  #                          gearSpType = gearSpType,
+  #                          gearSpSize = gearSpSize,
+  #                          dateStart = dateStart,
+  #                          dateEnd = dateEnd,
+  #                          useDate = useDate,
+  #                          noPrompts = noPrompts)
+  #     }
+  #   }
+  #   if (choice=="Gear Specifications"){
+  #
+  #     if (gearspecfn=="get_GearSpecs_local"){
+  #       df <- get_GearSpecs_local(cxn = NULL, keep=keep, df = df, data.dir = data.dir, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+  #       keep$gearSpecsDone <- T
+  #     }else{
+  #       df <- get_GearSpecs_remote(cxn = cxn, keep=keep, df = df, data.dir =NULL, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
+  #       keep$gearSpecsDone <- T
+  #     }
+  #     df <- applyFilters(cxn = cxn,
+  #                        keep = keep,
+  #                        quietly = quietly,
+  #                        df=df,
+  #                        data.dir = data.dir,
+  #                        mdCode=mdCode,
+  #                        gearCode=gearPick$GEAR_CODE,
+  #                        nafoCode = nafoCode,
+  #                        gearSpType = gearSpType,
+  #                        gearSpSize = gearSpSize,
+  #                        dateStart = dateStart,
+  #                        dateEnd = dateEnd,
+  #                        useDate = useDate,
+  #                        noPrompts = noPrompts)
+  #   }
+  #   if (choice=="Done"){
+  #     cat(paste0("\n","Filtering completed","\n"))
+  #     return(df)
+  #   }
+  # }
   return(df)
 }

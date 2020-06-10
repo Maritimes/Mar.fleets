@@ -59,7 +59,7 @@ sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
                              useDate = useDate,
                              vessLen = vessLen,
                              gearSpSize =gearSpSize,
-                             noPrompts = T,
+                             # noPrompts = T,
                              quietly = T)
 
     marf <- get_MARFIS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
@@ -76,7 +76,7 @@ sp_redfish <- function(data.dir = NULL, year=NULL, unit = NULL){
                               useDate = useDate,
                               vessLen = vessLen,
                               gearSpSize =gearSpSize,
-                              noPrompts = T,
+                              # noPrompts = T,
                               quietly = T)
     marf <- get_MARFIS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
                               dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode,
