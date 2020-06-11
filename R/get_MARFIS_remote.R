@@ -71,21 +71,22 @@
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_MARFIS_remote<-function(fn.oracle.username = "_none_",
-                            fn.oracle.password = "_none_",
-                            fn.oracle.dsn = "_none_",
-                            usepkg = "rodbc",
-                            dateStart = NULL, dateEnd = NULL,
+get_MARFIS_remote<-function(dateStart = NULL, dateEnd = NULL,
                             thisFleet = NULL,
                             useDate = "fished",
                             marfSpp = NULL,
                             nafoCode= NULL,
                             vessLen = NULL,
-                            quietly = FALSE){
+                            ...){
+  # fn.oracle.username = "_none_",
+  # fn.oracle.password = "_none_",
+  # fn.oracle.dsn = "_none_",
+  # usepkg = "rodbc",
+  args <- list(...)
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+  cxn = Mar.utils::make_oracle_cxn(usepkg = args$usepkg,fn.oracle.username = args$oracle.username,fn.oracle.password = args$fn.oracle.password,fn.oracle.dsn = args$fn.oracle.dsn, quietly = args$quietly)
 
   getEff<-function(log_efrt=NULL){
     PSQry1 <-paste0("SELECT DISTINCT

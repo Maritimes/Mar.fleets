@@ -4,12 +4,11 @@
 \alias{sp_swordfish}
 \title{sp_swordfish}
 \usage{
-sp_swordfish(data.dir = NULL, year = NULL)
+sp_swordfish(useLocal = F, year = NULL, ...)
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
@@ -37,8 +36,7 @@ information for the swordfish fleet:
 }
 \examples{
 \dontrun{
-Swordfish <- sp_swordfish(data.dir = "C:/myData",
-                          year = 2018)
+Swordfish <- sp_swordfish(useLocal = T, year = 2018, data.dir = "C:/myData")
                           }
 }
 \seealso{

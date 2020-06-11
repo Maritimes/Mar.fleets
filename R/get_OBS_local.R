@@ -2,9 +2,6 @@
 #' @description This function extracts all of the records from the observer database that are
 #' within a particular date range, and if a fleet is provided, it will also limit the results to
 #' those vessels with particular combinations of VR and licence.
-#' @param data.dir  The default is your working directory. If you are hoping to
-#' load existing data, this folder should identify the folder containing your
-#' *.rdata files.
 #' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
 #' of the window of time you want to look at.
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
@@ -21,8 +18,6 @@
 #' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
 #' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
 #' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information about the matching process should be shown.
 #' @param get_MARFIS default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet
@@ -32,9 +27,11 @@
 #' about the observer sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
-                          keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
-                          thisFleet = NULL, get_MARFIS = NULL){
+get_OBS_local <- function(dateStart = NULL, dateEnd = NULL,
+                          keepSurveyTrips = FALSE, useDate= "fished",
+                          thisFleet = NULL, get_MARFIS = NULL, ...){
+  args <- list(...)
+  quiet <- ifelse(is.null(args$quiet), TRUE,args$quiet)
   if (is.null(dateEnd)){
     cat(paste0("\n","No end date was provided, so one year of data will be retrieved."))
     dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
@@ -47,7 +44,7 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
   }
 
   get_OBS_trips<-function(dateStart=NULL, dateEnd = NULL, LIC_VR = NULL){
-    Mar.datawrangling::get_data_custom(schema = "ISDB", data.dir = data.dir, tables = c("ISTRIPS","ISVESSELS"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS","ISVESSELS"), env = environment(), quiet = quiet)
     #NA dates are turned to 9999-01-01 so that they will not meet
     #the criteria of being between our start and end dates
     ISTRIPS[is.na(ISTRIPS$LANDING_DATE),"LANDING_DATE"]<- '9999-01-01 01:00:00'
@@ -67,7 +64,7 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     LICS <- unique(LICS[!is.na(LICS)])
     VRS <- sub(".*\\_", "", LIC_VR)
     VRS <- unique(VRS[!is.na(VRS)])
-    Mar.datawrangling::get_data_custom(schema = "MARFIS", data.dir = data.dir, tables = c("LICENCE_VESSELS"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFIS", data.dir = args$data.dir, tables = c("LICENCE_VESSELS"), env = environment(), quiet = quiet)
     LICENCE_VESSELS <- LICENCE_VESSELS[paste0(LICENCE_VESSELS$LICENCE_ID,"_",LICENCE_VESSELS$VR_NUMBER) %in% LIC_VR,
                                        c("VR_NUMBER","LICENCE_ID")]
     colnames(LICENCE_VESSELS)[colnames(LICENCE_VESSELS)=="LICENCE_ID"] <- "LIC_tmp2"
@@ -80,7 +77,7 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     obs_TRIPS_all$LIC_tmp1 <- obs_TRIPS_all$LIC_tmp2 <- NULL
     if (!keepSurveyTrips){
       if (nrow(obs_TRIPS_all[(obs_TRIPS_all$TRIPCD_ID > 7010 & obs_TRIPS_all$TRIPCD_ID != 7099),])>0){
-        if (!quietly) {
+        if (!args$quiet) {
           cat(paste0("\n","Dropping these survey trips:","\n"))
           print(obs_TRIPS_all[(obs_TRIPS_all$TRIPCD_ID > 7010 & obs_TRIPS_all$TRIPCD_ID != 7099),
                               c("VR_NUMBER", "TRIP_ID_OBS", "TRIP", "TRIPCD_ID", "MARFIS_CONF_NUMBER", "MARFIS_LICENSE_NO")])
@@ -94,7 +91,7 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     return(obs_TRIPS_all)
   }
   get_OBS_sets<-function(obsTrips=NULL){
-    Mar.datawrangling::get_data_custom(schema = "ISDB", data.dir = data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"), env = environment(), quiet = quiet)
     ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% obsTrips$TRIP_ID_OBS,c("TRIP_ID", "FISHSET_ID")]
     ISSETPROFILE_WIDE<-ISSETPROFILE_WIDE[ISSETPROFILE_WIDE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
     ISSETPROFILE_WIDE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE_WIDE$DATE_TIME1 > as.POSIXct(as.Date("2100-01-01")),
@@ -132,14 +129,14 @@ get_OBS_local <- function(data.dir = NULL, dateStart = NULL, dateEnd = NULL,
     return(ISSETPROFILE_WIDE)
   }
   obs_TRIPS_all <- get_OBS_trips(dateStart = dateStart, dateEnd = dateEnd, LIC_VR = LIC_VR_fleet)
-  trips <- match_trips(get_MARFIS = get_MARFIS, get_OBS = obs_TRIPS_all, useDate = useDate, quietly = F)
+  trips <- match_trips(get_MARFIS = get_MARFIS, get_OBS = obs_TRIPS_all, useDate = useDate, quiet = quiet)
   if (all(is.na(trips))){
     obs_TRIPS_matched <- NA
   }else{
     obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
   }
   obs_SETS_all <- get_OBS_sets(obsTrips = obs_TRIPS_all)
-  sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = obs_SETS_all, match_trips = trips, quietly = F)
+  sets = match_sets(get_MARFIS = get_MARFIS, get_OBS = obs_SETS_all, match_trips = trips, quiet = quiet)
   if (is.na(sets)){
     obs_SETS_matched <- NA
   }else{

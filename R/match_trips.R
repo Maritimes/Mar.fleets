@@ -18,7 +18,7 @@
 #' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
 #' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
 #' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
+#' @param quiet default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
 #' @family fleets
 #' @return returns a list with 3 dataframes - MAP_OBS_MARFIS_TRIPS, MATCH_ISSUES, UNMATCHABLE & MATCH_SUMMARY
@@ -35,7 +35,7 @@
 match_trips <- function(get_MARFIS = NULL,
                         get_OBS = NULL,
                         useDate = "fished",
-                        quietly = FALSE){
+                        quiet = FALSE){
   if (all(is.na(get_OBS)))return(NA)
   if(class(get_OBS)=="list"){
     obs <- get_OBS$OBS_TRIPS
@@ -53,7 +53,7 @@ match_trips <- function(get_MARFIS = NULL,
     return(df)
   }
   if(is.null(get_MARFIS$MARF_MATCH) || is.null(obs) ){
-    if (!quietly)cat(paste0("\n","Either marfis of Observer did not have any trips to try match against"))
+    if (!quiet)cat(paste0("\n","Either marfis of Observer did not have any trips to try match against"))
     return(NULL)
   }
   marf_TRIPS_all <- clean_OBS_Trip(df = get_MARFIS$MARF_MATCH, field = "OBS_TRIP", out_name = "OBS_TRIP_M")
@@ -184,7 +184,7 @@ match_trips <- function(get_MARFIS = NULL,
 
   Marf_in_Obs <- unique(Marf_in_Obs)
 if(all(is.na(Marf_in_Obs))){
-  if(!quietly) cat(paste0("\n","Match Success Summary:","\n"))
+  if(!quiet) cat(paste0("\n","Match Success Summary:","\n"))
   Obs_Trip_Name = 0
   Hail_In_Confirmation_Code = 0
   Hail_Out_Confirmation_Code = 0
@@ -198,7 +198,7 @@ if(all(is.na(Marf_in_Obs))){
                                 Total_Matches,
                                 Total_Marf_Trips))
   names(summ_df)<-"Num of Trips Matched"
-  if(!quietly) print(summ_df)
+  if(!quiet) print(summ_df)
 
   res <- list()
   res[["MAP_OBS_MARFIS_TRIPS"]] <- NA
@@ -252,7 +252,7 @@ if(all(is.na(Marf_in_Obs))){
     mysteryTrips<-NA
   }
   Marf_in_Obs <- merge(Marf_in_Obs,Marf_O_lookup, all.x=T)
-  if(!quietly) cat(paste0("\n","Match Success Summary:","\n"))
+  if(!quiet) cat(paste0("\n","Match Success Summary:","\n"))
   Obs_Trip_Name = nrow(Marf_in_Obs[grep("OBS_TRIP", Marf_in_Obs$MATCHED_ON),])
   Hail_In_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HI", Marf_in_Obs$MATCHED_ON),])
   Hail_Out_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HO", Marf_in_Obs$MATCHED_ON),])
@@ -266,8 +266,8 @@ if(all(is.na(Marf_in_Obs))){
                                 Total_Matches,
                                 Total_Marf_Trips))
   names(summ_df)<-"Num of Trips Matched"
-  if(!quietly) print(summ_df)
-  if(!quietly) cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
+  if(!quiet) print(summ_df)
+  if(!quiet) cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
   res <- list()
   res[["MAP_OBS_MARFIS_TRIPS"]] <- Marf_in_Obs
   res[["MATCH_ISSUES"]] <- foundTrips

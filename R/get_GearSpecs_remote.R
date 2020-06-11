@@ -7,7 +7,8 @@
 # Prompt for and/or Apply Gear Description Filters ---------------------------
 get_GearSpecs_remote<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
                         gearSpType= gearSpType, gearSpSize=gearSpSize,
-                        dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
+                        dateStart=dateStart, dateEnd=dateEnd, ...){
+  args <- list(...)
   if(all('all' %in% gearSpSize && 'all' %in% gearSpType  )){
     #if both have 'all' no need to filter
     return(df)
@@ -122,37 +123,37 @@ get_GearSpecs_remote<- function(cxn = cxn, keep=keep, df = df, data.dir = NULL,
     }
     return(df)
   }
-  while (length(gearSpcFilt)>1){
-    choice<-utils::select.list(gearSpcFilt,
-                               preselect=NULL,
-                               multiple=F, graphics=T,
-                               title="Choose how to filter the data")
-
-    if (choice == "Types"){
-      choiceType<-utils::select.list(availTypes,
-                                     preselect=NULL,
-                                     multiple=T, graphics=T,
-                                     title='Available Gear Types')
-      if (!quietly)cat(paste0("\n","Gear Type choice: ",choiceType))
-      df = typeFilt(df = df, gearSpType = choiceType)
-      gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Types']
-    }else if (choice == "Sizes"){
-      choiceSize<-utils::select.list(availSizes,
-                                     preselect=NULL,
-                                     multiple=T, graphics=T,
-                                     title='Available Gear Sizes')
-      if (!quietly)cat(paste0("\n","Gear Size choice: ",choiceSize))
-      df = sizeFilt(df = df, gearSpSize = choiceSize)
-      gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Sizes']
-    }
-  }
-  if (gearSpcFilt=="Types"){
+  # while (length(gearSpcFilt)>1){
+  #   choice<-utils::select.list(gearSpcFilt,
+  #                              preselect=NULL,
+  #                              multiple=F, graphics=T,
+  #                              title="Choose how to filter the data")
+  #
+  #   if (choice == "Types"){
+  #     choiceType<-utils::select.list(availTypes,
+  #                                    preselect=NULL,
+  #                                    multiple=T, graphics=T,
+  #                                    title='Available Gear Types')
+  #     if (!quietly)cat(paste0("\n","Gear Type choice: ",choiceType))
+  #     df = typeFilt(df = df, gearSpType = choiceType)
+  #     gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Types']
+  #   }else if (choice == "Sizes"){
+  #     choiceSize<-utils::select.list(availSizes,
+  #                                    preselect=NULL,
+  #                                    multiple=T, graphics=T,
+  #                                    title='Available Gear Sizes')
+  #     if (!quietly)cat(paste0("\n","Gear Size choice: ",choiceSize))
+  #     df = sizeFilt(df = df, gearSpSize = choiceSize)
+  #     gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Sizes']
+  #   }
+  # }
+  # if (gearSpcFilt=="Types"){
     df= typeFilt(df,gearSpType )
-  }else if (gearSpcFilt=="Sizes"){
+  # }else if (gearSpcFilt=="Sizes"){
     df= sizeFilt(df,gearSpSize )
-  }else{
-    cat("Whaaat?")
-  }
+  # }else{
+  #   cat("Whaaat?")
+  # }
   return(df)
 }
 

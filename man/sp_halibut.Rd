@@ -4,12 +4,11 @@
 \alias{sp_halibut}
 \title{sp_halibut}
 \usage{
-sp_halibut(data.dir = NULL, year = NULL, vessLen = c(0, 999))
+sp_halibut(useLocal = F, year = NULL, vessLen = c(0, 999), ...)
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
@@ -41,9 +40,7 @@ information for the halibut fleets:
 }
 \examples{
 \dontrun{
-Halibut <- sp_halibut(data.dir = "C:/myData",
-                      year = 2018,
-                      vessLen = c(0,45))
+Halibut <- sp_halibut(useLocal = T, year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
 }
 }
 \seealso{

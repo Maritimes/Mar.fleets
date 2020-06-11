@@ -9,7 +9,7 @@ match_sets(
   get_OBS = NULL,
   match_trips = NULL,
   maxSetDiff_hr = 24,
-  quietly = F
+  quiet = F
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ the two databases are matched.}
 reported Observer and MARFIS sets before.  Sets differing by more than this time span
 will never be matched.}
 
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
+\item{quiet}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}
 }
 \value{

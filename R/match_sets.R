@@ -13,7 +13,7 @@
 #' @param maxSetDiff_hr default is \code{24}.  This is how many hours are allowed between
 #' reported Observer and MARFIS sets before.  Sets differing by more than this time span
 #' will never be matched.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
+#' @param quiet default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
 #' @import data.table
 #' @family fleets
@@ -24,7 +24,7 @@ match_sets <- function(get_MARFIS = NULL,
                        get_OBS = NULL,
                        match_trips = NULL,
                        maxSetDiff_hr =24,
-                       quietly=F){
+                       quiet=F){
   if (all(is.na(get_OBS)))return(NA)
   if(all(is.na(match_trips$MAP_OBS_MARFIS_TRIPS)))return(NA)
   if(class(get_OBS)=="list"){
@@ -40,7 +40,7 @@ match_sets <- function(get_MARFIS = NULL,
   # osets = get_OBS$OBS_SETS_ALL
   if(is.null(get_MARFIS$MARF_MATCH) ||
      is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
-    if (!quietly)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
+    if (!quiet)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
     return(NULL)
   }else{
     match = match_trips$MAP_OBS_MARFIS_TRIPS

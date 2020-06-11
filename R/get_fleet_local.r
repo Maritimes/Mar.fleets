@@ -1,9 +1,6 @@
 #' @title get_fleet_local
 #' @description This function extracts all of the Vessel/Licence combinations
 #' associated with a particular fleet for a particular date range.
-#' @param data.dir  The default is your working directory. If you are hoping to
-#' load existing data, this folder should identify the folder containing your
-#' *.rdata files.
 #' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
 #' of the window of time you want to look at.
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
@@ -140,38 +137,34 @@
 ## any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
 ## and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
 ## will be returned that match your other filters.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
-#' embed the script into a function rather than running it interactively.
 #' @family fleets
 #' @return returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",
 #'         "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_fleet_local<-function(data.dir=NULL,
-                          quietly = FALSE,
-                          dateStart = NULL, dateEnd = NULL,
+get_fleet_local<-function(dateStart = NULL, dateEnd = NULL,
                           mdCode = NULL,
                           gearCode = NULL, nafoCode = NULL,
                           gearSpType = NULL, gearSpSize= NULL,
-                          useDate = "landed", vessLen = NULL){
-                          # , noPrompts =FALSE){
+                          useDate = "landed", vessLen = NULL, ...){
+  args<-list(...)
+  # browser()
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
   keep<-new.env()
   keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$vessLenDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  df <- get_fleetBasic_local(keep, dateStart, dateEnd, data.dir, mdCode, gearCode, nafoCode, useDate, vessLen)
+  df <- get_fleetBasic_local(keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen,...)
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = -1, keep = keep, quietly = quietly, df = df, data.dir = data.dir, mdCode=mdCode,
+  df = applyFilters( keep = keep, df = df, mdCode=mdCode,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
-                    dateStart = dateStart, dateEnd = dateEnd, useDate = useDate)
+                    dateStart = dateStart, dateEnd = dateEnd, useDate = useDate, ...)
   # noPrompts = noPrompts,
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))

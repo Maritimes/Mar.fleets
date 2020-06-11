@@ -5,10 +5,6 @@
 \title{get_MARFIS_remote}
 \usage{
 get_MARFIS_remote(
-  fn.oracle.username = "_none_",
-  fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_",
-  usepkg = "rodbc",
   dateStart = NULL,
   dateEnd = NULL,
   thisFleet = NULL,
@@ -16,32 +12,10 @@ get_MARFIS_remote(
   marfSpp = NULL,
   nafoCode = NULL,
   vessLen = NULL,
-  quietly = FALSE
+  ...
 )
 }
 \arguments{
-\item{fn.oracle.username}{default is \code{'_none_'} This is your username for
-accessing oracle objects. If you have a value for \code{oracle.username}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{fn.oracle.password}{default is \code{'_none_'} This is your password for
-accessing oracle objects. If you have a value for \code{oracle.password}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{fn.oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
-identifier for accessing oracle objects. If you have a value for
-\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-this can be left and that value will be used.  If a value for this is
-provided, it will take priority over your existing value.}
-
-\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
-roracle will extract data ~ 5x faster.}
-
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
 
@@ -89,6 +63,28 @@ wildcard) would only return 5Z - no subareas.}
 \item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
+
+\item{fn.oracle.username}{default is \code{'_none_'} This is your username for
+accessing oracle objects. If you have a value for \code{oracle.username}
+stored in your environment (e.g. from an rprofile file), this can be left out
+and that value will be used.  If a value for this is provided, it will take
+priority over your existing value.}
+
+\item{fn.oracle.password}{default is \code{'_none_'} This is your password for
+accessing oracle objects. If you have a value for \code{oracle.password}
+stored in your environment (e.g. from an rprofile file), this can be left out
+and that value will be used.  If a value for this is provided, it will take
+priority over your existing value.}
+
+\item{fn.oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
+identifier for accessing oracle objects. If you have a value for
+\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
+this can be left and that value will be used.  If a value for this is
+provided, it will take priority over your existing value.}
+
+\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
+use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
+roracle will extract data ~ 5x faster.}
 
 \item{quietly}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}

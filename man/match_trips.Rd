@@ -8,7 +8,7 @@ match_trips(
   get_MARFIS = NULL,
   get_OBS = NULL,
   useDate = "fished",
-  quietly = FALSE
+  quiet = FALSE
 )
 }
 \arguments{
@@ -25,7 +25,7 @@ that are used for recording when fishing activity took place.  One is "DATE_FISH
 and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
 subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
 
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
+\item{quiet}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}
 }
 \value{

@@ -5,11 +5,6 @@
 \title{get_fleet_remote}
 \usage{
 get_fleet_remote(
-  fn.oracle.username = "_none_",
-  fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_",
-  usepkg = "rodbc",
-  quietly = FALSE,
   dateStart = NULL,
   dateEnd = NULL,
   mdCode = NULL,
@@ -19,36 +14,10 @@ get_fleet_remote(
   gearSpSize = NULL,
   useDate = "landed",
   vessLen = NULL,
-  noPrompts = FALSE
+  ...
 )
 }
 \arguments{
-\item{fn.oracle.username}{default is \code{'_none_'} This is your username for
-accessing oracle objects. If you have a value for \code{oracle.username}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{fn.oracle.password}{default is \code{'_none_'} This is your password for
-accessing oracle objects. If you have a value for \code{oracle.password}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{fn.oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
-identifier for accessing oracle objects. If you have a value for
-\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-this can be left and that value will be used.  If a value for this is
-provided, it will take priority over your existing value.}
-
-\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
-roracle will extract data ~ 5x faster.}
-
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
-information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
-embed the script into a function rather than running it interactively.}
-
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
 
@@ -190,10 +159,27 @@ subsetting data by date.  Any other value will result in the use of "LANDED_DATE
 "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
 
-\item{noPrompts}{default is \code{FALSE}. If set to True, the script will ignore
-any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
-and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
-will be returned that match your other filters.}
+\item{fn.oracle.username}{default is \code{'_none_'} This is your username for
+accessing oracle objects. If you have a value for \code{oracle.username}
+stored in your environment (e.g. from an rprofile file), this can be left out
+and that value will be used.  If a value for this is provided, it will take
+priority over your existing value.}
+
+\item{fn.oracle.password}{default is \code{'_none_'} This is your password for
+accessing oracle objects. If you have a value for \code{oracle.password}
+stored in your environment (e.g. from an rprofile file), this can be left out
+and that value will be used.  If a value for this is provided, it will take
+priority over your existing value.}
+
+\item{fn.oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
+identifier for accessing oracle objects. If you have a value for
+\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
+this can be left and that value will be used.  If a value for this is
+provided, it will take priority over your existing value.}
+
+\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
+use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
+roracle will extract data ~ 5x faster.}
 }
 \value{
 returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",

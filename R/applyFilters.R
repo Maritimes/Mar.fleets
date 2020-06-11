@@ -1,5 +1,8 @@
-applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
-                       quietly = NULL,
+#' @title applyFilters
+#' @description This function takes the criteria submitted by the user and calls the required
+#' filtering functions to ensure that all of the necessary filtering criteris are applied.
+#' @noRd
+applyFilters<-function(keep = NULL, df = NULL,
                        mdCode=NULL,
                        gearCode=NULL,
                        nafoCode= NULL,
@@ -8,7 +11,9 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
                        dateStart = NULL,
                        dateEnd = NULL,
                        # noPrompts = F,
-                       useDate = NULL){
+                       useDate = NULL,
+                       ...){
+  args <- list(...)
   # if(noPrompts){
     if (is.null(mdCode)) mdCode<- 'all'
     if (is.null(gearCode)) gearCode<- 'all'
@@ -17,7 +22,7 @@ applyFilters<-function(cxn=NULL, keep = NULL, df = NULL, data.dir = NULL,
     if (is.null(gearSpSize)) gearSpSize<- 'all'
     if (is.null(useDate)) useDate<- 'landed'
   # }
-  if (!dbAccess(data.dir=data.dir)){
+  if (args$useLocal){
     gearspecfn <- "get_GearSpecs_local"
   }else{
     gearspecfn <- "get_GearSpecs_remote"

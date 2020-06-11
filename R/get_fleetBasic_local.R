@@ -1,5 +1,6 @@
-get_fleetBasic_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL, data.dir = NULL,
-                           mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL){
+get_fleetBasic_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL,
+                           mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL, ...){
+  args <- list(...)
   Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir,
                   tables = c("PRO_SPC_INFO","MON_DOCS","GEARS","NAFO_UNIT_AREAS", "VESSELS","MON_DOC_DEFNS"), quiet = T, env = environment())
   if (useDate =="fished"){
@@ -32,8 +33,8 @@ get_fleetBasic_local<-function(keep = NULL, dateStart = NULL, dateEnd=NULL, data
     PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$VR_NUMBER_FISHING %in% VESSELS$VR_NUMBER,]
     keep$vessLenDone<-T
   }
-  GEARS =GEARS[,c("GEAR_CODE", "GEAR")]
-  names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
+  if ("GEAR" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
+  GEARS =GEARS[,c("GEAR_CODE", "DESC_ENG")]
   MON_DOCS= MON_DOCS[,c("MON_DOC_DEFN_ID","VR_NUMBER", "MON_DOC_ID")]
   PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID",dtField )]
   NAFO_UNIT_AREAS = NAFO_UNIT_AREAS[,c("AREA_ID", "NAFO_AREA")]

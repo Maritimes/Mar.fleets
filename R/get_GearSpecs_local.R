@@ -5,9 +5,10 @@
 #' specified, can prompt the user to decide if and how to filter the data.
 #' @noRd
 # Prompt for and/or Apply Gear Description Filters ---------------------------
-get_GearSpecs_local<- function(cxn = NULL, keep=keep, df = df, data.dir = NULL,
+get_GearSpecs_local<- function(keep=keep, df = df,
                                gearSpType= gearSpType, gearSpSize=gearSpSize,
-                               dateStart=dateStart, dateEnd=dateEnd, quietly=quietly){
+                               dateStart=dateStart, dateEnd=dateEnd, ...){
+  args <- list(...)
   if(all('all' %in% gearSpSize && 'all' %in% gearSpType  )){
     #if both have 'all' no need to filter
     return(df)
@@ -16,7 +17,7 @@ get_GearSpecs_local<- function(cxn = NULL, keep=keep, df = df, data.dir = NULL,
   if ("all" %in% gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
   if ("all" %in% gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
   # Get all of the records for our df that might link to gear info ----------------------------------------
-  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = T)
+  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = args$quiet)
   LOG_EFRT_STD_INFO = LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
   LOG_EFRT_STD_INFO <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(dateStart, origin = "1970-01-01")
                                                & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(dateEnd, origin = "1970-01-01")),]
@@ -54,7 +55,7 @@ get_GearSpecs_local<- function(cxn = NULL, keep=keep, df = df, data.dir = NULL,
 
   # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
 
-  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quiet = T)
+  Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quiet = args$quiet)
   LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
   gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
   if(nrow(gearSpecRelevant)<1){
@@ -105,37 +106,37 @@ get_GearSpecs_local<- function(cxn = NULL, keep=keep, df = df, data.dir = NULL,
     }
     return(df)
   }
-  while (length(gearSpcFilt)>1){
-    choice<-utils::select.list(gearSpcFilt,
-                               preselect=NULL,
-                               multiple=F, graphics=T,
-                               title="Choose how to filter the data")
-
-    if (choice == "Types"){
-      choiceType<-utils::select.list(availTypes,
-                                     preselect=NULL,
-                                     multiple=T, graphics=T,
-                                     title='Available Gear Types')
-      if (!quietly)cat(paste0("\n","Gear Type choice: ",choiceType))
-      df = typeFilt(df = df, gearSpType = choiceType)
-      gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Types']
-    }else if (choice == "Sizes"){
-      choiceSize<-utils::select.list(availSizes,
-                                     preselect=NULL,
-                                     multiple=T, graphics=T,
-                                     title='Available Gear Sizes')
-      if (!quietly)cat(paste0("\n","Gear Size choice: ",choiceSize))
-      df = sizeFilt(df = df, gearSpSize = choiceSize)
-      gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Sizes']
-    }
-  }
-  if (gearSpcFilt=="Types"){
-    df= typeFilt(df,gearSpType )
-  }else if (gearSpcFilt=="Sizes"){
-    df= sizeFilt(df,gearSpSize )
-  }else{
-    cat("Whaaat?")
-  }
+  # while (length(gearSpcFilt)>1){
+  #   choice<-utils::select.list(gearSpcFilt,
+  #                              preselect=NULL,
+  #                              multiple=F, graphics=T,
+  #                              title="Choose how to filter the data")
+  #
+  #   if (choice == "Types"){
+  #     choiceType<-utils::select.list(availTypes,
+  #                                    preselect=NULL,
+  #                                    multiple=T, graphics=T,
+  #                                    title='Available Gear Types')
+  #     if (!args$quiet)cat(paste0("\n","Gear Type choice: ",choiceType))
+  #     df = typeFilt(df = df, gearSpType = choiceType)
+  #     gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Types']
+  #   }else if (choice == "Sizes"){
+  #     choiceSize<-utils::select.list(availSizes,
+  #                                    preselect=NULL,
+  #                                    multiple=T, graphics=T,
+  #                                    title='Available Gear Sizes')
+  #     if (! = args$quiet)cat(paste0("\n","Gear Size choice: ",choiceSize))
+  #     df = sizeFilt(df = df, gearSpSize = choiceSize)
+  #     gearSpcFilt <- gearSpcFilt[gearSpcFilt!='Sizes']
+  #   }
+  # }
+  # if (gearSpcFilt=="Types"){
+     df= typeFilt(df,gearSpType )
+  # }else if (gearSpcFilt=="Sizes"){
+     df= sizeFilt(df,gearSpSize )
+  # }else{
+  #   cat("Whaaat?")
+  # }
   return(df)
 }
 

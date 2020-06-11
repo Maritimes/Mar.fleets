@@ -1,6 +1,6 @@
 get_fleetBasic_remote<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEnd=NULL,
-                     mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL){
-
+                     mdCode = NULL, gearCode=NULL, nafoCode = NULL, useDate =NULL, vessLen = NULL, ...){
+  args <- list(...)
   if (!is.null(mdCode) && length(mdCode)>0 && mdCode != 'all') {
     where_m = paste0("AND MD.MON_DOC_DEFN_ID IN (",Mar.utils::SQL_in(mdCode),")")
     keep$mdDone<-T
@@ -72,6 +72,6 @@ get_fleetBasic_remote<-function(cxn = cxn, keep = NULL, dateStart = NULL, dateEn
                       ",where_vl,"
                       ",where_g
   )
-  theFleet = cxn$thecmd(cxn$channel, fleetQry)
+  theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
   return(theFleet)
 }

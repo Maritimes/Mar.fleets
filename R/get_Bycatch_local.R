@@ -1,10 +1,18 @@
-get_Bycatch_local<-function(data.dir = data.dir, get_MARFIS = NULL, got_OBS = NULL, dir_Spp = NULL){
+#' @title get_Bycatch_local
+#' @description Certain gears can have different specifications.  Mesh gears can have different mesh
+#' sizes or shapes, hooks can be different sizes, and traps can have different configurations.
+#' This function filters the data to the specified size and/or type, and if no filters were initially
+#' specified, can prompt the user to decide if and how to filter the data.
+#' @noRd
+get_Bycatch_local<-function(got_OBS = NULL, dir_Spp = NULL, ...){
+  args <- list(...)
+  quiet <- ifelse(is.null(args$quiet), TRUE,args$quiet)
   ISCATCHES <- ISTRIPS <- NA
   if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
 
-  Mar.datawrangling::get_data(db="isdb", data.dir = data.dir, env = environment(), quiet = T )
+  Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = quiet )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
-  Mar.datawrangling::self_filter(quiet = T, env = environment())
+  Mar.datawrangling::self_filter(quiet = quiet, env = environment())
 
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==dir_Spp),c("SPECCD_ID")]
 

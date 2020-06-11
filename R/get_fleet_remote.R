@@ -155,25 +155,22 @@
 ## any parameters that might otherwise be used to filter the data. For example, if you set \code{noPrompts = T}
 ## and set \code{gearCode = NULL}, you will not be prompted to select a gear code - ALL gear codes
 ## will be returned that match your other filters.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information should be shown as the function proceeds.  This would be set to TRUE if you wanted to
-#' embed the script into a function rather than running it interactively.
 #' @family fleets
 #' @return returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",
 #'         "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_fleet_remote<-function(fn.oracle.username = "_none_",
-                           fn.oracle.password = "_none_",
-                           fn.oracle.dsn = "_none_",
-                           usepkg = "rodbc",
-                           quietly = FALSE,
-                           dateStart = NULL, dateEnd = NULL,
+get_fleet_remote<-function(dateStart = NULL, dateEnd = NULL,
                            mdCode = NULL,
                            gearCode = NULL, nafoCode = NULL,
                            gearSpType = NULL, gearSpSize= NULL,
-                           useDate = "landed", vessLen = NULL){
-                           # ,noPrompts =FALSE){
+                           useDate = "landed", vessLen = NULL, ...){
+
+  # fn.oracle.username = "_none_",
+  # fn.oracle.password = "_none_",
+  # fn.oracle.dsn = "_none_",
+  # usepkg = "rodbc",
+  args <- list(...)
   cat("REEEEEEEEEE!","\n")
   mdCode=tolower(mdCode)
   gearCode=tolower(gearCode)
@@ -181,17 +178,18 @@ get_fleet_remote<-function(fn.oracle.username = "_none_",
   keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$vessLenDone <- FALSE
   #if no end date, do it for 1 year
   if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  cxn = Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
-  df <- get_fleetBasic_remote(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
+  cxn = Mar.utils::make_oracle_cxn(usepkg = args$usepkg,fn.oracle.username = args$oracle.username,fn.oracle.password = args$fn.oracle.password,fn.oracle.dsn = args$fn.oracle.dsn, quietly = args$quietly)
+
+   df <- get_fleetBasic_remote(cxn, keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen)
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
   #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters(cxn = cxn, keep = keep, quietly = quietly, df = df, mdCode=mdCode,
+  df = applyFilters(keep = keep, df = df, mdCode=mdCode,
                     gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
-                    dateStart = dateStart, dateEnd = dateEnd, useDate = useDate)
+                    dateStart = dateStart, dateEnd = dateEnd, useDate = useDate, ...)
   # noPrompts = noPrompts,
 
   if (class(cxn) =="list" && cxn$usepkg =='rodbc') RODBC::odbcClose(cxn$channel)

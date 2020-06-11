@@ -5,7 +5,6 @@
 \title{get_MARFIS_local}
 \usage{
 get_MARFIS_local(
-  data.dir = NULL,
   dateStart = NULL,
   dateEnd = NULL,
   thisFleet = NULL,
@@ -13,14 +12,10 @@ get_MARFIS_local(
   marfSpp = NULL,
   nafoCode = NULL,
   vessLen = NULL,
-  quietly = FALSE
+  ...
 )
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
-
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
 
@@ -68,9 +63,6 @@ wildcard) would only return 5Z - no subareas.}
 \item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
-
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
-information about the matching process should be shown.}
 }
 \value{
 returns a list with 2 dataframes - "trips", and "sets".

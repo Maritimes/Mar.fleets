@@ -14,34 +14,27 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param data.dir  The default is your working directory. If you are hoping to
-#' load existing data, this folder should identify the folder containing your
-#' *.rdata files.
+#' @param useLocal default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+#' run them against local copies of the data, please set to TRUE.
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param mesh default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
 #' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
 #' @examples \dontrun{
-#' Pollock_West_m_sm <- sp_pollock(data.dir = "C:/myData",
-#'                                 year = 2018,
-#'                                 type = "MOBILE",
-#'                                 mesh="SMALL",
-#'                                 component = "WESTERN")
+#' Pollock_West_m_sm <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
 #'                                 }
 #' \dontrun{
-#' Pollock_East_m_lg <- sp_pollock(data.dir = "C:/myData",
-#'                                 year = 2018,
-#'                                 type = "MOBILE",
-#'                                 mesh="LARGE",
-#'                                 component = "EASTERN")
+#' Pollock_East_m_lg <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
 #'                                 }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_pollock <- function(data.dir = NULL, year=NULL, type = NULL, mesh=NULL, component = NULL){
+sp_pollock <- function(useLocal = F, year=NULL, type = NULL, mesh=NULL, component = NULL, ...){
+  args <- list(...)
+
   dateStart =paste0(year,"-01-01")
   dateEnd =paste0(year,"-12-31")
 
@@ -74,42 +67,18 @@ sp_pollock <- function(data.dir = NULL, year=NULL, type = NULL, mesh=NULL, compo
     gearSpSize = 'all'
   }
   vessLen = 'all'
-  # Get the Fleet -------------------------------------------------------------------------------
-  if(!dbAccess(data.dir=data.dir)){
-    fleet <- get_fleet_local(data.dir=data.dir,
-                             dateStart = dateStart,
-                             dateEnd = dateEnd,
-                             mdCode = mdCode,
-                             nafoCode= nafoCode,
-                             gearCode = gearCode,
-                             useDate = useDate,
-                             vessLen = vessLen,
-                             gearSpSize=gearSpSize,
-                             # noPrompts = T,
-                             quietly = T)
 
-    marf <- get_MARFIS_local(data.dir = data.dir, dateStart = dateStart, dateEnd = dateEnd,
-                             thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T)
-    obs <- get_OBS_local(data.dir = data.dir,  dateStart = dateStart, dateEnd = dateEnd,keepSurveyTrips = T, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T)
-    bycatch <- get_Bycatch_local(data.dir = data.dir, get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
+  if (!canRun(useLocal =useLocal, ...))stop("Can't run as requested.")
+
+  if(useLocal){
+    fleet <- get_fleet_local(dateStart = dateStart, dateEnd = dateEnd, mdCode = mdCode, nafoCode= nafoCode, gearCode = gearCode, useDate = useDate,vessLen = vessLen,  ...)
+    marf <- get_MARFIS_local(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
+    obs <- get_OBS_local(dateStart = dateStart, dateEnd = dateEnd, keepSurveyTrips = T, useDate = useDate, thisFleet = fleet, get_MARFIS = marf, ...)
+    bycatch <- get_Bycatch_local(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp, ...)
   }else{
-    # Get the Fleet (remote) ----------------------------------------------------------------------
-    fleet <- get_fleet_remote(dateStart = dateStart,
-                              dateEnd = dateEnd,
-                              mdCode = mdCode,
-                              nafoCode= nafoCode,
-                              gearCode = gearCode,
-                              useDate = useDate,
-                              vessLen = vessLen,
-                              gearSpSize=gearSpSize,
-                              # noPrompts = T,
-                              quietly = T)
-    marf <- get_MARFIS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
-                              dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode,
-                              useDate = useDate, quietly = T)
-    obs = get_OBS_remote(oracle.username, oracle.password, oracle.dsn, usepkg = 'roracle',
-                         dateStart = dateStart, dateEnd = dateEnd,
-                         thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T)
+    fleet <- get_fleet_remote(dateStart = dateStart,dateEnd = dateEnd,mdCode = mdCode,nafoCode= nafoCode,gearCode = gearCode,useDate = useDate,vessLen = vessLen,quietly = T, ...)
+    marf <- get_MARFIS_remote(dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T, ...)
+    obs <- get_OBS_remote(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T, ...)
     bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
   }
   # Capture the results in a list and return them ------------------------------------------------

@@ -4,12 +4,11 @@
 \alias{sp_haddock}
 \title{sp_haddock}
 \usage{
-sp_haddock(data.dir = NULL, year = NULL, type = NULL, area = NULL)
+sp_haddock(useLocal = F, year = NULL, type = NULL, area = NULL, ...)
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
@@ -40,16 +39,10 @@ information for the haddock fleets:
 }
 \examples{
 \dontrun{
-Haddock_5ZJM_m <- sp_haddock(data.dir = "C:/myData",
-                             year = 2018,
-                             type = "MOBILE",
-                             area = "5ZJM")
+Haddock_5ZJM_m <- sp_haddock(useLocal = T, year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
 }
 \dontrun{
-Haddock_4X5Y_f <- sp_haddock(data.dir = "C:/myData",
-                             year = 2018,
-                             type = "FIXED",
-                             area = "4X5Y")
+Haddock_4X5Y_f <- sp_haddock(useLocal = T,  year = 2018, type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
 }
 }
 \seealso{

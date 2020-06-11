@@ -1,9 +1,6 @@
 #' @title get_MARFIS_local
 #' @description This function extracts all of the MARFIS records for vessels with
 #' particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
-#' @param data.dir  The default is your working directory. If you are hoping to
-#' load existing data, this folder should identify the folder containing your
-#' *.rdata files.
 #' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
 #' of the window of time you want to look at.
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
@@ -45,8 +42,6 @@
 #' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 #' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 #' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information about the matching process should be shown.
 #' @family fleets
 #' @return returns a list with 2 dataframes - "trips", and "sets".
 #' "trips" conta ins all of the information necessary for identifying a trip
@@ -56,19 +51,22 @@
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_MARFIS_local<-function(data.dir = NULL,
-                           dateStart = NULL, dateEnd = NULL,
+get_MARFIS_local<-function(dateStart = NULL, dateEnd = NULL,
                            thisFleet = NULL,
                            useDate = "fished",
                            marfSpp = NULL,
                            nafoCode= NULL,
                            vessLen = NULL,
-                           quietly = FALSE){
+                           ...){
+  args <- list(...)
+  quiet <- ifelse(is.null(args$quiet), TRUE,args$quiet)
+
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  getEff<-function(log_efrt=NULL){
+  getEff<-function(log_efrt=NULL, quiet = quiet, ...){
+    args=list(...)
     LOG_EFRT_STD_INFO<-NA
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = quiet)
     PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
     colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
     PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
@@ -83,11 +81,13 @@ get_MARFIS_local<-function(data.dir = NULL,
     PS_sets<-unique(PS_sets)
     return(PS_sets)
   }
-  getPS<-function(allProSpc=NULL, marfSpp=NULL, nafoCode = NULL){
+  getPS<-function(allProSpc=NULL, marfSpp=NULL, nafoCode = NULL, quiet = quiet, ...){
+
+    args=list(...)
     PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- NA
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS"), env = environment(), quiet = quiet)
     PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc &
                             PRO_SPC_INFO$SPECIES_CODE %in% marfSpp,
                           c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
@@ -103,9 +103,10 @@ get_MARFIS_local<-function(data.dir = NULL,
     PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
     return(PS_df)
   }
-  getED<-function(mondocs=NULL){
+  getED<-function(mondocs=NULL, quiet = quiet, ...){
+    args=list(...)
     MON_DOC_ENTRD_DETS <- NA
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("MON_DOC_ENTRD_DETS"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("MON_DOC_ENTRD_DETS"), env = environment(), quiet = quiet)
     ED_df <- MON_DOC_ENTRD_DETS[MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
     if (nrow(ED_df)<1)return(NULL)
     ED_df<- reshape2::dcast(ED_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
@@ -118,17 +119,19 @@ get_MARFIS_local<-function(data.dir = NULL,
     ED_df <- unique(ED_df)
     return(ED_df)
   }
-  getHIC<-function(trips = NULL){
+  getHIC<-function(trips = NULL, quiet = quiet, ...){
+    args=list(...)
     HAIL_IN_CALLS <- HAIL_OUTS <- NA
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_IN_CALLS"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"), env = environment(), quiet = quiet)
     HIC_df <- HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
     colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
     return(HIC_df)
   }
-  getHOC<-function(trips = NULL){
+  getHOC<-function(trips = NULL, quiet = quiet, ...){
+    args=list(...)
     HAIL_OUTS <- NA
-    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = data.dir, tables = c("HAIL_OUTS"), env = environment(), quiet = T)
+    Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"), env = environment(), quiet = quiet)
     HOC_df <- HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
     colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
@@ -138,15 +141,14 @@ get_MARFIS_local<-function(data.dir = NULL,
   allLogEff <-  unique(stats::na.omit(thisFleet$LOG_EFRT_STD_INFO))
   allProSpc <-  unique(stats::na.omit(thisFleet$PRO_SPC_INFO_ID))
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
-
-  ps <- getPS(allProSpc = allProSpc, marfSpp = marfSpp, nafoCode = nafoCode)
+  ps <- getPS(allProSpc = allProSpc, marfSpp = marfSpp, nafoCode = nafoCode, quiet = quiet, ...)
 
   if (nrow(ps)<1){
     cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
   }
 
-  sets<- getEff(log_efrt = allLogEff)
+  sets<- getEff(log_efrt = allLogEff, quiet = quiet, ...)
   if (useDate =="fished"){
     theDate = "DATE_FISHED"
   }else{
@@ -155,7 +157,7 @@ get_MARFIS_local<-function(data.dir = NULL,
 
   eff <- unique(merge(ps[,!names(ps) %in% c(theDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
 
-  ed <- getED(mondocs =allMondocs)
+  ed <- getED(mondocs =allMondocs, quiet = quiet, ...)
   if (!is.null(ed) && nrow(ed)>0){
     ps<- merge(ps, ed, all.x = T)
 
@@ -168,7 +170,7 @@ get_MARFIS_local<-function(data.dir = NULL,
     ps$OBS_TRIP <- ps$OBS_ID <- ps$OBS_PRESENT <- NA
   }
 
-  hic<- getHIC(trips = ps$TRIP_ID)
+  hic<- getHIC(trips = ps$TRIP_ID, quiet = quiet, ...)
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
 
@@ -177,7 +179,7 @@ get_MARFIS_local<-function(data.dir = NULL,
       return(invisible(NULL))
     }
   }
-  hoc<- getHOC(trips = ps$TRIP_ID)
+  hoc<- getHOC(trips = ps$TRIP_ID, quiet = quiet, ...)
   if (!is.null(hoc) && nrow(hoc)>0){
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
   }

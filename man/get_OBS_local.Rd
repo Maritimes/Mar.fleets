@@ -5,21 +5,16 @@
 \title{get_OBS_local}
 \usage{
 get_OBS_local(
-  data.dir = NULL,
   dateStart = NULL,
   dateEnd = NULL,
   keepSurveyTrips = FALSE,
   useDate = "fished",
-  quietly = FALSE,
   thisFleet = NULL,
-  get_MARFIS = NULL
+  get_MARFIS = NULL,
+  ...
 )
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
-
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
 
@@ -36,9 +31,6 @@ commercial fishing patterns.}
 that are used for recording when fishing activity took place.  One is "DATE_FISHED",
 and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
 subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
-
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
-information about the matching process should be shown.}
 
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
 the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from

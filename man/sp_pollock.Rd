@@ -5,17 +5,17 @@
 \title{sp_pollock}
 \usage{
 sp_pollock(
-  data.dir = NULL,
+  useLocal = F,
   year = NULL,
   type = NULL,
   mesh = NULL,
-  component = NULL
+  component = NULL,
+  ...
 )
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
@@ -49,18 +49,10 @@ information for the pollock fleets:
 }
 \examples{
 \dontrun{
-Pollock_West_m_sm <- sp_pollock(data.dir = "C:/myData",
-                                year = 2018,
-                                type = "MOBILE",
-                                mesh="SMALL",
-                                component = "WESTERN")
+Pollock_West_m_sm <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
                                 }
 \dontrun{
-Pollock_East_m_lg <- sp_pollock(data.dir = "C:/myData",
-                                year = 2018,
-                                type = "MOBILE",
-                                mesh="LARGE",
-                                component = "EASTERN")
+Pollock_East_m_lg <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
                                 }
 }
 \seealso{

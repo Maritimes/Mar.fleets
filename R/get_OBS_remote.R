@@ -47,13 +47,15 @@
 #' about the observer sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_OBS_remote <- function(fn.oracle.username = "_none_",
-                    fn.oracle.password = "_none_",
-                    fn.oracle.dsn = "_none_",
-                    usepkg = "rodbc",
-                    dateStart = NULL, dateEnd = NULL,
+get_OBS_remote <- function(dateStart = NULL, dateEnd = NULL,
                     keepSurveyTrips = FALSE, useDate= "fished", quietly = FALSE,
-                    thisFleet = NULL, get_MARFIS = NULL){
+                    thisFleet = NULL, get_MARFIS = NULL,...){
+  # fn.oracle.username = "_none_",
+  # fn.oracle.password = "_none_",
+  # fn.oracle.dsn = "_none_",
+  # usepkg = "rodbc",
+  args <- list(...)
+
   if (is.null(dateEnd)){
     cat(paste0("\n","No end date was provided, so one year of data will be retrieved."))
     dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
@@ -65,7 +67,8 @@ get_OBS_remote <- function(fn.oracle.username = "_none_",
     LIC_VR_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER))))
   }
   # .I <- TRIP_ID_MARF <- FV_FISHED_DATETIME<- SET_DATETIME<- NA
-  cxn<- Mar.utils::make_oracle_cxn(usepkg,fn.oracle.username,fn.oracle.password,fn.oracle.dsn, quietly)
+  cxn = Mar.utils::make_oracle_cxn(usepkg = args$usepkg,fn.oracle.username = args$oracle.username,fn.oracle.password = args$fn.oracle.password,fn.oracle.dsn = args$fn.oracle.dsn, quietly = args$quietly)
+
   if (!class(cxn) =="list"){
     cat("\nCan't do this without a DB connection.  Aborting.\n")
     return(NULL)
