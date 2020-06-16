@@ -4,14 +4,14 @@
 \alias{sp_winterflounder}
 \title{sp_winterflounder}
 \usage{
-sp_winterflounder(useLocal = F, year = NULL, ...)
+sp_winterflounder(year = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -36,7 +36,7 @@ information for the winter flounder fleet:
 }
 \examples{
 \dontrun{
-WinterFlounder <- sp_winterflounder(useLocal = T, year = 2018, data.dir = "C:/myData")
+WinterFlounder <- sp_winterflounder(year = 2018, data.dir = "C:/myData")
 }
 }
 \seealso{

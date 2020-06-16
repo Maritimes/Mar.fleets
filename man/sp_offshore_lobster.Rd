@@ -4,14 +4,14 @@
 \alias{sp_offshore_lobster}
 \title{sp_offshore_lobster}
 \usage{
-sp_offshore_lobster(useLocal = F, year = NULL, ...)
+sp_offshore_lobster(year = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -36,7 +36,7 @@ information for the offshore lobster fleet:
 }
 \examples{
 \dontrun{
-OffshoreLobster <- sp_offshore_lobster(useLocal = T, year = 2018, data.dir = "C:/myData")
+OffshoreLobster <- sp_offshore_lobster(year = 2018, data.dir = "C:/myData")
 }
 }
 \seealso{

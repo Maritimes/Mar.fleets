@@ -4,16 +4,16 @@
 \alias{sp_redfish}
 \title{sp_redfish}
 \usage{
-sp_redfish(useLocal = F, year = NULL, unit = NULL, ...)
+sp_redfish(year = NULL, unit = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
 
 \item{unit}{default is \code{NULL}. This is either "2" or "3".}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -38,7 +38,7 @@ information for the redfish fleets:
 }
 \examples{
 \dontrun{
-Redfish <- sp_redfish(useLocal = T, year = 2018, unit = 2, data.dir = "C:/myData")
+Redfish <- sp_redfish(year = 2018, unit = 2, data.dir = "C:/myData")
                       }
 }
 \seealso{

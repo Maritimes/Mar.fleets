@@ -4,18 +4,18 @@
 \alias{sp_haddock}
 \title{sp_haddock}
 \usage{
-sp_haddock(useLocal = F, year = NULL, type = NULL, area = NULL, ...)
+sp_haddock(year = NULL, type = NULL, area = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
 
 \item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
 \item{area}{default is \code{NULL}. This is either "4X5Y" or "5ZJM".}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -39,10 +39,10 @@ information for the haddock fleets:
 }
 \examples{
 \dontrun{
-Haddock_5ZJM_m <- sp_haddock(useLocal = T, year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
+Haddock_5ZJM_m <- sp_haddock(year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
 }
 \dontrun{
-Haddock_4X5Y_f <- sp_haddock(useLocal = T,  year = 2018, type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
+Haddock_4X5Y_f <- sp_haddock(year = 2018, type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
 }
 }
 \seealso{

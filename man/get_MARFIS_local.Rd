@@ -4,28 +4,19 @@
 \alias{get_MARFIS_local}
 \title{get_MARFIS_local}
 \usage{
-get_MARFIS_local(
-  dateStart = NULL,
-  dateEnd = NULL,
-  thisFleet = NULL,
-  useDate = "fished",
-  marfSpp = NULL,
-  nafoCode = NULL,
-  vessLen = NULL,
-  ...
-)
+get_MARFIS_local(thisFleet = NULL, ...)
 }
 \arguments{
+\item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
+the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
+\code{Mar.bycatch::get_fleet()}}
+
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
 of the window of time you want to look at.}
 
 \item{dateEnd}{default is \code{NULL}. This is the end date (YYYY-MM-DD)
 of the window of time you want to look at.  If this is left blank, 1 year of
 data will be returned.}
-
-\item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
-the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
-\code{Mar.bycatch::get_fleet()}}
 
 \item{useDate}{default is \code{"fished"}. Some MARFIS tables have 2 different dates
 that are used for recording when fishing activity took place.  One is "DATE_FISHED",

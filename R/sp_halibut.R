@@ -22,47 +22,27 @@
 #' "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 #' including 45 feet, you might enter a value of \code{seq(0,45,1)}.
 #' @examples \dontrun{
-#' Halibut <- sp_halibut(useLocal = T, year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
+#' Halibut <- sp_halibut(year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_halibut <- function(useLocal = F, year=NULL, vessLen = c(0,999), ...){
-  args <- list(...)
+sp_halibut <- function(year=NULL, vessLen = c(0,999), ...){
 
-  dateStart =paste0(year,"-01-01")
-  dateEnd =paste0(year,"-12-31")
+  # Set up the Halibut-specific variables -------------------------------------------------------
+  args <- list(marfSpp=130,
+               nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%'),
+               gearCode = c(50,51),
+               mdCode = c(1, 29),
+               dateStart =paste0(year,"-01-01"),
+               dateEnd =paste0(year,"-12-31"),
+               vessLen = c(0,999)
+  )
+  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
+  args[names(argsSent)] <- argsSent
 
-  # Set up the Halibut-specific variables -----------------------------------------------------
-  marfSpp = 130
-  nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%')
-  #nafoCode = NULL
-  useDate = "landed" #fished" #landed
-  yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
-  gearCode = c(50,51)
-  mdCode = c(1, 29) #added 29 (international)
-if (!canRun(useLocal = useLocal, ...))stop("Can't run as requested.")
-  if(useLocal){
-    fleet <- get_fleet_local(dateStart = dateStart, dateEnd = dateEnd, mdCode = mdCode, nafoCode= nafoCode, gearCode = gearCode, useDate = useDate,vessLen = vessLen,  useLocal =T, ...)
-    marf <- get_MARFIS_local(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
-    obs <- get_OBS_local(dateStart = dateStart, dateEnd = dateEnd, keepSurveyTrips = T, useDate = useDate, thisFleet = fleet, get_MARFIS = marf, ...)
-    bycatch <- get_Bycatch_local(got_OBS = obs, dir_Spp = marfSpp, ...)
-  }else{
-    fleet <- get_fleet_remote(dateStart = dateStart,dateEnd = dateEnd,mdCode = mdCode,nafoCode= nafoCode,gearCode = gearCode,useDate = useDate,vessLen = vessLen,  useLocal =T, ...)
-    marf <- get_MARFIS_remote(dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
-    obs <- get_OBS_remote(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T, ...)
-    bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp, ...)
-  }
-  # Capture the results in a list and return them ------------------------------------------------
-  cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
-  cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
-  cat("\n")
-  res=list()
-  res[["fleet"]]<- fleet
-  res[["marf"]]<- marf
-  res[["obs"]]<- obs
-  res[["bycatch"]]<- bycatch
-  return(res)
+  data <- do.call(get_all, args)
+  return(data)
 }

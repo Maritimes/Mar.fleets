@@ -20,27 +20,19 @@
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
 #' @examples \dontrun{
-#' Haddock_5ZJM_m <- sp_haddock(useLocal = T, year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
+#' Haddock_5ZJM_m <- sp_haddock(year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
 #' }
 #' \dontrun{
-#' Haddock_4X5Y_f <- sp_haddock(useLocal = T,  year = 2018, type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
+#' Haddock_4X5Y_f <- sp_haddock(year = 2018, type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_haddock <- function(useLocal = F, year=NULL, type = NULL, area= NULL, ...){
-  args <- list(...)
-
-  dateStart =paste0(year,"-01-01")
-  dateEnd =paste0(year,"-12-31")
+sp_haddock <- function(year=NULL, type = NULL, area= NULL, ...){
 
   # Set up the Haddock-specific variables -------------------------------------------------------
-  marfSpp = 110
-  useDate = "landed" #fished" #landed
-  yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
-
   if (toupper(type) == "MOBILE"){
     mdCode = c(2)
     gearCode = c(12)
@@ -58,28 +50,19 @@ sp_haddock <- function(useLocal = F, year=NULL, type = NULL, area= NULL, ...){
     nafoCode=c('5ZEJ%', '5ZEM%', '5ZEU%')
     if (toupper(type) == "MOBILE") gearSpSize="all"
   }
-  vessLen = "all"
-  if (!canRun(useLocal =useLocal, ...))stop("Can't run as requested.")
 
-  if(useLocal){
-    fleet <- get_fleet_local(dateStart = dateStart, dateEnd = dateEnd, mdCode = mdCode, nafoCode= nafoCode, gearCode = gearCode, useDate = useDate,vessLen = vessLen, useLocal =T, ...)
-    marf <- get_MARFIS_local(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
-    obs <- get_OBS_local(dateStart = dateStart, dateEnd = dateEnd, keepSurveyTrips = T, useDate = useDate, thisFleet = fleet, get_MARFIS = marf, ...)
-    bycatch <- get_Bycatch_local(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp, ...)
-  }else{
-    fleet <- get_fleet_remote(dateStart = dateStart,dateEnd = dateEnd,mdCode = mdCode,nafoCode= nafoCode,gearCode = gearCode,useDate = useDate,vessLen = vessLen, useLocal = F, ...)
-    marf <- get_MARFIS_remote(dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
-    obs <- get_OBS_remote(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T, ...)
-    bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
-  }
-  # Capture the results in a list and return them ------------------------------------------------
-  cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
-  cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
-  cat("\n")
-  res=list()
-  res[["fleet"]]<- fleet
-  res[["marf"]]<- marf
-  res[["obs"]]<- obs
-  res[["bycatch"]]<- bycatch
-  return(res)
+  args <- list(marfSpp=110,
+               nafoCode=nafoCode,
+               gearCode = gearCode,
+               gearSpSize= gearSpSize,
+               mdCode = mdCode,
+               dateStart =paste0(year,"-01-01"),
+               dateEnd =paste0(year,"-12-31")
+  )
+
+  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
+  args[names(argsSent)] <- argsSent
+
+  data <- do.call(get_all, args)
+  return(data)
 }

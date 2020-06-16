@@ -4,18 +4,7 @@
 \alias{get_fleet_local}
 \title{get_fleet_local}
 \usage{
-get_fleet_local(
-  dateStart = NULL,
-  dateEnd = NULL,
-  mdCode = NULL,
-  gearCode = NULL,
-  nafoCode = NULL,
-  gearSpType = NULL,
-  gearSpSize = NULL,
-  useDate = "landed",
-  vessLen = NULL,
-  ...
-)
+get_fleet_local(...)
 }
 \arguments{
 \item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)

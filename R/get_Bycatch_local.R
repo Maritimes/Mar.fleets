@@ -4,17 +4,17 @@
 #' This function filters the data to the specified size and/or type, and if no filters were initially
 #' specified, can prompt the user to decide if and how to filter the data.
 #' @noRd
-get_Bycatch_local<-function(got_OBS = NULL, dir_Spp = NULL, ...){
-  args <- list(...)
-  quiet <- ifelse(is.null(args$quiet), TRUE,args$quiet)
+get_Bycatch_local<-function(got_OBS = NULL, ...){
+  args <- list(...)$argsList
+
   ISCATCHES <- ISTRIPS <- NA
   if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
 
-  Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = quiet )
+  Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = args$quiet )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
-  Mar.datawrangling::self_filter(quiet = quiet, env = environment())
+  Mar.datawrangling::self_filter(quiet = args$quiet, env = environment())
 
-  isdbSPP = spLookups[which(spLookups$MARFIS_CODE==dir_Spp),c("SPECCD_ID")]
+  isdbSPP = spLookups[which(spLookups$MARFIS_CODE==args$marfSpp),c("SPECCD_ID")]
 
   df<-ISCATCHES
   df<-df[,c("SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT")]

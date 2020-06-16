@@ -142,30 +142,16 @@
 #'         "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_fleet_local<-function(dateStart = NULL, dateEnd = NULL,
-                          mdCode = NULL,
-                          gearCode = NULL, nafoCode = NULL,
-                          gearSpType = NULL, gearSpSize= NULL,
-                          useDate = "landed", vessLen = NULL, ...){
-  args<-list(...)
-  # browser()
-  mdCode=tolower(mdCode)
-  gearCode=tolower(gearCode)
-  keep<-new.env()
-  keep$mdDone <- keep$gearDone <- keep$nafoDone <- keep$gearSpecsDone <- keep$canDoGearSpecs <- keep$vessLenDone <- FALSE
-  #if no end date, do it for 1 year
-  if (is.null(dateEnd)) dateEnd = as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
-  df <- get_fleetBasic_local(keep, dateStart, dateEnd, mdCode, gearCode, nafoCode, useDate, vessLen,...)
+get_fleet_local<-function(...){
+  args<-  list(...)$argsList
+  df <- do.call(get_fleetBasic_local, list(argsList=args))
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
-  #Further narrow the data using md and gear - prompting if needed
-  df = applyFilters( keep = keep, df = df, mdCode=mdCode,
-                    gearCode=gearCode, nafoCode = nafoCode, gearSpType = gearSpType, gearSpSize = gearSpSize,
-                    dateStart = dateStart, dateEnd = dateEnd, useDate = useDate, ...)
-  # noPrompts = noPrompts,
+  df <- do.call(applyFilters, list(df=df,argsList=args))
+
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))
     return(NULL)

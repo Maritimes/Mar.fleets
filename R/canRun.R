@@ -26,7 +26,7 @@ canRun <- function(useLocal = T, ...){
 
     if(!chk_OracleAvail()){
       cat("You don't appear to be on the network")
-      return(invisible(FALSE))
+      return(FALSE)
     }else{
       # #check for access
       # qry = paste0("select '1' from ", theschema, ".",
@@ -43,7 +43,7 @@ canRun <- function(useLocal = T, ...){
       #no calling marfissci marfis and vice versa
       cat("You appear to be on the network.  \n
 In the future, this will also verify you have access to the necessary tables.")
-      return(invisible(TRUE))
+      return(TRUE)
     }
     #2check if has access
   }
@@ -68,15 +68,14 @@ In the future, this will also verify you have access to the necessary tables.")
     }
     return(localDataCheck)
   }
-
   if (useLocal){
     if (wantLocal(MARFIS,...)&wantLocal(OBS,...)){
-      return(invisible(TRUE))
+      return(TRUE)
     }else{
-      cat("Cannot proceed offline. Check that all of the following files are in your data.dir:\n")
+      cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
       cat(paste0(OBS,".RData"),sep= "\n")
-      return(invisible(FALSE))
+      return(FALSE)
     }
   }else{
     tt = wantRemote(...)

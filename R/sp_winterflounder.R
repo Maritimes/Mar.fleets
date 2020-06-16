@@ -19,49 +19,31 @@
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
 #' @examples \dontrun{
-#' WinterFlounder <- sp_winterflounder(useLocal = T, year = 2018, data.dir = "C:/myData")
+#' WinterFlounder <- sp_winterflounder(year = 2018, data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_winterflounder <- function(useLocal = F,year=NULL, ...){
-  args <- list(...)
-
-  dateStart =paste0(year,"-01-01")
-  dateEnd =paste0(year,"-12-31")
+sp_winterflounder <- function(year=NULL, ...){
 
   # Set up the winterflounder-specific variables -------------------------------------------------------
-  marfSpp = 143
-  nafoCode=c('4X%','5Y%')
-  gearSpSize = seq(155,999,1)
-  useDate = "landed" #fished" #landed
-  yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
-  gearCode = c(12)
-  mdCode = c(2)
-  vessLen = "all"
+  args <- list(marfSpp=143,
+               nafoCode=c('4X%','5Y%'),
+               useDate = "landed",
+               gearCode = 12,
+               gearSpSize= gearSpSize,
+               mdCode = 2,
+               dateStart =paste0(year,"-01-01"),
+               dateEnd =paste0(year,"-12-31")
+  )
 
-  if (!canRun(useLocal =useLocal, ...))stop("Can't run as requested.")
-  if(useLocal){
-    fleet <- get_fleet_local(dateStart = dateStart, dateEnd = dateEnd, mdCode = mdCode, nafoCode= nafoCode, gearCode = gearCode, useDate = useDate,vessLen = vessLen,  ...)
-    marf <- get_MARFIS_local(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
-    obs <- get_OBS_local(dateStart = dateStart, dateEnd = dateEnd, keepSurveyTrips = T, useDate = useDate, thisFleet = fleet, get_MARFIS = marf, ...)
-    bycatch <- get_Bycatch_local(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp, ...)
-  }else{
-    fleet <- get_fleet_remote(dateStart = dateStart,dateEnd = dateEnd,mdCode = mdCode,nafoCode= nafoCode,gearCode = gearCode,useDate = useDate,vessLen = vessLen,quietly = T, ...)
-    marf <- get_MARFIS_remote(dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T, ...)
-    obs <- get_OBS_remote(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T, ...)
-    bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
-  }
-  # Capture the results in a list and return them ------------------------------------------------
-  cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
-  cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
-  cat("\n")
-  res=list()
-  res[["fleet"]]<- fleet
-  res[["marf"]]<- marf
-  res[["obs"]]<- obs
-  res[["bycatch"]]<- bycatch
-  return(res)
+
+
+  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
+  args[names(argsSent)] <- argsSent
+
+  data <- do.call(get_all, args)
+  return(data)
 }

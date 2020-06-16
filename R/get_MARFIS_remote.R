@@ -84,6 +84,8 @@ get_MARFIS_remote<-function(dateStart = NULL, dateEnd = NULL,
   # usepkg = "rodbc",
   args <- list(...)
 
+  theDate <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")
+
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (is.null(dateEnd)) dateEnd<- as.Date(dateStart,origin = "1970-01-01")+lubridate::years(1)
   cxn = Mar.utils::make_oracle_cxn(usepkg = args$usepkg,fn.oracle.username = args$oracle.username,fn.oracle.password = args$fn.oracle.password,fn.oracle.dsn = args$fn.oracle.dsn, quietly = args$quietly)

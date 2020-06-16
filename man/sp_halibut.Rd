@@ -4,18 +4,18 @@
 \alias{sp_halibut}
 \title{sp_halibut}
 \usage{
-sp_halibut(useLocal = F, year = NULL, vessLen = c(0, 999), ...)
+sp_halibut(year = NULL, vessLen = c(0, 999), ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
 
 \item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 "all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
 including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -40,7 +40,7 @@ information for the halibut fleets:
 }
 \examples{
 \dontrun{
-Halibut <- sp_halibut(useLocal = T, year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
+Halibut <- sp_halibut(year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
 }
 }
 \seealso{

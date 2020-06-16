@@ -4,14 +4,14 @@
 \alias{sp_swordfish}
 \title{sp_swordfish}
 \usage{
-sp_swordfish(useLocal = F, year = NULL, ...)
+sp_swordfish(year = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -36,7 +36,7 @@ information for the swordfish fleet:
 }
 \examples{
 \dontrun{
-Swordfish <- sp_swordfish(useLocal = T, year = 2018, data.dir = "C:/myData")
+Swordfish <- sp_swordfish(year = 2018, data.dir = "C:/myData")
                           }
 }
 \seealso{

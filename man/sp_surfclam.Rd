@@ -4,14 +4,14 @@
 \alias{sp_surfclam}
 \title{sp_surfclam}
 \usage{
-sp_surfclam(useLocal = F, year = NULL, ...)
+sp_surfclam(year = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -36,7 +36,7 @@ information for the surfclam fleet:
 }
 \examples{
 \dontrun{
-Surfclam <- sp_surfclam(useLocal = T, year = 2018, data.dir = "C:/myData")
+Surfclam <- sp_surfclam(year = 2018, data.dir = "C:/myData")
                        }
 }
 \seealso{

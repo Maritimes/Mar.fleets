@@ -4,19 +4,9 @@
 \alias{sp_pollock}
 \title{sp_pollock}
 \usage{
-sp_pollock(
-  useLocal = F,
-  year = NULL,
-  type = NULL,
-  mesh = NULL,
-  component = NULL,
-  ...
-)
+sp_pollock(year = NULL, type = NULL, mesh = NULL, component = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
-
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
 
@@ -25,6 +15,9 @@ observer and bycatch data.}
 \item{mesh}{default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".}
 
 \item{component}{default is \code{NULL}. This is either "WESTERN" or "EASTERN".}
+
+\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
+run them against local copies of the data, please set to TRUE.}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
@@ -49,10 +42,10 @@ information for the pollock fleets:
 }
 \examples{
 \dontrun{
-Pollock_West_m_sm <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
+Pollock_West_m_sm <- sp_pollock(year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
                                 }
 \dontrun{
-Pollock_East_m_lg <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
+Pollock_East_m_lg <- sp_pollock(year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
                                 }
 }
 \seealso{

@@ -22,27 +22,19 @@
 #' @param mesh default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
 #' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
 #' @examples \dontrun{
-#' Pollock_West_m_sm <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
+#' Pollock_West_m_sm <- sp_pollock(year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
 #'                                 }
 #' \dontrun{
-#' Pollock_East_m_lg <- sp_pollock(useLocal = T, year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
+#' Pollock_East_m_lg <- sp_pollock(year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
 #'                                 }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_pollock <- function(useLocal = F, year=NULL, type = NULL, mesh=NULL, component = NULL, ...){
-  args <- list(...)
-
-  dateStart =paste0(year,"-01-01")
-  dateEnd =paste0(year,"-12-31")
+sp_pollock <- function(year=NULL, type = NULL, mesh=NULL, component = NULL, ...){
 
   # Set up the Pollock-specific variables -------------------------------------------------------
-  marfSpp = 170
-  useDate = "landed" #fished" #landed
-  yrField = ifelse(useDate == "fished","YEAR","YEAR_LANDED")
-
   if (toupper(component)=="WESTERN"){
     nafoCode= c('4XO%','4XP%','4XQ%','4XR%','4XS%','5%') #'4XU%' intentionally excluded as directed by HS
     if (toupper(type) == "FIXED") nafoCode <-c(nafoCode, '4XU%')
@@ -66,29 +58,19 @@ sp_pollock <- function(useLocal = F, year=NULL, type = NULL, mesh=NULL, componen
     gearCode = c(40,41)
     gearSpSize = 'all'
   }
-  vessLen = 'all'
 
-  if (!canRun(useLocal =useLocal, ...))stop("Can't run as requested.")
+  args <- list(marfSpp=170,
+               nafoCode=nafoCode,
+               gearCode = gearCode,
+               gearSpSize = gearSpSize,
+               mdCode = mdCode,
+               dateStart =paste0(year,"-01-01"),
+               dateEnd =paste0(year,"-12-31")
+  )
 
-  if(useLocal){
-    fleet <- get_fleet_local(dateStart = dateStart, dateEnd = dateEnd, mdCode = mdCode, nafoCode= nafoCode, gearCode = gearCode, useDate = useDate,vessLen = vessLen,  ...)
-    marf <- get_MARFIS_local(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, ...)
-    obs <- get_OBS_local(dateStart = dateStart, dateEnd = dateEnd, keepSurveyTrips = T, useDate = useDate, thisFleet = fleet, get_MARFIS = marf, ...)
-    bycatch <- get_Bycatch_local(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp, ...)
-  }else{
-    fleet <- get_fleet_remote(dateStart = dateStart,dateEnd = dateEnd,mdCode = mdCode,nafoCode= nafoCode,gearCode = gearCode,useDate = useDate,vessLen = vessLen,quietly = T, ...)
-    marf <- get_MARFIS_remote(dateStart = dateStart, dateEnd = dateEnd,thisFleet = fleet, marfSpp = marfSpp, nafoCode= nafoCode, useDate = useDate, quietly = T, ...)
-    obs <- get_OBS_remote(dateStart = dateStart, dateEnd = dateEnd, thisFleet = fleet, get_MARFIS = marf, useDate = useDate, quietly = T, keepSurveyTrips = T, ...)
-    bycatch <- get_Bycatch_remote(get_MARFIS = marf, got_OBS = obs, dir_Spp = marfSpp)
-  }
-  # Capture the results in a list and return them ------------------------------------------------
-  cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
-  cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
-  cat("\n")
-  res=list()
-  res[["fleet"]]<- fleet
-  res[["marf"]]<- marf
-  res[["obs"]]<- obs
-  res[["bycatch"]]<- bycatch
-  return(res)
+  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
+  args[names(argsSent)] <- argsSent
+
+  data <- do.call(get_all, args)
+  return(data)
 }
