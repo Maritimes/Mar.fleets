@@ -14,7 +14,7 @@ applyFilters<-function(df = NULL, ...){
 
   if(!args$keep$mdDone){
     if (length(unique(df$MD_CODE))==1 ){
-      if(!quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
+      if(!args$quiet)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
       args$keep$mdDone <- T
       # }else if (length(mdCode) == 0){
       #   allOptions <- c(allOptions, "Monitoring Document Type")
@@ -28,7 +28,7 @@ applyFilters<-function(df = NULL, ...){
 
   if(!args$keep$gearDone){
     if (length(unique(df$GEAR_CODE))==1){
-      if(!quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
+      if(!args$quiet)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
       args$keep$gearDone<-T
     }else if (length(args$gearCode)>0 && args$gearCode != "all"){
       df=df[df$GEAR_CODE %in% args$gearCode,]
@@ -42,7 +42,7 @@ applyFilters<-function(df = NULL, ...){
 
   if(!args$keep$nafoDone){
     if (length(unique(df$NAFO))==1){
-      if(!quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
+      if(!args$quiet)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       args$keep$nafoDone<-T
     }else if (length(args$nafoCode)>0 && args$nafoCode != "all"){
 
@@ -63,16 +63,12 @@ applyFilters<-function(df = NULL, ...){
       if (!(is.null(args$gearSpType) || args$gearSpType=="all") && (is.null(args$gearSpSize) || args$gearSpSize=="all")){
         if (gearspecfn=="get_GearSpecs_local"){
           df<- do.call(get_GearSpecs_local, list(df=df,argsList=args))
-         # df <- get_GearSpecs_local(cxn = NULL, keep=keep, df = df, data.dir = data.dir, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
           args$keep$gearSpecsDone <- T
         }else{
           df<- do.call(get_GearSpecs_remote, list(df=df,argsList=args))
-         # df <- get_GearSpecs_remote(cxn = cxn, keep=keep, df = df, data.dir =NULL, gearSpType=gearSpType, gearSpSize=gearSpSize, dateStart=dateStart, dateEnd=dateEnd, quietly=quietly)
           args$keep$gearSpecsDone <- T
         }
         args$keep$gearSpecsDone <- T
-        # }else{
-        #   allOptions <- c(allOptions, "Gear Specifications")
       }
     }
   }

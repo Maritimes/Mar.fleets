@@ -2,11 +2,6 @@
 #' @description This function extracts all of the records from the observer database that are
 #' within a particular date range, and if a fleet is provided, it will also limit the results to
 #' those vessels with particular combinations of VR and licence.
-#' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
-#' of the window of time you want to look at.
-#' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
-#' of the window of time you want to look at.  If this is left blank, 1 year of
-#' data will be returned.
 #' @param keepSurveyTrips default is \code{FALSE}.  This indicates whether you
 #' want to retain trips that were part of a survey.  These are not typical
 #' commercial trips and their distribution will not reflect normal
@@ -14,10 +9,7 @@
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
 #' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 #' \code{Mar.bycatch::get_fleet()}
-#' @param useDate default is \code{"fished"}. Some MARFIS tables have 2 different dates
-#' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
-#' and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
-#' subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.
+#' @param ... other arguments passed to methods
 #' @param get_MARFIS default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet

@@ -11,11 +11,11 @@ sp_halibut(year = NULL, vessLen = c(0, 999), ...)
 observer and bycatch data.}
 
 \item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
-"all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
-including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
+"all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
+for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
+of the following - \code{c(0,45)} or \code{seq(0,45,1)}.}
 
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer

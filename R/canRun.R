@@ -4,8 +4,9 @@
 #' tables must be available in the data.dir.  If run against Oracle, we must be on the network and
 #' have access to the necessary schema.tables.
 #' @noRd
-canRun <- function(useLocal = T, ...){
+canRun <- function(...){
   args=list(...)
+
   #for each vector below, [1] is the name of the schema
   OBS = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
   MARFIS = c("MARFISSCI.GEARS","MARFISSCI.HAIL_IN_CALLS","MARFISSCI.HAIL_OUTS","MARFISSCI.LICENCE_SUBTYPES",

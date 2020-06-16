@@ -14,18 +14,21 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param useLocal default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-#' run them against local copies of the data, please set to TRUE.
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param mesh default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
 #' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
+#' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Pollock_West_m_sm <- sp_pollock(year = 2018, type = "MOBILE", mesh="SMALL", component = "WESTERN", data.dir = "C:/myData")
+#' Pollock_West_m_sm <- sp_pollock(year = 2018, type = "MOBILE",
+#'                                 mesh="SMALL", component = "WESTERN",
+#'                                 data.dir = "C:/myData")
 #'                                 }
 #' \dontrun{
-#' Pollock_East_m_lg <- sp_pollock(year = 2018, type = "MOBILE", mesh="LARGE", component = "EASTERN", data.dir = "C:/myData")
+#' Pollock_East_m_lg <- sp_pollock(year = 2018, type = "MOBILE",
+#'                                 mesh="LARGE", component = "EASTERN",
+#'                                 data.dir = "C:/myData")
 #'                                 }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer

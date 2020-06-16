@@ -13,12 +13,11 @@
 #'   \item \code{bycatch} - This is a dataframe with the various species that were observed during observed
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured}
-#' @param useLocal default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-#' run them against local copies of the data, please set to TRUE.
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
+#' @param ... other arguments passed to methods
 #' @examples \dontrun{
 #' Haddock_5ZJM_m <- sp_haddock(year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
 #' }

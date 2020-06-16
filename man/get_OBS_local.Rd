@@ -25,17 +25,7 @@ the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
 
-\item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
-of the window of time you want to look at.}
-
-\item{dateEnd}{default is \code{NULL}. This is the end date (YYYY-MM-DD)
-of the window of time you want to look at.  If this is left blank, 1 year of
-data will be returned.}
-
-\item{useDate}{default is \code{"fished"}. Some MARFIS tables have 2 different dates
-that are used for recording when fishing activity took place.  One is "DATE_FISHED",
-and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
-subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 returns a list with 2 dataframes - "OBS_TRIPS", and "OBS_SETS".

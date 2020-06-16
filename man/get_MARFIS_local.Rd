@@ -11,49 +11,7 @@ get_MARFIS_local(thisFleet = NULL, ...)
 the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
 
-\item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
-of the window of time you want to look at.}
-
-\item{dateEnd}{default is \code{NULL}. This is the end date (YYYY-MM-DD)
-of the window of time you want to look at.  If this is left blank, 1 year of
-data will be returned.}
-
-\item{useDate}{default is \code{"fished"}. Some MARFIS tables have 2 different dates
-that are used for recording when fishing activity took place.  One is "DATE_FISHED",
-and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
-subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
-
-\item{marfSpp}{default is \code{NULL}.  This is the marfis species code for the species you want
-records for. There are literally hundreds of codes, but here are some of the more commonly used:
-\itemize{
-\item 100 = Cod
-\item 110 = Haddock
-\item 120 = Redfish
-\item 130 = Halibut
-\item 141 = Yellowtail Flounder
-\item 142 = Witch Flounder
-\item 143 = Winter Flounder
-\item 144 = Turbot
-\item 170 = Pollock
-\item 172 = Silver Hake
-\item 200 = Herring
-\item 251 = Swordfish
-\item 608 = Surf Clam
-\item 619 = Sea Cucumber
-\item 623 = Sea Scallop
-\item 700 = Lobster
-}}
-
-\item{nafoCode}{default is \code{NULL}. This is a vector of NAFO AREAS (MARFIS) that will be
-used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
-valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
-with the specified code are returned.  For example c('5%') would return all of the areas within
-5Z and 5Y, c('5Z%'), would only return the areas within 5Z (e.g. 5ZE, 5ZU,...), and c('5Z') (no
-wildcard) would only return 5Z - no subareas.}
-
-\item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
-"all", it will be used to restrict vessels by their size.  If you wanted all vessels up to and
-including 45 feet, you might enter a value of \code{seq(0,45,1)}.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 returns a list with 2 dataframes - "trips", and "sets".

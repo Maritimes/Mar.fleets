@@ -14,11 +14,10 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param useLocal default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-#' run them against local copies of the data, please set to TRUE.
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
 #' @param unit default is \code{NULL}. This is either "2" or "3".
+#' @param ... other arguments passed to methods
 #' @examples \dontrun{
 #' Redfish <- sp_redfish(year = 2018, unit = 2, data.dir = "C:/myData")
 #'                       }

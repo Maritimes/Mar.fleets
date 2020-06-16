@@ -22,7 +22,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
-  COMMON <- ORD <- WT <- CATCH_TYPE <- NA
+  COMMON <- COMMON_fact <- EST_NUM_CAUGHT  <- ORD <- WT <- CATCH_TYPE <- NA
   ts = format(Sys.time(), "%Y%m%d_%H%M")
   fn = paste0(obsSpp)
 

@@ -14,10 +14,9 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param useLocal default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-#' run them against local copies of the data, please set to TRUE.
 #' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 #' observer and bycatch data.
+#' @param ... other arguments passed to methods
 #' @examples \dontrun{
 #' WinterFlounder <- sp_winterflounder(year = 2018, data.dir = "C:/myData")
 #' }
@@ -31,9 +30,8 @@ sp_winterflounder <- function(year=NULL, ...){
   # Set up the winterflounder-specific variables -------------------------------------------------------
   args <- list(marfSpp=143,
                nafoCode=c('4X%','5Y%'),
-               useDate = "landed",
                gearCode = 12,
-               gearSpSize= gearSpSize,
+               gearSpSize = seq(155,999,1),
                mdCode = 2,
                dateStart =paste0(year,"-01-01"),
                dateEnd =paste0(year,"-12-31")

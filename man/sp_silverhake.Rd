@@ -10,8 +10,7 @@ sp_silverhake(year = NULL, ...)
 \item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
 observer and bycatch data.}
 
-\item{useLocal}{default is \code{FALSE}. By default, these scripts query Oracle.  If you want to
-run them against local copies of the data, please set to TRUE.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 list of objects, including marfis data, observer data, information for matching observer
