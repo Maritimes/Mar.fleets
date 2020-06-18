@@ -13,6 +13,7 @@ get_Bycatch<-function(got_OBS = NULL, ...){
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==args$marfSpp),c("SPECCD_ID")]
 
   if(args$useLocal){
+    ds_all <<- Mar.datawrangling::load_datasources()
   Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = args$quiet )
   ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
   Mar.datawrangling::self_filter(quiet = args$quiet, env = environment())

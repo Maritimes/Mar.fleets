@@ -54,6 +54,7 @@ In the future, this will also verify you have access to the necessary tables.")
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
       #marfis is annoying because some files are prefaced with marfissci
+
       tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
       tabs2 = gsub(tabs1,pattern = "MARFISSCI", replacement = "MARFIS")
       localDataCheck1 <- sapply(X =tabs1, file.exists)
@@ -69,7 +70,7 @@ In the future, this will also verify you have access to the necessary tables.")
     }
     return(localDataCheck)
   }
-  if (useLocal){
+  if (args$useLocal){
     if (wantLocal(MARFIS,...)&wantLocal(OBS,...)){
       return(TRUE)
     }else{

@@ -10,11 +10,8 @@
 get_fleet<-function(...){
   args<-  list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  if(args$useLocal) {
-    df <- do.call(get_fleetBasic_local, list(argsList=args))
-  }else{
-    df <- do.call(get_fleetBasic_remote, list(argsList=args))
-  }
+
+  df <- do.call(get_fleetBasic, list(argsList=args))
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)

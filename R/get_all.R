@@ -25,7 +25,6 @@ get_all <- function(...){
   args[["theDate"]] <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")
 
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-
   if (!do.call(canRun, args))stop("Can't run as requested.")
 
   if(!args$useLocal){
@@ -40,7 +39,6 @@ get_all <- function(...){
     }
     args[["cxn"]] <- cxn
   }
-
   fleet <- do.call(get_fleet, list(argsList=args))
   marf <- do.call(get_MARFIS, list(thisFleet=fleet,argsList=args))
   obs <- do.call(get_OBS, list(thisFleet=fleet,get_MARFIS = marf, argsList=args))
