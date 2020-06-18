@@ -5,13 +5,7 @@
 applyFilters<-function(df = NULL, ...){
 
   args <- list(...)$argsList
-  if (args$useLocal){
-    gearspecfn <- "get_GearSpecs_local"
-  }else{
-    gearspecfn <- "get_GearSpecs_remote"
-  }
-  # allOptions<-"Done" #this will be a vector that gets populated with available filters
-
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if(!args$keep$mdDone){
     if (length(unique(df$MD_CODE))==1 ){
       if(!args$quiet)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
@@ -45,29 +39,20 @@ applyFilters<-function(df = NULL, ...){
       if(!args$quiet)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       args$keep$nafoDone<-T
     }else if (length(args$nafoCode)>0 && args$nafoCode != "all"){
-
       df=df[df$NAFO %in% args$nafoCode,]
       args$keep$nafoDone<-T
-      # }else{
-      #   allOptions <- c(allOptions, "NAFO Areas")
     }
   }
 
   if (args$keep$gearDone){
-    test=chk_Gears(df)
-    if (length(test)>0) args$keep$canDoGearSpecs <- T
+    test=do.call(chk_Gears, list(df=df,argsList=args))
+    if (length(test)>0) args$keep$canDoGearSpecs <- TRUE
   }
 
   if(args$keep$canDoGearSpecs){#only show if a gear selection has been made
     if(!args$keep$gearSpecsDone){
-      if (!(is.null(args$gearSpType) || args$gearSpType=="all") && (is.null(args$gearSpSize) || args$gearSpSize=="all")){
-        if (gearspecfn=="get_GearSpecs_local"){
-          df<- do.call(get_GearSpecs_local, list(df=df,argsList=args))
-          args$keep$gearSpecsDone <- T
-        }else{
-          df<- do.call(get_GearSpecs_remote, list(df=df,argsList=args))
-          args$keep$gearSpecsDone <- T
-        }
+      if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
+        df <- do.call(get_GearSpecs, list(df=df,argsList=args))
         args$keep$gearSpecsDone <- T
       }
     }

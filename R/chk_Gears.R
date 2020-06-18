@@ -4,8 +4,11 @@
 #' go with them. e.g. mesh gear has a mesh size, and those sorts of values are different than the
 #' sizes that might be associated with traps or hooks.
 #' @param df dataframe
+#' @param ... other arguments passed to methods
 #' @noRd
-chk_Gears <- function(df=df){
+chk_Gears <- function(df=df,...){
+  args <- list(...)$argsList
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   allGears = tolower(unique(df$GEAR_DESC))
   allGears = allGears[!allGears %in% c("trap net")]
   matchTrap=c('trap','pot')

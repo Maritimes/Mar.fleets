@@ -50,7 +50,6 @@ sp_redfish <- function(year=NULL, unit = NULL, ...){
 
   argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
   args[names(argsSent)] <- argsSent
-
   data <- do.call(get_all, args)
   return(data)
 }

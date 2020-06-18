@@ -1,5 +1,6 @@
 get_fleetBasic_local<-function(...){
   args <- list(...)$argsList
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   theDate <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")
 
   Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir,

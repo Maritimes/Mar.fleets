@@ -4,12 +4,7 @@
 \alias{match_trips}
 \title{match_trips}
 \usage{
-match_trips(
-  get_MARFIS = NULL,
-  get_OBS = NULL,
-  useDate = "fished",
-  quiet = FALSE
-)
+match_trips(get_MARFIS = NULL, get_OBS = NULL, ...)
 }
 \arguments{
 \item{get_MARFIS}{default is \code{NULL}. This is the list output by the
@@ -20,13 +15,7 @@ trip and set information from MARFIS}
 \code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
 trip and set information from the observer database.}
 
-\item{useDate}{default is \code{"fished"}. Some MARFIS tables have 2 different dates
-that are used for recording when fishing activity took place.  One is "DATE_FISHED",
-and the other is "LANDED_DATE". If useDate = "fished", the DATE_FISHED field will be used for
-subsetting data by date.  Any other value will result in the use of "LANDED_DATE" instead.}
-
-\item{quiet}{default is \code{FALSE}.  This indicates whether or not
-information about the matching process should be shown.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 returns a list with 3 dataframes - MAP_OBS_MARFIS_TRIPS, MATCH_ISSUES, UNMATCHABLE & MATCH_SUMMARY
@@ -53,13 +42,10 @@ and attempts to match trips based on:
 \seealso{
 Other fleets: 
 \code{\link{calc_Coverage}()},
-\code{\link{get_MARFIS_local}()},
-\code{\link{get_MARFIS_remote}()},
-\code{\link{get_OBS_local}()},
-\code{\link{get_OBS_remote}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
 \code{\link{get_VMSTracks}()},
-\code{\link{get_fleet_local}()},
-\code{\link{get_fleet_remote}()},
+\code{\link{get_fleet}()},
 \code{\link{match_sets}()}
 }
 \author{

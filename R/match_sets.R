@@ -13,8 +13,7 @@
 #' @param maxSetDiff_hr default is \code{24}.  This is how many hours are allowed between
 #' reported Observer and MARFIS sets before.  Sets differing by more than this time span
 #' will never be matched.
-#' @param quiet default is \code{FALSE}.  This indicates whether or not
-#' information about the matching process should be shown.
+#' @param ... other arguments passed to methods
 #' @import data.table
 #' @family fleets
 #' @return a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
@@ -24,7 +23,10 @@ match_sets <- function(get_MARFIS = NULL,
                        get_OBS = NULL,
                        match_trips = NULL,
                        maxSetDiff_hr =24,
-                       quiet=F){
+                       ...){
+
+  args <- list(...)$argsList
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if (all(is.na(get_OBS)))return(NA)
   if(all(is.na(match_trips$MAP_OBS_MARFIS_TRIPS)))return(NA)
   if(class(get_OBS)=="list"){
@@ -40,7 +42,7 @@ match_sets <- function(get_MARFIS = NULL,
   # osets = get_OBS$OBS_SETS_ALL
   if(is.null(get_MARFIS$MARF_MATCH) ||
      is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
-    if (!quiet)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
+    if (!args$quiet)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
     return(NULL)
   }else{
     match = match_trips$MAP_OBS_MARFIS_TRIPS
@@ -72,7 +74,8 @@ match_sets <- function(get_MARFIS = NULL,
 
     data.table::setkey(this_Otrip,DATE_TIME)
     data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
-    #matches all mtrips to nearest otrip - some otrips matched mult
+    #matches all mtrips to nearest otrip - some otrips matched mult]
+
     mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
     mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
 

@@ -58,12 +58,9 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 \seealso{
 Other fleets: 
 \code{\link{calc_Coverage}()},
-\code{\link{get_MARFIS_local}()},
-\code{\link{get_MARFIS_remote}()},
-\code{\link{get_OBS_local}()},
-\code{\link{get_OBS_remote}()},
-\code{\link{get_fleet_local}()},
-\code{\link{get_fleet_remote}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
+\code{\link{get_fleet}()},
 \code{\link{match_sets}()},
 \code{\link{match_trips}()}
 }

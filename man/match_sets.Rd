@@ -9,7 +9,7 @@ match_sets(
   get_OBS = NULL,
   match_trips = NULL,
   maxSetDiff_hr = 24,
-  quiet = F
+  ...
 )
 }
 \arguments{
@@ -29,8 +29,7 @@ the two databases are matched.}
 reported Observer and MARFIS sets before.  Sets differing by more than this time span
 will never be matched.}
 
-\item{quiet}{default is \code{FALSE}.  This indicates whether or not
-information about the matching process should be shown.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
@@ -42,13 +41,10 @@ and match_trips(), and attempts to match the sets for each trip.
 \seealso{
 Other fleets: 
 \code{\link{calc_Coverage}()},
-\code{\link{get_MARFIS_local}()},
-\code{\link{get_MARFIS_remote}()},
-\code{\link{get_OBS_local}()},
-\code{\link{get_OBS_remote}()},
+\code{\link{get_MARFIS}()},
+\code{\link{get_OBS}()},
 \code{\link{get_VMSTracks}()},
-\code{\link{get_fleet_local}()},
-\code{\link{get_fleet_remote}()},
+\code{\link{get_fleet}()},
 \code{\link{match_trips}()}
 }
 \author{
