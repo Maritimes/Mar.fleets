@@ -6,7 +6,7 @@
 #' @noRd
 canRun <- function(...){
   args=list(...)
-
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   #for each vector below, [1] is the name of the schema
   OBS = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
   MARFIS = c("MARFISSCI.GEARS","MARFISSCI.HAIL_IN_CALLS","MARFISSCI.HAIL_OUTS","MARFISSCI.LICENCE_SUBTYPES",
@@ -15,6 +15,8 @@ canRun <- function(...){
              "MARFISSCI.MON_DOCS","MARFISSCI.NAFO_UNIT_AREAS","MARFISSCI.PRO_SPC_INFO","MARFISSCI.VESSELS")
 
   wantRemote <- function(...){
+    args=list(...)
+    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     #1check if on network
     chk_OracleAvail <- function(url_in = "https://intranet.ent.dfo-mpo.ca/",t=2){
       con <- url(url_in)
@@ -50,7 +52,8 @@ In the future, this will also verify you have access to the necessary tables.")
   }
 
   wantLocal <- function(tables = NULL, ...){
-    args= list(...)
+    args=list(...)
+    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
       #marfis is annoying because some files are prefaced with marfissci
@@ -70,6 +73,7 @@ In the future, this will also verify you have access to the necessary tables.")
     }
     return(localDataCheck)
   }
+
   if (args$useLocal){
     if (wantLocal(MARFIS,...)&wantLocal(OBS,...)){
       return(TRUE)
