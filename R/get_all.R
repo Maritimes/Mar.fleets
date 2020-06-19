@@ -23,25 +23,21 @@ get_all <- function(...){
   argsSent<-  list(...)
   args[names(argsSent)] <- argsSent
   args[["theDate"]] <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")
-
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  if (!do.call(canRun, args))stop("Can't run as requested.")
+  cxnCheck <- do.call(canRun, args)
 
-  if(!args$useLocal){
-    cxn = Mar.utils::make_oracle_cxn(usepkg = args$usepkg,
-                                     fn.oracle.username = args$oracle.username,
-                                     fn.oracle.password = args$oracle.password,
-                                     fn.oracle.dsn = args$oracle.dsn,
-                                     quietly = args$quiet)
-    if (!class(cxn) =="list"){
-      cat("\nCan't do this without a DB connection.  Aborting.\n")
-      return(NULL)
-    }
-    args[["cxn"]] <- cxn
+
+  if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
+    stop("Can't run as requested.")
+  } else if (is.list(cxnCheck)){
+    args[["cxn"]] <- cxnCheck
   }
+
   fleet <- do.call(get_fleet, list(argsList=args))
+  stop()
   marf <- do.call(get_MARFIS, list(thisFleet=fleet,argsList=args))
   obs <- do.call(get_OBS, list(thisFleet=fleet,get_MARFIS = marf, argsList=args))
+
   bycatch <- do.call(get_Bycatch, list(got_OBS = obs, argsList=args))
 
   # Capture the results in a list and return them ------------------------------------------------

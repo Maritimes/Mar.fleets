@@ -109,7 +109,7 @@ get_OBS <- function(thisFleet = NULL, get_MARFIS = NULL, ...){
       tripSQLsupp <- paste0("SELECT DISTINCT VR_NUMBER, LICENCE_ID LIC_tmp2 FROM MARFISSCI.LICENCE_VESSELS
                           WHERE VR_NUMBER BETWEEN ",min(VRS)," AND ",max(VRS), "
                           AND LICENCE_ID BETWEEN ",min(LICS)," AND ",max(LICS))
-      tripSQLsupp_all<- cxn$thecmd(cxn$channel, tripSQLsupp)
+      tripSQLsupp_all<- args$cxn$thecmd(args$cxn$channel, tripSQLsupp)
       tripSQLsupp_all <- tripSQLsupp_all[paste0(tripSQLsupp_all$LIC_TMP2,"_",tripSQLsupp_all$VR_NUMBER) %in% LIC_VR,]
 
       obs_TRIPS_all <- merge(obs_TRIPS_all, tripSQLsupp_all, all.x=T)

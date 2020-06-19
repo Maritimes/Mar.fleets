@@ -126,11 +126,13 @@ get_fleet<-function(...){
                       ",where_g
       )
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
+
     }
     return(theFleet)
   }
 
   df <- do.call(get_fleetBasic, list(argsList=args))
+  if (args$debug) cat("1 - nrow(get_fleetBasic):",nrow(df),"\n")
 
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
   for (b in 1:length(bad)){
@@ -138,6 +140,7 @@ get_fleet<-function(...){
   }
   df$MD_DESC <- trimws(df$MD_DESC)
   df <- do.call(applyFilters, list(df=df,argsList=args))
+  if (args$debug) cat("1 - nrow(post-applyFilters):",nrow(df),"\n")
 
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))
