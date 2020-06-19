@@ -15,23 +15,20 @@ get_GearSpecs<- function(df = NULL, ...){
   # Get all of the records for our df that might link to gear info ----------------------------------------
   if (args$useLocal){
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = args$quiet)
-    LOG_EFRT_STD_INFO = LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
-    LOG_EFRT_STD_INFO <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(args$dateStart, origin = "1970-01-01")
+    gearSpecDF <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(args$dateStart, origin = "1970-01-01")
                                                  & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(args$dateEnd, origin = "1970-01-01")),]
-    gearSpecDF<-  LOG_EFRT_STD_INFO[ LOG_EFRT_STD_INFO$MON_DOC_ID %in% df$MON_DOC_ID,]
   }else{
     gearSpecDFQry <- paste0("SELECT DISTINCT
                           LOG_EFRT_STD_INFO.MON_DOC_ID,
                           LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
                           FROM MARFISSCI.LOG_EFRT_STD_INFO
                           WHERE
-                          LOG_EFRT_STD_INFO.MON_DOC_ID BETWEEN ",min(df$MON_DOC_ID), " AND ",max(df$MON_DOC_ID),"
-                          AND LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD')
-                          AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
-    gearSpecDF<- args$cxn$thecmd(args$cxn$channel, gearSpecDFQry)
-    gearSpecDF<- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
-
+                          LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
+    gearSpecDF <- args$cxn$thecmd(args$cxn$channel, gearSpecDFQry)
   }
+  gearSpecDF <- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
+  gearSpecDF<- unique(gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,])
+  if (args$debug) cat("gearSpecDF done:",nrow(gearSpecDF),"\n")
 
   if(nrow(gearSpecDF)<1){
     cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
@@ -77,6 +74,8 @@ get_GearSpecs<- function(df = NULL, ...){
     gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
 
   }
+  if (args$debug) cat("gearSpecRelevant done:",nrow(gearSpecRelevant),"\n")
+
   if(nrow(gearSpecRelevant)<1){
     cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
     return(df)
@@ -105,12 +104,14 @@ get_GearSpecs<- function(df = NULL, ...){
       }else{
         gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% args$gearSpSize,"LOG_EFRT_STD_INFO_ID"]
       }
-
+      if (args$debug) cat("gearSpecRelevant_size done:",nrow(gearSpecRelevant_size),"\n")
       log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
+      if (args$debug) cat("log_eff recs:",length(log_eff),"\n")
       df<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
       log_eff <- NA
       gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
     }
+    if (args$debug) cat("sizeFilt done:",nrow(df),"\n")
     return(df)
   }
   typeFilt <- function(df=NULL, ...){
@@ -122,11 +123,13 @@ get_GearSpecs<- function(df = NULL, ...){
     }else if (length(args$gearSpType)>0){
       #apply the requested filter
       gearSpecRelevant_types <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% args$gearSpType,"LOG_EFRT_STD_INFO_ID"]
+      if (args$debug) cat("gearSpecRelevant_types done:",nrow(gearSpecRelevant_types),"\n")
       log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"LOG_EFRT_STD_INFO_ID"])
       df<-df[df$MON_DOC_ID %in% log_eff,]
       log_eff <- NA
       gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
     }
+    if (args$debug) cat("typeFilt done:",nrow(df),"\n")
     return(df)
   }
 

@@ -34,10 +34,8 @@ get_all <- function(...){
   }
 
   fleet <- do.call(get_fleet, list(argsList=args))
-  stop()
   marf <- do.call(get_MARFIS, list(thisFleet=fleet,argsList=args))
   obs <- do.call(get_OBS, list(thisFleet=fleet,get_MARFIS = marf, argsList=args))
-
   bycatch <- do.call(get_Bycatch, list(got_OBS = obs, argsList=args))
 
   # Capture the results in a list and return them ------------------------------------------------

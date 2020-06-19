@@ -68,6 +68,7 @@ getEff<-function(log_efrt=NULL, ...){
   }
   PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
   PS_sets<-unique(PS_sets)
+  if (args$debug) cat("getEff done:",nrow(PS_sets),"\n")
   return(PS_sets)
 }
 getPS<-function(allProSpc=NULL, ...){
@@ -127,6 +128,7 @@ getPS<-function(allProSpc=NULL, ...){
   PS_df<- args$cxn$thecmd(args$cxn$channel, PSQry0)
   PS_df <- PS_df[PS_df$PRO_SPC_INFO_ID %in% allProSpc,]
   }
+  if (args$debug) cat("getPS done:",nrow(PS_df),"\n")
   return(PS_df)
 }
 getED<-function(mondocs=NULL, ...){
@@ -164,6 +166,8 @@ getED<-function(mondocs=NULL, ...){
   if (!"OBS_ID" %in%  colnames(ED_df)) ED_df$OBS_ID<-NA
   }
   ED_df <- unique(ED_df)
+
+  if (args$debug) cat("getED done:",nrow(ED_df),"\n")
   return(ED_df)
 }
 getHIC<-function(trips = NULL, ...){
@@ -173,8 +177,7 @@ getHIC<-function(trips = NULL, ...){
     HAIL_IN_CALLS <- HAIL_OUTS <- NA
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"), env = environment(), quiet = args$quiet)
     HIC_df <- HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
-    colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
-    colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
+
   }else{
   HICQry<-paste0("SELECT
                     HI.TRIP_ID,
@@ -186,9 +189,11 @@ getHIC<-function(trips = NULL, ...){
                   HI.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
   HIC_df<- args$cxn$thecmd(args$cxn$channel, HICQry)
   HIC_df <- HIC_df[HIC_df$TRIP_ID %in% trips ,]
+  }
+  HIC_df <- unique(HIC_df)
   colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
   colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
-  }
+  if (args$debug) cat("getHIC done:",nrow(HIC_df),"\n")
   return(HIC_df)
 }
 getHOC<-function(trips = NULL, ...){
@@ -198,8 +203,6 @@ getHOC<-function(trips = NULL, ...){
     HAIL_OUTS <- NA
     Mar.datawrangling::get_data_custom(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"), env = environment(), quiet = args$quiet)
     HOC_df <- HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
-    colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
-    colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
   }else{
   HOCQry<-paste0("SELECT
                    HO.TRIP_ID,
@@ -211,9 +214,11 @@ getHOC<-function(trips = NULL, ...){
                    HO.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
   HOC_df<- args$cxn$thecmd(args$cxn$channel, HOCQry)
   HOC_df <- HOC_df[HOC_df$TRIP_ID %in% trips ,]
+  }
+  HOC_df<-unique(HOC_df)
   colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
   colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
-  }
+  if (args$debug) cat("getHOC done:",nrow(HOC_df),"\n")
   return(HOC_df)
 }
 

@@ -11,15 +11,24 @@ get_Bycatch<-function(got_OBS = NULL, ...){
 
   ISCATCHES <- ISTRIPS <- NA
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==args$marfSpp),c("SPECCD_ID")]
-
+  isTrips<- unique(got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS)
   if(args$useLocal){
     ds_all <<- Mar.datawrangling::load_datasources()
-  Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = args$quiet )
-  ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS,]
-  Mar.datawrangling::self_filter(quiet = args$quiet, env = environment())
-  df<-ISCATCHES
+    Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = args$quiet )
+    ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% isTrips,]
+    Mar.datawrangling::self_filter(quiet = args$quiet, env = environment())
+    df<-ISCATCHES
   }else{
 
+    ISCATCHESQry<-paste0("SELECT
+                  SPECCD_ID, EST_NUM_CAUGHT, EST_KEPT_WT, EST_DISCARD_WT
+                FROM OBSERVER.ISCATCHES
+                WHERE FISHSET_ID IN (SELECT
+                                        FISHSET_ID
+                                      FROM OBSERVER.ISFISHSETS
+                                      WHERE TRIP_ID IN (", Mar.utils::SQL_in(isTrips, apo=F),"))")
+
+    df <- args$cxn$thecmd(args$cxn$channel, ISCATCHESQry)
   }
 
   df<-df[,c("SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT")]

@@ -136,6 +136,7 @@ get_OBS <- function(thisFleet = NULL, get_MARFIS = NULL, ...){
         return(invisible(NULL))
       }
     }
+    if (args$debug) cat("get_OBS_trips done:",nrow(obs_TRIPS_all),"\n")
     return(obs_TRIPS_all)
   }
   get_OBS_sets<-function(obsTrips=NULL,...){
@@ -239,6 +240,7 @@ get_OBS <- function(thisFleet = NULL, get_MARFIS = NULL, ...){
       }
       ISSETPROFILE_WIDE <- merge (set_df,set_df2, all.y=T)
     }
+    if (args$debug) cat("get_OBS_sets done:",nrow(ISSETPROFILE_WIDE),"\n")
     return(ISSETPROFILE_WIDE)
   }
   obs_TRIPS_all <- do.call(get_OBS_trips, list(LIC_VR = LIC_VR_fleet, argsList = args))
