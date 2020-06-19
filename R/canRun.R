@@ -6,6 +6,7 @@
 #' @noRd
 canRun <- function(...){
   args=list(...)
+  data.dir <- NA
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   #for each vector below, [1] is the name of the schema
   OBS = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
@@ -13,14 +14,6 @@ canRun <- function(...){
              "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.LOG_EFRT_ENTRD_DETS",
              "MARFISSCI.LOG_EFRT_STD_INFO","MARFISSCI.MON_DOC_DEFNS","MARFISSCI.MON_DOC_ENTRD_DETS",
              "MARFISSCI.MON_DOCS","MARFISSCI.NAFO_UNIT_AREAS","MARFISSCI.PRO_SPC_INFO","MARFISSCI.VESSELS")
-  # chk_OracleAvail <- function(url_in = "https://intranet.ent.dfo-mpo.ca/",t=2){
-  #   con <- url(url_in)
-  #   check <- suppressWarnings(try(open.connection(con,open="rt",timeout=t),silent=T)[1])
-  #   this <- ifelse(is.null(check),TRUE,FALSE)
-  #   suppressWarnings(close.connection(con))
-  #   rm(con)
-  #   return(this)
-  # }
   connect_Oracle <-function(...){
     args=list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
@@ -62,6 +55,7 @@ canRun <- function(...){
 
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
+      data.dir <- NA
       #marfis is annoying because some files are prefaced with marfissci
 
       tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
@@ -73,6 +67,7 @@ canRun <- function(...){
       localDataCheck <- all(mChk$RES>0)
       rm(tabs1, tabs2, localDataCheck1, localDataCheck2, mChk)
     }else{
+      data.dir <- NA
       tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
       localDataCheck <- all(sapply(X =tabs, file.exists))
       rm(tabs)
@@ -90,12 +85,6 @@ canRun <- function(...){
       return(FALSE)
     }
   }else{
-    # if(!chk_OracleAvail()){
-    #   cat("You don't appear to be on the network")
-    #   return(FALSE)
-    # }else{
-    #   if (!args$quiet) cat("You appear to be on the network.")
-    # }
 
     cxnCheck <- do.call(connect_Oracle, list(argsList=args))
     if (!is.list(cxnCheck)) {

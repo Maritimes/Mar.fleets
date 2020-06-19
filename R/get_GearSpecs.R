@@ -8,6 +8,9 @@
 get_GearSpecs<- function(df = NULL, ...){
 
   args <- list(...)$argsList
+
+  LOG_EFRT_STD_INFO <- data.dir <- NA
+
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   gearSpcFilt <- c("Types","Sizes")
   if ("all" %in% args$gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]

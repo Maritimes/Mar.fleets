@@ -6,6 +6,9 @@
 #' @noRd
 get_Bycatch<-function(got_OBS = NULL, ...){
   args <- list(...)$argsList
+
+  data.dir <- ds_all <- NA
+
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if (all(is.na(got_OBS$OBS_TRIPS_MATCHED)))return(NA)
 
@@ -13,7 +16,7 @@ get_Bycatch<-function(got_OBS = NULL, ...){
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==args$marfSpp),c("SPECCD_ID")]
   isTrips<- unique(got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS)
   if(args$useLocal){
-    ds_all <<- Mar.datawrangling::load_datasources()
+    ds_all <- Mar.datawrangling::load_datasources()
     Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = args$quiet )
     ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% isTrips,]
     Mar.datawrangling::self_filter(quiet = args$quiet, env = environment())
