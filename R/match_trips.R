@@ -53,7 +53,7 @@ match_trips <- function(get_MARFIS = NULL,
   marf_CONF_all <- sort(unique(stats::na.omit(c(marf_TRIPS_all$CONF_NUMBER_HI, marf_TRIPS_all$CONF_NUMBER_HO))))
   marf_LIC_VR_all <- sort(unique(stats::na.omit(c(paste0(marf_TRIPS_all$LICENCE_ID,"_", marf_TRIPS_all$VR_NUMBER_FISHING),
                                                   paste0(marf_TRIPS_all$LICENCE_ID,"_", marf_TRIPS_all$VR_NUMBER_LANDING)))))
-  if (is.data.frame(obs_TRIPS_all))obs_TRIPS_all$LIC_VR = paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$LICENSE_NO)
+  if (is.data.frame(obs_TRIPS_all))obs_TRIPS_all$LIC_VR = paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$VR_NUMBER)
 
   # example Matching Routine ---------------------------------------------------------------------
   # 1) Set var to NA to hold results
@@ -95,7 +95,7 @@ match_trips <- function(get_MARFIS = NULL,
         unmatched_Marf_trip<-NA
       }
       unmatched_all <- rbind(unmatched_Marf_trip, unmatched_Obs_trip)
-      unmatched_all$MATCH_COMMENT <- "'Trip' present, but not matchable"
+      unmatched_all$MATCH_COMMENT <- "Trip present, but not matchable"
       Marf_in_Obs_trip$MATCHED_ON <- "OBS_TRIP"
       Marf_in_Obs_trip$OBS_TRIP_M <- NULL
     }else{

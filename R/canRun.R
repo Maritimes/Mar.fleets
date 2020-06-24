@@ -50,12 +50,17 @@ canRun <- function(...){
     #2check if has access
   }
   wantLocal <- function(tables = NULL, ...){
-    args=list(...)$argsList
+    args<-list(...)$argsList
+    # #not sure why but r build didn't like my referencing of data.dir, so
+    # #I've provided a default taht should be overwritten
+    # args[["data.dir"]]<-paste0(getwd(), .Platform$file.sep, "data")
+    # argsSent<-  list(...)$argsList
+    # args[names(argsSent)] <- argsSent
+
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
-      data.dir <- NA
       #marfis is annoying because some files are prefaced with marfissci
 
       tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
@@ -67,7 +72,6 @@ canRun <- function(...){
       localDataCheck <- all(mChk$RES>0)
       rm(tabs1, tabs2, localDataCheck1, localDataCheck2, mChk)
     }else{
-      data.dir <- NA
       tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
       localDataCheck <- all(sapply(X =tabs, file.exists))
       rm(tabs)
@@ -85,8 +89,8 @@ canRun <- function(...){
       return(FALSE)
     }
   }else{
-
     cxnCheck <- do.call(connect_Oracle, list(argsList=args))
+
     if (!is.list(cxnCheck)) {
       cat("\nCan't create a DB connection.  \nPlease provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').\n")
       return(FALSE)

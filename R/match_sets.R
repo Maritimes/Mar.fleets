@@ -24,7 +24,6 @@ match_sets <- function(get_MARFIS = NULL,
                        match_trips = NULL,
                        maxSetDiff_hr =24,
                        ...){
-
   args <- list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if (all(is.na(get_OBS)))return(NA)
@@ -56,7 +55,9 @@ match_sets <- function(get_MARFIS = NULL,
   msets_m =merge(msets_m, match[,c("TRIP_ID_MARF","TRIP_ID_OBS","OBS_TRIP")],
                  by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all.x=T)
   spdf = unique(msets[,c("TRIP_ID_MARF","SET_PER_DAY")])
+
   msets_m = merge(msets_m, spdf,all.x=T)
+
   utrips = sort(unique(osets_m$TRIP_ID))
   matches_all<-NA
   for (i in 1:length(utrips)){
@@ -90,20 +91,21 @@ match_sets <- function(get_MARFIS = NULL,
     otrips_match$timeM<-otrips_match$timeO<-NULL
 
     #retain trips within acceptable time frame -others are "unmatchable"
-    this_Mtrip_OK <- mtrips_match[mtrips_match$diff<=maxSetDiff_hr,]
-    this_Otrip_OK <- otrips_match[otrips_match$diff<=maxSetDiff_hr,]
-    this_Mtrip_nope <- mtrips_match[mtrips_match$diff>maxSetDiff_hr,]
+    this_Mtrip_OK <- unique(mtrips_match[mtrips_match$diff<=maxSetDiff_hr,])
+    this_Otrip_OK <- unique(otrips_match[otrips_match$diff<=maxSetDiff_hr,])
+    this_Mtrip_nope <- unique(mtrips_match[mtrips_match$diff>maxSetDiff_hr,])
 
     if (nrow(this_Mtrip_nope)>0)this_Mtrip_nope$FISHSET_ID <- NA
-    this_Otrip_nope <- otrips_match[otrips_match$diff>maxSetDiff_hr,]
+    this_Otrip_nope <- unique(otrips_match[otrips_match$diff>maxSetDiff_hr,])
     if (nrow(this_Otrip_nope)>0)this_Otrip_nope$LOG_EFRT_STD_INFO_ID <- NA
 
     # For all msets in timeframe, calculate difference and retain closest in time
     #for for matches for all marfis sets, then for all obs sets
    #print(this_Otrip_OK[this_Otrip_OK[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1])
+
     this_Mtrip_chk1 <- this_Mtrip_OK[this_Mtrip_OK[, .I[diff == suppressWarnings(min(diff))], by=FISHSET_ID]$V1]
     this_Mtrip_chk1 <- this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
-    this_Otrip_chk1<-this_Otrip_OK[this_Otrip_OK[, .I[diff == suppressWarnings(min(diff))], by=LOG_EFRT_STD_INFO_ID]$V1]
+    this_Otrip_chk1 <- this_Otrip_OK[this_Otrip_OK[, .I[diff == suppressWarnings(min(diff))], by=LOG_EFRT_STD_INFO_ID]$V1]
     this_Otrip_chk1 <- this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
     #if the same sets were matched up in both directions, they are almost certainly the same set
     matches_high <- merge(this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],

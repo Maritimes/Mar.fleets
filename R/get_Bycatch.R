@@ -6,7 +6,7 @@
 #' @noRd
 get_Bycatch<-function(got_OBS = NULL, ...){
   args <- list(...)$argsList
-
+  ds_all <<- Mar.datawrangling::load_datasources()
   data.dir <- ds_all <- NA
 
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
@@ -16,10 +16,9 @@ get_Bycatch<-function(got_OBS = NULL, ...){
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==args$marfSpp),c("SPECCD_ID")]
   isTrips<- unique(got_OBS$OBS_TRIPS_MATCHED$TRIP_ID_OBS)
   if(args$useLocal){
-    ds_all <- Mar.datawrangling::load_datasources()
-    Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = args$quiet )
+    Mar.datawrangling::get_data(db="isdb", data.dir = args$data.dir, env = environment(), quiet = T )
     ISTRIPS <- ISTRIPS[ISTRIPS$TRIP_ID %in% isTrips,]
-    Mar.datawrangling::self_filter(quiet = args$quiet, env = environment())
+    Mar.datawrangling::self_filter(quiet = T, env = environment())
     df<-ISCATCHES
   }else{
 
@@ -45,7 +44,7 @@ get_Bycatch<-function(got_OBS = NULL, ...){
     sum
   )
   breakdown <- merge(breakdown, spLookups[,c("SPECCD_ID","COMMON", "SCIENTIFIC")], by.x="SPEC", by.y = "SPECCD_ID", all.x=T)
-  breakdown <- breakdown[with(breakdown, order(-EST_NUM_CAUGHT, EST_KEPT_WT,EST_DISCARD_WT)), ]
+  breakdown <- breakdown[with(breakdown, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
   dir_Spp_row <- breakdown[breakdown$SPEC ==isdbSPP,]
   breakdown <- breakdown[breakdown$SPEC !=isdbSPP,]
 
