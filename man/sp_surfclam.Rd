@@ -42,10 +42,12 @@ Surfclam <- sp_surfclam(year = 2018, data.dir = "C:/myData")
 Other species: 
 \code{\link{sp_haddock}()},
 \code{\link{sp_halibut}()},
+\code{\link{sp_northernShrimp}()},
 \code{\link{sp_offshore_lobster}()},
 \code{\link{sp_pollock}()},
 \code{\link{sp_redfish}()},
 \code{\link{sp_silverhake}()},
+\code{\link{sp_snowCrab}()},
 \code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}
 }
