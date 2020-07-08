@@ -92,7 +92,9 @@ canRun <- function(...){
     cxnCheck <- do.call(connect_Oracle, list(argsList=args))
 
     if (!is.list(cxnCheck)) {
-      cat("\nCan't create a DB connection.  \nPlease provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').\n")
+      cat("\n","Cannot proceed online (Can't create a DB connection).",
+          "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').",
+          "\n")
       return(FALSE)
     }else{
       if (!args$quiet)  cat("\nDB connection established.\n")

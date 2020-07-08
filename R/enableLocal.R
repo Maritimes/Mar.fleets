@@ -28,7 +28,7 @@ enableLocal <- function(data.dir = NULL,
                         fn.oracle.dsn = "_none_",
                         usepkg = "rodbc"){
   cat("Extracting MARFIS data...\n")
-  Mar.datawrangling::get_data_custom(fn.oracle.username = fn.oracle.username,
+  Mar.utils::get_data_tables(fn.oracle.username = fn.oracle.username,
                                      fn.oracle.password = fn.oracle.password,
                                      fn.oracle.dsn = fn.oracle.dsn,
                                      schema = "MARFISSCI",
@@ -40,7 +40,7 @@ enableLocal <- function(data.dir = NULL,
                                      env = environment(), quiet = TRUE)
 
   cat("Extracting Observer data...\n")
-  Mar.datawrangling::get_data_custom(fn.oracle.username = fn.oracle.username,
+  Mar.utils::get_data_tables(fn.oracle.username = fn.oracle.username,
                                      fn.oracle.password = fn.oracle.password,
                                      fn.oracle.dsn = fn.oracle.dsn,
                                      schema = "ISDB",

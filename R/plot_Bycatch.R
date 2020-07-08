@@ -31,7 +31,6 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   # Make a stacked column of kept/discarded -----------------------------------------------------
   dfLong <- df
 
-  # dfLong <- dftmp
   dfLong<- dfLong[,c("SPEC", "label","EST_KEPT_WT", "EST_DISCARD_WT")]
   dfLong$ALL_WT <- dfLong$EST_KEPT_WT+dfLong$EST_DISCARD_WT
   dfLong <- dfLong[with(dfLong, order(-ALL_WT, -EST_KEPT_WT)), ]
@@ -53,7 +52,7 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
 
   s<- ggplot2::ggplot(data=dfLong, ggplot2::aes(x = stats::reorder(label, ORD), y = WT, fill = CATCH_TYPE))
   s <- s + ggplot2::geom_bar(stat = "identity")
-  s <- s + ggplot2::geom_text(data=subset(dfLong, WT !=0), ggplot2::aes(label=WT, vjust = hj, colors= col), colour="black", size=3.5, angle=90, position =  ggplot2::position_stack(vjust = 0.5)) #position = position_stack(vjust = 0.5),
+  s <- s + ggplot2::geom_text(data=subset(dfLong, WT !=0), ggplot2::aes(label=WT, vjust = hj), color="black", size=3.5, angle=90, position =  ggplot2::position_stack(vjust = 0.5)) #position = position_stack(vjust = 0.5),
   s <- s + ggplot2::labs(y="Weight (kgs)", x = NULL, fill = "CATCH TYPE",title = title, subtitle = subtitle)
   s <- s + ggplot2::theme_minimal()
   s <- s + ggplot2::theme(axis.text.x =  ggplot2::element_text(size=7.5, angle = 90, hjust=1, vjust=0))
@@ -90,7 +89,7 @@ plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
     p<-p + ggplot2::annotation_logticks(sides="l")
     p<-p + ggplot2::geom_bar(stat="identity")
     p<-p + ggplot2::labs(y="Est Number Caught (log)", x = NULL, title = title, subtitle = subtitle)
-    p<-p + ggplot2::geom_text(ggplot2::aes(label=EST_NUM_CAUGHT), position = ggplot2::position_stack(vjust = 0.5), colour="black", size=4, angle=90)
+    p<-p + ggplot2::geom_text(ggplot2::aes(label=EST_NUM_CAUGHT), position = ggplot2::position_stack(vjust = 0.5), color="black", size=4, angle=90)
     p<-p + ggplot2::scale_fill_manual(values =c("#FF0000",  randomcoloR::distinctColorPalette(nrow(df))))
     p<-p + ggplot2::theme_minimal()
     p<-p + ggplot2::theme(axis.text.x = ggplot2::element_text(size=7.5, angle = 90, hjust=1))

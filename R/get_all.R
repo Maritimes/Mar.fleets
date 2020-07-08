@@ -35,7 +35,6 @@ get_all <- function(...){
   argsS <- args
   obs <- do.call(get_OBS, list(thisFleet=fleet,get_MARFIS = marf, argsList=args))
   bycatch <- do.call(get_Bycatch, list(got_OBS = obs, argsList=args))
-
   # Capture the results in a list and return them ------------------------------------------------
   cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
