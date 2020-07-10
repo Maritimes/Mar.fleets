@@ -1,4 +1,4 @@
-#' @title sp_snowCrab
+#' @title sp_snowcrab
 #' @description This function is a wrapper function that facilitates extracting the following
 #' information for the snowcrab fleet:
 #' \itemize{
@@ -19,14 +19,14 @@
 #' @param CFA default is \code{NULL}. This is a crab-fishing area.  It can be "SENS", "NENS", "4X", or "ALL"
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Shrimp <- sp_snowCrab(year = 2018, CFA = "SENS", data.dir = "C:/myData")
+#' Shrimp <- sp_snowcrab(year = 2018, CFA = "SENS", data.dir = "C:/myData")
 #'                       }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_snowCrab <- function(year=NULL, CFA = NULL, ...){
+sp_snowcrab <- function(year=NULL, CFA = NULL, ...){
   # # Set up the snowcrab-specific variables -------------------------------------------------------
   if (!is.null(CFA))CFA = toupper(CFA)
     if (CFA=="SENS"){

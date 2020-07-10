@@ -1,4 +1,4 @@
-#' @title sp_offshore_lobster
+#' @title sp_offshorelobster
 #' @description This function is a wrapper function that facilitates extracting the following
 #' information for the offshore lobster fleet:
 #' \itemize{
@@ -18,14 +18,14 @@
 #' observer and bycatch data.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' OffshoreLobster <- sp_offshore_lobster(year = 2018, data.dir = "C:/myData")
+#' OffshoreLobster <- sp_offshorelobster(year = 2018, data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_offshore_lobster <- function(year=NULL, ...){
+sp_offshorelobster <- function(year=NULL, ...){
 
   # Set up the lobster-specific variables -------------------------------------------------------
   args <- list(marfSpp=700,

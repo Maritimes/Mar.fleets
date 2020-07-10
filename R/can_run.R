@@ -1,10 +1,10 @@
-#' @title canRun
+#' @title can_run
 #' @description This function assesses the whether or not the package can accomodate a request to
 #' run locally or directly against  oracle.  If the desire is to run locally, all of the necessary
 #' tables must be available in the data.dir.  If run against Oracle, we must be on the network and
 #' have access to the necessary schema.tables.
 #' @noRd
-canRun <- function(...){
+can_run <- function(...){
   args=list(...)
   data.dir <- NA
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")

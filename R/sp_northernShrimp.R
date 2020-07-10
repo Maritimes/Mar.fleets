@@ -1,4 +1,4 @@
-#' @title sp_northernShrimp
+#' @title sp_northernshrimp
 #' @description This function is a wrapper function that facilitates extracting the following
 #' information for the northern shrimp fleet:
 #' \itemize{
@@ -18,14 +18,14 @@
 #' observer and bycatch data.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Shrimp <- sp_northernShrimp(year = 2018, data.dir = "C:/myData")
+#' Shrimp <- sp_northernshrimp(year = 2018, data.dir = "C:/myData")
 #'                       }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_northernShrimp <- function(year=NULL, ...){
+sp_northernshrimp <- function(year=NULL, ...){
 
   # # Set up the shrimp-specific variables -------------------------------------------------------
 

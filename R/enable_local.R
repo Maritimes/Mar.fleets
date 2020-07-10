@@ -1,4 +1,4 @@
-#' @title enableLocal
+#' @title enable_local
 #' @description This function extracts all of the necessary oracle tables to a local folder so that
 #' the functions can be run locally.
 #' @param data.dir  The default is your working directory. If you are hoping to
@@ -22,7 +22,7 @@
 #' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 #' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 #' roracle will extract data ~ 5x faster.
-enableLocal <- function(data.dir = NULL,
+enable_local <- function(data.dir = NULL,
                         fn.oracle.username = "_none_",
                         fn.oracle.password = "_none_",
                         fn.oracle.dsn = "_none_",

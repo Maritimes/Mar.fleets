@@ -1,10 +1,10 @@
-#' @title get_Bycatch
+#' @title get_bycatch
 #' @description Certain gears can have different specifications.  Mesh gears can have different mesh
 #' sizes or shapes, hooks can be different sizes, and traps can have different configurations.
 #' This function filters the data to the specified size and/or type, and if no filters were initially
 #' specified, can prompt the user to decide if and how to filter the data.
 #' @noRd
-get_Bycatch<-function(got_OBS = NULL, ...){
+get_bycatch<-function(got_OBS = NULL, ...){
   args <- list(...)$argsList
 
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")

@@ -1,4 +1,4 @@
-#' @title get_MARFIS
+#' @title get_marfis
 #' @description This function extracts all of the MARFIS records for vessels with
 #' particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
@@ -14,7 +14,7 @@
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_MARFIS<-function(thisFleet = NULL, ...){
+get_marfis<-function(thisFleet = NULL, ...){
 args <- list(...)$argsList
 if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 # theDate <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")

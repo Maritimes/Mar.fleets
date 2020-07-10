@@ -24,17 +24,17 @@ get_all <- function(...){
   args[names(argsSent)] <- argsSent
   args[["theDate"]] <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  cxnCheck <- do.call(canRun, args)
+  cxnCheck <- do.call(can_run, args)
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
     stop("Can't run as requested.")
   } else if (is.list(cxnCheck)){
     args[["cxn"]] <- cxnCheck
   }
   fleet <- do.call(get_fleet, list(argsList=args))
-  marf <- do.call(get_MARFIS, list(thisFleet=fleet,argsList=args))
+  marf <- do.call(get_marfis, list(thisFleet=fleet,argsList=args))
   argsS <- args
-  obs <- do.call(get_OBS, list(thisFleet=fleet,get_MARFIS = marf, argsList=args))
-  bycatch <- do.call(get_Bycatch, list(got_OBS = obs, argsList=args))
+  obs <- do.call(get_obs, list(thisFleet=fleet,get_marfis = marf, argsList=args))
+  bycatch <- do.call(get_bycatch, list(get_obs = obs, argsList=args))
   # Capture the results in a list and return them ------------------------------------------------
   cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))

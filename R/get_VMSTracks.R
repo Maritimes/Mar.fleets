@@ -1,5 +1,5 @@
-#' @ title get_VMSTracks
-#' @description This function takes the results from get_MARFIS() and get_OBS()
+#' @ title get_vmstracks
+#' @description This function takes the results from get_marfis() and get_obs()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param fn.oracle.username default is \code{'_none_'} This is your username for
 #' accessing oracle objects. If you have a value for \code{oracle.username}
@@ -19,11 +19,11 @@
 #' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 #' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 #' roracle will extract data ~ 5x faster.
-#' @param get_MARFIS default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
+#' @param get_marfis default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
-#' @param get_OBS default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
+#' @param get_obs default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 #' trip and set information from the observer database.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
@@ -31,11 +31,11 @@
 #' @return returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_none_", fn.oracle.dsn = "_none_", usepkg = 'roracle',
-                        get_MARFIS = NULL, get_OBS = NULL, quietly = FALSE){
+get_vmstracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_none_", fn.oracle.dsn = "_none_", usepkg = 'roracle',
+                        get_marfis = NULL, get_obs = NULL, quietly = FALSE){
   vr_dates<-data.frame(VESSEL = integer(), DATE1 = as.Date(character()))
 
-  marDat<-merge(get_MARFIS$MARF_SETS, get_MARFIS$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
+  marDat<-merge(get_marfis$MARF_SETS, get_marfis$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
 
   vr_dates1 <- marDat[,c("VR_NUMBER_FISHING", "EF_FISHED_DATETIME")]
   colnames(vr_dates1)<-c("VR_NUMBER","mDate")
@@ -43,15 +43,15 @@ get_VMSTracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_no
   vr_dates2 <- marDat[,c("VR_NUMBER_LANDING", "EF_FISHED_DATETIME")]
   colnames(vr_dates2)<-c("VR_NUMBER","mDate")
   vr_dates2$OBS<- 0
-  if(!is.null(get_OBS)){
-    obsDat<-merge(get_OBS$OBS_SETS, get_OBS$OBS_TRIPS, by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
+  if(!is.null(get_obs)){
+    obsDat<-merge(get_obs$OBS_SETS, get_obs$OBS_TRIPS, by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
     vr_dates3 <- obsDat[,c("VR_NUMBER","DATE_TIME")]
     colnames(vr_dates3)<-c("VR_NUMBER","mDate")
     vr_dates3$OBS<- 1
   }
   vr_dates<-rbind(vr_dates, vr_dates1)
   vr_dates<-rbind(vr_dates, vr_dates2)
-  if(!is.null(get_OBS))vr_dates<-rbind(vr_dates, vr_dates3)
+  if(!is.null(get_obs))vr_dates<-rbind(vr_dates, vr_dates3)
   vr_dates<-unique(vr_dates)
   vr_dates <- vr_dates[!is.na(vr_dates$mDate),]
   theDates<- as.Date(range(vr_dates$mDate))

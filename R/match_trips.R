@@ -1,5 +1,5 @@
 #' @title match_trips
-#' @description This function takes the results from get_MARFIS() and get_OBS()
+#' @description This function takes the results from get_marfis() and get_obs()
 #' and attempts to match trips based on:
 #' \itemize{
 #' \item 1 = MARFIS confirmation numbers
@@ -8,11 +8,11 @@
 #' }
 #' * - only the alphanumeric characters of the trip names are used (e.g.
 #' "J18-0000B" becomes "J180000B").
-#' @param get_MARFIS default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
+#' @param get_marfis default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
-#' @param get_OBS default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
+#' @param get_obs default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 #' trip and set information from the observer database.
 #' @param ... other arguments passed to methods
 #' @family fleets
@@ -27,27 +27,27 @@
 #' }
 #' @export
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-match_trips <- function(get_MARFIS = NULL,
-                        get_OBS = NULL,
+match_trips <- function(get_marfis = NULL,
+                        get_obs = NULL,
                         ...){
   args <- list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  if (all(is.na(get_OBS)))return(NA)
-  if(class(get_OBS)=="list"){
-    obs <- get_OBS$OBS_TRIPS
-  }else if(class(get_OBS)=="data.frame"){
-    obs <- get_OBS
+  if (all(is.na(get_obs)))return(NA)
+  if(class(get_obs)=="list"){
+    obs <- get_obs$OBS_TRIPS
+  }else if(class(get_obs)=="data.frame"){
+    obs <- get_obs
   }
 
   clean_OBS_Trip <- function(df=NULL, field = "OBS_TRIP", out_name="OBS_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
     return(df)
   }
-  if(is.null(get_MARFIS$MARF_MATCH) || is.null(obs) ){
+  if(is.null(get_marfis$MARF_MATCH) || is.null(obs) ){
     if (!args$quiet)cat(paste0("\n","Either marfis of Observer did not have any trips to try match against"))
     return(NULL)
   }
-  marf_TRIPS_all <- clean_OBS_Trip(df = get_MARFIS$MARF_MATCH, field = "OBS_TRIP", out_name = "OBS_TRIP_M")
+  marf_TRIPS_all <- clean_OBS_Trip(df = get_marfis$MARF_MATCH, field = "OBS_TRIP", out_name = "OBS_TRIP_M")
   obs_TRIPS_all <- clean_OBS_Trip(df = obs, field = "TRIP", out_name = "OBS_TRIP_O")
   if (is.null(unique(obs$TRIP)))obs_TRIPS_all<-NA
   marf_CONF_all <- sort(unique(stats::na.omit(c(marf_TRIPS_all$CONF_NUMBER_HI, marf_TRIPS_all$CONF_NUMBER_HO))))

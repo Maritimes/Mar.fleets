@@ -1,8 +1,8 @@
-#' @title plot_Bycatch
+#' @title plot_bycatch
 #' @description This function generates simple pdf plots for the output from Mar.bycatch species
 #' functions.
 #' @param obsSpp  This is the observer db species code ID for the main species.
-#' @param df default is \code{NULL}. This is the \code{bycatch} object from the \code{get_Bycatch_*()}
+#' @param df default is \code{NULL}. This is the \code{bycatch} object from the \code{get_bycatch_()}
 #' function.  Alternative, a data.frame with the following codes would work as well - "SPEC" (the code),
 #' EST_NUM_CAUGHT (numeric), EST_KEPT_WT (numeric), EST_DISCARD_WT (numeric) and COMMON (species
 #' common name).
@@ -13,7 +13,7 @@
 #' @param title default is \code{NULL}. This will be the title of your plots.
 #' @param subtitle default is \code{NULL}. This will be the subtitle of your plots.
 #' @examples \dontrun{
-#' plot_Bycatch(obsSpp = swordfish2018$bycatch[1,1],
+#' plot_bycatch(obsSpp = swordfish2018$bycatch[1,1],
 #'              df = swordfish2018$bycatch, showXSpp = 20,
 #'              title ="Swordfish",
 #'              subtitle =2018)
@@ -21,7 +21,7 @@
 #' @return nothing, but png files will be generated in your working directory.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-plot_Bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
+plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
   COMMON <- COMMON_fact <- EST_NUM_CAUGHT  <- ORD <- WT <- CATCH_TYPE <- NA
   ts = format(Sys.time(), "%Y%m%d_%H%M%S")
   fn = paste0(obsSpp)

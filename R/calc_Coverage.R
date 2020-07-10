@@ -1,13 +1,13 @@
-#' @title calc_Coverage
-#' @description This function takes the results from get_MARFIS() and get_OBS()
+#' @title calc_coverage
+#' @description This function takes the results from get_marfis() and get_obs()
 #' and produces a table showing the how the proportion of observed data varies
 #' across areas.  Different polygons can be provided, and the results will be
 #' tailored to those polygons.
-#' @param get_MARFIS default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
+#' @param get_marfis default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet
-#' @param get_OBS default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
+#' @param get_obs default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 #' trip and set information from OBSERVER related to the specified fleet
 #' @param agg.poly.shp default is \code{NULL}.  This is the shapefile that has
 #' polygons that should be checked for sufficient unique values of the
@@ -63,14 +63,14 @@
 #' }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-calc_Coverage<-function(get_OBS = NULL,
-                          get_MARFIS = NULL,
+calc_coverage<-function(get_obs = NULL,
+                        get_marfis = NULL,
                           agg.poly.shp = NULL,
                           agg.poly.field = NULL,
                           quietly = FALSE){
 
-    oTrips <- get_OBS$OBS_TRIPS_MATCHED
-    oSets <- get_OBS$OBS_SETS_MATCHED
+    oTrips <- get_obs$OBS_TRIPS_MATCHED
+    oSets <- get_obs$OBS_SETS_MATCHED
 
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
@@ -95,8 +95,8 @@ calc_Coverage<-function(get_OBS = NULL,
       OBS_area_s<- NA
     }
   #grab the first (valid) position from each set
-  if (!is.null(get_MARFIS$MARF_SETS)){
-    MARF_sets_pos <- get_MARFIS$MARF_SETS[,c("MON_DOC_ID","TRIP_ID_MARF","LOG_EFRT_STD_INFO_ID","LATITUDE","LONGITUDE")]
+  if (!is.null(get_marfis$MARF_SETS)){
+    MARF_sets_pos <- get_marfis$MARF_SETS[,c("MON_DOC_ID","TRIP_ID_MARF","LOG_EFRT_STD_INFO_ID","LATITUDE","LONGITUDE")]
     MARF_sets_pos <- MARF_sets_pos[with(MARF_sets_pos,order(LOG_EFRT_STD_INFO_ID)),]
     MARF_sets_pos <- MARF_sets_pos[!is.na(MARF_sets_pos$LATITUDE) & !is.na(MARF_sets_pos$LONGITUDE),]
     MARF_sets_pos <-data.table::as.data.table(MARF_sets_pos)
@@ -104,12 +104,12 @@ calc_Coverage<-function(get_OBS = NULL,
     MARF_sets_pos <- as.data.frame(MARF_sets_pos)
     MARF_sets_pos$LOG_EFRT_STD_INFO_ID <- NULL
     MARF_sets_pos <- unique(MARF_sets_pos[!is.na(MARF_sets_pos$MON_DOC_ID),])
-    Marf_Trip_pos<-merge(get_MARFIS$MARF_TRIPS, MARF_sets_pos )
-    MAR_area_s = Mar.utils::identify_area(get_MARFIS$MARF_SETS,
+    Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos )
+    MAR_area_s = Mar.utils::identify_area(get_marfis$MARF_SETS,
                                         agg.poly.shp = agg.poly.shp,
                                         agg.poly.field = agg.poly.field)
   }else{
-    Marf_Trip_pos<-merge(get_MARFIS$MARF_TRIPS, MARF_sets_pos )
+    Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos )
     MAR_area_s<- NA
   }
 
