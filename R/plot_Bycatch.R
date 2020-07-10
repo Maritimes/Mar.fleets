@@ -26,6 +26,7 @@ plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   ts = format(Sys.time(), "%Y%m%d_%H%M%S")
   fn = paste0(obsSpp)
 
+  df$label <- NA
   df$label <- paste0(df$COMMON, " (",df$SPEC,")")
 
   # Make a stacked column of kept/discarded -----------------------------------------------------
@@ -46,7 +47,7 @@ plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   dfLong <- dfLong[ order(dfLong$CATCH_TYPE, decreasing=T), ]
   dfLong$CATCH_TYPE<-as.character(dfLong$CATCH_TYPE)
 
-
+  dfLong$hj <-NA
   dfLong$hj = ifelse(dfLong$CATCH_TYPE=="EST_DISCARD_WT",-0.25,0.75)
   dfLong$col = ifelse(dfLong$CATCH_TYPE=="EST_DISCARD_WT","blue","pink")
 

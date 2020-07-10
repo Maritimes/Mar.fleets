@@ -5,20 +5,20 @@
 \title{match_sets}
 \usage{
 match_sets(
-  get_MARFIS = NULL,
-  get_OBS = NULL,
+  get_marfis = NULL,
+  get_obs = NULL,
   match_trips = NULL,
   maxSetDiff_hr = 24,
   ...
 )
 }
 \arguments{
-\item{get_MARFIS}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
+\item{get_marfis}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS}
 
-\item{get_OBS}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
+\item{get_obs}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 trip and set information from the observer database.}
 
 \item{match_trips}{default is \code{NULL}. This is the list output by the
@@ -35,16 +35,16 @@ will never be matched.}
 a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
 }
 \description{
-This function takes the results from get_MARFIS(), get_OBS()
+This function takes the results from get_marfis(), get_obs()
 and match_trips(), and attempts to match the sets for each trip.
 }
 \seealso{
 Other fleets: 
-\code{\link{calc_Coverage}()},
-\code{\link{get_MARFIS}()},
-\code{\link{get_OBS}()},
-\code{\link{get_VMSTracks}()},
+\code{\link{calc_coverage}()},
 \code{\link{get_fleet}()},
+\code{\link{get_marfis}()},
+\code{\link{get_obs}()},
+\code{\link{get_vmstracks}()},
 \code{\link{match_trips}()}
 }
 \author{

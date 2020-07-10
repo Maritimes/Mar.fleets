@@ -139,8 +139,8 @@ get_fleet<-function(...){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
-  df <- do.call(applyFilters, list(df=df,argsList=args))
-  if (args$debug) cat("1 - nrow(post-applyFilters):",nrow(df),"\n")
+  df <- do.call(apply_filters, list(df=df,argsList=args))
+  if (args$debug) cat("1 - nrow(post-apply_filters):",nrow(df),"\n")
 
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))

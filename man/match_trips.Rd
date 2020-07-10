@@ -4,15 +4,15 @@
 \alias{match_trips}
 \title{match_trips}
 \usage{
-match_trips(get_MARFIS = NULL, get_OBS = NULL, ...)
+match_trips(get_marfis = NULL, get_obs = NULL, ...)
 }
 \arguments{
-\item{get_MARFIS}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_MARFIS()} function - it contains dataframes of both the
+\item{get_marfis}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS}
 
-\item{get_OBS}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_OBS()} function - it contains dataframes of both the
+\item{get_obs}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 trip and set information from the observer database.}
 
 \item{...}{other arguments passed to methods}
@@ -29,7 +29,7 @@ matched to the other database using any method.
 }
 }
 \description{
-This function takes the results from get_MARFIS() and get_OBS()
+This function takes the results from get_marfis() and get_obs()
 and attempts to match trips based on:
 \itemize{
 \item 1 = MARFIS confirmation numbers
@@ -41,11 +41,11 @@ and attempts to match trips based on:
 }
 \seealso{
 Other fleets: 
-\code{\link{calc_Coverage}()},
-\code{\link{get_MARFIS}()},
-\code{\link{get_OBS}()},
-\code{\link{get_VMSTracks}()},
+\code{\link{calc_coverage}()},
 \code{\link{get_fleet}()},
+\code{\link{get_marfis}()},
+\code{\link{get_obs}()},
+\code{\link{get_vmstracks}()},
 \code{\link{match_sets}()}
 }
 \author{
