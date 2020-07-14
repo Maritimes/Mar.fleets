@@ -10,7 +10,7 @@
 #' @export
 get_bycatch<-function(get_obs = NULL, ...){
   args <- list(...)$argsList
-  data("spLookups", envir = environment())
+  utils::data("spLookups", envir = environment())
   spLookups <- get("spLookups", envir  = environment())
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if (all(is.na(get_obs$OBS_TRIPS_MATCHED)))return(NA)

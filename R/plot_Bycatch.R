@@ -26,6 +26,7 @@ plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   ts = format(Sys.time(), "%Y%m%d_%H%M%S")
   fn = paste0(obsSpp)
 
+  label <- hj <- NA
   df$label <- NA
   df$label <- paste0(df$COMMON, " (",df$SPEC,")")
 
