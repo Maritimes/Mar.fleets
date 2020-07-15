@@ -37,7 +37,7 @@ get_bycatch<-function(get_obs = NULL, ...){
 
   df<-df[,c("SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT")]
   df[is.na(df)] <- 0
-  breakdown = stats::aggregate(
+  BYCATCH = stats::aggregate(
     x = list(EST_NUM_CAUGHT = df$EST_NUM_CAUGHT,
              EST_KEPT_WT = df$EST_KEPT_WT,
              EST_DISCARD_WT = df$EST_DISCARD_WT),
@@ -45,12 +45,12 @@ get_bycatch<-function(get_obs = NULL, ...){
     ),
     sum
   )
-  breakdown <- merge(breakdown, spLookups[,c("SPECCD_ID","COMMON", "SCIENTIFIC")], by.x="SPEC", by.y = "SPECCD_ID", all.x=T)
-  breakdown <- breakdown[with(breakdown, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
-  dir_Spp_row <- breakdown[breakdown$SPEC ==isdbSPP,]
-  breakdown <- breakdown[breakdown$SPEC !=isdbSPP,]
+  BYCATCH <- merge(BYCATCH, spLookups[,c("SPECCD_ID","COMMON", "SCIENTIFIC")], by.x="SPEC", by.y = "SPECCD_ID", all.x=T)
+  BYCATCH <- BYCATCH[with(BYCATCH, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
+  dir_Spp_row <- BYCATCH[BYCATCH$SPEC ==isdbSPP,]
+  BYCATCH <- BYCATCH[BYCATCH$SPEC !=isdbSPP,]
 
-  breakdown <- rbind(dir_Spp_row, breakdown)
+  BYCATCH <- rbind(dir_Spp_row, BYCATCH)
 
-  return(breakdown)
+  return(BYCATCH)
 }
