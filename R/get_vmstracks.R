@@ -1,24 +1,6 @@
 #' @ title get_vmstracks
 #' @description This function takes the results from get_marfis() and get_obs()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
-#' @param fn.oracle.username default is \code{'_none_'} This is your username for
-#' accessing oracle objects. If you have a value for \code{oracle.username}
-#' stored in your environment (e.g. from an rprofile file), this can be left out
-#' and that value will be used.  If a value for this is provided, it will take
-#' priority over your existing value.
-#' @param fn.oracle.password default is \code{'_none_'} This is your password for
-#' accessing oracle objects. If you have a value for \code{oracle.password}
-#' stored in your environment (e.g. from an rprofile file), this can be left out
-#' and that value will be used.  If a value for this is provided, it will take
-#' priority over your existing value.
-#' @param fn.oracle.dsn default is \code{'_none_'} This is your dsn/ODBC
-#' identifier for accessing oracle objects. If you have a value for
-#' \code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-#' this can be left and that value will be used.  If a value for this is
-#' provided, it will take priority over your existing value.
-#' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should
-#' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
-#' roracle will extract data ~ 5x faster.
 #' @param get_marfis default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
@@ -27,43 +9,69 @@
 #' trip and set information from the observer database.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
+#' @param ... other arguments passed to methods
 #' @family fleets
 #' @return returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_vmstracks<-function(fn.oracle.username = "_none_", fn.oracle.password = "_none_", fn.oracle.dsn = "_none_", usepkg = 'roracle',
-                        get_marfis = NULL, get_obs = NULL, quietly = FALSE){
-  vr_dates<-data.frame(VESSEL = integer(), DATE1 = as.Date(character()))
+get_vmstracks<-function(get_marfis = NULL, get_obs = NULL, ...){
+  args <- list(oracle.username = "_none_",
+               oracle.password = "_none_",
+               oracle.dsn = "_none_",
+               usepkg = "rodbc",
+               useLocal = FALSE,
+               quiet=TRUE,
+               debug=FALSE
+  )
+
+  argsSent<-  list(...)
+  args[names(argsSent)] <- argsSent
+  if (args$useLocal==TRUE){
+    cat("\n", "VMS data requires a connection to the network.  It cannot be run locally")
+    return(NULL)
+  }
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+
+ vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
+                                                                mDate=as.Date(character()),
+                                                                OBS=numeric(),
+                                                                stringsAsFactors=FALSE)
+
 
   marDat<-merge(get_marfis$MARF_SETS, get_marfis$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
 
-  vr_dates1 <- marDat[,c("VR_NUMBER_FISHING", "EF_FISHED_DATETIME")]
-  colnames(vr_dates1)<-c("VR_NUMBER","mDate")
-  vr_dates1$OBS<- 0
-  vr_dates2 <- marDat[,c("VR_NUMBER_LANDING", "EF_FISHED_DATETIME")]
-  colnames(vr_dates2)<-c("VR_NUMBER","mDate")
-  vr_dates2$OBS<- 0
+  vr_dates1 <- cbind(marDat[,c("VR_NUMBER_FISHING", "EF_FISHED_DATETIME")],0)
+  vr_dates2 <- cbind(marDat[,c("VR_NUMBER_LANDING", "EF_FISHED_DATETIME")],0)
+  colnames(vr_dates1)<-colnames(vr_dates2)<-c("VR_NUMBER","mDate", "OBS")
+
   if(!is.null(get_obs)){
-    obsDat<-merge(get_obs$OBS_SETS, get_obs$OBS_TRIPS, by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
-    vr_dates3 <- obsDat[,c("VR_NUMBER","DATE_TIME")]
-    colnames(vr_dates3)<-c("VR_NUMBER","mDate")
-    vr_dates3$OBS<- 1
+    if (nrow(get_obs$OBS_SETS_MATCHED)>0 & nrow(get_obs$OBS_TRIPS_MATCHED)>0){
+      obsDat<-merge(get_obs$OBS_SETS_MATCHED, get_obs$OBS_TRIPS_MATCHED, by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
+      vr_dates3 <- cbind(obsDat[,c("VR_NUMBER","DATE_TIME")],1)
+      colnames(vr_dates3)<-c("VR_NUMBER","mDate", "OBS")
+    }
   }
-  vr_dates<-rbind(vr_dates, vr_dates1)
-  vr_dates<-rbind(vr_dates, vr_dates2)
-  if(!is.null(get_obs))vr_dates<-rbind(vr_dates, vr_dates3)
+
+  vr_dates<-rbind(vr_dates1, vr_dates2)
+  vr_dates<-rbind(vr_dates, vr_dates3)
+
   vr_dates<-unique(vr_dates)
   vr_dates <- vr_dates[!is.na(vr_dates$mDate),]
   theDates<- as.Date(range(vr_dates$mDate))
   allVRs <- unique(vr_dates$VR_NUMBER)
+
   # VMS
   # get the vms data for these vessels, and convert to lines
-  allVMS <- Mar.utils::VMS_get_recs(fn.oracle.username, fn.oracle.password, fn.oracle.dsn, usepkg = 'roracle',
-                                    dateStart = min(theDates), dateEnd = max(theDates),
+  allVMS <- Mar.utils::VMS_get_recs(fn.oracle.username = args$oracle.username, fn.oracle.password = args$oracle.password,
+                                    fn.oracle.dsn = args$oracle.dsn, usepkg = args$usepkg,
+                                    dateStart =  as.character(min(theDates)), dateEnd =  as.character(max(theDates)),
                                     vrnList = allVRs,
                                     rowNum = 1000000,
-                                    quietly = quietly)
-  if (is.null(allVMS))return(NULL)
+                                    quietly = args$quiet)
+  if (is.null(allVMS)){
+    cat("\n", "No VMS data could be found matching your parameters")
+    return(NULL)
+  }
   all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)
   all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek",
                                                seqField = "POSITION_UTC_DATE", createShp = F, plot=F)
