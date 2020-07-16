@@ -4,10 +4,12 @@
 \alias{get_bycatch}
 \title{get_bycatch}
 \usage{
-get_bycatch(get_obs = NULL, ...)
+get_bycatch(isTrips = NULL, marfSpID = NULL, ...)
 }
 \arguments{
-\item{get_obs}{default is \code{NULL} this is the results of the get_obs() function}
+\item{isTrips}{default is \code{NULL} This is a vector of trip_ids from ISDB}
+
+\item{marfSpID}{default is \code{NULL}.  This is the Marfis species ID for the targeted species}
 
 \item{...}{other arguments passed to methods}
 }
@@ -16,7 +18,7 @@ returns a dataframe of the bycatch information for the requested species (using 
 marfis species code and supplie results from get_obs
 }
 \description{
-This function takes the results for get_obs() and a marfis species code
+This function takes a vector of ISDB trip IDs and a marfis species code
 and generates a dataframe of all of the bycatche species from the observer db
 }
 \note{

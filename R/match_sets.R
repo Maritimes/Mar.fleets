@@ -1,15 +1,17 @@
 #' @title match_sets
 #' @description This function takes the results from get_marfis(), get_obs()
 #' and match_trips(), and attempts to match the sets for each trip.
-#' @param get_marfis default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
-#' trip and set information from MARFIS
 #' @param get_obs default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 #' trip and set information from the observer database.
 #' @param match_trips default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::match_trips()} function - it information related to how trips from
 #' the two databases are matched.
+#' @param marfMatch default is \code{NULL}. This is the MARF_MATCH output of the
+#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+#' trip and set information from MARFIS
+#' @param marfSets default is \code{NULL}. This is the MARF_SETS output of the
+#' \code{Mar.bycatch::get_marfis()} function - it contains information about the MARFIS sets.
 #' @param maxSetDiff_hr default is \code{24}.  This is how many hours are allowed between
 #' reported Observer and MARFIS sets before.  Sets differing by more than this time span
 #' will never be matched.
@@ -19,9 +21,10 @@
 #' @return a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-match_sets <- function(get_marfis = NULL,
-                       get_obs = NULL,
+match_sets <- function(get_obs = NULL,
                        match_trips = NULL,
+                       marfMatch = NULL,
+                       marfSets = NULL,
                        maxSetDiff_hr =24,
                        ...){
   args <- list(...)$argsList
@@ -34,13 +37,12 @@ match_sets <- function(get_marfis = NULL,
     osets <- get_obs
   }
 
-
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
-  msets = get_marfis$MARF_SETS
+  msets = marfSets
+
   # osets = get_obs$OBS_SETS_ALL
-  if(is.null(get_marfis$MARF_MATCH) ||
-     is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
+  if(is.null(marfMatch) || is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
     if (!args$quiet)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
     return(NULL)
   }else{

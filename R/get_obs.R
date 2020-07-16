@@ -3,19 +3,21 @@
 #' within a particular date range, and if a fleet is provided, it will also limit the results to
 #' those vessels with particular combinations of VR and licence.
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
-#' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
-#' \code{Mar.bycatch::get_fleet()}
+#' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Mar.bycatch::get_fleet()}
 #' @param ... other arguments passed to methods
 #' @param get_marfis default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet
+#' @param matchMarfis default is \code{FALSE}.  This indicates whether or not an attempt should be made
+#' to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
+#' \code{get_marfis} must be provided.
 #' @family fleets
 #' @return returns a list with 2 dataframes - "OBS_TRIPS", and "OBS_SETS".
 #' "OBS_TRIPS" contains information for the observer trips, while "OBS_SETS" contains information
 #' about the observer sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_obs <- function(thisFleet = NULL, get_marfis = NULL, ...){
+get_obs <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  ...){
   args <- list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if (is.null(thisFleet)){
@@ -197,24 +199,18 @@ get_obs <- function(thisFleet = NULL, get_marfis = NULL, ...){
     if (args$debug) cat("get_obs_sets done:",nrow(ISSETPROFILE_WIDE),"\n")
     return(ISSETPROFILE_WIDE)
   }
-
   obs_TRIPS_all <- do.call(get_obs_trips, list(LIC_VR = LIC_VR_fleet, argsList = args))
-
-  trips <- do.call(match_trips, list(get_marfis = get_marfis, get_obs = obs_TRIPS_all, argsList = args))
-
-  if (all(is.na(trips))){
-    obs_TRIPS_matched <- NA
-  }else{
-    obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
-  }
   obs_SETS_all <- do.call(get_obs_sets, list(obsTrips = obs_TRIPS_all, argsList = args))
 
-  sets <- do.call(match_sets, list(get_marfis = get_marfis, get_obs = obs_SETS_all, match_trips = trips, argsList = args))
-
-  if (is.na(sets)){
-    obs_SETS_matched <- NA
-  }else{
-    obs_SETS_matched <- obs_SETS_all[obs_SETS_all$FISHSET_ID %in% sets$MAP_OBS_MARFIS_SETS$FISHSET_ID,]
+  obs_TRIPS_matched <- NA
+  obs_SETS_matched <- NA
+  if (matchMarfis) {
+    trips <- do.call(match_trips, list(obsTrips = obs_TRIPS_all, marfMatch = get_marfis$MARF_MATCH, argsList = args))
+    if (!all(is.na(trips))) obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
+    if (!all(is.na(obs_TRIPS_matched))) {
+      sets <- do.call(match_sets, list(get_obs = obs_SETS_all, match_trips = trips, marfMatch = get_marfis$MARF_MATCH, marfSets =  get_marfis$MARF_SETS, argsList = args))
+      if (!all(is.na(sets))) obs_SETS_matched <- obs_SETS_all[obs_SETS_all$FISHSET_ID %in% sets$MAP_OBS_MARFIS_SETS$FISHSET_ID,]
+    }
   }
 
   res= list()

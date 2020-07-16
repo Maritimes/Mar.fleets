@@ -16,6 +16,7 @@ get_all <- function(...){
                gearSpSize = "all",
                vessLen = "all",
                useDate = "landed",
+               marfSpp = NULL,
                keep = keep,
                keepSurveyTrips = FALSE,
                data.dir = file.path(getwd(), "data"),
@@ -40,8 +41,8 @@ get_all <- function(...){
   }
   fleet <- do.call(get_fleet, list(argsList=args))
   marf <- do.call(get_marfis, list(thisFleet=fleet,argsList=args))
-  obs <- do.call(get_obs, list(thisFleet=fleet,get_marfis = marf, argsList=args))
-  bycatch <- do.call(get_bycatch, list(get_obs = obs, argsList=args))
+  obs <- do.call(get_obs, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, argsList=args))
+  bycatch <- do.call(get_bycatch, list(isTrips = obs$OBS_TRIPS_MATCHED$TRIP_ID_OBS, marfSpID = args$marfSpp, argsList=args))
   # Capture the results in a list and return them ------------------------------------------------
   cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))

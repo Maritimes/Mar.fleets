@@ -1,23 +1,30 @@
 #' @title get_bycatch
-#' @description This function takes the results for get_obs() and a marfis species code
+#' @description This function takes a vector of ISDB trip IDs and a marfis species code
 #' and generates a dataframe of all of the bycatche species from the observer db
-#' @param get_obs default is \code{NULL} this is the results of the get_obs() function
+#' @param isTrips default is \code{NULL} This is a vector of trip_ids from ISDB
+#' @param marfSpID default is \code{NULL}.  This is the Marfis species ID for the targeted species
 #' @param ... other arguments passed to methods
 #' @return returns a dataframe of the bycatch information for the requested species (using the requested)
 #' marfis species code and supplie results from get_obs
 #' @note This function can accept many parameters.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_bycatch<-function(get_obs = NULL, ...){
+get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   args <- list(...)$argsList
+  if (is.null(marfSpID))  marfSpID <- args$marfSpp
+  if (is.null(marfSpID)){
+    cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
+    return(NA)
+  }
   utils::data("spLookups", envir = environment())
   spLookups <- get("spLookups", envir  = environment())
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  if (all(is.na(get_obs$OBS_TRIPS_MATCHED)))return(NA)
+
+  if (all(is.na(isTrips)))return(NA) #get_obs$OBS_TRIPS_MATCHED
 
   ISCATCHES <- ISTRIPS <- NA
-  isdbSPP = spLookups[which(spLookups$MARFIS_CODE==args$marfSpp),c("SPECCD_ID")]
-  isTrips<- unique(get_obs$OBS_TRIPS_MATCHED$TRIP_ID_OBS)
+  isdbSPP = spLookups[which(spLookups$MARFIS_CODE==marfSpID),c("SPECCD_ID")]
+  isTrips<- unique(isTrips)
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"), env = environment(), quiet = TRUE)
     ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isTrips,]

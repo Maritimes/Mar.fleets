@@ -5,18 +5,15 @@
 \title{match_sets}
 \usage{
 match_sets(
-  get_marfis = NULL,
   get_obs = NULL,
   match_trips = NULL,
+  marfMatch = NULL,
+  marfSets = NULL,
   maxSetDiff_hr = 24,
   ...
 )
 }
 \arguments{
-\item{get_marfis}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
-trip and set information from MARFIS}
-
 \item{get_obs}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 trip and set information from the observer database.}
@@ -24,6 +21,13 @@ trip and set information from the observer database.}
 \item{match_trips}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::match_trips()} function - it information related to how trips from
 the two databases are matched.}
+
+\item{marfMatch}{default is \code{NULL}. This is the MARF_MATCH output of the
+\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+trip and set information from MARFIS}
+
+\item{marfSets}{default is \code{NULL}. This is the MARF_SETS output of the
+\code{Mar.bycatch::get_marfis()} function - it contains information about the MARFIS sets.}
 
 \item{maxSetDiff_hr}{default is \code{24}.  This is how many hours are allowed between
 reported Observer and MARFIS sets before.  Sets differing by more than this time span

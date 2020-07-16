@@ -4,39 +4,9 @@
 \alias{get_vmstracks}
 \title{title get_vmstracks}
 \usage{
-get_vmstracks(
-  fn.oracle.username = "_none_",
-  fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_",
-  usepkg = "roracle",
-  get_marfis = NULL,
-  get_obs = NULL,
-  quietly = FALSE
-)
+get_vmstracks(get_marfis = NULL, get_obs = NULL, ...)
 }
 \arguments{
-\item{fn.oracle.username}{default is \code{'_none_'} This is your username for
-accessing oracle objects. If you have a value for \code{oracle.username}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{fn.oracle.password}{default is \code{'_none_'} This is your password for
-accessing oracle objects. If you have a value for \code{oracle.password}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{fn.oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
-identifier for accessing oracle objects. If you have a value for
-\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-this can be left and that value will be used.  If a value for this is
-provided, it will take priority over your existing value.}
-
-\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
-roracle will extract data ~ 5x faster.}
-
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS}
@@ -44,6 +14,8 @@ trip and set information from MARFIS}
 \item{get_obs}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 trip and set information from the observer database.}
+
+\item{...}{other arguments passed to methods}
 
 \item{quietly}{default is \code{FALSE}.  This indicates whether or not
 information about the matching process should be shown.}

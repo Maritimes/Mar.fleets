@@ -4,16 +4,16 @@
 \alias{match_trips}
 \title{match_trips}
 \usage{
-match_trips(get_marfis = NULL, get_obs = NULL, ...)
+match_trips(obsTrips = NULL, marfMatch = NULL, ...)
 }
 \arguments{
-\item{get_marfis}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
-trip and set information from MARFIS}
-
-\item{get_obs}{default is \code{NULL}. This is the list output by the
+\item{obsTrips}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 trip and set information from the observer database.}
+
+\item{marfMatch}{default is \code{NULL}. This is the MARF_MATCH output of the
+\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+trip and set information from MARFIS}
 
 \item{...}{other arguments passed to methods}
 }

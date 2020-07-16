@@ -21,7 +21,6 @@ if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 
 if (is.null(thisFleet))stop("Please provide 'thisFleet'")
 
-
 getEff<-function(log_efrt=NULL, ...){
   args <- list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")

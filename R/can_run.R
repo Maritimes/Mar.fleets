@@ -51,11 +51,6 @@ can_run <- function(...){
   }
   wantLocal <- function(tables = NULL, ...){
     args<-list(...)$argsList
-    # #not sure why but r build didn't like my referencing of data.dir, so
-    # #I've provided a default taht should be overwritten
-    # args[["data.dir"]]<-paste0(getwd(), .Platform$file.sep, "data")
-    # argsSent<-  list(...)$argsList
-    # args[names(argsSent)] <- argsSent
 
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 
