@@ -131,17 +131,17 @@ match_trips <- function(obsTrips = NULL,
   if (is.data.frame(Marf_in_Obs_CONFHO) && nrow(Marf_in_Obs_CONFHO)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_CONFHO)
   # VRN, LICENCE and DATE RANGE --------------------------------------------------------
   Marf_in_Obs_VRLICDATE_F <-NA
-  marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$VR_NUMBER_FISHING) & !is.na(marf_TRIPS_all$LICENCE_ID) & !is.na(marf_TRIPS_all[args$theDate]),]
+  marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$VR_NUMBER_FISHING) & !is.na(marf_TRIPS_all$LICENCE_ID) & !is.na(marf_TRIPS_all[args$useDate]),]
   marf_TRIPS_all_tmp$LIC_VR_F <- paste0(marf_TRIPS_all_tmp$LICENCE_ID,"_", marf_TRIPS_all_tmp$VR_NUMBER_FISHING)
   obs_TRIPS_all_tmp <- obs_TRIPS_all[!is.na(obs_TRIPS_all$LIC_VR) &
                                        !is.na(obs_TRIPS_all$BOARD_DATE) &
                                        !is.na(obs_TRIPS_all$LANDING_DATE),]
   if (nrow(marf_TRIPS_all_tmp[which(marf_TRIPS_all_tmp$LIC_VR_F %in% obs_TRIPS_all_tmp$LIC_VR), ])>0){
-    Marf_in_Obs_VRLICDATE_F <- merge(marf_TRIPS_all_tmp[, c("TRIP_ID_MARF","LIC_VR_F", args$theDate)],
+    Marf_in_Obs_VRLICDATE_F <- merge(marf_TRIPS_all_tmp[, c("TRIP_ID_MARF","LIC_VR_F", args$useDate)],
                                      obs_TRIPS_all_tmp[,c("TRIP_ID_OBS", "LIC_VR", "BOARD_DATE", "LANDING_DATE")],
                                      by.x="LIC_VR_F", by.y = "LIC_VR")
-    Marf_in_Obs_VRLICDATE_F <- unique(Marf_in_Obs_VRLICDATE_F[which(Marf_in_Obs_VRLICDATE_F[,args$theDate] >= Marf_in_Obs_VRLICDATE_F$BOARD_DATE &
-                                                                      Marf_in_Obs_VRLICDATE_F[,args$theDate]<=Marf_in_Obs_VRLICDATE_F$LANDING_DATE),
+    Marf_in_Obs_VRLICDATE_F <- unique(Marf_in_Obs_VRLICDATE_F[which(Marf_in_Obs_VRLICDATE_F[,args$useDate] >= Marf_in_Obs_VRLICDATE_F$BOARD_DATE &
+                                                                      Marf_in_Obs_VRLICDATE_F[,args$useDate]<=Marf_in_Obs_VRLICDATE_F$LANDING_DATE),
                                                               c("TRIP_ID_MARF", "TRIP_ID_OBS")])
     if (nrow(Marf_in_Obs_VRLICDATE_F)>0)Marf_in_Obs_VRLICDATE_F$MATCHED_ON <- "VR_LIC_DATE"
 

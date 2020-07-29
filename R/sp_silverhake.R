@@ -18,7 +18,7 @@
 #' observer and bycatch data.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' SilverHake <- sp_silverhake(year = 2018, data.dir = "C:/myData")
+#' SilverHake <- sp_silverhake(data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
@@ -31,10 +31,7 @@ sp_silverhake <- function(year=NULL, ...){
   args <- list(marfSpp=172,
                nafoCode=c('4V%','4W%','4X%'),#4VWX
                gearCode =12,
-               mdCode = 2,
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31")
-  )
+               mdCode = 2)
 
 
   argsSent <- as.list(match.call(expand.dots=TRUE))[-1]

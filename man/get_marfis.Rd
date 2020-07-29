@@ -26,15 +26,11 @@ This function extracts all of the MARFIS records for vessels with
 particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 }
 \seealso{
-Other fleets: 
-\code{\link{calc_coverage}()},
+Other coreFuncs: 
 \code{\link{get_fleet}()},
-\code{\link{get_obs}()},
-\code{\link{get_vmstracks}()},
-\code{\link{match_sets}()},
-\code{\link{match_trips}()}
+\code{\link{get_obs}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
-\concept{fleets}
+\concept{coreFuncs}

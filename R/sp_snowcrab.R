@@ -14,20 +14,19 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param CFA default is \code{NULL}. This is a crab-fishing area.  It can be "SENS", "NENS", "4X", or "ALL"
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Shrimp <- sp_snowcrab(year = 2018, CFA = "SENS", data.dir = "C:/myData")
+#' snowcrab <- sp_snowcrab(CFA = "SENS", data.dir = "C:/myData")
 #'                       }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_snowcrab <- function(year=NULL, CFA = NULL, ...){
+sp_snowcrab <- function(CFA = NULL, ...){
   # # Set up the snowcrab-specific variables -------------------------------------------------------
+  stop("Not ready for primetime")
   if (!is.null(CFA))CFA = toupper(CFA)
     if (CFA=="SENS"){
     nafoCode= c('4VS%','4W%')

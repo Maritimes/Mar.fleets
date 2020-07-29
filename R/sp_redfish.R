@@ -14,19 +14,17 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param unit default is \code{NULL}. This is either "2" or "3".
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Redfish <- sp_redfish(year = 2018, unit = 2, data.dir = "C:/myData")
+#' Redfish <- sp_redfish(unit = 2, data.dir = "C:/myData")
 #'                       }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_redfish <- function(year=NULL, unit = NULL, ...){
+sp_redfish <- function(unit = NULL, ...){
 
   # Set up the redfish-specific variables -------------------------------------------------------
   if (unit==2){
@@ -42,10 +40,7 @@ sp_redfish <- function(year=NULL, unit = NULL, ...){
                nafoCode=nafoCode,
                gearCode = 12,
                gearSpSize = gearSpSize,
-               mdCode = 2,
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31")
-  )
+               mdCode = 2 )
 
 
   argsSent <- as.list(match.call(expand.dots=TRUE))[-1]

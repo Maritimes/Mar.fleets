@@ -11,7 +11,7 @@
 #' @param matchMarfis default is \code{FALSE}.  This indicates whether or not an attempt should be made
 #' to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
 #' \code{get_marfis} must be provided.
-#' @family fleets
+#' @family coreFuncs
 #' @return returns a list with 2 dataframes - "OBS_TRIPS", and "OBS_SETS".
 #' "OBS_TRIPS" contains information for the observer trips, while "OBS_SETS" contains information
 #' about the observer sets.
@@ -190,7 +190,7 @@ get_obs <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  .
 
     if (nrow(ISSETPROFILE_WIDE)==0){
       cat(paste0("\n","No Observer sets"))
-      return(NA)
+      return(NULL)
       #return(invisible(NULL))
     }
 
@@ -204,6 +204,8 @@ get_obs <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  .
 
   obs_TRIPS_matched <- NA
   obs_SETS_matched <- NA
+  trips <- NA
+  sets <- NA
   if (matchMarfis) {
     trips <- do.call(match_trips, list(obsTrips = obs_TRIPS_all, marfMatch = get_marfis$MARF_MATCH, argsList = args))
     if (!all(is.na(trips))) obs_TRIPS_matched <- obs_TRIPS_all[obs_TRIPS_all$TRIP_ID_OBS %in% trips$MAP_OBS_MARFIS_TRIPS$TRIP_ID_OBS,]
@@ -216,6 +218,8 @@ get_obs <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  .
   res= list()
   res[["OBS_TRIPS_ALL"]]<- obs_TRIPS_all
   res[["OBS_SETS_ALL"]] <- obs_SETS_all
+  res[["OBS_TRIPS_MATCH_RESULTS"]] <- trips
+  res[["OBS_SETS_MATCH_RESULTS"]] <- sets
   res[["OBS_TRIPS_MATCHED"]]<- obs_TRIPS_matched
   res[["OBS_SETS_MATCHED"]] <- obs_SETS_matched
   return(res)

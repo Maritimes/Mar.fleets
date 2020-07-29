@@ -3,6 +3,8 @@
 #' run locally or directly against  oracle.  If the desire is to run locally, all of the necessary
 #' tables must be available in the data.dir.  If run against Oracle, we must be on the network and
 #' have access to the necessary schema.tables.
+#' @family setup
+#' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @noRd
 can_run <- function(...){
   args=list(...)
@@ -14,6 +16,7 @@ can_run <- function(...){
              "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.LOG_EFRT_ENTRD_DETS",
              "MARFISSCI.LOG_EFRT_STD_INFO","MARFISSCI.MON_DOC_DEFNS","MARFISSCI.MON_DOC_ENTRD_DETS",
              "MARFISSCI.MON_DOCS","MARFISSCI.NAFO_UNIT_AREAS","MARFISSCI.PRO_SPC_INFO","MARFISSCI.VESSELS")
+  #connect_Oracle is just results of trying to establish connecion
   connect_Oracle <-function(...){
     args=list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
@@ -24,9 +27,9 @@ can_run <- function(...){
                                                     quietly = args$quiet))
     return(cxn)
   }
+  #tblAccess is T if has necess permiss
   tblAccess <- function(tables = NULL,...){
     args=list(...)$argsList
-
     #the schema holding the ISDB objects is actually observer
     tables <- gsub("ISDB","OBSERVER", tables)
     # #check for access
@@ -49,15 +52,13 @@ can_run <- function(...){
     }
     #2check if has access
   }
+  #wantLocal is T if all necessar things are found
   wantLocal <- function(tables = NULL, ...){
     args<-list(...)$argsList
-
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
       #marfis is annoying because some files are prefaced with marfissci
-
       tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
       tabs2 = gsub(tabs1,pattern = "MARFISSCI", replacement = "MARFIS")
       localDataCheck1 <- sapply(X =tabs1, file.exists)
@@ -81,16 +82,16 @@ can_run <- function(...){
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
       cat(paste0(OBS,".RData"),sep= "\n")
-      return(FALSE)
+      stop()
+      #return(FALSE)
     }
   }else{
     cxnCheck <- do.call(connect_Oracle, list(argsList=args))
-
     if (!is.list(cxnCheck)) {
       cat("\n","Cannot proceed online (Can't create a DB connection).",
-          "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').",
-          "\n")
-      return(FALSE)
+          "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').","\n")
+      stop()
+      # return(FALSE)
     }else{
       if (!args$quiet)  cat("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
@@ -98,7 +99,9 @@ can_run <- function(...){
     if (all(do.call(tblAccess,list(MARFIS, argsList=args)) && do.call(tblAccess,list(OBS, argsList=args)))){
       return(cxnCheck)
     }else{
-      return(FALSE)
+      cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
+      stop()
+      #return(FALSE)
     }
   }
 }

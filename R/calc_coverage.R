@@ -18,7 +18,7 @@
 #' sufficient unique values of the sens.fields.
 #' @param quietly default is \code{FALSE}.  This indicates whether or not
 #' information about the matching process should be shown.
-#' @family fleets
+#' @family simpleproducts
 #' @return returns a list with 2 items - \code{summary} and \code{details}.
 #'
 #' \code{summary} is a dataframe with 5 columns, as described below:
@@ -61,6 +61,7 @@
 #' Additionally, if fishing can occur outside of the extent of the provided polygon,
 #' those trips/sets will be attributed to "Other".
 #' }
+#' @family simpleproducts
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 calc_coverage<-function(get_obs = NULL,

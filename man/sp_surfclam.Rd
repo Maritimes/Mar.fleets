@@ -4,12 +4,9 @@
 \alias{sp_surfclam}
 \title{sp_surfclam}
 \usage{
-sp_surfclam(year = NULL, ...)
+sp_surfclam(...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{...}{other arguments passed to methods}
 }
 \value{
@@ -35,7 +32,7 @@ information for the surfclam fleet:
 }
 \examples{
 \dontrun{
-Surfclam <- sp_surfclam(year = 2018, data.dir = "C:/myData")
+Surfclam <- sp_surfclam(data.dir = "C:/myData")
                        }
 }
 \seealso{

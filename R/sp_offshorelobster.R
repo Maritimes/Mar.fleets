@@ -14,25 +14,20 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' OffshoreLobster <- sp_offshorelobster(year = 2018, data.dir = "C:/myData")
+#' OffshoreLobster <- sp_offshorelobster(data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_offshorelobster <- function(year=NULL, ...){
+sp_offshorelobster <- function(...){
 
   # Set up the lobster-specific variables -------------------------------------------------------
   args <- list(marfSpp=700,
-               mdCode = 19,
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31")
-  )
+               mdCode = 19)
 
   argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
   args[names(argsSent)] <- argsSent

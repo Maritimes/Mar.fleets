@@ -14,32 +14,28 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 #' "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
 #' for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
 #' of the following - \code{c(0,45)} or \code{seq(0,45,1)}.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Halibut <- sp_halibut(year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
+#' Halibut <- sp_halibut(vessLen = c(0,45), data.dir = "C:/myData")
 #' }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_halibut <- function(year=NULL, vessLen = c(0,999), ...){
+sp_halibut <- function(vessLen = c(0,999), ...){
 
   # Set up the Halibut-specific variables -------------------------------------------------------
   args <- list(marfSpp=130,
                nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%'),
                gearCode = c(50,51),
                mdCode = c(1, 29),
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31"),
-               vessLen = c(0,999)
-  )
+               vessLen = c(0,999))
+
   argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
   args[names(argsSent)] <- argsSent
 

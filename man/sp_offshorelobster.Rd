@@ -4,12 +4,9 @@
 \alias{sp_offshorelobster}
 \title{sp_offshorelobster}
 \usage{
-sp_offshorelobster(year = NULL, ...)
+sp_offshorelobster(...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{...}{other arguments passed to methods}
 }
 \value{
@@ -35,7 +32,7 @@ information for the offshore lobster fleet:
 }
 \examples{
 \dontrun{
-OffshoreLobster <- sp_offshorelobster(year = 2018, data.dir = "C:/myData")
+OffshoreLobster <- sp_offshorelobster(data.dir = "C:/myData")
 }
 }
 \seealso{

@@ -24,6 +24,14 @@ and generates a dataframe of all of the bycatche species from the observer db
 \note{
 This function can accept many parameters.
 }
+\seealso{
+Other simpleproducts: 
+\code{\link{calc_coverage}()},
+\code{\link{get_vmstracks}()},
+\code{\link{plot_bycatch}()},
+\code{\link{plot_coverage_time}()}
+}
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
+\concept{simpleproducts}

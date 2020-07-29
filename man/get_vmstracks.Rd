@@ -16,9 +16,6 @@ trip and set information from MARFIS}
 trip and set information from the observer database.}
 
 \item{...}{other arguments passed to methods}
-
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
-information about the matching process should be shown.}
 }
 \value{
 returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
@@ -28,15 +25,13 @@ This function takes the results from get_marfis() and get_obs()
 and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{
-Other fleets: 
+Other simpleproducts: 
 \code{\link{calc_coverage}()},
-\code{\link{get_fleet}()},
-\code{\link{get_marfis}()},
-\code{\link{get_obs}()},
-\code{\link{match_sets}()},
-\code{\link{match_trips}()}
+\code{\link{get_bycatch}()},
+\code{\link{plot_bycatch}()},
+\code{\link{plot_coverage_time}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
-\concept{fleets}
+\concept{simpleproducts}

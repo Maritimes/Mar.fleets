@@ -84,15 +84,19 @@ those trips/sets will be attributed to "Other".
 }
 }
 \seealso{
-Other fleets: 
-\code{\link{get_fleet}()},
-\code{\link{get_marfis}()},
-\code{\link{get_obs}()},
+Other simpleproducts: 
+\code{\link{get_bycatch}()},
 \code{\link{get_vmstracks}()},
-\code{\link{match_sets}()},
-\code{\link{match_trips}()}
+\code{\link{plot_bycatch}()},
+\code{\link{plot_coverage_time}()}
+
+Other simpleproducts: 
+\code{\link{get_bycatch}()},
+\code{\link{get_vmstracks}()},
+\code{\link{plot_bycatch}()},
+\code{\link{plot_coverage_time}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
-\concept{fleets}
+\concept{simpleproducts}

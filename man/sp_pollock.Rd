@@ -4,12 +4,9 @@
 \alias{sp_pollock}
 \title{sp_pollock}
 \usage{
-sp_pollock(year = NULL, type = NULL, mesh = NULL, component = NULL, ...)
+sp_pollock(type = NULL, mesh = NULL, component = NULL, ...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
 \item{mesh}{default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".}
@@ -41,12 +38,12 @@ information for the pollock fleets:
 }
 \examples{
 \dontrun{
-Pollock_West_m_sm <- sp_pollock(year = 2018, type = "MOBILE",
+Pollock_West_m_sm <- sp_pollock(type = "MOBILE",
                                 mesh="SMALL", component = "WESTERN",
                                 data.dir = "C:/myData")
                                 }
 \dontrun{
-Pollock_East_m_lg <- sp_pollock(year = 2018, type = "MOBILE",
+Pollock_East_m_lg <- sp_pollock(type = "MOBILE",
                                 mesh="LARGE", component = "EASTERN",
                                 data.dir = "C:/myData")
                                 }

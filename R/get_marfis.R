@@ -5,7 +5,7 @@
 #' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 #' \code{Mar.bycatch::get_fleet()}
 #' @param ... other arguments passed to methods
-#' @family fleets
+#' @family coreFuncs
 #' @return returns a list with 2 dataframes - "trips", and "sets".
 #' "trips" conta ins all of the information necessary for identifying a trip
 #' within MARFIS, as well as associated information about the trip
@@ -17,7 +17,6 @@
 get_marfis<-function(thisFleet = NULL, ...){
 args <- list(...)$argsList
 if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-# theDate <- ifelse(args$useDate =="fished","DATE_FISHED", "LANDED_DATE")
 
 if (is.null(thisFleet))stop("Please provide 'thisFleet'")
 
@@ -237,7 +236,7 @@ if (nrow(ps)<1){
 
 sets<-  do.call(getEff, list(log_efrt = allLogEff, argsList=args))
 
-eff <- unique(merge(ps[,!names(ps) %in% c(args$theDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
+eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
 
 ed <-  do.call(getED, list(mondocs =allMondocs, argsList=args))
 if (!is.null(ed) && nrow(ed)>0){

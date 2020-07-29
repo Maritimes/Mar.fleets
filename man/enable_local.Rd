@@ -43,3 +43,7 @@ roracle will extract data ~ 5x faster.}
 This function extracts all of the necessary oracle tables to a local folder so that
 the functions can be run locally.
 }
+\author{
+Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
+}
+\concept{setup}

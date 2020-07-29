@@ -7,23 +7,21 @@
 #' @param get_obs default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
 #' trip and set information from the observer database.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information about the matching process should be shown.
 #' @param ... other arguments passed to methods
-#' @family fleets
+#' @family simpleproducts
 #' @return returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_vmstracks<-function(get_marfis = NULL, get_obs = NULL, ...){
-  args <- list(oracle.username = "_none_",
-               oracle.password = "_none_",
-               oracle.dsn = "_none_",
-               usepkg = "rodbc",
-               useLocal = FALSE,
-               quiet=TRUE,
-               debug=FALSE
-  )
-
+  # args <- list(oracle.username = "_none_",
+  #              oracle.password = "_none_",
+  #              oracle.dsn = "_none_",
+  #              usepkg = "rodbc",
+  #              useLocal = FALSE,
+  #              quiet=TRUE,
+  #              debug=FALSE
+  # )
+  args<-set_defaults(argsList = args)
   argsSent<-  list(...)
   args[names(argsSent)] <- argsSent
   if (args$useLocal==TRUE){

@@ -41,11 +41,6 @@ and attempts to match trips based on:
 }
 \seealso{
 Other fleets: 
-\code{\link{calc_coverage}()},
-\code{\link{get_fleet}()},
-\code{\link{get_marfis}()},
-\code{\link{get_obs}()},
-\code{\link{get_vmstracks}()},
 \code{\link{match_sets}()}
 }
 \author{

@@ -14,19 +14,17 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param mesh default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
 #' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Pollock_West_m_sm <- sp_pollock(year = 2018, type = "MOBILE",
+#' Pollock_West_m_sm <- sp_pollock(type = "MOBILE",
 #'                                 mesh="SMALL", component = "WESTERN",
 #'                                 data.dir = "C:/myData")
 #'                                 }
 #' \dontrun{
-#' Pollock_East_m_lg <- sp_pollock(year = 2018, type = "MOBILE",
+#' Pollock_East_m_lg <- sp_pollock(type = "MOBILE",
 #'                                 mesh="LARGE", component = "EASTERN",
 #'                                 data.dir = "C:/myData")
 #'                                 }
@@ -35,7 +33,7 @@
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_pollock <- function(year=NULL, type = NULL, mesh=NULL, component = NULL, ...){
+sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
 
   # Set up the Pollock-specific variables -------------------------------------------------------
   if (toupper(component)=="WESTERN"){

@@ -18,6 +18,7 @@
 #'              title ="Swordfish",
 #'              subtitle =2018)
 #'                                 }
+#' @family simpleproducts
 #' @return nothing, but png files will be generated in your working directory.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export

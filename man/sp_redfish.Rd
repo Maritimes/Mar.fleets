@@ -4,12 +4,9 @@
 \alias{sp_redfish}
 \title{sp_redfish}
 \usage{
-sp_redfish(year = NULL, unit = NULL, ...)
+sp_redfish(unit = NULL, ...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{unit}{default is \code{NULL}. This is either "2" or "3".}
 
 \item{...}{other arguments passed to methods}
@@ -37,7 +34,7 @@ information for the redfish fleets:
 }
 \examples{
 \dontrun{
-Redfish <- sp_redfish(year = 2018, unit = 2, data.dir = "C:/myData")
+Redfish <- sp_redfish(unit = 2, data.dir = "C:/myData")
                       }
 }
 \seealso{

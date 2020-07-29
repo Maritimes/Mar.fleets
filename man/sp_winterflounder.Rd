@@ -4,12 +4,9 @@
 \alias{sp_winterflounder}
 \title{sp_winterflounder}
 \usage{
-sp_winterflounder(year = NULL, ...)
+sp_winterflounder(...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{...}{other arguments passed to methods}
 }
 \value{
@@ -35,7 +32,7 @@ information for the winter flounder fleet:
 }
 \examples{
 \dontrun{
-WinterFlounder <- sp_winterflounder(year = 2018, data.dir = "C:/myData")
+WinterFlounder <- sp_winterflounder(data.dir = "C:/myData")
 }
 }
 \seealso{

@@ -4,12 +4,9 @@
 \alias{sp_halibut}
 \title{sp_halibut}
 \usage{
-sp_halibut(year = NULL, vessLen = c(0, 999), ...)
+sp_halibut(vessLen = c(0, 999), ...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
 for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
@@ -40,7 +37,7 @@ information for the halibut fleets:
 }
 \examples{
 \dontrun{
-Halibut <- sp_halibut(year = 2018, vessLen = c(0,45), data.dir = "C:/myData")
+Halibut <- sp_halibut(vessLen = c(0,45), data.dir = "C:/myData")
 }
 }
 \seealso{

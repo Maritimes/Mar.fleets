@@ -4,12 +4,9 @@
 \alias{sp_haddock}
 \title{sp_haddock}
 \usage{
-sp_haddock(year = NULL, type = NULL, area = NULL, ...)
+sp_haddock(type = NULL, area = NULL, ...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
 \item{area}{default is \code{NULL}. This is either "4X5Y" or "5ZJM".}
@@ -38,10 +35,10 @@ information for the haddock fleets:
 }
 \examples{
 \dontrun{
-Haddock_5ZJM_m <- sp_haddock(year = 2018, type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
+Haddock_5ZJM_m <- sp_haddock(type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
 }
 \dontrun{
-Haddock_4X5Y_f <- sp_haddock(year = 2018, type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
+Haddock_4X5Y_f <- sp_haddock(type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
 }
 }
 \seealso{

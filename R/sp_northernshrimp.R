@@ -14,18 +14,16 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #' }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Shrimp <- sp_northernshrimp(year = 2018, data.dir = "C:/myData")
+#' Shrimp <- sp_northernshrimp(data.dir = "C:/myData")
 #'                       }
 #' @family species
 #' @return list of objects, including marfis data, observer data, information for matching observer
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_northernshrimp <- function(year=NULL, ...){
+sp_northernshrimp <- function( ...){
 
   # # Set up the shrimp-specific variables -------------------------------------------------------
 

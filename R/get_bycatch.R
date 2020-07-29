@@ -4,6 +4,7 @@
 #' @param isTrips default is \code{NULL} This is a vector of trip_ids from ISDB
 #' @param marfSpID default is \code{NULL}.  This is the Marfis species ID for the targeted species
 #' @param ... other arguments passed to methods
+#' @family simpleproducts
 #' @return returns a dataframe of the bycatch information for the requested species (using the requested)
 #' marfis species code and supplie results from get_obs
 #' @note This function can accept many parameters.
@@ -14,13 +15,13 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   if (is.null(marfSpID))  marfSpID <- args$marfSpp
   if (is.null(marfSpID)){
     cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
-    return(NA)
+    return(NULL)
   }
   utils::data("spLookups", envir = environment())
   spLookups <- get("spLookups", envir  = environment())
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 
-  if (all(is.na(isTrips)))return(NA) #get_obs$OBS_TRIPS_MATCHED
+  if (all(is.na(isTrips)))return(NULL) #get_obs$OBS_TRIPS_MATCHED
 
   ISCATCHES <- ISTRIPS <- NA
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==marfSpID),c("SPECCD_ID")]

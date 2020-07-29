@@ -4,16 +4,19 @@
 \alias{get_obs}
 \title{get_obs}
 \usage{
-get_obs(thisFleet = NULL, get_marfis = NULL, ...)
+get_obs(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE, ...)
 }
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
-the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
-\code{Mar.bycatch::get_fleet()}}
+the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Mar.bycatch::get_fleet()}}
 
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
+
+\item{matchMarfis}{default is \code{FALSE}.  This indicates whether or not an attempt should be made
+to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
+\code{get_marfis} must be provided.}
 
 \item{...}{other arguments passed to methods}
 }
@@ -28,15 +31,11 @@ within a particular date range, and if a fleet is provided, it will also limit t
 those vessels with particular combinations of VR and licence.
 }
 \seealso{
-Other fleets: 
-\code{\link{calc_coverage}()},
+Other coreFuncs: 
 \code{\link{get_fleet}()},
-\code{\link{get_marfis}()},
-\code{\link{get_vmstracks}()},
-\code{\link{match_sets}()},
-\code{\link{match_trips}()}
+\code{\link{get_marfis}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
-\concept{fleets}
+\concept{coreFuncs}

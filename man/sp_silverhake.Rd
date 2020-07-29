@@ -35,7 +35,7 @@ information for the silver hake fleets:
 }
 \examples{
 \dontrun{
-SilverHake <- sp_silverhake(year = 2018, data.dir = "C:/myData")
+SilverHake <- sp_silverhake(data.dir = "C:/myData")
 }
 }
 \seealso{

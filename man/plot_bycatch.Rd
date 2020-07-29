@@ -44,6 +44,14 @@ plot_bycatch(obsSpp = swordfish2018$bycatch[1,1],
              subtitle =2018)
                                 }
 }
+\seealso{
+Other simpleproducts: 
+\code{\link{calc_coverage}()},
+\code{\link{get_bycatch}()},
+\code{\link{get_vmstracks}()},
+\code{\link{plot_coverage_time}()}
+}
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
+\concept{simpleproducts}

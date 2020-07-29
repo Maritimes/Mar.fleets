@@ -16,7 +16,7 @@ plot_bycatch(
 \item{obsSpp}{This is the observer db species code ID for the main species.}
 
 \item{df}{default is \code{NULL}. This is the \code{bycatch} object from the \code{get_bycatch_()}
-function.  Alternative, a data.frame with the following codes would work as well - "SPEC" (the code),
+function.  Alternatively, a data.frame with the following codes would work as well - "SPEC" (the code),
 EST_NUM_CAUGHT (numeric), EST_KEPT_WT (numeric), EST_DISCARD_WT (numeric) and COMMON (species
 common name).}
 
@@ -44,6 +44,14 @@ plot_bycatch(obsSpp = swordfish2018$bycatch[1,1],
              subtitle =2018)
                                 }
 }
+\seealso{
+Other simpleproducts: 
+\code{\link{calc_coverage}()},
+\code{\link{get_bycatch}()},
+\code{\link{get_vmstracks}()},
+\code{\link{plot_coverage_time}()}
+}
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
+\concept{simpleproducts}

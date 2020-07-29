@@ -4,12 +4,9 @@
 \alias{sp_snowcrab}
 \title{sp_snowcrab}
 \usage{
-sp_snowcrab(year = NULL, CFA = NULL, ...)
+sp_snowcrab(CFA = NULL, ...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{CFA}{default is \code{NULL}. This is a crab-fishing area.  It can be "SENS", "NENS", "4X", or "ALL"}
 
 \item{...}{other arguments passed to methods}
@@ -37,7 +34,7 @@ information for the snowcrab fleet:
 }
 \examples{
 \dontrun{
-Shrimp <- sp_snowcrab(year = 2018, CFA = "SENS", data.dir = "C:/myData")
+snowcrab <- sp_snowcrab(CFA = "SENS", data.dir = "C:/myData")
                       }
 }
 \seealso{

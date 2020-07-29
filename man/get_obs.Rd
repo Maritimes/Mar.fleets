@@ -31,15 +31,11 @@ within a particular date range, and if a fleet is provided, it will also limit t
 those vessels with particular combinations of VR and licence.
 }
 \seealso{
-Other fleets: 
-\code{\link{calc_coverage}()},
+Other coreFuncs: 
 \code{\link{get_fleet}()},
-\code{\link{get_marfis}()},
-\code{\link{get_vmstracks}()},
-\code{\link{match_sets}()},
-\code{\link{match_trips}()}
+\code{\link{get_marfis}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
-\concept{fleets}
+\concept{coreFuncs}

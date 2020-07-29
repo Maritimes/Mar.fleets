@@ -18,15 +18,11 @@ This function extracts all of the Vessel/Licence combinations
 associated with a particular fleet for a particular date range.
 }
 \seealso{
-Other fleets: 
-\code{\link{calc_coverage}()},
+Other coreFuncs: 
 \code{\link{get_marfis}()},
-\code{\link{get_obs}()},
-\code{\link{get_vmstracks}()},
-\code{\link{match_sets}()},
-\code{\link{match_trips}()}
+\code{\link{get_obs}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
-\concept{fleets}
+\concept{coreFuncs}
