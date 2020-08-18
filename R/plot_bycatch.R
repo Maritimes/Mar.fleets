@@ -1,7 +1,7 @@
 #' @title plot_bycatch
 #' @description This function generates simple pdf plots for the output from Mar.bycatch species
 #' functions.
-#' @param obsSpp  This is the observer db species code ID for the main species.
+#' @param isdbSp  This is the ISDB species code ID for the main species sought.
 #' @param df default is \code{NULL}. This is the \code{bycatch} object from the \code{get_bycatch_()}
 #' function.  Alternatively, a data.frame with the following codes would work as well - "SPEC" (the code),
 #' EST_NUM_CAUGHT (numeric), EST_KEPT_WT (numeric), EST_DISCARD_WT (numeric) and COMMON (species
@@ -13,7 +13,7 @@
 #' @param title default is \code{NULL}. This will be the title of your plots.
 #' @param subtitle default is \code{NULL}. This will be the subtitle of your plots.
 #' @examples \dontrun{
-#' plot_bycatch(obsSpp = swordfish2018$bycatch[1,1],
+#' plot_bycatch(isdbSp = swordfish2018$bycatch[1,1],
 #'              df = swordfish2018$bycatch, showXSpp = 20,
 #'              title ="Swordfish",
 #'              subtitle =2018)
@@ -22,10 +22,10 @@
 #' @return nothing, but png files will be generated in your working directory.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
+plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
   COMMON <- COMMON_fact <- EST_NUM_CAUGHT  <- ORD <- WT <- CATCH_TYPE <- NA
   ts = format(Sys.time(), "%Y%m%d_%H%M%S")
-  fn = paste0(obsSpp)
+  fn = paste0(isdbSp)
 
   label <- hj <- NA
   df$label <- NA
@@ -37,8 +37,8 @@ plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   dfLong<- dfLong[,c("SPEC", "label","EST_KEPT_WT", "EST_DISCARD_WT")]
   dfLong$ALL_WT <- dfLong$EST_KEPT_WT+dfLong$EST_DISCARD_WT
   dfLong <- dfLong[with(dfLong, order(-ALL_WT, -EST_KEPT_WT)), ]
-  dir_Spp_row_dfLong <- dfLong[dfLong$SPEC ==obsSpp,]
-  dfLong <- dfLong[dfLong$SPEC !=obsSpp,]
+  dir_Spp_row_dfLong <- dfLong[dfLong$SPEC ==isdbSp,]
+  dfLong <- dfLong[dfLong$SPEC !=isdbSp,]
   if (!is.null(showXSpp))dfLong<-utils::head(dfLong,showXSpp-1)
   dfLong <- rbind(dir_Spp_row_dfLong, dfLong)
   dfLong$ORD <- seq(1:nrow(dfLong))
@@ -68,8 +68,8 @@ plot_bycatch <- function(obsSpp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
 
   # sort the data, ensure that the specified spp is first
   df <- df[with(df, order(-EST_NUM_CAUGHT, EST_KEPT_WT,EST_DISCARD_WT)), ]
-  dir_Spp_row <- df[df$SPEC ==obsSpp,]
-  df <- df[df$SPEC !=obsSpp,]
+  dir_Spp_row <- df[df$SPEC ==isdbSp,]
+  df <- df[df$SPEC !=isdbSp,]
   if (!is.null(showXSpp)){
     if (nrow(df)>= showXSpp-1) {
       df<-utils::head(df,showXSpp-1)

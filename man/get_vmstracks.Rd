@@ -4,16 +4,16 @@
 \alias{get_vmstracks}
 \title{title get_vmstracks}
 \usage{
-get_vmstracks(get_marfis = NULL, get_obs = NULL, ...)
+get_vmstracks(get_marfis = NULL, get_isdb = NULL, ...)
 }
 \arguments{
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS}
 
-\item{get_obs}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-trip and set information from the observer database.}
+\item{get_isdb}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+trip and set information from the ISDB database.}
 
 \item{...}{other arguments passed to methods}
 }
@@ -21,7 +21,7 @@ trip and set information from the observer database.}
 returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 }
 \description{
-This function takes the results from get_marfis() and get_obs()
+This function takes the results from get_marfis() and get_isdb()
 and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{

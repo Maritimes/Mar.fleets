@@ -142,10 +142,10 @@ getED<-function(mondocs=NULL, ...){
     if (nrow(ED_df)<1)return(NULL)
     ED_df<- reshape2::dcast(ED_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
     colnames(ED_df)[colnames(ED_df)=="21"] <- "OBS_PRESENT"
-    colnames(ED_df)[colnames(ED_df)=="741"] <- "OBS_TRIP"
+    colnames(ED_df)[colnames(ED_df)=="741"] <- "ISDB_TRIP"
     colnames(ED_df)[colnames(ED_df)=="835"] <- "OBS_ID"
     if (!"OBS_PRESENT" %in%  colnames(ED_df)) ED_df$OBS_PRESENT<-NA
-    if (!"OBS_TRIP" %in%  colnames(ED_df)) ED_df$OBS_TRIP<-NA
+    if (!"ISDB_TRIP" %in%  colnames(ED_df)) ED_df$ISDB_TRIP<-NA
     if (!"OBS_ID" %in%  colnames(ED_df)) ED_df$OBS_ID<-NA
   }else{
   EDQry<-paste0("SELECT
@@ -160,10 +160,10 @@ getED<-function(mondocs=NULL, ...){
   if (nrow(ED_df)<1)return(NULL)
   ED_df<- reshape2::dcast(ED_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
   colnames(ED_df)[colnames(ED_df)=="21"] <- "OBS_PRESENT"
-  colnames(ED_df)[colnames(ED_df)=="741"] <- "OBS_TRIP"
+  colnames(ED_df)[colnames(ED_df)=="741"] <- "ISDB_TRIP"
   colnames(ED_df)[colnames(ED_df)=="835"] <- "OBS_ID"
   if (!"OBS_PRESENT" %in%  colnames(ED_df)) ED_df$OBS_PRESENT<-NA
-  if (!"OBS_TRIP" %in%  colnames(ED_df)) ED_df$OBS_TRIP<-NA
+  if (!"ISDB_TRIP" %in%  colnames(ED_df)) ED_df$ISDB_TRIP<-NA
   if (!"OBS_ID" %in%  colnames(ED_df)) ED_df$OBS_ID<-NA
   }
   ED_df <- unique(ED_df)
@@ -248,7 +248,7 @@ if (!is.null(ed) && nrow(ed)>0){
   }
 
 }else{
-  ps$OBS_TRIP <- ps$OBS_ID <- ps$OBS_PRESENT <- NA
+  ps$ISDB_TRIP <- ps$OBS_ID <- ps$OBS_PRESENT <- NA
 }
 
 hic<- do.call(getHIC, list(trips = ps$TRIP_ID, argsList=args))
@@ -273,7 +273,7 @@ eff$SET_PER_DAY <- F
 
 #trips below gets a bunch of fields dropped so that impacts of multiple species
 #don't result in duplicate records
-trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "OBS_TRIP", "OBS_ID", "OBS_PRESENT")])
+trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID", "OBS_PRESENT")])
 
 # ps <- merge(ps, spd, all.x = T)
 ps$RND_WEIGHT_KGS<-NULL

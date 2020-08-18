@@ -4,3 +4,5 @@ if (file.exists(prefs)) {
   cat(paste("About to load prefs from ",prefs,"\n"))
   source(prefs)
 }
+
+options("scipen"=0, "digits"=15)

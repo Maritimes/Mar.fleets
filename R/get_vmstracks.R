@@ -1,26 +1,18 @@
 #' @ title get_vmstracks
-#' @description This function takes the results from get_marfis() and get_obs()
+#' @description This function takes the results from get_marfis() and get_isdb()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param get_marfis default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
-#' @param get_obs default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-#' trip and set information from the observer database.
+#' @param get_isdb default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' trip and set information from the ISDB database.
 #' @param ... other arguments passed to methods
 #' @family simpleproducts
 #' @return returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_vmstracks<-function(get_marfis = NULL, get_obs = NULL, ...){
-  # args <- list(oracle.username = "_none_",
-  #              oracle.password = "_none_",
-  #              oracle.dsn = "_none_",
-  #              usepkg = "rodbc",
-  #              useLocal = FALSE,
-  #              quiet=TRUE,
-  #              debug=FALSE
-  # )
+get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   args<-set_defaults(argsList = args)
   argsSent<-  list(...)
   args[names(argsSent)] <- argsSent
@@ -42,9 +34,9 @@ get_vmstracks<-function(get_marfis = NULL, get_obs = NULL, ...){
   vr_dates2 <- cbind(marDat[,c("VR_NUMBER_LANDING", "EF_FISHED_DATETIME")],0)
   colnames(vr_dates1)<-colnames(vr_dates2)<-c("VR_NUMBER","mDate", "OBS")
 
-  if(!is.null(get_obs)){
-    if (nrow(get_obs$OBS_SETS_MATCHED)>0 & nrow(get_obs$OBS_TRIPS_MATCHED)>0){
-      obsDat<-merge(get_obs$OBS_SETS_MATCHED, get_obs$OBS_TRIPS_MATCHED, by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
+  if(!is.null(get_isdb)){
+    if (nrow(get_isdb$ISDB_SETS_MATCHED)>0 & nrow(get_isdb$ISDB_TRIPS_MATCHED)>0){
+      obsDat<-merge(get_isdb$ISDB_SETS_MATCHED, get_isdb$ISDB_TRIPS_MATCHED, by.x="TRIP_ID", by.y="TRIP_ID_ISDB", all.x=T)
       vr_dates3 <- cbind(obsDat[,c("VR_NUMBER","DATE_TIME")],1)
       colnames(vr_dates3)<-c("VR_NUMBER","mDate", "OBS")
     }

@@ -5,7 +5,7 @@
 \title{calc_coverage}
 \usage{
 calc_coverage(
-  get_obs = NULL,
+  get_isdb = NULL,
   get_marfis = NULL,
   agg.poly.shp = NULL,
   agg.poly.field = NULL,
@@ -13,9 +13,9 @@ calc_coverage(
 )
 }
 \arguments{
-\item{get_obs}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-trip and set information from OBSERVER related to the specified fleet}
+\item{get_isdb}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+trip and set information from ISDB related to the specified fleet}
 
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
@@ -42,39 +42,39 @@ returns a list with 2 items - \code{summary} and \code{details}.
 contains all of the values of \code{agg.poly.field}
 \item \code{MARFIS_TRIPS} {This is how many Commercial trips had their majority of
 their sets within this polygon}
-\item \code{OBS_TRIPS} {This is how many opbserved trips had their majority of
+\item \code{ISDB_TRIPS} {This is how many opbserved trips had their majority of
 their sets within this polygon}
 \item \code{MARFIS_SETS} {This is how many Commercial sets occurred in this polygon}
-\item \code{OBS_TRIPS} {This is how many Observed sets occurred in this polygon}
+\item \code{ISDB_TRIPS} {This is how many Observed sets occurred in this polygon}
 }
 
-\code{details} is a list containing 4 dataframes - MARFIS_TRIPS, OBS_TRIPS,
-MARFIS_SETS and OBS_SETS.  Each of these dataframes has 2 columns - the first
+\code{details} is a list containing 4 dataframes - MARFIS_TRIPS, ISDB_TRIPS,
+MARFIS_SETS and ISDB_SETS.  Each of these dataframes has 2 columns - the first
 identifying the TRIP or SET, and the second identifying which area was
 applied to that TRIP OR SET.
 }
 \description{
-This function takes the results from get_marfis() and get_obs()
+This function takes the results from get_marfis() and get_isdb()
 and produces a table showing the how the proportion of observed data varies
 across areas.  Different polygons can be provided, and the results will be
 tailored to those polygons.
 }
 \note{
 \itemize{
-\item \code{_SETS} A given "TRIP_ID" in MARFIS or OBSERVER
+\item \code{_SETS} A given "TRIP_ID" in MARFIS or ISDB
 typically has multiple sets, and each set has its own coordinates.  For this
 analysis, every set is analyzed to see which polygon it occurred in, and
 this information is provided via as the values for \code{MARFIS_SETS} and
-\code{OBS_SETS} in the results.
+\code{ISDB_SETS} in the results.
 
 Coordinates for MARFIS_* data comes from the db table "PRO_SPC_INFO", and
-coordinates for OBS_* data come from "ISSETPROFILE" - using the first non-null
+coordinates for ISDB_* data come from "ISSETPROFILE" - using the first non-null
 pair found while checking from P1-P4 in order.
 
 \item \code{_TRIPS} = Since a single trip can have sets across
 multiple polygons, this script determines which polygon had the most sets for
 a given trip, and defines that polygon as the value for a given trip.  These
-are provided as the values for \code{MARFIS_TRIPS} and \code{OBS_TRIPS}.
+are provided as the values for \code{MARFIS_TRIPS} and \code{ISDB_TRIPS}.
 
 \item Bad\code{Weird} Coordinates = If the latitude or longitude of the input data
 for any set has a NULL value, an entry of "Bad coordinate" will be added to

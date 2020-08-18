@@ -1,14 +1,14 @@
 #' @title calc_coverage
-#' @description This function takes the results from get_marfis() and get_obs()
+#' @description This function takes the results from get_marfis() and get_isdb()
 #' and produces a table showing the how the proportion of observed data varies
 #' across areas.  Different polygons can be provided, and the results will be
 #' tailored to those polygons.
 #' @param get_marfis default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet
-#' @param get_obs default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-#' trip and set information from OBSERVER related to the specified fleet
+#' @param get_isdb default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' trip and set information from ISDB related to the specified fleet
 #' @param agg.poly.shp default is \code{NULL}.  This is the shapefile that has
 #' polygons that should be checked for sufficient unique values of the
 #' sens.fields.  If NULL, NAFO zones will be used.  Otherwise, a path to any
@@ -27,33 +27,33 @@
 #' contains all of the values of \code{agg.poly.field}
 #' \item \code{MARFIS_TRIPS} {This is how many Commercial trips had their majority of
 #' their sets within this polygon}
-#' \item \code{OBS_TRIPS} {This is how many opbserved trips had their majority of
+#' \item \code{ISDB_TRIPS} {This is how many opbserved trips had their majority of
 #' their sets within this polygon}
 #' \item \code{MARFIS_SETS} {This is how many Commercial sets occurred in this polygon}
-#' \item \code{OBS_TRIPS} {This is how many Observed sets occurred in this polygon}
+#' \item \code{ISDB_TRIPS} {This is how many Observed sets occurred in this polygon}
 #' }
 #'
-#' \code{details} is a list containing 4 dataframes - MARFIS_TRIPS, OBS_TRIPS,
-#' MARFIS_SETS and OBS_SETS.  Each of these dataframes has 2 columns - the first
+#' \code{details} is a list containing 4 dataframes - MARFIS_TRIPS, ISDB_TRIPS,
+#' MARFIS_SETS and ISDB_SETS.  Each of these dataframes has 2 columns - the first
 #' identifying the TRIP or SET, and the second identifying which area was
 #' applied to that TRIP OR SET.
 #'
 #' @note
 #' \itemize{
-#' \item \code{_SETS} A given "TRIP_ID" in MARFIS or OBSERVER
+#' \item \code{_SETS} A given "TRIP_ID" in MARFIS or ISDB
 #' typically has multiple sets, and each set has its own coordinates.  For this
 #' analysis, every set is analyzed to see which polygon it occurred in, and
 #' this information is provided via as the values for \code{MARFIS_SETS} and
-#' \code{OBS_SETS} in the results.
+#' \code{ISDB_SETS} in the results.
 #'
 #' Coordinates for MARFIS_* data comes from the db table "PRO_SPC_INFO", and
-#' coordinates for OBS_* data come from "ISSETPROFILE" - using the first non-null
+#' coordinates for ISDB_* data come from "ISSETPROFILE" - using the first non-null
 #' pair found while checking from P1-P4 in order.
 #'
 #' \item \code{_TRIPS} = Since a single trip can have sets across
 #' multiple polygons, this script determines which polygon had the most sets for
 #' a given trip, and defines that polygon as the value for a given trip.  These
-#' are provided as the values for \code{MARFIS_TRIPS} and \code{OBS_TRIPS}.
+#' are provided as the values for \code{MARFIS_TRIPS} and \code{ISDB_TRIPS}.
 #'
 #' \item Bad\code{Weird} Coordinates = If the latitude or longitude of the input data
 #' for any set has a NULL value, an entry of "Bad coordinate" will be added to
@@ -64,14 +64,14 @@
 #' @family simpleproducts
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-calc_coverage<-function(get_obs = NULL,
+calc_coverage<-function(get_isdb = NULL,
                         get_marfis = NULL,
                           agg.poly.shp = NULL,
                           agg.poly.field = NULL,
                           quietly = FALSE){
 
-    oTrips <- get_obs$OBS_TRIPS_MATCHED
-    oSets <- get_obs$OBS_SETS_MATCHED
+    oTrips <- get_isdb$ISDB_TRIPS_MATCHED
+    oSets <- get_isdb$ISDB_SETS_MATCHED
 
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
@@ -120,7 +120,7 @@ calc_coverage<-function(get_obs = NULL,
 
   if (!is.null(oTrips) && !is.null(oSets)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
-                    oSets, all.y =TRUE, by.x = "TRIP_ID_OBS", by.y = "TRIP_ID")
+                    oSets, all.y =TRUE, by.x = "TRIP_ID_ISDB", by.y = "TRIP_ID")
     OBS_area_t = Mar.utils::identify_area(O_trips,
                                         agg.poly.shp = agg.poly.shp,
                                         agg.poly.field = agg.poly.field)
@@ -177,7 +177,7 @@ calc_coverage<-function(get_obs = NULL,
     m_t<-NA
   }
   if(is.data.frame(OBS_area_t)){
-    o_t = determineArea(df = OBS_area_t, setField = "TRIP_ID_OBS" , agg.poly.field = agg.poly.field, newID = "OBS_TRIPS")
+    o_t = determineArea(df = OBS_area_t, setField = "TRIP_ID_ISDB" , agg.poly.field = agg.poly.field, newID = "ISDB_TRIPS")
     allAreas = merge(allAreas,o_t$summary, by= agg.poly.field, all.x=T)
   }else{
     o_t<-NA
@@ -189,7 +189,7 @@ calc_coverage<-function(get_obs = NULL,
     m_s<-NA
   }
   if(is.data.frame(OBS_area_s)){
-     o_s = determineArea(df = OBS_area_s, setField = "FISHSET_ID" , agg.poly.field = agg.poly.field, newID = "OBS_SETS")
+     o_s = determineArea(df = OBS_area_s, setField = "FISHSET_ID" , agg.poly.field = agg.poly.field, newID = "ISDB_SETS")
      allAreas = merge(allAreas,o_s$summary, by= agg.poly.field, all.x=T)
   }else{
     o_s<-NA
@@ -202,8 +202,8 @@ calc_coverage<-function(get_obs = NULL,
   res[["summary"]]<-allAreas
   res[["details"]]<-list()
   res$details[["TRIPS_MARF"]] <- ifelse(!is.na(m_t),m_t, NA)
-  res$details[["TRIPS_OBS"]] <- ifelse(!is.na(o_t),o_t, NA)
+  res$details[["TRIPS_ISDB"]] <- ifelse(!is.na(o_t),o_t, NA)
   res$details[["SETS_MARF"]] <- ifelse(!is.na(m_s),m_s, NA)
-  res$details[["SETS_OBS"]] <- ifelse(!is.na(o_s),o_s, NA)
+  res$details[["SETS_ISDB"]] <- ifelse(!is.na(o_s),o_s, NA)
   return(res)
 }

@@ -42,7 +42,7 @@ enable_local <- function(data.dir = NULL,
                                                 "MON_DOCS","NAFO_UNIT_AREAS","PRO_SPC_INFO","VESSELS"),
                                      env = environment(), quiet = TRUE)
 
-  cat("Extracting Observer data...\n")
+  cat("Extracting ISDB data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = fn.oracle.username,
                                      fn.oracle.password = fn.oracle.password,
                                      fn.oracle.dsn = fn.oracle.dsn,

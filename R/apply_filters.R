@@ -15,7 +15,7 @@ apply_filters<-function(df = NULL, ...){
     allGears = allGears[!allGears %in% c("trap net")]
     matchTrap=c('trap','pot')
     matchMesh=c('trawl','seine','net','midwtr', 'drag')
-    matchLine=c('line','jig','anli')
+    matchLine=c('line','jig','angli')
     theseGears<-NA
     if (any(grepl(pattern = paste(matchTrap, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"trap")
     if (any(grepl(pattern = paste(matchMesh, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"mesh")
@@ -44,8 +44,8 @@ apply_filters<-function(df = NULL, ...){
     # Get all of the records for our df that might link to gear info ----------------------------------------
     if (args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = TRUE)
-      gearSpecDF <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= as.POSIXct(args$dateStart, origin = "1970-01-01")
-                                            & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= as.POSIXct(args$dateEnd, origin = "1970-01-01")),]
+      gearSpecDF <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= args$dateStart
+                                            & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= args$dateEnd),]
     }else{
       gearSpecDFQry <- paste0("SELECT DISTINCT
                           LOG_EFRT_STD_INFO.MON_DOC_ID,

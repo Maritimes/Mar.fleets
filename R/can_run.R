@@ -11,7 +11,7 @@ can_run <- function(...){
   data.dir <- NA
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   #for each vector below, [1] is the name of the schema
-  OBS = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
+  ISDB = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
   MARFIS = c("MARFISSCI.GEARS","MARFISSCI.HAIL_IN_CALLS","MARFISSCI.HAIL_OUTS","MARFISSCI.LICENCE_SUBTYPES",
              "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.LOG_EFRT_ENTRD_DETS",
              "MARFISSCI.LOG_EFRT_STD_INFO","MARFISSCI.MON_DOC_DEFNS","MARFISSCI.MON_DOC_ENTRD_DETS",
@@ -76,12 +76,12 @@ can_run <- function(...){
   }
 
   if (args$useLocal){
-    if (do.call(wantLocal,list(MARFIS,argsList=args))&do.call(wantLocal,list(OBS,argsList=args))){
+    if (do.call(wantLocal,list(MARFIS,argsList=args))&do.call(wantLocal,list(ISDB,argsList=args))){
       return(TRUE)
     }else{
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
-      cat(paste0(OBS,".RData"),sep= "\n")
+      cat(paste0(ISDB,".RData"),sep= "\n")
       stop()
       #return(FALSE)
     }
@@ -96,7 +96,7 @@ can_run <- function(...){
       if (!args$quiet)  cat("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
     }
-    if (all(do.call(tblAccess,list(MARFIS, argsList=args)) && do.call(tblAccess,list(OBS, argsList=args)))){
+    if (all(do.call(tblAccess,list(MARFIS, argsList=args)) && do.call(tblAccess,list(ISDB, argsList=args)))){
       return(cxnCheck)
     }else{
       cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")

@@ -7,7 +7,7 @@
 \format{
 rda
 \describe{
-\item{SPECCD_ID}{observer species code}
+\item{SPECCD_ID}{ISDB species code}
 \item{SCIENTIFIC}{Scientifi name}
 \item{COMMON}{Common name}
 \item{MARFIS_CODE}{marfis species code}

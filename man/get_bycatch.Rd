@@ -15,11 +15,11 @@ get_bycatch(isTrips = NULL, marfSpID = NULL, ...)
 }
 \value{
 returns a dataframe of the bycatch information for the requested species (using the requested)
-marfis species code and supplie results from get_obs
+marfis species code and supplie results from get_isdb
 }
 \description{
 This function takes a vector of ISDB trip IDs and a marfis species code
-and generates a dataframe of all of the bycatche species from the observer db
+and generates a dataframe of all of the bycatche species from the ISDB db
 }
 \note{
 This function can accept many parameters.

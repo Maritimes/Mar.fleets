@@ -17,7 +17,7 @@ get_fleet<-function(...){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
                                          tables = c("PRO_SPC_INFO","MON_DOCS","GEARS","NAFO_UNIT_AREAS", "VESSELS","MON_DOC_DEFNS"), quiet = TRUE, env = environment())
 
-      PRO_SPC_INFO = PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= as.POSIXct(args$dateStart, origin = "1970-01-01") & PRO_SPC_INFO[,args$useDate] <= as.POSIXct(args$dateEnd)),]
+      PRO_SPC_INFO = PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= args$dateStart & PRO_SPC_INFO[,args$useDate] <= args$dateEnd),]
 
       if (all(args$mdCode != 'all')) {
         # args$mdCode = as.numeric(args$mdCode)

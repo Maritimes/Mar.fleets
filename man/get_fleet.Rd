@@ -19,8 +19,8 @@ associated with a particular fleet for a particular date range.
 }
 \seealso{
 Other coreFuncs: 
-\code{\link{get_marfis}()},
-\code{\link{get_obs}()}
+\code{\link{get_isdb}()},
+\code{\link{get_marfis}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

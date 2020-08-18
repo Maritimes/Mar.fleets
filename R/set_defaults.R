@@ -18,7 +18,7 @@ set_defaults <- function(...){
                useDate = "LANDED_DATE",
                marfSpp = NULL,
                dateStart = as.Date(paste0(as.numeric(format(Sys.Date(), "%Y")) - 1,"-01-01")),
-               dateEnd = as.Date(paste0(as.numeric(format(Sys.Date(), "%Y")) - 1,"-12-31")),
+               dateEnd = NULL,
                filtTrack = filtTrack,
                keepSurveyTrips = FALSE,
                data.dir = file.path(getwd(), "data"),
@@ -33,23 +33,22 @@ set_defaults <- function(...){
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   argsSent <- list(...)$argsList
 
-  #seems that T or F when added to a list, do not become a TRUE or FALSE.  Force it in case that's
-  #what people send.
-  lnames<-names(argsSent)
-  argsSent <- lapply(1:length(argsSent), function(x) {
-    res <- argsSent[[x]]
-    if (length(res)==1 && res =="T") {
-      this1<-TRUE
-    } else if (length(res)==1 && res =="F"){
-      this1<-FALSE
-    } else{
-      this1=res
-    }
-  })
-  names(argsSent)<-lnames
+  # #seems that T or F when added to a list, do not become a TRUE or FALSE.  Force it in case that's
+  # #what people send.
+  # lnames<-names(argsSent)
+  # argsSent <- lapply(1:length(argsSent), function(x) {
+  #   res <- argsSent[[x]]
+  #   if (length(res)==1 && res =="T") {
+  #     this1<-TRUE
+  #   } else if (length(res)==1 && res =="F"){
+  #     this1<-FALSE
+  #   } else{
+  #     this1=res
+  #   }
+  # })
+  # names(argsSent)<-lnames
 
   args[names(argsSent)] <- argsSent
-
 
   # validate sent dates, and convert year -------------------------------------------------------
   if(!is.null(args$year)){
@@ -65,7 +64,7 @@ set_defaults <- function(...){
     if( class( dateStart ) == "try-error" || is.na( dateStart ) ){
       stop("\n","The value for dateStart was not a valid year (YYYY) or date (YYYY-MM-DD)")
     }else{
-      args$dateStart <- dateStart
+      args$dateStart <- as.POSIXct(dateStart, origin = "1970-01-01")
     }
   }
   if(!is.null(args$dateEnd)){
@@ -77,10 +76,10 @@ set_defaults <- function(...){
     if( class( dateEnd ) == "try-error" || is.na( dateEnd ) ){
       stop("\n","The value for dateEnd was not a valid year (YYYY) or date (YYYY-MM-DD)")
     }else{
-      args$dateEnd <- dateEnd
+      args$dateEnd <- as.POSIXct(dateEnd, origin = "1970-01-01")
     }
   }else{
-    args$dateEnd <- format(as.Date(dateStart) + 365, "%Y-%m-%d")
+    args$dateEnd <- as.POSIXct(format(as.Date(dateStart) + 365, "%Y-%m-%d"), origin = "1970-01-01")
   }
   return(args)
 }

@@ -3,14 +3,13 @@
 #' and \code{get_bycatch(...)} individually.
 #' @param ... other arguments passed to methods
 
-#' @return returns a list including the fleet, and the resultant information from MARFIS, OBS, and the bycatch
+#' @return returns a list including the fleet, and the resultant information from MARFIS, ISDB, and the bycatch
 #' @note This function can accept many parameters.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_all <- function(...){
   args <- as.list(match.call(expand.dots=TRUE))[-1]
   args<-set_defaults(argsList = args)
-
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   cxnCheck <- do.call(can_run, args)
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
@@ -20,8 +19,8 @@ get_all <- function(...){
   }
   fleet <- do.call(get_fleet, list(argsList=args))
   if (!is.null(fleet))                  marf <- do.call(get_marfis, list(thisFleet=fleet,argsList=args))
-  if (!is.null(fleet) & !is.null(marf)) obs <- do.call(get_obs, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, argsList=args))
-  if (!is.null(obs))                    bycatch <- do.call(get_bycatch, list(isTrips = obs$OBS_TRIPS_MATCHED$TRIP_ID_OBS, marfSpID = args$marfSpp, argsList=args))
+  if (!is.null(fleet) & !is.null(marf)) isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, argsList=args))
+  if (!is.null(isdb))                    bycatch <- do.call(get_bycatch, list(isTrips = isdb$ISDB_TRIPS_MATCHED$TRIP_ID_ISDB, marfSpID = args$marfSpp, argsList=args))
   # Capture the results in a list and return them ------------------------------------------------
   if (!is.null(marf)) {
     cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
@@ -31,7 +30,7 @@ get_all <- function(...){
   res=list()
   res[["fleet"]]<- fleet
   res[["marf"]]<- marf
-  res[["obs"]]<- obs
+  res[["isdb"]]<- isdb
   res[["bycatch"]]<- bycatch
   return(res)
 }

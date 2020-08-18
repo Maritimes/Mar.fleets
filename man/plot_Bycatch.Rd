@@ -5,7 +5,7 @@
 \title{plot_bycatch}
 \usage{
 plot_bycatch(
-  obsSpp = NULL,
+  isdbSp = NULL,
   df = NULL,
   showXSpp = NULL,
   title = NULL,
@@ -13,7 +13,7 @@ plot_bycatch(
 )
 }
 \arguments{
-\item{obsSpp}{This is the observer db species code ID for the main species.}
+\item{isdbSp}{This is the ISDB species code ID for the main species sought.}
 
 \item{df}{default is \code{NULL}. This is the \code{bycatch} object from the \code{get_bycatch_()}
 function.  Alternatively, a data.frame with the following codes would work as well - "SPEC" (the code),
@@ -38,7 +38,7 @@ functions.
 }
 \examples{
 \dontrun{
-plot_bycatch(obsSpp = swordfish2018$bycatch[1,1],
+plot_bycatch(isdbSp = swordfish2018$bycatch[1,1],
              df = swordfish2018$bycatch, showXSpp = 20,
              title ="Swordfish",
              subtitle =2018)

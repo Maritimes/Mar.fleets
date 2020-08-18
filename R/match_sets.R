@@ -1,157 +1,159 @@
 #' @title match_sets
-#' @description This function takes the results from get_marfis(), get_obs()
+#' @description This function takes the results from get_marfis(), get_isdb()
 #' and match_trips(), and attempts to match the sets for each trip.
-#' @param get_obs default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-#' trip and set information from the observer database.
-#' @param match_trips default is \code{NULL}. This is the list output by the
+#' @param isdb_sets default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' trip and set information from the ISDB database.
+#' @param matched_trips default is \code{NULL}. This is the updated df output by the
 #' \code{Mar.bycatch::match_trips()} function - it information related to how trips from
 #' the two databases are matched.
-#' @param marfMatch default is \code{NULL}. This is the MARF_MATCH output of the
-#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
-#' trip and set information from MARFIS
-#' @param marfSets default is \code{NULL}. This is the MARF_SETS output of the
+#' @param marf_sets default is \code{NULL}. This is the MARF_SETS output of the
 #' \code{Mar.bycatch::get_marfis()} function - it contains information about the MARFIS sets.
 #' @param maxSetDiff_hr default is \code{24}.  This is how many hours are allowed between
-#' reported Observer and MARFIS sets before.  Sets differing by more than this time span
+#' reported ISDB and MARFIS sets before.  Sets differing by more than this time span
 #' will never be matched.
 #' @param ... other arguments passed to methods
 #' @import data.table
 #' @family fleets
-#' @return a list containing a single dataframe - "MAP_OBS_MARFIS_SETS"
+#' @return a list containing a single dataframe - "MAP_ISDB_MARFIS_SETS"
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
-match_sets <- function(get_obs = NULL,
-                       match_trips = NULL,
-                       marfMatch = NULL,
-                       marfSets = NULL,
-                       maxSetDiff_hr =24,
+#' @note as this was developed for the Maritimes region, internal position QC requires that
+#' Latitudes outside of 35:52 and Longitudes outside of -75:-45 are flagged and not used to match
+#' @noRd
+match_sets <- function(isdb_sets = NULL,
+                       matched_trips = NULL,
+                       marf_sets = NULL,
+                       maxSetDiff_hr =48,
                        ...){
   args <- list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  if (all(is.na(get_obs)))return(NA)
-  if(all(is.na(match_trips$MAP_OBS_MARFIS_TRIPS)))return(NA)
-  if(class(get_obs)=="list"){
-    osets <- get_obs$OBS_SETS_ALL
-  }else if(class(get_obs)=="data.frame"){
-    osets <- get_obs
-  }
-
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
-  msets = marfSets
+  isdb_sets_o <- isdb_sets
+  marf_sets_o <- marf_sets
 
-  # osets = get_obs$OBS_SETS_ALL
-  if(is.null(marfMatch) || is.null(match_trips$MAP_OBS_MARFIS_TRIPS)){
-    if (!args$quiet)cat(paste0("\n","Either marfis of Observer did not have any trips, or none of the trips could be matched"))
-    return(NULL)
-  }else{
-    match = match_trips$MAP_OBS_MARFIS_TRIPS
+  matchdf = matched_trips[!is.na(matched_trips$TRIP_ID_ISDB) & !is.na(matched_trips$TRIP_ID_MARF),c("TRIP_ID_ISDB","TRIP_ID_MARF","TRIP")]
+
+  #only retain the sets from trips that we've matched
+  #add marf trip id to isdb and isdb trip id to marf
+  isdb_sets <- unique(isdb_sets[isdb_sets$TRIP_ID %in% matchdf$TRIP_ID_ISDB,])
+  colnames(isdb_sets)[colnames(isdb_sets)=="TRIP_ID"] <- "TRIP_ID_ISDB"
+  colnames(isdb_sets)[colnames(isdb_sets)=="LATITUDE"] <- "LATITUDE_I"
+  colnames(isdb_sets)[colnames(isdb_sets)=="LONGITUDE"] <- "LONGITUDE_I"
+
+  marf_sets <- unique(marf_sets[marf_sets$TRIP_ID %in% matchdf$TRIP_ID_MARF,c("LOG_EFRT_STD_INFO_ID", "TRIP_ID_MARF","EF_FISHED_DATETIME", "LATITUDE", "LONGITUDE" )])
+
+  #make lats and longs identifiable as marfis and add pseudo-set numbers to marfis data
+  colnames(marf_sets)[colnames(marf_sets)=="LATITUDE"] <- "LATITUDE_M"
+  colnames(marf_sets)[colnames(marf_sets)=="LONGITUDE"] <- "LONGITUDE_M"
+
+  qcer <- function(df=NULL, tripField = NULL,lat.field = "LATITUDE", lon.field = "LONGITUDE", timeField = NULL ){
+    #this takes a df, and for each unique trip, it returns the number of unique values from the time field,
+    #lat.field and lon.field (i.e. CNT_TIME, CNT_LAT and CNT_LON)
+    #this is done to help assess whether or not times and/or positions are appropriate for differentiating
+    #sets.  If they're all the same, no point trying to use them
+    df$BADTIM<- FALSE
+    df$BADPOS<- FALSE
+    #qc positions
+    df[(is.na(df[,lat.field]) | df[,lat.field] >  52 | df[,lat.field] < 35 |
+          is.na(df[,lon.field]) | df[,lon.field] < -75 | df[,lon.field] > -45),"BADPOS"]<-"TRUE"
+    #qc times would go here, and populate BADTIM if they're bad
+    nsets <- df[,c(tripField, timeField, lat.field, lon.field,"BADPOS", "BADTIM")]
+    #cnt the nsets/trip with good time
+    nsets_tim <- stats::aggregate(data=nsets[nsets$BADTIM ==F,],
+                           nsets[,timeField]~nsets[,tripField],
+                           FUN = function(x) length(unique(x))
+    )
+    colnames(nsets_tim) <- c(tripField, "CNT_TIM")
+    #cnt the nsets/trip with good lats
+    nsets_lat <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
+                           nsets[,lat.field]~nsets[,tripField],
+                           FUN = function(x) length(unique(x))
+    )
+    colnames(nsets_lat) <- c(tripField, "CNT_LAT")
+    #cnt the nsets/trip with good lonss
+    nsets_lon <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
+                           nsets[,lon.field]~nsets[,tripField],
+                           FUN = function(x) length(unique(x))
+    )
+    colnames(nsets_lon) <- c(tripField, "CNT_LON")
+    dets=merge(nsets_tim, nsets_lat, all=T)
+    dets=merge(dets, nsets_lon, all=T)
+    dets$MAXMATCH <- pmax(dets$CNT_TIM, dets$CNT_LAT, dets$CNT_LON, na.rm = T)
+
+    dets$CNT_TIM <- dets$CNT_LAT <- dets$CNT_LON <- NULL
+    df<- merge(df, dets)
+    return(df)
   }
-  #subset each to only those that are matchable (ie have a matched trip)
-  msets_m = msets[msets$TRIP_ID %in% match$TRIP_ID_MARF,]
-  osets_m = osets[osets$TRIP_ID %in% match$TRIP_ID_OBS,]
-  #add the obs trip to the set recs
-  osets_m = merge(osets_m, match[,c("TRIP_ID_MARF","TRIP_ID_OBS","OBS_TRIP")],
-                  by.x="TRIP_ID", by.y="TRIP_ID_OBS", all.x=T)
-  msets_m =merge(msets_m, match[,c("TRIP_ID_MARF","TRIP_ID_OBS","OBS_TRIP")],
-                 by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all.x=T)
-  spdf = unique(msets[,c("TRIP_ID_MARF","SET_PER_DAY")])
+  isdb_sets =qcer(df=isdb_sets, tripField = "TRIP_ID_ISDB", timeField = "DATE_TIME", lat.field = "LATITUDE_I", lon.field = "LONGITUDE_I")
+  colnames(isdb_sets)[colnames(isdb_sets)=="MAXMATCH"] <- "MAXMATCH_I"
+  colnames(isdb_sets)[colnames(isdb_sets)=="BADTIM"] <- "BADTIM_I"
+  colnames(isdb_sets)[colnames(isdb_sets)=="BADPOS"] <- "BADPOS_I"
 
-  msets_m = merge(msets_m, spdf,all.x=T)
+  marf_sets =qcer(df=marf_sets, tripField = "TRIP_ID_MARF", timeField = "EF_FISHED_DATETIME", lat.field = "LATITUDE_M", lon.field = "LONGITUDE_M")
+  colnames(marf_sets)[colnames(marf_sets)=="MAXMATCH"] <- "MAXMATCH_M"
+  colnames(marf_sets)[colnames(marf_sets)=="BADTIM"] <- "BADTIM_M"
+  colnames(marf_sets)[colnames(marf_sets)=="BADPOS"] <- "BADPOS_M"
+  #megadf is merged by trip - not set - so there are many false positives at this stage
+  megadf <- merge(isdb_sets, matchdf, by.x="TRIP_ID_ISDB", by.y="TRIP_ID_ISDB", all = T)
+  megadf <- merge(megadf, marf_sets, by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all = T)
+  megadf$MAXMATCH <- pmin(megadf$MAXMATCH_I, megadf$MAXMATCH_M) #not sure if we'll get NAs here?
+  megadf$MAXMATCH_I <- megadf$MAXMATCH_M <- NULL
 
-  utrips = sort(unique(osets_m$TRIP_ID))
-  matches_all<-NA
+  # calc time between isdb and marfis and flag those that exceed tolerance (maxSetDiff_hr)
+  megadf$DUR_DIFF <- NA
+  megadf[,"DUR_DIFF"]<- as.numeric(abs(difftime(megadf$DATE_TIME,megadf$EF_FISHED_DATETIME, units="hours")))
+  megadf$BADTIM <- FALSE
+  megadf <- megadf[megadf$DUR_DIFF <= maxSetDiff_hr,]
+  megadf[megadf$BADTIM_I==T | megadf$BADTIM_M==T |is.na(megadf$DUR_DIFF),"BADTIM"]<-TRUE
+  megadf$BADTIM_I <- megadf$BADTIM_M <- NULL
+  # calc dist between isdb and marfis
+  megadf$BADPOS <- FALSE
+  megadf[(megadf$BADPOS_I ==T | megadf$BADPOS_M ==T | is.na(megadf$LATITUDE_I)| is.na(megadf$LONGITUDE_I)| is.na(megadf$LATITUDE_M)| is.na(megadf$LONGITUDE_M)), "BADPOS"]<-TRUE
+  megadf$BADPOS_I <- megadf$BADPOS_M <- NULL
+  megadf[,"DIST_DIFF"]<- round(geosphere::distGeo(p1 = megadf[,c("LONGITUDE_I","LATITUDE_I")],
+                                                  p2 = megadf[,c("LONGITUDE_M","LATITUDE_M")]),0)
+
+
+  megadf$MATCH<- NA
+  matches_all<- data.frame(TRIP_ID_ISDB=numeric(),
+                           FISHSET_ID=numeric(),
+                           TRIP_ID_MARF=numeric(),
+                           LOG_EFRT_STD_INFO_ID = numeric(),
+                           SET_MATCH = character())
+  utrips = sort(unique(megadf$TRIP_ID_ISDB))
   for (i in 1:length(utrips)){
-    this_Otrip = osets_m[osets_m$TRIP_ID == utrips[i],]
-    this_Mtrip <- msets_m[msets_m$TRIP_ID_OBS == utrips[i],]
-    this_Otrip_Name <- this_Otrip[1,c("TRIP_ID","OBS_TRIP")]
-    this_Otrip_Name[is.na(this_Otrip_Name$OBS_TRIP),"OBS_TRIP"]<-"unknown trip name"
+    thisTrip_MATCHED_ALL <- thisTrip_MATCHED <-  matches_all[FALSE,]
+    thisTrip<- megadf[megadf$TRIP_ID_ISDB == utrips[i],]
+    while (nrow(thisTrip_MATCHED) < thisTrip[1,"MAXMATCH"] ){
+      trippos <- thisTrip[thisTrip$BADPOS ==F,]
+      triptim <- thisTrip[thisTrip$BADTIM ==F,]
+      bestPos <- trippos[which.min(trippos$DIST_DIFF),]
+      bestPos <- bestPos[bestPos$BADPOS ==F,]
+      bestTim <- triptim[which.min(triptim$DUR_DIFF),]
+      bestTim <- bestTim[bestTim$BADTIM ==F,]
+      if (nrow(bestPos)==1  & nrow(bestTim)==1){
+        thisTrip_MATCHED <- thisTrip[rownames(bestPos),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
+        thisTrip_MATCHED$SET_MATCH <- "POS AND TIME"
+      }else if(nrow(bestPos)==0 & nrow(bestTim)==1){
+        thisTrip_MATCHED <- thisTrip[rownames(bestTim),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
+        thisTrip_MATCHED$SET_MATCH <- "TIME"
+      }else if(nrow(bestPos)==1 & nrow(bestTim)==0){
+        thisTrip_MATCHED <- thisTrip[rownames(bestPos),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
+        thisTrip_MATCHED$SET_MATCH <- "POS"
+      }else{
+        #multiple best?  A tie?
+        browser()
+      }
 
-    this_Otrip <- data.table::setDT(this_Otrip)
-    this_Mtrip <- data.table::setDT(this_Mtrip)
-    this_Otrip$timeO <- this_Otrip$DATE_TIME
-    this_Mtrip$timeM <- this_Mtrip$EF_FISHED_DATETIME
-    # this_Otrip <- this_Otrip[, timeO:=DATE_TIME]
-    # this_Mtrip <- this_Mtrip[, timeM:=EF_FISHED_DATETIME]
 
-    data.table::setkey(this_Otrip,DATE_TIME)
-    data.table::setkey(this_Mtrip,EF_FISHED_DATETIME)
-    #matches all mtrips to nearest otrip - some otrips matched mult]
-
-    mtrips_match <- this_Otrip[ this_Mtrip, roll = "nearest" , allow.cartesian=TRUE ]
-    mtrips_match <- mtrips_match[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","timeM", "timeO")]
-
-    #matches all otrips to nearest mtrip - some mtrips matched mult
-    otrips_match <- this_Mtrip[this_Otrip , roll = "nearest", allow.cartesian=TRUE ]
-    otrips_match <- otrips_match[,c("LOG_EFRT_STD_INFO_ID","FISHSET_ID","timeM", "timeO")]
-
-    mtrips_match$diff<- as.numeric(abs(difftime(mtrips_match$timeM,mtrips_match$timeO)), units="hours")
-    mtrips_match$timeM<-mtrips_match$timeO<-NULL
-
-    otrips_match$diff<- as.numeric(abs(difftime(otrips_match$timeM,otrips_match$timeO)), units="hours")
-    otrips_match$timeM<-otrips_match$timeO<-NULL
-
-    #retain trips within acceptable time frame -others are "unmatchable"
-    this_Mtrip_OK <- unique(mtrips_match[mtrips_match$diff<=maxSetDiff_hr,])
-    this_Otrip_OK <- unique(otrips_match[otrips_match$diff<=maxSetDiff_hr,])
-    this_Mtrip_nope <- unique(mtrips_match[mtrips_match$diff>maxSetDiff_hr,])
-
-    if (nrow(this_Mtrip_nope)>0)this_Mtrip_nope$FISHSET_ID <- NA
-    this_Otrip_nope <- unique(otrips_match[otrips_match$diff>maxSetDiff_hr,])
-    if (nrow(this_Otrip_nope)>0)this_Otrip_nope$LOG_EFRT_STD_INFO_ID <- NA
-
-    # For all msets in timeframe, calculate difference and retain closest in time
-    #for for matches for all marfis sets, then for all obs sets
-   #print(this_Otrip_OK[this_Otrip_OK[, .I[diff == min(diff)], by=LOG_EFRT_STD_INFO_ID]$V1])
-
-    this_Mtrip_chk1 <- this_Mtrip_OK[this_Mtrip_OK[, .I[diff == suppressWarnings(min(diff))], by=FISHSET_ID]$V1]
-    this_Mtrip_chk1 <- this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
-    this_Otrip_chk1 <- this_Otrip_OK[this_Otrip_OK[, .I[diff == suppressWarnings(min(diff))], by=LOG_EFRT_STD_INFO_ID]$V1]
-    this_Otrip_chk1 <- this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")]
-    #if the same sets were matched up in both directions, they are almost certainly the same set
-    matches_high <- merge(this_Mtrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
-                          this_Otrip_chk1[,c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff")],
-                          by =c("FISHSET_ID", "LOG_EFRT_STD_INFO_ID","diff"))
-    matches_high$CONF<-"High"
-    #if sets are matched in one direction with only one suggested match,
-    # there's a good chance they're the same set
-
-    this_Mtrip_OK2 <- this_Mtrip_chk1[!(this_Mtrip_chk1$FISHSET_ID %in% matches_high$FISHSET_ID),]
-    this_Otrip_OK2 <- this_Otrip_chk1[!(this_Otrip_chk1$LOG_EFRT_STD_INFO_ID %in% matches_high$LOG_EFRT_STD_INFO_ID),]
-    matches_tmp <- rbind(this_Mtrip_OK2, this_Otrip_OK2)
-    if (nrow(matches_tmp)>0){
-      matches_med <- matches_tmp[which(with(matches_tmp,ave(seq(nrow(matches_tmp)),FISHSET_ID,FUN = length)*
-                                              ave(seq(nrow(matches_tmp)),LOG_EFRT_STD_INFO_ID,FUN = length)) == 1),]
-      matches_med$CONF<-"Medium"
-    }else{
-      matches_med <- matches_high[FALSE,]
+      thisTrip <- thisTrip[!(thisTrip$FISHSET_ID %in% thisTrip_MATCHED$FISHSET_ID | thisTrip$LOG_EFRT_STD_INFO_ID %in% thisTrip_MATCHED$LOG_EFRT_STD_INFO_ID),]
+      thisTrip_MATCHED_ALL <- rbind(thisTrip_MATCHED_ALL, thisTrip_MATCHED)
+      if(nrow(thisTrip)==0)break
     }
-    this_Mtrip_OK3 <- this_Mtrip_OK2[!(this_Mtrip_OK2$FISHSET_ID %in% matches_med$FISHSET_ID),]
-    this_Otrip_OK3 <- this_Otrip_OK2[!(this_Otrip_OK2$LOG_EFRT_STD_INFO_ID %in% matches_med$LOG_EFRT_STD_INFO_ID),]
-    if (nrow(rbind(this_Mtrip_OK3, this_Otrip_OK3))>0){
-      matches_mult <- rbind(this_Mtrip_OK3, this_Otrip_OK3)
-      matches_mult$CONF <-"Multi-match"
-    }else{
-      matches_mult <- matches_high[FALSE,]
-    }
-    if(nrow(rbind(this_Mtrip_nope, this_Otrip_nope))>0){
-      matches_nope <-rbind(this_Mtrip_nope, this_Otrip_nope)
-      matches_nope$CONF<- "Unmatchable"
-    }else{
-      matches_nope <- matches_high[FALSE,]
-    }
-    theseMatches <- rbind(matches_high, matches_med, matches_nope,matches_mult)
-    if(!is.data.frame(matches_all)){
-      matches_all <- theseMatches
-    }else{
-      matches_all <- rbind(matches_all, theseMatches)
-    }
+    matches_all<- rbind(matches_all, thisTrip_MATCHED_ALL)
   }
-
-
-  matches_all$diff <-NULL
   res= list()
-  res[["MAP_OBS_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
+  res[["MAP_ISDB_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
   return(res)
 }

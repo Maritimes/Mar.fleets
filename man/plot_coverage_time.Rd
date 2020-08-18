@@ -6,7 +6,7 @@
 \usage{
 plot_coverage_time(
   get_marfis = NULL,
-  get_obs = NULL,
+  get_isdb = NULL,
   dateStart = NULL,
   dateEnd = NULL,
   useDate = "LANDED_DATE"
@@ -17,26 +17,26 @@ plot_coverage_time(
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS}
 
-\item{get_obs}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-trip and set information from the observer database.}
+\item{get_isdb}{default is \code{NULL}. This is the list output by the
+\code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+trip and set information from the ISDB database.}
 
 \item{dateStart}{default is \code{NULL}. This is the start of the date range for which marfis and
-observer was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the earliest date from the
+ISDB was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the earliest date from the
 supplied data.}
 
 \item{dateEnd}{default is \code{NULL}. This is the end of the date range for which marfis and
-observer was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the most recent date from the
+ISDB was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the most recent date from the
 supplied data.}
 
 \item{useDate}{default is \code{"LANDED_DATE"}.  Some MARFIS tables have 2 different dates
 that are used for recording when fishing activity took place.  One is "DATE_FISHED",
 and the other is "LANDED_DATE".Whichever is chosen will be the field used to aggregate the MARFIS
 trips.  This can be important for particular fleets, and it would be best if this value matched
-whatever was used for the initial extraction of the \code{get_obs} and \code{get_marfis} objects.}
+whatever was used for the initial extraction of the \code{get_isdb} and \code{get_marfis} objects.}
 }
 \description{
-This function takes the results from get_marfis() and get_obs()
+This function takes the results from get_marfis() and get_isdb()
 and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{

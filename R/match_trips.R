@@ -1,264 +1,168 @@
 #' @title match_trips
-#' @description This function takes the results from get_marfis() and get_obs()
+#' @description This function takes the results from get_marfis() and get_isdb()
 #' and attempts to match trips based on:
 #' \itemize{
-#' \item 1 = MARFIS confirmation numbers
-#' \item 2 = Observer TRIP names (e.g. J18-0000)*
+#' \item 1 = MARFIS confirmation numbers (Hail in and Hail out)
+#' \item 2 = ISDB TRIP names (e.g. J18-0000)*
 #' \item 3 = Correct combination of VRN and LICENCE and appropriate date range
 #' }
 #' * - only the alphanumeric characters of the trip names are used (e.g.
 #' "J18-0000B" becomes "J180000B").
-#' @param obsTrips default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-#' trip and set information from the observer database.
+#' @param isdbTrips default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' trip and set information from the ISDB database.
 #' @param marfMatch default is \code{NULL}. This is the MARF_MATCH output of the
 #' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
 #' @param ... other arguments passed to methods
 #' @family fleets
-#' @return returns a list with 3 dataframes - MAP_OBS_MARFIS_TRIPS, MATCH_ISSUES, UNMATCHABLE & MATCH_SUMMARY
+#' @return returns a list with 3 dataframes - MAP_ISDB_MARFIS_TRIPS, MATCH_ISSUES, UNMATCHABLE & MATCH_SUMMARY
 #' \itemize{
-#' \item "MAP_OBS_MARFIS_TRIPS" - contains the TRIP_IDs from MARFIS and OBSERVER, and
+#' \item "MAP_ISDB_MARFIS_TRIPS" - contains the TRIP_IDs from MARFIS and ISDB, and
 #' an additional feld that indicates all of the ways the match was attained.
 #' \item "MATCH_ISSUES" - contains any trips that were matched, but had at least one invalid/
 #' unmatchable entry due to something like a bad trip name.
-#' \item "UNMATCHABLE" - contains any records from both Marfis and Observer that could not be
+#' \item "UNMATCHABLE" - contains any records from both Marfis and ISDB that could not be
 #' matched to the other database using any method.
 #' }
-#' @export
+#' @noRd
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-match_trips <- function(obsTrips = NULL,
+match_trips <- function(isdbTrips = NULL,
                         marfMatch = NULL,
                         ...){
   args <- list(...)$argsList
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-    obs <- obsTrips
-    if(is.null(marfMatch) || is.null(obs) ){
-      if (!args$quiet)cat(paste0("\n","Either marfis of Observer did not have any trips to try match against"))
-      return(NULL)
-    }
-
-  clean_OBS_Trip <- function(df=NULL, field = "OBS_TRIP", out_name="OBS_TRIP_CLN"){
+  clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
     return(df)
   }
 
-  marf_TRIPS_all <- clean_OBS_Trip(df = marfMatch, field = "OBS_TRIP", out_name = "OBS_TRIP_M")
-  obs_TRIPS_all <- clean_OBS_Trip(df = obs, field = "TRIP", out_name = "OBS_TRIP_O")
-  if (is.null(unique(obs$TRIP)))obs_TRIPS_all<-NA
-  marf_CONF_all <- sort(unique(stats::na.omit(c(marf_TRIPS_all$CONF_NUMBER_HI, marf_TRIPS_all$CONF_NUMBER_HO))))
-  marf_LIC_VR_all <- sort(unique(stats::na.omit(c(paste0(marf_TRIPS_all$LICENCE_ID,"_", marf_TRIPS_all$VR_NUMBER_FISHING),
-                                                  paste0(marf_TRIPS_all$LICENCE_ID,"_", marf_TRIPS_all$VR_NUMBER_LANDING)))))
-  if (is.data.frame(obs_TRIPS_all))obs_TRIPS_all$LIC_VR = paste0(obs_TRIPS_all$MARFIS_LICENSE_NO,"_",obs_TRIPS_all$VR_NUMBER)
+  if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
+    if (!args$quiet)cat(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
+    return(NULL)
+  }
 
-  # example Matching Routine ---------------------------------------------------------------------
-  # 1) Set var to NA to hold results
-  # 2) Subset original data to ensure match field != NA to tmp df
-  # 3) Check if merge will have records
-  # 4) Do match, save (unique) results to var (from 1) - retain only key fields
-  # 5) Add "MATCHED_ON" field
-  # 6) remove tmp_df from 2)
+  marfMatch <- clean_ISDB_Trip(df = marfMatch, field = "ISDB_TRIP", out_name = "ISDB_TRIP_M")
+  isdbTrips <- clean_ISDB_Trip(df = isdbTrips, field = "TRIP", out_name = "ISDB_TRIP_O")
 
-  Marf_in_Obs <-NA
-  Marf_in_Obs_trip <- NA
+  #create df to hold matched trip info
+  matches<-data.frame(TRIP_ID_ISDB=numeric(),
+                      TRIP_ID_MARF = numeric(),
+                      ON = character())
+
+  marf_CONF_all <- sort(unique(stats::na.omit(c(marfMatch$CONF_NUMBER_HI, marfMatch$CONF_NUMBER_HO))))
+  marf_VR_LIC_all <- sort(unique(stats::na.omit(c(paste0( marfMatch$VR_NUMBER_FISHING,"_",marfMatch$LICENCE_ID),paste0(marfMatch$VR_NUMBER_LANDING,"_",marfMatch$LICENCE_ID)))))
+  isdbTrips$VR_LIC = paste0(isdbTrips$VR_NUMBER,"_",isdbTrips$MARFIS_LICENSE_NO)
+
+  Marf_in_ISDB <-NA
+  Marf_in_ISDB_trip <- NA
+
+  #lay out all possible matching ways, set all to FALSE
+  isdbTrips$match_TRIP <-  isdbTrips$match_CONF_HI <-  isdbTrips$match_CONF_HO <-  isdbTrips$match_LICVRDATE <- FALSE
+  isdbTrips$match_DETS <- NA
+
+  # FOR EACH MATCH -----------------------------------------------------
+  # 1 - identify fields which are in both marf and isdb
+  # 2 - tick the appropriate column in isdb trips (indicating if matched)
+  # 3 - add matches to df called matches
+
   # MARFIS TRIP NAME ----------------------------------------------------------------------------
+  match_TRIP <- unique(merge(isdbTrips[,c("TRIP_ID_ISDB", "ISDB_TRIP_O")], marfMatch[,c("TRIP_ID_MARF","ISDB_TRIP_M")], by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% match_TRIP$TRIP_ID_ISDB,"match_TRIP"] <- TRUE
+  matches =  unique(rbind(matches, match_TRIP[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
+  # newMatch$ON <- "TRIP"
+  # matches <- unique(rbind(matches,newMatch))
+  # newMatch <- NULL
 
-  if (is.data.frame(obs_TRIPS_all)){
-    obs_TRIPS_all_tmp<- obs_TRIPS_all[!is.na(obs_TRIPS_all$OBS_TRIP_O),]
-    marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$OBS_TRIP_M),]
-    if (nrow(marf_TRIPS_all_tmp[marf_TRIPS_all_tmp$OBS_TRIP_M %in% obs_TRIPS_all_tmp$OBS_TRIP_O, ])>0){
-
-      Marf_in_Obs_trip <- unique(merge(marf_TRIPS_all_tmp[,c("TRIP_ID_MARF", "OBS_TRIP_M")],
-                                       obs_TRIPS_all_tmp[,c("TRIP_ID_OBS", "OBS_TRIP_O")],
-                                       by.x = "OBS_TRIP_M", by.y = "OBS_TRIP_O"))
-
-      unmatched_Obs_trip <- unique(obs_TRIPS_all_tmp[!(obs_TRIPS_all_tmp$OBS_TRIP_O %in% Marf_in_Obs_trip$OBS_TRIP_M),c("TRIP_ID_OBS", "TRIP")])
-      unmatched_Marf_trip <- unique(marf_TRIPS_all_tmp[!(marf_TRIPS_all_tmp$OBS_TRIP_M %in% Marf_in_Obs_trip$OBS_TRIP_M),c("TRIP_ID_MARF", "OBS_TRIP")])
-      if (nrow(unmatched_Obs_trip)>0){
-        unmatched_Obs_trip$SRC <- "OBS"
-        unmatched_Obs_trip$TRIP_ID_MARF <- NA
-        unmatched_Obs_trip$MARF_TRIP <- NA
-        colnames(unmatched_Obs_trip)[colnames(unmatched_Obs_trip)=="TRIP"] <- "OBS_TRIP"
-      }else{
-        unmatched_Obs_trip<-NA
-      }
-      if (nrow(unmatched_Marf_trip)>0){
-        unmatched_Marf_trip$SRC <- "MARFIS"
-        unmatched_Marf_trip$TRIP_ID_OBS <- NA
-        colnames(unmatched_Marf_trip)[colnames(unmatched_Marf_trip)=="OBS_TRIP"] <- "MARF_TRIP"
-        unmatched_Marf_trip$OBS_TRIP <- NA
-      }else{
-        unmatched_Marf_trip<-NA
-      }
-      unmatched_all <- rbind(unmatched_Marf_trip, unmatched_Obs_trip)
-      unmatched_all$MATCH_COMMENT <- "Trip present, but not matchable"
-      Marf_in_Obs_trip$MATCHED_ON <- "OBS_TRIP"
-      Marf_in_Obs_trip$OBS_TRIP_M <- NULL
-    }else{
-      unmatched_all <- NA
-    }
-    marf_TRIPS_all_tmp <-NULL
-    obs_TRIPS_all_tmp <- NULL
-    if (is.data.frame(Marf_in_Obs_trip)&& nrow(Marf_in_Obs_trip)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_trip)
-  }
   # MARFIS HAILIN CONFIRMATION NUMBER -----------------------------------------------------------
-  Marf_in_Obs_CONFHI <- NA
-  marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$CONF_NUMBER_HI),]
-  obs_TRIPS_all_tmp <- obs_TRIPS_all[!is.na(obs_TRIPS_all$MARFIS_CONF_NUMBER),]
-  if (nrow(marf_TRIPS_all_tmp[marf_TRIPS_all_tmp$CONF_NUMBER_HI %in% obs_TRIPS_all_tmp$MARFIS_CONF_NUMBER, ])>0){
-    Marf_in_Obs_CONFHI <-unique(merge(marf_TRIPS_all_tmp[,c("TRIP_ID_MARF", "CONF_NUMBER_HI")],
-                                      obs_TRIPS_all_tmp[,c("TRIP_ID_OBS", "MARFIS_CONF_NUMBER")],
-                                      by.x="CONF_NUMBER_HI", by.y="MARFIS_CONF_NUMBER"))
-    Marf_in_Obs_CONFHI$MATCHED_ON <- "CONF_HI"
-    Marf_in_Obs_CONFHI$CONF_NUMBER_HI <- NULL
-  }
-  marf_TRIPS_all_tmp <- NULL
-  obs_TRIPS_all_tmp <- NULL
-  if (is.data.frame(Marf_in_Obs_CONFHI) && nrow(Marf_in_Obs_CONFHI)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_CONFHI)
-  # MARFIS HAILOUT CONFIRMATION NUMBER ---------------------------------------------------------
-  Marf_in_Obs_CONFHO <-NA
-  marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$CONF_NUMBER_HO),]
-  obs_TRIPS_all_tmp <- obs_TRIPS_all[!is.na(obs_TRIPS_all$MARFIS_CONF_NUMBER),]
-  if (nrow(marf_TRIPS_all_tmp[marf_TRIPS_all_tmp$CONF_NUMBER_HO %in% obs_TRIPS_all_tmp$MARFIS_CONF_NUMBER, ])>0){
-    Marf_in_Obs_CONFHO <- unique(merge(marf_TRIPS_all_tmp[,c("TRIP_ID_MARF", "CONF_NUMBER_HO")],
-                                       obs_TRIPS_all_tmp[,c("TRIP_ID_OBS", "MARFIS_CONF_NUMBER")],
-                                       by.x= "CONF_NUMBER_HO", by.y="MARFIS_CONF_NUMBER"))
-    Marf_in_Obs_CONFHO$MATCHED_ON <- "CONF_HO"
-    Marf_in_Obs_CONFHO$CONF_NUMBER_HO <- NULL
-  }
-  marf_TRIPS_all_tmp<-NULL
-  obs_TRIPS_all_tmp <- NULL
-  if (is.data.frame(Marf_in_Obs_CONFHO) && nrow(Marf_in_Obs_CONFHO)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_CONFHO)
+  match_CONF_HI <- unique(merge(isdbTrips[,c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")], marfMatch[!is.na(marfMatch$CONF_NUMBER_HI),c("TRIP_ID_MARF","CONF_NUMBER_HI")], by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HI"))
+  isdbTrips[isdbTrips$MARFIS_CONF_NUMBER %in% match_CONF_HI$MARFIS_CONF_NUMBER,"match_CONF_HI"] <- TRUE
+  matches =  unique(rbind(matches, match_CONF_HI[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
+  # match_HI = unique(match_CONF_HI[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")])
+  # newMatch$ON <- "CONF_HI"
+  # matches <- unique(rbind(matches,newMatch))
+  # newMatch <- NULL
+
+  # MARFIS HAILOUT CONFIRMATION NUMBER -----------------------------------------------------------
+  match_CONF_HO <- unique(merge(isdbTrips[,c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")], marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")], by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
+  isdbTrips[isdbTrips$MARFIS_CONF_NUMBER %in% match_CONF_HO$MARFIS_CONF_NUMBER,"match_CONF_HO"] <- TRUE
+  matches =  unique(rbind(matches, match_CONF_HO[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
+  # match_HO <- unique(match_CONF_HI[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")])
+  # newMatch$ON <- "CONF_HO"
+  # matches <- unique(rbind(matches,newMatch))
+  # newMatch <- NULL
+
   # VRN, LICENCE and DATE RANGE --------------------------------------------------------
-  Marf_in_Obs_VRLICDATE_F <-NA
-  marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$VR_NUMBER_FISHING) & !is.na(marf_TRIPS_all$LICENCE_ID) & !is.na(marf_TRIPS_all[args$useDate]),]
-  marf_TRIPS_all_tmp$LIC_VR_F <- paste0(marf_TRIPS_all_tmp$LICENCE_ID,"_", marf_TRIPS_all_tmp$VR_NUMBER_FISHING)
-  obs_TRIPS_all_tmp <- obs_TRIPS_all[!is.na(obs_TRIPS_all$LIC_VR) &
-                                       !is.na(obs_TRIPS_all$BOARD_DATE) &
-                                       !is.na(obs_TRIPS_all$LANDING_DATE),]
-  if (nrow(marf_TRIPS_all_tmp[which(marf_TRIPS_all_tmp$LIC_VR_F %in% obs_TRIPS_all_tmp$LIC_VR), ])>0){
-    Marf_in_Obs_VRLICDATE_F <- merge(marf_TRIPS_all_tmp[, c("TRIP_ID_MARF","LIC_VR_F", args$useDate)],
-                                     obs_TRIPS_all_tmp[,c("TRIP_ID_OBS", "LIC_VR", "BOARD_DATE", "LANDING_DATE")],
-                                     by.x="LIC_VR_F", by.y = "LIC_VR")
-    Marf_in_Obs_VRLICDATE_F <- unique(Marf_in_Obs_VRLICDATE_F[which(Marf_in_Obs_VRLICDATE_F[,args$useDate] >= Marf_in_Obs_VRLICDATE_F$BOARD_DATE &
-                                                                      Marf_in_Obs_VRLICDATE_F[,args$useDate]<=Marf_in_Obs_VRLICDATE_F$LANDING_DATE),
-                                                              c("TRIP_ID_MARF", "TRIP_ID_OBS")])
-    if (nrow(Marf_in_Obs_VRLICDATE_F)>0)Marf_in_Obs_VRLICDATE_F$MATCHED_ON <- "VR_LIC_DATE"
+  # these are more complicated because: I'm matching on multiple fields (vrn/lic/date),
+  #                                     There are multiple vrn fields,
+  #                                     The date field is checked against a range (not just ==)
 
-  }
-  marf_TRIPS_all_tmp <- NULL
-  if (is.data.frame(Marf_in_Obs_VRLICDATE_F) && nrow(Marf_in_Obs_VRLICDATE_F)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_VRLICDATE_F)
+  isdbTrips_dets <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_LICENSE_NO) & !is.na(isdbTrips$VR_NUMBER)  & !is.na(isdbTrips$BOARD_DATE) & !is.na(isdbTrips$LANDING_DATE),
+                                     c("TRIP_ID_ISDB","MARFIS_LICENSE_NO","VR_NUMBER","BOARD_DATE","LANDING_DATE")])
+  isdbTrips_dets$VR_LIC <- paste0(isdbTrips_dets$VR_NUMBER,"_",isdbTrips_dets$MARFIS_LICENSE_NO)
+  isdbTrips_dets$VR_NUMBER <- isdbTrips_dets$MARFIS_LICENSE_NO <- NULL
+  marf_TRIPS_F <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID","VR_NUMBER_FISHING", args$useDate )])
+  marf_TRIPS_F$VR_LIC <- paste0(marf_TRIPS_F$VR_NUMBER_FISHING,"_",marf_TRIPS_F$LICENCE_ID)
+  marf_TRIPS_F$LICENCE_ID <- marf_TRIPS_F$VR_NUMBER_FISHING <- NULL
+  marf_TRIPS_L <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID","VR_NUMBER_LANDING", args$useDate )])
+  marf_TRIPS_L$VR_LIC <- paste0(marf_TRIPS_L$VR_NUMBER_LANDING,"_",marf_TRIPS_L$LICENCE_ID)
+  marf_TRIPS_L$LICENCE_ID <- marf_TRIPS_L$VR_NUMBER_LANDING <- NULL
+  marf_TRIPS_dets <- unique(rbind(marf_TRIPS_F,marf_TRIPS_L))
+  marf_TRIPS_F <- marf_TRIPS_L <- NULL
+  isdb_marf_dets <-  merge(isdbTrips_dets, marf_TRIPS_dets, by.x = "VR_LIC", by.y = "VR_LIC")
 
-  # VRN (landing), LICENCE and DATE RANGE --------------------------------------------------------
-  #reusing obs..._tmp
-  # Marf_in_Obs_VRLICDATE_L <-NA
-  # marf_TRIPS_all_tmp <- marf_TRIPS_all[!is.na(marf_TRIPS_all$VR_NUMBER_LANDING) & !is.na(marf_TRIPS_all$LICENCE_ID) & !is.na(marf_TRIPS_all$DATE_FISHED),]
-  # marf_TRIPS_all_tmp$LIC_VR_F <- paste0(marf_TRIPS_all_tmp$LICENCE_ID,"_", marf_TRIPS_all_tmp$VR_NUMBER_LANDING)
-  # if (nrow(marf_TRIPS_all_tmp[which(marf_TRIPS_all_tmp$LIC_VR_F %in% obs_TRIPS_all_tmp$LIC_VR), ])>0){
-  #   Marf_in_Obs_VRLICDATE_L <- merge(marf_TRIPS_all_tmp[, c("TRIP_ID_MARF","LIC_VR_F", theDate)],
-  #                                    obs_TRIPS_all_tmp[,c("TRIP_ID_OBS", "LIC_VR", "BOARD_DATE", "LANDING_DATE")],
-  #                                    by.x="LIC_VR_F", by.y = "LIC_VR")
-  #
-  #   Marf_in_Obs_VRLICDATE_L <- unique(Marf_in_Obs_VRLICDATE_L[which(Marf_in_Obs_VRLICDATE_L[,theDate] >= Marf_in_Obs_VRLICDATE_L$BOARD_DATE &
-  #                                                                     Marf_in_Obs_VRLICDATE_L[,theDate]<=Marf_in_Obs_VRLICDATE_L$LANDING_DATE),
-  #                                                             c("TRIP_ID_MARF", "TRIP_ID_OBS")])
-  #   if (nrow(Marf_in_Obs_VRLICDATE_L)>0)Marf_in_Obs_VRLICDATE_L$MATCHED_ON <- "VR_LIC_DATE"
-  # }
-  #
-  #   marf_TRIPS_all_tmp <- NULL
-  #   obs_TRIPS_all_tmp <- NULL
-  #   if (is.data.frame(Marf_in_Obs_VRLICDATE_L) && nrow(Marf_in_Obs_VRLICDATE_L)>0) Marf_in_Obs <- rbind(Marf_in_Obs, Marf_in_Obs_VRLICDATE_L)
+  within <- isdb_marf_dets[isdb_marf_dets$LANDED_DATE >= isdb_marf_dets$BOARD_DATE & isdb_marf_dets$LANDED_DATE <= isdb_marf_dets$LANDING_DATE,]
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_DETS"] <- "good date"
+  isdb_marf_dets <- isdb_marf_dets[!(isdb_marf_dets$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB),]
+  matches =  unique(rbind(matches, within[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
 
-  Marf_in_Obs <- unique(Marf_in_Obs)
-  if(all(is.na(Marf_in_Obs))){
-    if(!args$quiet) cat(paste0("\n","Match Success Summary:","\n"))
-    Obs_Trip_Name = 0
-    Hail_In_Confirmation_Code = 0
-    Hail_Out_Confirmation_Code = 0
-    License_Vessel_Date_Combo = 0
-    Total_Matches = 0
-    Total_Marf_Trips = length(unique(marf_TRIPS_all$TRIP_ID_MARF))
-    summ_df = as.data.frame(rbind(Obs_Trip_Name,
-                                  Hail_In_Confirmation_Code,
-                                  Hail_Out_Confirmation_Code,
-                                  License_Vessel_Date_Combo,
-                                  Total_Matches,
-                                  Total_Marf_Trips))
-    names(summ_df)<-"Num of Trips Matched"
-    if(!args$quiet) print(summ_df)
+  close<- isdb_marf_dets
+  close[,"BD"]<- abs(difftime(close$BOARD_DATE,close$LANDED_DATE, units="days"))
+  close[,"LD"]<- abs(difftime(close$LANDING_DATE,close$LANDED_DATE, units="days"))
+  close$CLOSEST<- with(close, pmin(BD, LD))
+  close <- close[close$CLOSEST <2,]
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_DETS"] <- "close dates"
+  matches =  unique(rbind(matches, close[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
 
-    res <- list()
-    res[["MAP_OBS_MARFIS_TRIPS"]] <- NA
-    res[["MATCH_ISSUES"]] <- NA
-    res[["UNMATCHABLE"]] <- NA
-    res[["MATCH_SUMMARY"]] <- NA
-    return(res)
-  }
-  # Assemble all records from Marfis that exist in Obs ------------------------------------------
-  Marf_in_Obs = unique(stats::aggregate(by=Marf_in_Obs[c("TRIP_ID_MARF","TRIP_ID_OBS")],
-                                        x = Marf_in_Obs[c("MATCHED_ON")], paste, collapse = ", "))
-  Marf_O_lookup <- unique(marf_TRIPS_all[!is.na(marf_TRIPS_all$OBS_TRIP),c("TRIP_ID_MARF","OBS_TRIP")])
 
-  # Check if any of the unmatchable trips were found by non-trip methods ------------------------
-  if (is.data.frame(unmatched_all)){
-    un<-data.frame(TRIP_ID_OBS=numeric(),
-                   MARF_TRIP = numeric(),
-                   SRC = character(),
-                   OBS_TRIP = character(),
-                   MATCH_COMMENT = character(),
-                   TRIP_ID_MARF = numeric(),
-                   MATCHED_ON = character()
-    )
-    if (nrow(Marf_in_Obs[Marf_in_Obs$TRIP_ID_MARF %in% unmatched_all$TRIP_ID_MARF, ])>0){
-      un1 <- merge(unmatched_all, Marf_in_Obs[Marf_in_Obs$TRIP_ID_MARF %in% unmatched_all$TRIP_ID_MARF, ],
-                   by="TRIP_ID_MARF")
-      colnames(un1)[colnames(un1)=="TRIP_ID_OBS.y"] <- "TRIP_ID_OBS"
-      un1$TRIP_ID_OBS.x<-NULL
-    }else{
-      un1<-un
-    }
-    if (nrow(Marf_in_Obs[Marf_in_Obs$TRIP_ID_OBS %in% unmatched_all$TRIP_ID_OBS, ])>0){
-      un2 <- merge(unmatched_all, Marf_in_Obs[Marf_in_Obs$TRIP_ID_OBS %in% unmatched_all$TRIP_ID_OBS, ],
-                   by="TRIP_ID_OBS")
-      colnames(un2)[colnames(un2)=="TRIP_ID_MARF.y"] <- "TRIP_ID_MARF"
+  isdbTrips <- merge(isdbTrips, matches, all.x=T )
 
-      un2$TRIP_ID_MARF.x<-NULL
-    }else{
-      un2<- un
-    }
-    foundTrips<- rbind(un1,un2)
-    foundTrips <- foundTrips[,c("SRC", "TRIP_ID_MARF", "MARF_TRIP", "TRIP_ID_OBS", "OBS_TRIP", "MATCHED_ON", "MATCH_COMMENT")]
 
-    mysteryTrips <- unmatched_all[!(unmatched_all$TRIP_ID_MARF %in% Marf_in_Obs_trip$TRIP_ID_MARF) &
-                                    !(unmatched_all$TRIP_ID_OBS %in% Marf_in_Obs_trip$TRIP_ID_OBS) &
-                                    !(unmatched_all$TRIP_ID_MARF %in% foundTrips$TRIP_ID_MARF) &
-                                    !(unmatched_all$TRIP_ID_OBS %in% foundTrips$TRIP_ID_OBS),]
-    mysteryTrips <- mysteryTrips[,c("SRC", "TRIP_ID_MARF", "MARF_TRIP", "TRIP_ID_OBS", "OBS_TRIP", "MATCH_COMMENT")]
-  }else{
-    foundTrips <- NA
-    mysteryTrips<-NA
-  }
-  Marf_in_Obs <- merge(Marf_in_Obs,Marf_O_lookup, all.x=T)
-  if(!args$quiet) cat(paste0("\n","Match Success Summary:","\n"))
-  Obs_Trip_Name = nrow(Marf_in_Obs[grep("OBS_TRIP", Marf_in_Obs$MATCHED_ON),])
-  Hail_In_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HI", Marf_in_Obs$MATCHED_ON),])
-  Hail_Out_Confirmation_Code = nrow(Marf_in_Obs[grep("CONF_HO", Marf_in_Obs$MATCHED_ON),])
-  License_Vessel_Date_Combo = nrow(Marf_in_Obs[grep("VR_LIC_DATE", Marf_in_Obs$MATCHED_ON),])
-  Total_Matches = nrow(Marf_in_Obs)
-  Total_Marf_Trips = length(unique(marf_TRIPS_all$TRIP_ID_MARF))
+  Obs_Trip_Name = nrow(isdbTrips[isdbTrips$match_TRIP==TRUE,])
+  Hail_In_Confirmation_Code = nrow(isdbTrips[isdbTrips$match_CONF_HI==TRUE,])
+  Hail_Out_Confirmation_Code = nrow(isdbTrips[isdbTrips$match_CONF_HO==TRUE,])
+  License_Vessel_Date_Combo = nrow(isdbTrips[isdbTrips$match_LICVRDATE==TRUE,])
+  Total_Matches = nrow(isdbTrips[(isdbTrips$match_LICVRDATE==TRUE | isdbTrips$match_CONF_HO==TRUE | isdbTrips$match_CONF_HI==TRUE | isdbTrips$match_TRIP==TRUE),])
+
   summ_df = as.data.frame(rbind(Obs_Trip_Name,
                                 Hail_In_Confirmation_Code,
                                 Hail_Out_Confirmation_Code,
                                 License_Vessel_Date_Combo,
-                                Total_Matches,
-                                Total_Marf_Trips))
-  names(summ_df)<-"Num of Trips Matched"
-  if(!args$quiet) print(summ_df)
-  if(!args$quiet) cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
+                                Total_Matches))
+  names(summ_df)<-"MATCHES_N"
+  summ_df$TRIPS_N <- nrow(isdbTrips)
+
+  # find trips that have elements for matching that didn't have successful matches - maybe typos?
+  unmatchedTrips <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("ISDB_TRIP","ISDB_TRIP_M")])
+  unmatchedTrips <- sort(unique(unmatchedTrips[!(unmatchedTrips$ISDB_TRIP_M %in% isdbTrips$ISDB_TRIP_O),"ISDB_TRIP"]))
+
+
+  isdbTrips$ISDB_TRIP_O <- isdbTrips$VR_LIC <- NULL
+  if(!args$quiet) {
+    cat(paste0("\n","Match Success Summary*:","\n"))
+    print(summ_df)
+    cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
+    if (length(unmatchedTrips)>0){
+      cat(paste0("The following ISDB-style Trip Names were found in the MARFIS records that did NOT match an ISDB record for this fleet:","\n"))
+      cat(unmatchedTrips)
+    }
+  }
+
   res <- list()
-  res[["MAP_OBS_MARFIS_TRIPS"]] <- Marf_in_Obs
-  res[["MATCH_ISSUES"]] <- foundTrips
-  res[["UNMATCHABLE"]] <- mysteryTrips
+  res[["ISDB_MARFIS_POST_MATCHED"]] <- isdbTrips
   res[["MATCH_SUMMARY"]] <- summ_df
+  res[["UNMATCHABLE"]] <- unmatchedTrips
   return(res)
 }

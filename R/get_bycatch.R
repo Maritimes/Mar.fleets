@@ -1,12 +1,12 @@
 #' @title get_bycatch
 #' @description This function takes a vector of ISDB trip IDs and a marfis species code
-#' and generates a dataframe of all of the bycatche species from the observer db
+#' and generates a dataframe of all of the bycatche species from the ISDB db
 #' @param isTrips default is \code{NULL} This is a vector of trip_ids from ISDB
 #' @param marfSpID default is \code{NULL}.  This is the Marfis species ID for the targeted species
 #' @param ... other arguments passed to methods
 #' @family simpleproducts
 #' @return returns a dataframe of the bycatch information for the requested species (using the requested)
-#' marfis species code and supplie results from get_obs
+#' marfis species code and supplie results from get_isdb
 #' @note This function can accept many parameters.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
@@ -21,7 +21,7 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   spLookups <- get("spLookups", envir  = environment())
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 
-  if (all(is.na(isTrips)))return(NULL) #get_obs$OBS_TRIPS_MATCHED
+  if (all(is.na(isTrips)))return(NULL) #get_isdb$ISDB_TRIPS_MATCHED
 
   ISCATCHES <- ISTRIPS <- NA
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==marfSpID),c("SPECCD_ID")]

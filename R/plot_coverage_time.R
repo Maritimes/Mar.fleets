@@ -1,35 +1,34 @@
 #' @ title plot_coverage_time
-#' @description This function takes the results from get_marfis() and get_obs()
+#' @description This function takes the results from get_marfis() and get_isdb()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param get_marfis default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
-#' @param get_obs default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_obs()} function - it contains dataframes of both the
-#' trip and set information from the observer database.
+#' @param get_isdb default is \code{NULL}. This is the list output by the
+#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' trip and set information from the ISDB database.
 #' @param dateStart default is \code{NULL}. This is the start of the date range for which marfis and
-#' observer was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the earliest date from the
+#' ISDB was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the earliest date from the
 #' supplied data.
 #' @param dateEnd default is \code{NULL}. This is the end of the date range for which marfis and
-#' observer was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the most recent date from the
+#' ISDB was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the most recent date from the
 #' supplied data.
 #' @param useDate default is \code{"LANDED_DATE"}.  Some MARFIS tables have 2 different dates
 #' that are used for recording when fishing activity took place.  One is "DATE_FISHED",
 #' and the other is "LANDED_DATE".Whichever is chosen will be the field used to aggregate the MARFIS
 #' trips.  This can be important for particular fleets, and it would be best if this value matched
-#' whatever was used for the initial extraction of the \code{get_obs} and \code{get_marfis} objects.
+#' whatever was used for the initial extraction of the \code{get_isdb} and \code{get_marfis} objects.
 #' @family simpleproducts
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
-plot_coverage_time<- function(get_marfis = NULL, get_obs=NULL,  dateStart=NULL, dateEnd = NULL, useDate = "LANDED_DATE"){
+plot_coverage_time<- function(get_marfis = NULL, get_isdb=NULL,  dateStart=NULL, dateEnd = NULL, useDate = "LANDED_DATE"){
 
   MARF_T <- MARF_S <- OBS_T <- OBS_S <- DATE <- NA
   if (is.null(dateStart)|is.null(dateEnd)){
 
     dateRange <-range(c(as.Date(range(get_marfis$MARF_TRIPS[,useDate])),
                         as.Date(range(get_marfis$MARF_SETS[,"EF_FISHED_DATETIME"])),
-                        as.Date(range(get_obs$OBS_TRIPS_MATCHED[,"BOARD_DATE"])),
-                        as.Date(range(get_obs$OBS_SETS_MATCHED[,"DATE_TIME"]))))
+                        as.Date(range(get_isdb$ALL_ISDB_TRIPS[,"BOARD_DATE"])),
+                        as.Date(range(get_isdb$ALL_ISDB_SETS[,"DATE_TIME"]))),na.rm = T)
     if (is.null(dateStart)) dateStart <- min(dateRange)
     if (is.null(dateEnd)) dateEnd <- max(dateRange)
     cat("\n","Date ranges defaulting to match the extents of provided data")
@@ -41,7 +40,7 @@ plot_coverage_time<- function(get_marfis = NULL, get_obs=NULL,  dateStart=NULL, 
     dfColName <- switch(theN,
                         "PRO_SPC_INFO_ID" = "MARF_T",
                         "LOG_EFRT_STD_INFO_ID" = "MARF_T",
-                        "TRIP_ID_OBS" = "OBS_T",
+                        "TRIP_ID_ISDB" = "OBS_T",
                         "FISHSET_ID" = "OBS_S")
 
     this = stats::aggregate(
@@ -60,8 +59,8 @@ plot_coverage_time<- function(get_marfis = NULL, get_obs=NULL,  dateStart=NULL, 
 
   MT = dateAgger(df=get_marfis$MARF_TRIPS, theN="PRO_SPC_INFO_ID", theDate = useDate, dateStart = dateStart, dateEnd = dateEnd)
   MS = dateAgger(df=get_marfis$MARF_SETS, theN="LOG_EFRT_STD_INFO_ID", theDate = "EF_FISHED_DATETIME", dateStart = dateStart, dateEnd = dateEnd)
-  OT = dateAgger(df=get_obs$OBS_TRIPS_MATCHED, theN="TRIP_ID_OBS", theDate = "BOARD_DATE", dateStart = dateStart, dateEnd = dateEnd)
-  OS = dateAgger(df=get_obs$OBS_SETS_MATCHED, theN="FISHSET_ID", theDate = "DATE_TIME", dateStart = dateStart, dateEnd = dateEnd)
+  OT = dateAgger(df=get_isdb$ALL_ISDB_TRIPS, theN="TRIP_ID_ISDB", theDate = "BOARD_DATE", dateStart = dateStart, dateEnd = dateEnd)
+  OS = dateAgger(df=get_isdb$ALL_ISDB_SETS, theN="FISHSET_ID", theDate = "DATE_TIME", dateStart = dateStart, dateEnd = dateEnd)
 
   all= merge(MT, MS)
   all= merge(all, OT)

@@ -28,7 +28,7 @@ particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 \seealso{
 Other coreFuncs: 
 \code{\link{get_fleet}()},
-\code{\link{get_obs}()}
+\code{\link{get_isdb}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
