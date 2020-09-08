@@ -11,14 +11,25 @@
 #' @param matchMarfis default is \code{FALSE}.  This indicates whether or not an attempt should be made
 #' to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
 #' \code{get_marfis} must be provided.
+#' @param keepSurveyTrips default is \code{FALSE}.  This indicates whether you
+#' want to retain trips that were part of a survey.  These are not typical
+#' commercial trips and their distribution will not reflect normal
+#' commercial fishing patterns.
+#' @param dateStart default is \code{NULL}. This is the start date (YYYY-MM-DD)
+#' of the window of time you want to look at.
+#' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
+#' of the window of time you want to look at.  If this is left blank, 1 year of
+#' data will be returned.
 #' @family coreFuncs
 #' @return returns a list with 2 dataframes - "ISDB_TRIPS", and "ISDB_SETS".
 #' "ISDB_TRIPS" contains information for the ISDB trips, while "ISDB_SETS" contains information
 #' about the ISDB sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  ...){
-  args <- list(...)$argsList
+get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = FALSE, dateStart = NULL, dateEnd = NULL, ...){
+  #args <- list(...)$argsList
+  args <- as.list(match.call(expand.dots=TRUE))[-1]
+  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if (is.null(thisFleet)){
     cat(paste0("\n","No fleet value was supplied, so all records for the specified time period will be retrieved"))
@@ -26,7 +37,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   } else{
     VR_LIC_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$VR_NUMBER,"_",thisFleet$LICENCE_ID))))
   }
-
+  if (is.null(get_marfis) & matchMarfis){
+    cat(paste0("\n","marfMatch is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
+    stop()
+  }
   get_isdb_trips<-function(VR_LIC = NULL,...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
@@ -211,12 +225,16 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPS_all, marfMatch = get_marfis$MARF_MATCH, argsList = args))
     isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED
     msum <- trips$MATCH_SUMMARY
-    sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, argsList = args))
+    if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
+      sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, argsList = args))
+    }else{
+      sets <- NA
+    }
     if (!all(is.na(sets))) {
       isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
       isdb_SETS_all$TRIP_ID_ISDB<- NULL
     }else{
-      sdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
+      isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
     }
   }
 

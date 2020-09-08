@@ -85,6 +85,7 @@ match_sets <- function(isdb_sets = NULL,
     df<- merge(df, dets)
     return(df)
   }
+
   isdb_sets =qcer(df=isdb_sets, tripField = "TRIP_ID_ISDB", timeField = "DATE_TIME", lat.field = "LATITUDE_I", lon.field = "LONGITUDE_I")
   colnames(isdb_sets)[colnames(isdb_sets)=="MAXMATCH"] <- "MAXMATCH_I"
   colnames(isdb_sets)[colnames(isdb_sets)=="BADTIM"] <- "BADTIM_I"
