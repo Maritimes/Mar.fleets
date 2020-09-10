@@ -26,21 +26,31 @@
 #' about the ISDB sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = FALSE, dateStart = NULL, dateEnd = NULL, ...){
-  #args <- list(...)$argsList
-  args <- as.list(match.call(expand.dots=TRUE))[-1]
-  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = NULL,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
+  if (is.null(get_marfis) & matchMarfis){
+    cat(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
+    stop()
+  }
   if (is.null(thisFleet)){
-    cat(paste0("\n","No fleet value was supplied, so all records for the specified time period will be retrieved"))
+    #cat(paste0("\n","No fleet value was supplied, so all records for the specified time period will be retrieved"))
     VR_LIC_fleet <- NULL
   } else{
     VR_LIC_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$VR_NUMBER,"_",thisFleet$LICENCE_ID))))
   }
-  if (is.null(get_marfis) & matchMarfis){
-    cat(paste0("\n","marfMatch is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
-    stop()
-  }
+
+  args <-list(...)$argsList
+  dateArgs = Mar.utils::vali_dates(dateStart = args$dateStart, dateEnd = args$dateEnd, year = args$year)
+  args$dateStart <- dateArgs$dateStart
+  args$dateEnd <- dateArgs$dateEnd
+
+
+  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
+   # if params are sent, we should overwrite the defaults
+  if (!is.null(keepSurveyTrips)) args$keepSurveyTrips <- keepSurveyTrips
+  if (!is.null(matchMarfis)) args$matchMarfis <- matchMarfis
+
+
+  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   get_isdb_trips<-function(VR_LIC = NULL,...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
@@ -221,10 +231,12 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   trips <- NA
   sets <- NA
   msum <- NA
+  unmatchables <- NA
   if (matchMarfis) {
     trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPS_all, marfMatch = get_marfis$MARF_MATCH, argsList = args))
     isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED
-    msum <- trips$MATCH_SUMMARY
+    msum <- trips$MATCH_SUMMARY_TRIPS
+    unmatchables <- trips$UNMATCHABLE
     if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
       sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, argsList = args))
     }else{
@@ -241,6 +253,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   res= list()
   res[["ALL_ISDB_TRIPS"]]<- isdb_TRIPS_all
   res[["ALL_ISDB_SETS"]] <- isdb_SETS_all
-  res[["MATCH_SUMMARY"]] <- msum
+  res[["MATCH_SUMMARY_TRIPS"]] <- msum
+  res[["ISDB_UNMATCHABLES"]] <- unmatchables
   return(res)
 }

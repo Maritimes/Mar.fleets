@@ -32,7 +32,6 @@ sp_swordfish <- function(...){
 
   argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
   args[names(argsSent)] <- argsSent
-
   data <- do.call(get_all, args)
   return(data)
 }

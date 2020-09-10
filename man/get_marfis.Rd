@@ -4,18 +4,36 @@
 \alias{get_marfis}
 \title{get_marfis}
 \usage{
-get_marfis(thisFleet = NULL, ...)
+get_marfis(
+  thisFleet = NULL,
+  marfSpp = NULL,
+  useDate = "LANDED_DATE",
+  nafoCode = "all",
+  ...
+)
 }
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
 the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
 
+\item{marfSpp}{default is \code{NULL}. This is a MARFIS species code.  Some of these can be found
+in spLookups}
+
+\item{useDate}{default is \code{'LANDED_DATE'}. Can also be \code{'DATE_FISHED'}.}
+
+\item{nafoCode}{default is \code{'all'}. This is a vector of NAFO AREAS (MARFIS) that will be
+used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
+valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
+with the specified code are returned.  For example c('5%') would return all of the areas within
+5Z and 5Y, c('5Z%'), would only return the areas within 5Z (e.g. 5ZE, 5ZU,...), and c('5Z') (no
+wildcard) would only return 5Z - no subareas.}
+
 \item{...}{other arguments passed to methods}
 }
 \value{
 returns a list with 2 dataframes - "trips", and "sets".
-"trips" conta ins all of the information necessary for identifying a trip
+"trips" contains all of the information necessary for identifying a trip
 within MARFIS, as well as associated information about the trip
 from the HAIL_OUTS and HAIL_IN_CALLS tables (e.g. confirmation numbers).
 "sets" contains information about individual fishing activities, including

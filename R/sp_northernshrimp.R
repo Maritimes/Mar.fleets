@@ -24,7 +24,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_northernshrimp <- function( ...){
-
+  warning("This analytic has not been throughly reviewed.  Use at your own risk.")
   # # Set up the shrimp-specific variables -------------------------------------------------------
 
   args <- list(marfSpp=702,

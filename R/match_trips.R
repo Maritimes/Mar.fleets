@@ -150,19 +150,19 @@ match_trips <- function(isdbTrips = NULL,
 
 
   isdbTrips$ISDB_TRIP_O <- isdbTrips$VR_LIC <- NULL
-  if(!args$quiet) {
-    cat(paste0("\n","Match Success Summary*:","\n"))
-    print(summ_df)
-    cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
-    if (length(unmatchedTrips)>0){
-      cat(paste0("The following ISDB-style Trip Names were found in the MARFIS records that did NOT match an ISDB record for this fleet:","\n"))
-      cat(unmatchedTrips)
-    }
-  }
+  # if(!args$quiet) {
+  #   cat(paste0("\n","Match Success Summary*:","\n"))
+  #   print(summ_df)
+  #   cat(paste0("* Note that some trips are matched on more than 1 field","\n"))
+  #   if (length(unmatchedTrips)>0){
+  #     cat(paste0("The following ISDB-style Trip Names were found in the MARFIS records that did NOT match an ISDB record for this fleet:","\n"))
+  #     cat(unmatchedTrips)
+  #   }
+  # }
 
   res <- list()
   res[["ISDB_MARFIS_POST_MATCHED"]] <- isdbTrips
-  res[["MATCH_SUMMARY"]] <- summ_df
+  res[["MATCH_SUMMARY_TRIPS"]] <- summ_df
   res[["UNMATCHABLE"]] <- unmatchedTrips
   return(res)
 }

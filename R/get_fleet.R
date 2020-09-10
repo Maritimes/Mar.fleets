@@ -8,11 +8,10 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_fleet<-function(...){
-  args <- as.list(match.call(expand.dots=TRUE))[-1]
+  args <-list(...)$argsList
   if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   get_fleetBasic<-function(...){
-
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){

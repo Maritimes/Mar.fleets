@@ -48,7 +48,6 @@ Other species:
 \code{\link{sp_pollock}()},
 \code{\link{sp_redfish}()},
 \code{\link{sp_silverhake}()},
-\code{\link{sp_snowcrab}()},
 \code{\link{sp_surfclam}()},
 \code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}

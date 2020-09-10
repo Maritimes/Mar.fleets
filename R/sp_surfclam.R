@@ -24,7 +24,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_surfclam <- function(...){
-
+  warning("This analytic has not been throughly reviewed.  Use at your own risk.")
   # Set up the surfclam-specific variables -----------------------------------------------------
   args <- list(marfSpp=608,
                mdCode = 13)

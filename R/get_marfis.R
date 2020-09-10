@@ -16,7 +16,7 @@
 #' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @return returns a list with 2 dataframes - "trips", and "sets".
-#' "trips" conta ins all of the information necessary for identifying a trip
+#' "trips" contains all of the information necessary for identifying a trip
 #' within MARFIS, as well as associated information about the trip
 #' from the HAIL_OUTS and HAIL_IN_CALLS tables (e.g. confirmation numbers).
 #' "sets" contains information about individual fishing activities, including
@@ -24,11 +24,15 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', nafoCode='all',  ...){
-  args <- as.list(match.call(expand.dots=TRUE))[-1]
-  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
+  args <-list(...)$argsList
+  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
+  # if params are sent, we should overwrite the defaults
+  if (!is.null(marfSpp))args$marfSpp <- marfSpp
+  if (useDate != 'LANDED_DATE') args$useDate <- useDate
+  if (nafoCode != 'all') args$nafoCode <- nafoCode
 
-  getEff<-function(log_efrt=NULL, ...){
+  getEff <- function(log_efrt = NULL, ...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
@@ -77,7 +81,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     if (args$debug) cat("getEff done:",nrow(PS_sets),"\n")
     return(PS_sets)
   }
-  getPS<-function(allProSpc=NULL, ...){
+  getPS <- function(allProSpc = NULL, ...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
@@ -138,7 +142,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     if (args$debug) cat("getPS done:",nrow(PS_df),"\n")
     return(PS_df)
   }
-  getED<-function(mondocs=NULL, ...){
+  getED <- function(mondocs = NULL, ...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
@@ -177,7 +181,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     if (args$debug) cat("getED done:",nrow(ED_df),"\n")
     return(ED_df)
   }
-  getHIC<-function(trips = NULL, ...){
+  getHIC <- function(trips = NULL, ...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
@@ -203,7 +207,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     if (args$debug) cat("getHIC done:",nrow(HIC_df),"\n")
     return(HIC_df)
   }
-  getHOC<-function(trips = NULL, ...){
+  getHOC <- function(trips = NULL, ...){
     args <- list(...)$argsList
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
@@ -232,6 +236,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   allLogEff <-  unique(stats::na.omit(thisFleet$LOG_EFRT_STD_INFO))
   allProSpc <-  unique(stats::na.omit(thisFleet$PRO_SPC_INFO_ID))
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
+
   ps <- do.call(getPS, list(allProSpc = allProSpc, argsList=args))
 
   if (nrow(ps)<1){
@@ -245,7 +250,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   ed <-  do.call(getED, list(mondocs =allMondocs, argsList=args))
   if (!is.null(ed) && nrow(ed)>0){
     ps<- unique(merge(ps, ed, all.x = T))
-
     if (nrow(ps)<1){
       cat(paste0("\n","No MARFIS data meets criteria"))
       return(invisible(NULL))

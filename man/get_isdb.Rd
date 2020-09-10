@@ -4,7 +4,15 @@
 \alias{get_isdb}
 \title{get_isdb}
 \usage{
-get_isdb(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE, ...)
+get_isdb(
+  thisFleet = NULL,
+  get_marfis = NULL,
+  matchMarfis = NULL,
+  keepSurveyTrips = NULL,
+  dateStart = NULL,
+  dateEnd = NULL,
+  ...
+)
 }
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
@@ -17,6 +25,18 @@ trip and set information from MARFIS related to the specified fleet}
 \item{matchMarfis}{default is \code{FALSE}.  This indicates whether or not an attempt should be made
 to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
 \code{get_marfis} must be provided.}
+
+\item{keepSurveyTrips}{default is \code{FALSE}.  This indicates whether you
+want to retain trips that were part of a survey.  These are not typical
+commercial trips and their distribution will not reflect normal
+commercial fishing patterns.}
+
+\item{dateStart}{default is \code{NULL}. This is the start date (YYYY-MM-DD)
+of the window of time you want to look at.}
+
+\item{dateEnd}{default is \code{NULL}. This is the end date (YYYY-MM-DD)
+of the window of time you want to look at.  If this is left blank, 1 year of
+data will be returned.}
 
 \item{...}{other arguments passed to methods}
 }
