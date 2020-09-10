@@ -81,7 +81,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = NULL,  k
       ISVESSELS<- ISVESSELS[,c("VESS_ID", "VR_NUMBER")]
       isdb_TRIPS_all <- merge(ISTRIPS, ISVESSELS, by = "VESS_ID", all.x=T)
 
-      Mar.utils::get_data_tables(schema = "MARFIS", data.dir = args$data.dir, tables = c("LICENCE_VESSELS"), env = environment(), quiet = TRUE)
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LICENCE_VESSELS"), env = environment(), quiet = TRUE)
       LICENCE_VESSELS <- unique(LICENCE_VESSELS[,c("VR_NUMBER","LICENCE_ID")])
       LICENCE_VESSELS<-LICENCE_VESSELS[(LICENCE_VESSELS$VR_NUMBER >= min(VRS) & LICENCE_VESSELS$VR_NUMBER <= max(VRS)) &
                                          (LICENCE_VESSELS$LICENCE_ID >= min(LICS) & LICENCE_VESSELS$LICENCE_ID <= max(LICS)),]
