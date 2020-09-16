@@ -98,6 +98,8 @@ match_sets <- function(isdb_sets = NULL,
   #megadf is merged by trip - not set - so there are many false positives at this stage
   megadf <- merge(isdb_sets, matchdf, by.x="TRIP_ID_ISDB", by.y="TRIP_ID_ISDB", all = T)
   megadf <- merge(megadf, marf_sets, by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all = T)
+  #if there are no marfis sets, drop the recs -- can't match
+  megadf <- megadf[!is.na(megadf$LOG_EFRT_STD_INFO_ID),]
   megadf$MAXMATCH <- pmin(megadf$MAXMATCH_I, megadf$MAXMATCH_M) #not sure if we'll get NAs here?
   megadf$MAXMATCH_I <- megadf$MAXMATCH_M <- NULL
 
@@ -144,7 +146,7 @@ match_sets <- function(isdb_sets = NULL,
         thisTrip_MATCHED$SET_MATCH <- "POS"
       }else{
         #multiple best?  A tie?
-        browser()
+        Warning("Something weird happened while attempting to matchh sets.  Please let Mike.McMahon@dfo-mpo.gc.ca know what you were just doing - maybe send him the script you just ran?")
       }
 
 
