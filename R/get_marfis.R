@@ -25,15 +25,15 @@
 #' @export
 get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', nafoCode='all',  ...){
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
-  args <-list(...)$argsList
-  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
+  args <-list(...)$args
+  if (!"filtTrack" %in% names(args)) args<-set_defaults(args = args)
   # if params are sent, we should overwrite the defaults
   if (!is.null(marfSpp))args$marfSpp <- marfSpp
   if (useDate != 'LANDED_DATE') args$useDate <- useDate
   if (nafoCode != 'all') args$nafoCode <- nafoCode
 
   getEff <- function(log_efrt = NULL, ...){
-    args <- list(...)$argsList
+    args <- list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       LOG_EFRT_STD_INFO<-NA
@@ -82,7 +82,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
-    args <- list(...)$argsList
+    args <- list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- NA
@@ -143,7 +143,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     return(PS_df)
   }
   getED <- function(mondocs = NULL, ...){
-    args <- list(...)$argsList
+    args <- list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       MON_DOC_ENTRD_DETS <- NA
@@ -182,7 +182,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     return(ED_df)
   }
   getHIC <- function(trips = NULL, ...){
-    args <- list(...)$argsList
+    args <- list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       HAIL_IN_CALLS <- HAIL_OUTS <- NA
@@ -208,7 +208,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     return(HIC_df)
   }
   getHOC <- function(trips = NULL, ...){
-    args <- list(...)$argsList
+    args <- list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       HAIL_OUTS <- NA
@@ -236,18 +236,17 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   allLogEff <-  unique(stats::na.omit(thisFleet$LOG_EFRT_STD_INFO))
   allProSpc <-  unique(stats::na.omit(thisFleet$PRO_SPC_INFO_ID))
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
-
-  ps <- do.call(getPS, list(allProSpc = allProSpc, argsList=args))
+  ps <- do.call(getPS, list(allProSpc = allProSpc, args=args))
 
   if (nrow(ps)<1){
     cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
   }
 
-  sets<-  do.call(getEff, list(log_efrt = allLogEff, argsList=args))
+  sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
   eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
 
-  ed <-  do.call(getED, list(mondocs =allMondocs, argsList=args))
+  ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
   if (!is.null(ed) && nrow(ed)>0){
     ps<- unique(merge(ps, ed, all.x = T))
     if (nrow(ps)<1){
@@ -259,7 +258,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     ps$ISDB_TRIP <- ps$OBS_ID <- ps$OBS_PRESENT <- NA
   }
 
-  hic<- do.call(getHIC, list(trips = ps$TRIP_ID, argsList=args))
+  hic<- do.call(getHIC, list(trips = ps$TRIP_ID, args=args))
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
 
@@ -268,7 +267,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       return(invisible(NULL))
     }
   }
-  hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, argsList=args))
+  hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
   if (!is.null(hoc) && nrow(hoc)>0){
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
   }

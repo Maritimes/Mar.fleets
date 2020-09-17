@@ -25,13 +25,18 @@
 #' @export
 sp_swordfish <- function(...){
 
-  # Set up the swordfish-specific variables -----------------------------------------------------
-  args <- list(marfSpp=251,
-               gearCode = 51,
-               mdCode = 5)
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
 
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
+  # Set up the swordfish-specific variables -----------------------------------------------------
+  marfSpp=251
+  gearCode = 51
+  mdCode = 5
+
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

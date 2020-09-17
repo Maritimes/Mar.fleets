@@ -29,16 +29,20 @@
 #' @export
 sp_halibut <- function(vessLen = c(0,999), ...){
 
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # Set up the Halibut-specific variables -------------------------------------------------------
-  args <- list(marfSpp=130,
-               nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%'),
-               gearCode = c(50,51),
-               mdCode = c(1, 29),
-               vessLen = c(0,999))
+  marfSpp=130
+  nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%')
+  gearCode = c(50,51)
+  mdCode = c(1, 29)
+  vessLen = c(0,999)
 
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
-
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

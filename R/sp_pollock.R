@@ -34,6 +34,10 @@
 #' @export
 sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
 
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # Set up the Pollock-specific variables -------------------------------------------------------
   if (toupper(component)=="WESTERN"){
     nafoCode= c('4XO%','4XP%','4XQ%','4XR%','4XS%','5%') #'4XU%' intentionally excluded as directed by HS
@@ -59,17 +63,17 @@ sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
     gearSpSize = 'all'
   }
 
-  args <- list(marfSpp=170,
-               nafoCode=nafoCode,
-               gearCode = gearCode,
-               gearSpSize = gearSpSize,
-               mdCode = mdCode,
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31")
-  )
+  marfSpp=170
+  nafoCode=nafoCode
+  gearCode = gearCode
+  gearSpSize = gearSpSize
+  mdCode = mdCode
+  dateStart =paste0(year,"-01-01")
+  dateEnd =paste0(year,"-12-31")
 
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

@@ -9,7 +9,6 @@ set_defaults <- function(...){
   # keep track of what filters have been applied ------------------------------------------------
   filtTrack<-new.env()
   filtTrack$mdDone <- filtTrack$gearDone <- filtTrack$nafoDone <- filtTrack$gearSpecsDone <- filtTrack$canDoGearSpecs <- filtTrack$vessLenDone <- FALSE
-
   args <- list(mdCode = "all",
                gearCode = "all",
                nafoCode = "all",
@@ -34,12 +33,11 @@ set_defaults <- function(...){
                debug=FALSE
   )
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
-  argsSent <- list(...)$argsList
-
+  argsSent <- list(...)
   args[names(argsSent)] <- argsSent
-
   dateArgs = Mar.utils::vali_dates(dateStart = args$dateStart, dateEnd = args$dateEnd, year = args$year)
   args$dateStart <- dateArgs$dateStart
   args$dateEnd <- dateArgs$dateEnd
+  if (args$debug) print(args)
   return(args)
 }

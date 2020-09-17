@@ -30,7 +30,7 @@
 match_trips <- function(isdbTrips = NULL,
                         marfMatch = NULL,
                         ...){
-  args <- list(...)$argsList
+  args <- list(...)$args
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])

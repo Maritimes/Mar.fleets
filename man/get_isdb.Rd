@@ -7,7 +7,7 @@
 get_isdb(
   thisFleet = NULL,
   get_marfis = NULL,
-  matchMarfis = NULL,
+  matchMarfis = FALSE,
   keepSurveyTrips = NULL,
   dateStart = NULL,
   dateEnd = NULL,

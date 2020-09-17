@@ -11,7 +11,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
-  args <- list(...)$argsList
+  args <- list(...)$args
   if (is.null(marfSpID))  marfSpID <- args$marfSpp
   if (is.null(marfSpID)){
     cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")

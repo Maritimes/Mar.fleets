@@ -5,11 +5,10 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @noRd
 apply_filters<-function(df = NULL, ...){
-
-  args <- list(...)$argsList
+  args <- list(...)$args
 
   chk_Gears <- function(df=df,...){
-    args <- list(...)$argsList
+    args <- list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     allGears = tolower(unique(df$GEAR_DESC))
     allGears = allGears[!allGears %in% c("trap net")]
@@ -33,7 +32,7 @@ apply_filters<-function(df = NULL, ...){
 
   get_GearSpecs<- function(df = NULL, ...){
 
-    args <- list(...)$argsList
+    args <- list(...)$args
 
     LOG_EFRT_STD_INFO <- data.dir <- NA
 
@@ -63,7 +62,7 @@ apply_filters<-function(df = NULL, ...){
       cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
       return(df)
     }
-    gearType <- do.call(chk_Gears, list(df, argsList=args))
+    gearType <- do.call(chk_Gears, list(df, args=args))
     grSpType <- NA
     grSpSize <- NA
     if('mesh' %in% gearType){
@@ -115,7 +114,7 @@ apply_filters<-function(df = NULL, ...){
     if (length(availSizes)<1)gearSpcFilt[!gearSpcFilt %in% "Sizes"]
 
     sizeFilt <- function(df=NULL, ...){
-      args <- list(...)$argsList
+      args <- list(...)$args
       if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
       if ('all' %in% args$gearSpSize){
         #just get all gear
@@ -144,7 +143,7 @@ apply_filters<-function(df = NULL, ...){
       return(df)
     }
     typeFilt <- function(df=NULL, ...){
-      args <- list(...)$argsList
+      args <- list(...)$args
       if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
       if ('all' %in% args$gearSpType){
         #just get all gear
@@ -162,8 +161,8 @@ apply_filters<-function(df = NULL, ...){
       return(df)
     }
 
-    df= do.call(typeFilt, list(df,argsList=args))
-    df= do.call(sizeFilt, list(df,argsList=args))
+    df= do.call(typeFilt, list(df,args=args))
+    df= do.call(sizeFilt, list(df,args=args))
     return(df)
   }
 
@@ -206,14 +205,14 @@ apply_filters<-function(df = NULL, ...){
   if (args$debug) cat("NAFO done:",nrow(df),"\n")
 
   if (args$filtTrack$gearDone){
-    test=do.call(chk_Gears, list(df=df,argsList=args))
+    test=do.call(chk_Gears, list(df=df,args=args))
     if (length(test)>0) args$filtTrack$canDoGearSpecs <- TRUE
   }
 
   if(args$filtTrack$canDoGearSpecs){#only show if a gear selection has been made
     if(!args$filtTrack$gearSpecsDone){
       if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
-        df <- do.call(get_GearSpecs, list(df=df,argsList=args))
+        df <- do.call(get_GearSpecs, list(df=df,args=args))
         args$filtTrack$gearSpecsDone <- T
       }
     }

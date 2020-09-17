@@ -27,16 +27,20 @@
 #' @export
 sp_silverhake <- function(year=NULL, ...){
 
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # Set up the silver hake-specific variables -------------------------------------------------------
-  args <- list(marfSpp=172,
-               nafoCode=c('4V%','4W%','4X%'),#4VWX
-               gearCode =12,
-               mdCode = 2)
+  marfSpp=172
+  nafoCode=c('4V%','4W%','4X%') #4VWX
+  gearCode =12
+  mdCode = 2
 
 
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
-
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

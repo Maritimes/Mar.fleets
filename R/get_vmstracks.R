@@ -13,7 +13,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
-  args<-set_defaults(argsList = args)
+  args<-set_defaults(args = args)
   argsSent<-  list(...)
   args[names(argsSent)] <- argsSent
   if (args$useLocal==TRUE){

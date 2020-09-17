@@ -25,17 +25,20 @@
 #' @export
 sp_northernshrimp <- function( ...){
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
+
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # # Set up the shrimp-specific variables -------------------------------------------------------
+  marfSpp=702
+  mdCode = c(16,28)
+  dateStart =paste0(year,"-01-01")
+  dateEnd =paste0(year,"-12-31")
 
-  args <- list(marfSpp=702,
-               mdCode = c(16,28),
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31")
-  )
-
-
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

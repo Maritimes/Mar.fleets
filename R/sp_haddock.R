@@ -30,6 +30,10 @@
 #' @export
 sp_haddock <- function(type = NULL, area= NULL, ...){
 
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # Set up the Haddock-specific variables -------------------------------------------------------
   if (toupper(type) == "MOBILE"){
     mdCode = c(2)
@@ -49,15 +53,15 @@ sp_haddock <- function(type = NULL, area= NULL, ...){
     if (toupper(type) == "MOBILE") gearSpSize="all"
   }
 
-  args <- list(marfSpp=110,
-               nafoCode=nafoCode,
-               gearCode = gearCode,
-               gearSpSize= gearSpSize,
-               mdCode = mdCode)
+  marfSpp=110
+  nafoCode=nafoCode
+  gearCode = gearCode
+  gearSpSize= gearSpSize
+  mdCode = mdCode
 
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
-
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

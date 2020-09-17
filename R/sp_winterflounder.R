@@ -25,16 +25,20 @@
 #' @export
 sp_winterflounder <- function(...){
 
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # Set up the winterflounder-specific variables -------------------------------------------------------
-  args <- list(marfSpp=143,
-               nafoCode=c('4X%','5Y%'),
-               gearCode = 12,
-               gearSpSize = seq(155,999,1),
-               mdCode = 2)
+  marfSpp=143
+  nafoCode=c('4X%','5Y%')
+  gearCode = 12
+  gearSpSize = seq(155,999,1)
+  mdCode = 2
 
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
-
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

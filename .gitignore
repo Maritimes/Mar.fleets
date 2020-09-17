@@ -4,6 +4,10 @@
 .Ruserdata
 *.xlsx
 *.png
+*.shp
+*.dbf
+*.shx
+*.prj
 /temp
 /crap
 .Rprofile

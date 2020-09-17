@@ -26,6 +26,10 @@
 #' @export
 sp_redfish <- function(unit = NULL, ...){
 
+  # grab all parameters (sent and ...), replace ... val with specified
+  args <- list(...)
+  args[names(as.list(environment()))] <- as.list(environment())
+
   # Set up the redfish-specific variables -------------------------------------------------------
   if (unit==2){
     nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
@@ -35,16 +39,15 @@ sp_redfish <- function(unit = NULL, ...){
     gearSpSize = seq(110,115,1)
   }
 
+  marfSpp=120
+  nafoCode=nafoCode
+  gearCode = 12
+  gearSpSize = gearSpSize
+  mdCode = 2
 
-  args <- list(marfSpp=120,
-               nafoCode=nafoCode,
-               gearCode = 12,
-               gearSpSize = gearSpSize,
-               mdCode = 2 )
-
-
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
   return(data)
 }

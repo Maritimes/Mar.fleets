@@ -9,7 +9,7 @@
 #' @export
 get_all <- function(...){
   args <- as.list(match.call(expand.dots=TRUE))[-1]
-  args <- set_defaults(argsList = args)
+  args <- do.call(set_defaults, args)
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   cxnCheck <- do.call(can_run, args)
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
@@ -17,12 +17,12 @@ get_all <- function(...){
   } else if (is.list(cxnCheck)){
     args[["cxn"]] <- cxnCheck
   }
-  fleet <- do.call(get_fleet, list(argsList=args))
-  if (!is.null(fleet))                  marf <- do.call(get_marfis, list(thisFleet=fleet,argsList=args))
-  if (!is.null(fleet) & !is.null(marf)) isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, argsList=args))
+  fleet <- do.call(get_fleet, args)
+  if (!is.null(fleet))                  marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
+  if (!is.null(fleet) & !is.null(marf)) isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, args=args))
 
   matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
-  if (!is.null(isdb))                    bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, argsList=args))
+  if (!is.null(isdb))                    bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
   # Capture the results in a list and return them ------------------------------------------------
   if (!is.null(marf)) {
     cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)

@@ -25,7 +25,7 @@ match_sets <- function(isdb_sets = NULL,
                        marf_sets = NULL,
                        maxSetDiff_hr =48,
                        ...){
-  args <- list(...)$argsList
+  args <- list(...)$args
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value

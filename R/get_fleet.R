@@ -8,11 +8,11 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_fleet<-function(...){
-  args <-list(...)$argsList
-  if (!"filtTrack" %in% names(args)) args<-set_defaults(argsList = args)
+  args <-list(...)
+  if (!"filtTrack" %in% names(args))   args <- do.call(set_defaults, args)
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   get_fleetBasic<-function(...){
-    args <- list(...)$argsList
+    args <- list(...)
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
@@ -131,7 +131,7 @@ get_fleet<-function(...){
     return(theFleet)
   }
 
-  df <- do.call(get_fleetBasic, list(argsList=args))
+  df <- do.call(get_fleetBasic, args)
   if (args$debug) cat("1 - nrow(get_fleetBasic):",nrow(df),"\n")
 
   bad = c("MONIT.*","DOCU.*","/ .*","FISHING .*","LOG.*"," FI$")
@@ -139,7 +139,7 @@ get_fleet<-function(...){
     df$MD_DESC = sub(bad[b], "", df$MD_DESC)
   }
   df$MD_DESC <- trimws(df$MD_DESC)
-  df <- do.call(apply_filters, list(df=df,argsList=args))
+  df <- do.call(apply_filters, list(df=df,args=args))
   if (args$debug) cat("1 - nrow(post-apply_filters):",nrow(df),"\n")
 
   if(nrow(df)<1) {

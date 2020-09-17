@@ -18,7 +18,7 @@ can_run <- function(...){
              "MARFISSCI.MON_DOCS","MARFISSCI.NAFO_UNIT_AREAS","MARFISSCI.PRO_SPC_INFO","MARFISSCI.VESSELS")
   #connect_Oracle is just results of trying to establish connecion
   connect_Oracle <-function(...){
-    args=list(...)$argsList
+    args=list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     cxn <- do.call(Mar.utils::make_oracle_cxn, list(usepkg = args$usepkg,
                                                     fn.oracle.username = args$oracle.username,
@@ -29,7 +29,7 @@ can_run <- function(...){
   }
   #tblAccess is T if has necess permiss
   tblAccess <- function(tables = NULL,...){
-    args=list(...)$argsList
+    args=list(...)$args
     #the schema holding the ISDB objects is actually observer
     tables <- gsub("ISDB","OBSERVER", tables)
     # #check for access
@@ -54,7 +54,7 @@ can_run <- function(...){
   }
   #wantLocal is T if all necessar things are found
   wantLocal <- function(tables = NULL, ...){
-    args<-list(...)$argsList
+    args<-list(...)$args
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
@@ -76,7 +76,7 @@ can_run <- function(...){
   }
 
   if (args$useLocal){
-    if (do.call(wantLocal,list(MARFIS,argsList=args))&do.call(wantLocal,list(ISDB,argsList=args))){
+    if (do.call(wantLocal,list(MARFIS,args=args))&do.call(wantLocal,list(ISDB,args=args))){
       return(TRUE)
     }else{
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
@@ -86,7 +86,7 @@ can_run <- function(...){
       #return(FALSE)
     }
   }else{
-    cxnCheck <- do.call(connect_Oracle, list(argsList=args))
+    cxnCheck <- do.call(connect_Oracle, list(args=args))
     if (!is.list(cxnCheck)) {
       cat("\n","Cannot proceed online (Can't create a DB connection).",
           "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').","\n")
@@ -96,7 +96,7 @@ can_run <- function(...){
       if (!args$quiet)  cat("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
     }
-    if (all(do.call(tblAccess,list(MARFIS, argsList=args)) && do.call(tblAccess,list(ISDB, argsList=args)))){
+    if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
       return(cxnCheck)
     }else{
       cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
