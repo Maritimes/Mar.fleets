@@ -67,37 +67,47 @@ match_trips <- function(isdbTrips = NULL,
   # 3 - add matches to df called matches
 
   # MARFIS TRIP NAME ----------------------------------------------------------------------------
-  match_TRIP <- unique(merge(isdbTrips[,c("TRIP_ID_ISDB", "ISDB_TRIP_O")], marfMatch[,c("TRIP_ID_MARF","ISDB_TRIP_M")], by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
+  thisIsdbTrips <- unique(isdbTrips[!is.na(isdbTrips$ISDB_TRIP_O),c("TRIP_ID_ISDB", "ISDB_TRIP_O")])
+  thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("TRIP_ID_MARF","ISDB_TRIP_M")])
+
+  match_TRIP <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% match_TRIP$TRIP_ID_ISDB,"match_TRIP"] <- TRUE
   matches =  unique(rbind(matches, match_TRIP[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
-  # newMatch$ON <- "TRIP"
-  # matches <- unique(rbind(matches,newMatch))
-  # newMatch <- NULL
+
+  thisIsdbTrips <- thisMarfMatch<- NULL
 
   # MARFIS HAILIN CONFIRMATION NUMBER -----------------------------------------------------------
-  match_CONF_HI <- unique(merge(isdbTrips[,c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")], marfMatch[!is.na(marfMatch$CONF_NUMBER_HI),c("TRIP_ID_MARF","CONF_NUMBER_HI")], by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HI"))
+  thisIsdbTrips <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
+  thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HI),c("TRIP_ID_MARF","CONF_NUMBER_HI")])
+
+  match_CONF_HI <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HI"))
   isdbTrips[isdbTrips$MARFIS_CONF_NUMBER %in% match_CONF_HI$MARFIS_CONF_NUMBER,"match_CONF_HI"] <- TRUE
   matches =  unique(rbind(matches, match_CONF_HI[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
   # match_HI = unique(match_CONF_HI[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")])
-  # newMatch$ON <- "CONF_HI"
-  # matches <- unique(rbind(matches,newMatch))
-  # newMatch <- NULL
+
+  thisIsdbTrips <- thisMarfMatch<- NULL
 
   # MARFIS HAILOUT CONFIRMATION NUMBER -----------------------------------------------------------
-  match_CONF_HO <- unique(merge(isdbTrips[,c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")], marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")], by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
+  #lastisdbTrips <<- isdbTrips[,c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")]
+  #lastmarfMatch <<- marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")]
+  thisIsdbTrips <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
+  thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")])
+
+    match_CONF_HO <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
   isdbTrips[isdbTrips$MARFIS_CONF_NUMBER %in% match_CONF_HO$MARFIS_CONF_NUMBER,"match_CONF_HO"] <- TRUE
   matches =  unique(rbind(matches, match_CONF_HO[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
-  # match_HO <- unique(match_CONF_HI[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")])
-  # newMatch$ON <- "CONF_HO"
-  # matches <- unique(rbind(matches,newMatch))
-  # newMatch <- NULL
+
+  thisIsdbTrips <- thisMarfMatch<- NULL
 
   # VRN, LICENCE and DATE RANGE --------------------------------------------------------
   # these are more complicated because: I'm matching on multiple fields (vrn/lic/date),
   #                                     There are multiple vrn fields,
   #                                     The date field is checked against a range (not just ==)
 
-  isdbTrips_dets <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_LICENSE_NO) & !is.na(isdbTrips$VR_NUMBER)  & !is.na(isdbTrips$BOARD_DATE) & !is.na(isdbTrips$LANDING_DATE),
+  isdbTrips_dets <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_LICENSE_NO) &
+                                       !is.na(isdbTrips$VR_NUMBER)  &
+                                       !is.na(isdbTrips$BOARD_DATE) &
+                                       !is.na(isdbTrips$LANDING_DATE),
                                      c("TRIP_ID_ISDB","MARFIS_LICENSE_NO","VR_NUMBER","BOARD_DATE","LANDING_DATE")])
   isdbTrips_dets$VR_LIC <- paste0(isdbTrips_dets$VR_NUMBER,"_",isdbTrips_dets$MARFIS_LICENSE_NO)
   isdbTrips_dets$VR_NUMBER <- isdbTrips_dets$MARFIS_LICENSE_NO <- NULL

@@ -65,23 +65,16 @@ match_sets <- function(isdb_sets = NULL,
                            FUN = function(x) length(unique(x))
     )
     colnames(nsets_tim) <- c(tripField, "CNT_TIM")
-    #cnt the nsets/trip with good lats
-    nsets_lat <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
-                           nsets[,lat.field]~nsets[,tripField],
-                           FUN = function(x) length(unique(x))
+    nsets_pos <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
+                                  nsets[,lat.field]+nsets[,lon.field]~nsets[,tripField],
+                                  FUN = function(x) length(unique(x))
     )
-    colnames(nsets_lat) <- c(tripField, "CNT_LAT")
-    #cnt the nsets/trip with good lonss
-    nsets_lon <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
-                           nsets[,lon.field]~nsets[,tripField],
-                           FUN = function(x) length(unique(x))
-    )
-    colnames(nsets_lon) <- c(tripField, "CNT_LON")
-    dets=merge(nsets_tim, nsets_lat, all=T)
-    dets=merge(dets, nsets_lon, all=T)
-    dets$MAXMATCH <- pmax(dets$CNT_TIM, dets$CNT_LAT, dets$CNT_LON, na.rm = T)
+    colnames(nsets_pos) <- c(tripField, "CNT_POS")
 
-    dets$CNT_TIM <- dets$CNT_LAT <- dets$CNT_LON <- NULL
+    dets=merge(nsets_tim, nsets_pos, all=T)
+    dets$MAXMATCH <- pmax(dets$CNT_TIM, dets$CNT_POS, na.rm = T)
+
+    dets$CNT_TIM <- dets$CNT_POS <- NULL
     df<- merge(df, dets)
     return(df)
   }
@@ -108,6 +101,7 @@ match_sets <- function(isdb_sets = NULL,
   megadf[,"DUR_DIFF"]<- as.numeric(abs(difftime(megadf$DATE_TIME,megadf$EF_FISHED_DATETIME, units="hours")))
   megadf$BADTIM <- FALSE
   megadf <- megadf[megadf$DUR_DIFF <= maxSetDiff_hr,]
+  if (nrow(megadf)==0)return(NA)
   megadf[megadf$BADTIM_I==T | megadf$BADTIM_M==T |is.na(megadf$DUR_DIFF),"BADTIM"]<-TRUE
   megadf$BADTIM_I <- megadf$BADTIM_M <- NULL
   # calc dist between isdb and marfis
@@ -127,7 +121,8 @@ match_sets <- function(isdb_sets = NULL,
   utrips = sort(unique(megadf$TRIP_ID_ISDB))
   for (i in 1:length(utrips)){
     thisTrip_MATCHED_ALL <- thisTrip_MATCHED <-  matches_all[FALSE,]
-    thisTrip<- megadf[megadf$TRIP_ID_ISDB == utrips[i],]
+    thisTrip<- megadf[which(megadf$TRIP_ID_ISDB == utrips[i]),]
+    if (nrow(thisTrip)==0) next
     while (nrow(thisTrip_MATCHED) < thisTrip[1,"MAXMATCH"] ){
       trippos <- thisTrip[thisTrip$BADPOS ==F,]
       triptim <- thisTrip[thisTrip$BADTIM ==F,]

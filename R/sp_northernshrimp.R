@@ -33,8 +33,6 @@ sp_northernshrimp <- function( ...){
   # # Set up the shrimp-specific variables -------------------------------------------------------
   marfSpp=702
   mdCode = c(16,28)
-  dateStart =paste0(year,"-01-01")
-  dateEnd =paste0(year,"-12-31")
 
   argsFun <-  as.list(environment())
   argsFun[["args"]] <- NULL

@@ -28,7 +28,7 @@ sp_snowcrab <- function(CFA = NULL, ...){
   # # Set up the snowcrab-specific variables -------------------------------------------------------
   stop("Not ready for primetime")
   if (!is.null(CFA))CFA = toupper(CFA)
-    if (CFA=="SENS"){
+  if (CFA=="SENS"){
     nafoCode= c('4VS%','4W%')
   } else if (CFA=="NENS"){
     nafoCode= c('4VN%','3%')
@@ -37,17 +37,13 @@ sp_snowcrab <- function(CFA = NULL, ...){
   }else if (CFA=="all"){
     nafoCode= c('4VS%','4W%','4VN%','3%','4X%','5%')
   }
-cat("\n","This analytic is preliminary, and does not use the correct CFAS!!")
-  args <- list(marfSpp=705,
-               mdCode = c(10),
-               nafoCode=nafoCode,
-               dateStart =paste0(year,"-01-01"),
-               dateEnd =paste0(year,"-12-31")
-  )
+  marfSpp=705
+  mdCode = c(10)
 
-
-  argsSent <- as.list(match.call(expand.dots=TRUE))[-1]
-  args[names(argsSent)] <- argsSent
+  argsFun <-  as.list(environment())
+  argsFun[["args"]] <- NULL
+  args[names(argsFun)] <- argsFun
   data <- do.call(get_all, args)
+
   return(data)
 }

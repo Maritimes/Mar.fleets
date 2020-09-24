@@ -68,8 +68,6 @@ sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
   gearCode = gearCode
   gearSpSize = gearSpSize
   mdCode = mdCode
-  dateStart =paste0(year,"-01-01")
-  dateEnd =paste0(year,"-12-31")
 
   argsFun <-  as.list(environment())
   argsFun[["args"]] <- NULL
