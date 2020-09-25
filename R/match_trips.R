@@ -38,7 +38,7 @@ match_trips <- function(isdbTrips = NULL,
   }
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
-    if (!args$quiet)cat(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
+    if (!args$quietly)cat(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
     return(NULL)
   }
 
@@ -160,7 +160,7 @@ match_trips <- function(isdbTrips = NULL,
 
 
   isdbTrips$ISDB_TRIP_O <- isdbTrips$VR_LIC <- NULL
-  # if(!args$quiet) {
+  # if(!args$quietly) {
   #   cat(paste0("\n","Match Success Summary*:","\n"))
   #   print(summ_df)
   #   cat(paste0("* Note that some trips are matched on more than 1 field","\n"))

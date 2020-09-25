@@ -29,13 +29,13 @@ set_defaults <- function(...){
                oracle.dsn = "_none_",
                usepkg = "rodbc",
                useLocal = FALSE,
-               quiet=TRUE,
+               quietly=TRUE,
                debug=FALSE
   )
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   argsSent <- list(...)
   args[names(argsSent)] <- argsSent
-  dateArgs = Mar.utils::vali_dates(dateStart = args$dateStart, dateEnd = args$dateEnd, year = args$year)
+  dateArgs <- vali_dates(dateStart = args$dateStart, dateEnd = args$dateEnd, year = args$year)
   args$dateStart <- dateArgs$dateStart
   args$dateEnd <- dateArgs$dateEnd
   if (args$debug) print(args)

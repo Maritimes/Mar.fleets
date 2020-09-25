@@ -16,7 +16,7 @@ get_fleet<-function(...){
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
-                                         tables = c("PRO_SPC_INFO","MON_DOCS","GEARS","NAFO_UNIT_AREAS", "VESSELS","MON_DOC_DEFNS"), quiet = TRUE, env = environment())
+                                         tables = c("PRO_SPC_INFO","MON_DOCS","GEARS","NAFO_UNIT_AREAS", "VESSELS","MON_DOC_DEFNS"), quietly = TRUE, env = environment())
 
       PRO_SPC_INFO = PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= args$dateStart & PRO_SPC_INFO[,args$useDate] <= args$dateEnd),]
 

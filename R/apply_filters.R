@@ -42,7 +42,7 @@ apply_filters<-function(df = NULL, ...){
     if ("all" %in% args$gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
     # Get all of the records for our df that might link to gear info ----------------------------------------
     if (args$useLocal){
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quiet = TRUE)
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"), env = environment(), quietly = TRUE)
       gearSpecDF <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= args$dateStart
                                             & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= args$dateEnd),]
     }else{
@@ -89,7 +89,7 @@ apply_filters<-function(df = NULL, ...){
 
     # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quiet = TRUE)
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS"), env = environment(), quietly = TRUE)
       LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
       gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
     }else{
@@ -123,7 +123,7 @@ apply_filters<-function(df = NULL, ...){
         #apply the requested filter
         if (all(length(args$gearSpSize)==length(seq(130,999,1))) && all(args$gearSpSize==seq(130,999,1))){
 
-          if(!args$quiet)cat("\n","Large mesh is found indirectly, by getting all data, and subtracting small mesh","\n")
+          if(!args$quietly)cat("\n","Large mesh is found indirectly, by getting all data, and subtracting small mesh","\n")
           #this is weird because HS finds the large gear indirectly
           #he gets all gear, and subtracts the small gear - this leaves the large gear (and some NAs)
           gearSpSizeSm <- seq(1,129,1)
@@ -170,7 +170,7 @@ apply_filters<-function(df = NULL, ...){
   if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if(!args$filtTrack$mdDone){
     if (length(unique(df$MD_CODE))==1 ){
-      if(!args$quiet)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
+      if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
       args$filtTrack$mdDone <- T
     }else if (length(args$mdCode)>0 && args$mdCode != "all"){
       df=df[df$MD_CODE %in% args$mdCode,]
@@ -182,7 +182,7 @@ apply_filters<-function(df = NULL, ...){
   if (args$debug) cat("MD_CODE done:",nrow(df),"\n")
   if(!args$filtTrack$gearDone){
     if (length(unique(df$GEAR_CODE))==1){
-      if(!args$quiet)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
+      if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
       args$filtTrack$gearDone<-T
     }else if (length(args$gearCode)>0 && args$gearCode != "all"){
       df=df[df$GEAR_CODE %in% args$gearCode,]
@@ -195,7 +195,7 @@ apply_filters<-function(df = NULL, ...){
 
   if(!args$filtTrack$nafoDone){
     if (length(unique(df$NAFO))==1){
-      if(!args$quiet)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
+      if(!args$quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
       args$filtTrack$nafoDone<-T
     }else if (length(args$nafoCode)>0 && args$nafoCode != "all"){
       df=df[df$NAFO %in% args$nafoCode,]

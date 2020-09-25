@@ -27,7 +27,7 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE==marfSpID),c("SPECCD_ID")]
   isTrips<- unique(isTrips)
   if(args$useLocal){
-    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"), env = environment(), quiet = TRUE)
+    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"), env = environment(), quietly = TRUE)
     ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isTrips,]
     ISCATCHES <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,]
     df<-ISCATCHES

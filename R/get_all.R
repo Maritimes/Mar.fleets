@@ -17,6 +17,7 @@ get_all <- function(...){
   } else if (is.list(cxnCheck)){
     args[["cxn"]] <- cxnCheck
   }
+
   fleet <- do.call(get_fleet, args)
   if (!is.null(fleet))                  marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
   if (!is.null(fleet) & !is.null(marf)) isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, args=args))
@@ -24,7 +25,7 @@ get_all <- function(...){
   matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
   if (!is.null(isdb))                    bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
   # Capture the results in a list and return them ------------------------------------------------
-  if (!is.null(marf)) {
+  if (!is.null(marf) & !(args$quietly)) {
     cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
     cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
     cat("\n")

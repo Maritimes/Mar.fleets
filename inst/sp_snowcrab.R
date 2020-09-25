@@ -39,11 +39,10 @@ sp_snowcrab <- function(CFA = NULL, ...){
   }
   marfSpp=705
   mdCode = c(10)
-
-  argsFun <-  as.list(environment())
-  argsFun[["args"]] <- NULL
-  args[names(argsFun)] <- argsFun
+  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
+  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
+  # such that it's no longer correct
+  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
   data <- do.call(get_all, args)
-
   return(data)
 }

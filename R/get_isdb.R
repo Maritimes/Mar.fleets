@@ -62,7 +62,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     VRS <- as.numeric(unique(VRS[!is.na(VRS)]))
 
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS","ISVESSELS"), env = environment(), quiet = TRUE)
+      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS","ISVESSELS"), env = environment(), quietly = TRUE)
       #NA dates are turned to 9999-01-01 so that they will not meet
       #the criteria of being between our start and end dates
       ISTRIPS[is.na(ISTRIPS$LANDING_DATE),"LANDING_DATE"]<- '9999-01-01 01:00:00'
@@ -81,7 +81,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       ISVESSELS<- ISVESSELS[,c("VESS_ID", "VR_NUMBER")]
       isdb_TRIPS_all <- merge(ISTRIPS, ISVESSELS, by = "VESS_ID", all.x=T)
 
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LICENCE_VESSELS"), env = environment(), quiet = TRUE)
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LICENCE_VESSELS"), env = environment(), quietly = TRUE)
       LICENCE_VESSELS <- unique(LICENCE_VESSELS[,c("VR_NUMBER","LICENCE_ID")])
       LICENCE_VESSELS<-LICENCE_VESSELS[(LICENCE_VESSELS$VR_NUMBER >= min(VRS) & LICENCE_VESSELS$VR_NUMBER <= max(VRS)) &
                                          (LICENCE_VESSELS$LICENCE_ID >= min(LICS) & LICENCE_VESSELS$LICENCE_ID <= max(LICS)),]
@@ -132,7 +132,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     ####
     if (!args$keepSurveyTrips){
       if (nrow(isdb_TRIPS_all[(isdb_TRIPS_all$TRIPCD_ID > 7010 & isdb_TRIPS_all$TRIPCD_ID != 7099),])>0){
-        if (!args$quiet) {
+        if (!args$quietly) {
           cat(paste0("\n","Dropping these survey trips:","\n"))
           print(isdb_TRIPS_all[(isdb_TRIPS_all$TRIPCD_ID > 7010 & isdb_TRIPS_all$TRIPCD_ID != 7099),
                                c("VR_NUMBER", "TRIP_ID_ISDB", "TRIP", "TRIPCD_ID", "MARFIS_CONF_NUMBER", "MARFIS_LICENSE_NO")])
@@ -156,7 +156,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     badDate <- as.POSIXct(as.Date("2100-01-01"))
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"), env = environment(), quiet = TRUE)
+      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"), env = environment(), quietly = TRUE)
       ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ID_ISDB,c("TRIP_ID", "FISHSET_ID")]
       ISSETPROFILE_WIDE<-ISSETPROFILE_WIDE[ISSETPROFILE_WIDE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
       ISSETPROFILE_WIDE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE_WIDE$DATE_TIME1 > badDate,

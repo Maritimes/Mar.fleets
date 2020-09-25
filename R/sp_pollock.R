@@ -33,11 +33,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
-
-  # grab all parameters (sent and ...), replace ... val with specified
-  args <- list(...)
-  args[names(as.list(environment()))] <- as.list(environment())
-
   # Set up the Pollock-specific variables -------------------------------------------------------
   if (toupper(component)=="WESTERN"){
     nafoCode= c('4XO%','4XP%','4XQ%','4XR%','4XS%','5%') #'4XU%' intentionally excluded as directed by HS
@@ -64,14 +59,10 @@ sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
   }
 
   marfSpp=170
-  nafoCode=nafoCode
-  gearCode = gearCode
-  gearSpSize = gearSpSize
-  mdCode = mdCode
-
-  argsFun <-  as.list(environment())
-  argsFun[["args"]] <- NULL
-  args[names(argsFun)] <- argsFun
+  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
+  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
+  # such that it's no longer correct
+  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
   data <- do.call(get_all, args)
   return(data)
 }

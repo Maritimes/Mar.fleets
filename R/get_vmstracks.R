@@ -57,7 +57,7 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
                                     dateStart =  as.character(min(theDates)), dateEnd =  as.character(max(theDates)),
                                     vrnList = allVRs,
                                     rowNum = 1000000,
-                                    quietly = args$quiet)
+                                    quietly = args$quietly)
   if (is.null(allVMS)){
     cat("\n", "No VMS data could be found matching your parameters")
     return(NULL)

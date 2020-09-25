@@ -25,11 +25,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_redfish <- function(unit = NULL, ...){
-
-  # grab all parameters (sent and ...), replace ... val with specified
-  args <- list(...)
-  args[names(as.list(environment()))] <- as.list(environment())
-
   # Set up the redfish-specific variables -------------------------------------------------------
   if (unit==2){
     nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
@@ -40,14 +35,12 @@ sp_redfish <- function(unit = NULL, ...){
   }
 
   marfSpp=120
-  nafoCode=nafoCode
   gearCode = 12
-  gearSpSize = gearSpSize
   mdCode = 2
-
-  argsFun <-  as.list(environment())
-  argsFun[["args"]] <- NULL
-  args[names(argsFun)] <- argsFun
+  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
+  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
+  # such that it's no longer correct
+  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
   data <- do.call(get_all, args)
   return(data)
 }

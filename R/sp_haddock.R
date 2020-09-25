@@ -29,11 +29,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_haddock <- function(type = NULL, area= NULL, ...){
-
-  # grab all parameters (sent and ...), replace ... val with specified
-  args <- list(...)
-  args[names(as.list(environment()))] <- as.list(environment())
-
   # Set up the Haddock-specific variables -------------------------------------------------------
   if (toupper(type) == "MOBILE"){
     mdCode = c(2)
@@ -54,14 +49,10 @@ sp_haddock <- function(type = NULL, area= NULL, ...){
   }
 
   marfSpp=110
-  nafoCode=nafoCode
-  gearCode = gearCode
-  gearSpSize= gearSpSize
-  mdCode = mdCode
-
-  argsFun <-  as.list(environment())
-  argsFun[["args"]] <- NULL
-  args[names(argsFun)] <- argsFun
+  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
+  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
+  # such that it's no longer correct
+  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
   data <- do.call(get_all, args)
   return(data)
 }

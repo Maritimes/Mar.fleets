@@ -40,7 +40,7 @@ enable_local <- function(data.dir = NULL,
                                                 "LICENCE_VESSELS","LICENCES","LOG_EFRT_ENTRD_DETS",
                                                 "LOG_EFRT_STD_INFO","MON_DOC_DEFNS","MON_DOC_ENTRD_DETS",
                                                 "MON_DOCS","NAFO_UNIT_AREAS","PRO_SPC_INFO","VESSELS"),
-                                     env = environment(), quiet = TRUE)
+                                     env = environment(), quietly = TRUE)
 
   cat("Extracting ISDB data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = fn.oracle.username,
@@ -49,6 +49,6 @@ enable_local <- function(data.dir = NULL,
                                      schema = "ISDB",
                                      data.dir = data.dir,
                                      tables = c("ISFISHSETS","ISSETPROFILE_WIDE","ISTRIPS","ISVESSELS"),
-                                     env = environment(), quiet = T)
+                                     env = environment(), quietly = TRUE)
 cat(paste0("All tables successfully extracted to ", data.dir),"\n")
 }

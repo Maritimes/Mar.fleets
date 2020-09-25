@@ -24,7 +24,7 @@ can_run <- function(...){
                                                     fn.oracle.username = args$oracle.username,
                                                     fn.oracle.password = args$oracle.password,
                                                     fn.oracle.dsn = args$oracle.dsn,
-                                                    quietly = args$quiet))
+                                                    quietly = args$quietly))
     return(cxn)
   }
   #tblAccess is T if has necess permiss
@@ -35,14 +35,14 @@ can_run <- function(...){
     # #check for access
     fails = 0
     for (t in 1:length(tables)){
-      if (!args$quiet) cat(paste0("Checking access to ",tables[t],": "))
+      if (!args$quietly) cat(paste0("Checking access to ",tables[t],": "))
       qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM<=1")
       test = args$cxn$thecmd(args$cxn$channel, qry, rows_at_time = 1)
       if (is.character(test)) {
         fails=fails+1
-        if (!args$quiet) cat(" failed","\n")
+        if (!args$quietly) cat(" failed","\n")
       }else{
-        if (!args$quiet) cat(" success","\n")
+        if (!args$quietly) cat(" success","\n")
       }
     }
     if (fails>0){
@@ -93,7 +93,7 @@ can_run <- function(...){
       stop()
       # return(FALSE)
     }else{
-      if (!args$quiet)  cat("\nDB connection established.\n")
+      if (!args$quietly)  cat("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){

@@ -18,66 +18,66 @@ makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/w
       # order is the same as Heath's document
       if (fleet[f] == "HADDOCK_FIX_5Z"){
         theName <- "HADDOCK_FIX_5Z"
-        this <- sp_haddock(type = "FIXED",area = "5ZJM", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_haddock(type = "FIXED",area = "5ZJM", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "POLLOCK_FIX_WEST"){
         theName <- "POLLOCK_FIX_WEST"
-        this <- sp_pollock(type = "FIXED",component = "WESTERN", mesh = "ALL",  dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_pollock(type = "FIXED",component = "WESTERN", mesh = "ALL",  dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "HALIBUT_45UND"){
         theName <- "HALIBUT_45UND"
-        this <- sp_halibut(vessLen = c(0,45), dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_halibut(vessLen = c(0,45), dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "HALIBUT_45PLUS"){
         theName <- "HALIBUT_45PLUS"
-        this <- sp_halibut(vessLen = c(45,999), dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_halibut(vessLen = c(45,999), dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "HALIBUT"){
         theName <- "HALIBUT"
-        this <- sp_halibut(vessLen = c(0,999), dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_halibut(vessLen = c(0,999), dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "REDFISH_2"){
         theName <- "REDFISH_2"
-        this <- sp_redfish(unit = 2, dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_redfish(unit = 2, dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "REDFISH_3"){
         theName <- "REDFISH_3"
-        this <- sp_halibut(unit = 3, dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_halibut(unit = 3, dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "HADDOCK_MOB_5Z"){
         theName <- "HADDOCK_MOB_5Z"
-        this <- sp_haddock(type = "MOBILE",area = "5ZJM", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_haddock(type = "MOBILE",area = "5ZJM", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "SILVERHAKE"){
         theName <- "SILVERHAKE"
-        this <- sp_silverhake(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_silverhake(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "WFLOUNDER"){
         theName <- "WFLOUNDER"
-        this <- sp_winterflounder(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_winterflounder(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "HADDOCK_MOB_4X5Y"){
         theName <- "HADDOCK_MOB_4X5Y"
-        this <- sp_haddock(type = "MOBILE",area = "4X5Y", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_haddock(type = "MOBILE",area = "4X5Y", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "POLLOCK_MOB_WEST"){
         theName <- "POLLOCK_MOB_WEST"
-        this <- sp_pollock(type = "MOBILE", component = "WESTERN", mesh = "ALL", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_pollock(type = "MOBILE", component = "WESTERN", mesh = "ALL", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "POLLOCK_MOB_EAST"){
         theName <- "POLLOCK_MOB_EAST"
-        this <- sp_pollock(type = "MOBILE", component = "EASTERN", mesh = "ALL", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_pollock(type = "MOBILE", component = "EASTERN", mesh = "ALL", dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
       if (fleet[f] == "SWORDFISH"){
         theName <- "SWORDFISH"
-        this <- sp_swordfish(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quiet = T)
+        this <- sp_swordfish(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       }
 
       cov <- calc_coverage(get_isdb = this$isdb, get_marfis = this$marf, quietly = T)
       thisTrips <- this$isdb$ALL_ISDB_TRIPS[!is.na(this$isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),"TRIP_ID_ISDB"]
-      get_data("isdb", data.dir = data.dir, quiet = T, env= loopy)
+      get_data("isdb", data.dir = data.dir, quietly = T, env= loopy)
       loopy$ISTRIPS = loopy$ISTRIPS[loopy$ISTRIPS$TRIP_ID %in% thisTrips,]
-      self_filter(quiet = T, env= loopy)
+      self_filter(quietly = T, env= loopy)
       thisSumm <- summarize_catches('isdb', env= loopy)
       thisSumm <- thisSumm[,c("FISHSET_ID",  "MARFIS_LICENSE_NO", "CFV",  "LATITUDE", "LONGITUDE", "SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT")]
       thisSumm_sps <- assess_privacy(df = thisSumm, agg.fields = c("EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT"),
