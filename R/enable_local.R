@@ -24,7 +24,7 @@
 #' roracle will extract data ~ 5x faster.
 #' @family setup
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#'
+#' @export
 enable_local <- function(data.dir = NULL,
                         fn.oracle.username = "_none_",
                         fn.oracle.password = "_none_",

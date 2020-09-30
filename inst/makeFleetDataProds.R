@@ -3,6 +3,8 @@ library(Mar.bycatch)
 library(Mar.datawrangling)
 library(Mar.utils)
 makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/wrangledData/", saveDir =NULL, fleet = NULL){
+
+  startTime1 <- Sys.time()
   if ((substr(saveDir, nchar(saveDir), nchar(saveDir))) != "/") saveDir =paste0(saveDir,"/")
   if(!dir.exists(saveDir)) dir.create(saveDir)
 
@@ -12,7 +14,7 @@ makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/w
     cat("Working on", fleet[f],"\n")
     for (y in 1:(length(bins)-1)){
       cat("\t",bins[y],"\n")
-      start.time <- Sys.time()
+      startTime2 <- Sys.time()
       loopy <- new.env()
       theName <- this <- thisTrips <- thisSumm <- thisSumm_sps <- NA
       # order is the same as Heath's document
@@ -75,9 +77,9 @@ makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/w
 
       cov <- calc_coverage(get_isdb = this$isdb, get_marfis = this$marf, quietly = T)
       thisTrips <- this$isdb$ALL_ISDB_TRIPS[!is.na(this$isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),"TRIP_ID_ISDB"]
-      get_data("isdb", data.dir = data.dir, quietly = T, env= loopy)
+      get_data("isdb", data.dir = data.dir, quiet = TRUE, env= loopy)
       loopy$ISTRIPS = loopy$ISTRIPS[loopy$ISTRIPS$TRIP_ID %in% thisTrips,]
-      self_filter(quietly = T, env= loopy)
+      self_filter(quiet = TRUE, env= loopy)
       thisSumm <- summarize_catches('isdb', env= loopy)
       thisSumm <- thisSumm[,c("FISHSET_ID",  "MARFIS_LICENSE_NO", "CFV",  "LATITUDE", "LONGITUDE", "SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT")]
       thisSumm_sps <- assess_privacy(df = thisSumm, agg.fields = c("EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT"),
@@ -98,9 +100,11 @@ makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/w
       saveRDS(thisSumm_sps$Grid2Min, file = paste0(saveDir,theName,"_grid_",bins[y],".rds"))
       saveRDS(thisSumm_sps$POLY_AGG, file = paste0(saveDir,theName,"_NAFO_",bins[y],".rds"))
       rm(loopy)
-      cat("\t","Completed in",round( difftime(Sys.time(),start.time,units = "secs"),0),"s\n")
-      start.time <- NULL
+      cat("\t","Completed in",round( difftime(Sys.time(),startTime2,units = "secs"),0),"s\n")
+      startTime2 <- NULL
     }
   }
+  cat("\t","Completed in",round( difftime(Sys.time(),startTime1,units = "mins"),0),"mins\n")
+  startTime2 <- NULL
 }
 #makeFleetDataProds(startYr = 2002, binYears = 5, fleet= c('HADDOCK_FIX_5Z','POLLOCK_FIX_WEST','HALIBUT_45UND','HALIBUT_45PLUS','HALIBUT','REDFISH_2','REDFISH_3','HADDOCK_MOB_5Z','SILVERHAKE','WFLOUNDER','HADDOCK_MOB_4X5Y', 'POLLOCK_MOB_WEST','POLLOCK_MOB_EAST','SWORDFISH'), saveDir = "C:/Users/McMahonM/Documents/Assistance/Bycatch/Loop202009")
