@@ -20,13 +20,9 @@
 #' @note as this was developed for the Maritimes region, internal position QC requires that
 #' Latitudes outside of 35:52 and Longitudes outside of -75:-45 are flagged and not used to match
 #' @noRd
-match_sets <- function(isdb_sets = NULL,
-                       matched_trips = NULL,
-                       marf_sets = NULL,
-                       maxSetDiff_hr =48,
-                       ...){
+match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, maxSetDiff_hr =48, ...){
   args <- list(...)$args
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
   isdb_sets_o <- isdb_sets
@@ -110,8 +106,6 @@ match_sets <- function(isdb_sets = NULL,
   megadf$BADPOS_I <- megadf$BADPOS_M <- NULL
   megadf[,"DIST_DIFF"]<- round(geosphere::distGeo(p1 = megadf[,c("LONGITUDE_I","LATITUDE_I")],
                                                   p2 = megadf[,c("LONGITUDE_M","LATITUDE_M")]),0)
-
-
   megadf$MATCH<- NA
   matches_all<- data.frame(TRIP_ID_ISDB=numeric(),
                            FISHSET_ID=numeric(),

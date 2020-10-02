@@ -8,8 +8,8 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   data.dir <- NA
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   #for each vector below, [1] is the name of the schema
   ISDB = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
   MARFIS = c("MARFISSCI.GEARS","MARFISSCI.HAIL_IN_CALLS","MARFISSCI.HAIL_OUTS","MARFISSCI.LICENCE_SUBTYPES",
@@ -19,7 +19,7 @@ can_run <- function(...){
   #connect_Oracle is just results of trying to establish connecion
   connect_Oracle <-function(...){
     args=list(...)$args
-    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     cxn <- do.call(Mar.utils::make_oracle_cxn, list(usepkg = args$usepkg,
                                                     fn.oracle.username = args$oracle.username,
                                                     fn.oracle.password = args$oracle.password,
@@ -55,7 +55,7 @@ can_run <- function(...){
   #wantLocal is T if all necessar things are found
   wantLocal <- function(tables = NULL, ...){
     args<-list(...)$args
-    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
       #marfis is annoying because some files are prefaced with marfissci

@@ -27,6 +27,8 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
+  args <-list(...)$args
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   if (is.null(get_marfis) & matchMarfis==TRUE){
     cat(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
     stop()
@@ -38,7 +40,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     VR_LIC_fleet <- sort(unique(stats::na.omit(paste0(thisFleet$VR_NUMBER,"_",thisFleet$LICENCE_ID))))
   }
 
-  args <-list(...)$args
   dateArgs = Mar.utils::vali_dates(dateStart = args$dateStart, dateEnd = args$dateEnd, year = args$year)
   args$dateStart <- dateArgs$dateStart
   args$dateEnd <- dateArgs$dateEnd
@@ -50,10 +51,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   if (!is.null(matchMarfis)) args$matchMarfis <- matchMarfis
 
 
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   get_isdb_trips<-function(VR_LIC = NULL,...){
     args <- list(...)$args
-    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     # Sometimes ISDB does not have the correct MARFIS licences - extract them from MARFIS,
     # merge them on to the ISDB data, and use them preferentially
     LICS <- sub("\\_.*", "", VR_LIC)
@@ -71,7 +71,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       ISTRIPS = ISTRIPS[(ISTRIPS$LANDING_DATE >= args$dateStart & ISTRIPS$LANDING_DATE <= args$dateEnd) |
                           (ISTRIPS$BOARD_DATE >= args$dateStart & ISTRIPS$BOARD_DATE <= args$dateEnd) ,]
 
-      if (args$debug) cat("!!!TRIPS post date range",nrow(ISTRIPS),"\n")
+      # if (args$debug) cat("!!!TRIPS post date range",nrow(ISTRIPS),"\n")
 
       colnames(ISTRIPS)[colnames(ISTRIPS)=="TRIP_ID"] <- "TRIP_ID_ISDB"
       colnames(ISTRIPS)[colnames(ISTRIPS)=="MARFIS_LICENSE_NO"] <- "LIC_TMP1"
@@ -88,7 +88,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       LICENCE_VESSELS <- LICENCE_VESSELS[paste0(LICENCE_VESSELS$LICENCE_ID,"_",LICENCE_VESSELS$VR_NUMBER) %in% VR_LIC, c("VR_NUMBER","LICENCE_ID")]
       colnames(LICENCE_VESSELS)[colnames(LICENCE_VESSELS)=="LICENCE_ID"] <- "LIC_TMP2"
 
-      if (args$debug) cat("LICENCE_VESSELS: ", nrow(LICENCE_VESSELS),"\n")
+      # if (args$debug) cat("LICENCE_VESSELS: ", nrow(LICENCE_VESSELS),"\n")
     }else{
       #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet
       #the criteria of being between our start and end dates
@@ -113,21 +113,21 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
                      to_date('",args$dateStart,"','YYYY-MM-DD') AND
                      to_date('",args$dateEnd,"','YYYY-MM-DD')))")
       isdb_TRIPS_all<- args$cxn$thecmd(args$cxn$channel, tripSQL)
-      if (args$debug) cat("!!!TRIPS post date range",nrow(isdb_TRIPS_all),"\n")
+      # if (args$debug) cat("!!!TRIPS post date range",nrow(isdb_TRIPS_all),"\n")
 
       LICENCE_VESSELSSQL <- paste0("SELECT DISTINCT VR_NUMBER, to_number(LICENCE_ID) LIC_TMP2 FROM MARFISSCI.LICENCE_VESSELS
                           WHERE VR_NUMBER BETWEEN ",min(VRS)," AND ",max(VRS),"
                           AND LICENCE_ID BETWEEN ",min(LICS)," AND ",max(LICS))
       LICENCE_VESSELS<- args$cxn$thecmd(args$cxn$channel, LICENCE_VESSELSSQL)
       LICENCE_VESSELS <- LICENCE_VESSELS[paste0(LICENCE_VESSELS$VR_NUMBER,"_",LICENCE_VESSELS$LIC_TMP2) %in% VR_LIC,]
-      if (args$debug) cat("LICENCE_VESSELS: ", nrow(LICENCE_VESSELS),"\n")
+      # if (args$debug) cat("LICENCE_VESSELS: ", nrow(LICENCE_VESSELS),"\n")
     }
     isdb_TRIPS_all <- merge(isdb_TRIPS_all, LICENCE_VESSELS, all.x=T)
     isdb_TRIPS_all$MARFIS_LICENSE_NO <- ifelse(is.na(isdb_TRIPS_all$LIC_TMP2),isdb_TRIPS_all$LIC_TMP1, isdb_TRIPS_all$LIC_TMP2)
 
     isdb_TRIPS_all <- isdb_TRIPS_all[paste0(isdb_TRIPS_all$VR_NUMBER,"_",isdb_TRIPS_all$MARFIS_LICENSE_NO) %in% VR_LIC,]
 
-    if (args$debug) cat("isdb_TRIPS_all (post VR_LIC check) : ", nrow(isdb_TRIPS_all),"\n")
+    # if (args$debug) cat("isdb_TRIPS_all (post VR_LIC check) : ", nrow(isdb_TRIPS_all),"\n")
     isdb_TRIPS_all$LIC_TMP1 <- isdb_TRIPS_all$LIC_TMP2 <- NULL
     ####
     if (!args$keepSurveyTrips){
@@ -148,12 +148,12 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       return(invisible(NULL))
     }
 
-    if (args$debug) cat("get_isdb_trips done:",nrow(isdb_TRIPS_all),"\n")
+    # if (args$debug) cat("get_isdb_trips done:",nrow(isdb_TRIPS_all),"\n")
     return(isdb_TRIPS_all)
   }
   get_isdb_sets<-function(isdbTrips=NULL,...){
     args <- list(...)$args
-    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     badDate <- as.POSIXct(as.Date("2100-01-01"))
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"), env = environment(), quietly = TRUE)
@@ -222,7 +222,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
 
-    if (args$debug) cat("get_isdb_sets done:",nrow(ISSETPROFILE_WIDE),"\n")
+    # if (args$debug) cat("get_isdb_sets done:",nrow(ISSETPROFILE_WIDE),"\n")
     return(ISSETPROFILE_WIDE)
   }
 

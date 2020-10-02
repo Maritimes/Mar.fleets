@@ -6,10 +6,11 @@
 #' @noRd
 apply_filters<-function(df = NULL, ...){
   args <- list(...)$args
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
   chk_Gears <- function(df=df,...){
     args <- list(...)$args
-    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     allGears = tolower(unique(df$GEAR_DESC))
     allGears = allGears[!allGears %in% c("trap net")]
     matchTrap=c('trap','pot')
@@ -31,12 +32,9 @@ apply_filters<-function(df = NULL, ...){
   }
 
   get_GearSpecs<- function(df = NULL, ...){
-
     args <- list(...)$args
-
+    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     LOG_EFRT_STD_INFO <- data.dir <- NA
-
-    if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
     gearSpcFilt <- c("Types","Sizes")
     if ("all" %in% args$gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
     if ("all" %in% args$gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
@@ -56,7 +54,7 @@ apply_filters<-function(df = NULL, ...){
     }
     gearSpecDF <- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
     gearSpecDF<- unique(gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,])
-    if (args$debug) cat("gearSpecDF done:",nrow(gearSpecDF),"\n")
+    # if (args$debug) cat("gearSpecDF done:",nrow(gearSpecDF),"\n")
 
     if(nrow(gearSpecDF)<1){
       cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
@@ -102,7 +100,7 @@ apply_filters<-function(df = NULL, ...){
       gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
 
     }
-    if (args$debug) cat("gearSpecRelevant done:",nrow(gearSpecRelevant),"\n")
+    # if (args$debug) cat("gearSpecRelevant done:",nrow(gearSpecRelevant),"\n")
 
     if(nrow(gearSpecRelevant)<1){
       cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
@@ -115,7 +113,7 @@ apply_filters<-function(df = NULL, ...){
 
     sizeFilt <- function(df=NULL, ...){
       args <- list(...)$args
-      if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+      if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
       if ('all' %in% args$gearSpSize){
         #just get all gear
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
@@ -132,32 +130,32 @@ apply_filters<-function(df = NULL, ...){
         }else{
           gearSpecRelevant_size <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% args$gearSpSize,"LOG_EFRT_STD_INFO_ID"]
         }
-        if (args$debug) cat("gearSpecRelevant_size done:",nrow(gearSpecRelevant_size),"\n")
+        # if (args$debug) cat("gearSpecRelevant_size done:",nrow(gearSpecRelevant_size),"\n")
         log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
-        if (args$debug) cat("log_eff recs:",length(log_eff),"\n")
+        # if (args$debug) cat("log_eff recs:",length(log_eff),"\n")
         df<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
         log_eff <- NA
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
       }
-      if (args$debug) cat("sizeFilt done:",nrow(df),"\n")
+      # if (args$debug) cat("sizeFilt done:",nrow(df),"\n")
       return(df)
     }
     typeFilt <- function(df=NULL, ...){
       args <- list(...)$args
-      if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+      if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
       if ('all' %in% args$gearSpType){
         #just get all gear
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
       }else if (length(args$gearSpType)>0){
         #apply the requested filter
         gearSpecRelevant_types <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% args$gearSpType,"LOG_EFRT_STD_INFO_ID"]
-        if (args$debug) cat("gearSpecRelevant_types done:",nrow(gearSpecRelevant_types),"\n")
+        # if (args$debug) cat("gearSpecRelevant_types done:",nrow(gearSpecRelevant_types),"\n")
         log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"LOG_EFRT_STD_INFO_ID"])
         df<-df[df$MON_DOC_ID %in% log_eff,]
         log_eff <- NA
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
       }
-      if (args$debug) cat("typeFilt done:",nrow(df),"\n")
+      # if (args$debug) cat("typeFilt done:",nrow(df),"\n")
       return(df)
     }
 
@@ -167,7 +165,6 @@ apply_filters<-function(df = NULL, ...){
   }
 
 
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
   if(!args$filtTrack$mdDone){
     if (length(unique(df$MD_CODE))==1 ){
       if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
@@ -179,7 +176,7 @@ apply_filters<-function(df = NULL, ...){
       args$filtTrack$mdDone <- T
     }
   }
-  if (args$debug) cat("MD_CODE done:",nrow(df),"\n")
+  # if (args$debug) cat("MD_CODE done:",nrow(df),"\n")
   if(!args$filtTrack$gearDone){
     if (length(unique(df$GEAR_CODE))==1){
       if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
@@ -191,7 +188,7 @@ apply_filters<-function(df = NULL, ...){
       args$filtTrack$gearDone<-T
     }
   }
-  if (args$debug) cat("GEAR_CODE done:",nrow(df),"\n")
+  # if (args$debug) cat("GEAR_CODE done:",nrow(df),"\n")
 
   if(!args$filtTrack$nafoDone){
     if (length(unique(df$NAFO))==1){
@@ -202,7 +199,7 @@ apply_filters<-function(df = NULL, ...){
       args$filtTrack$nafoDone<-T
     }
   }
-  if (args$debug) cat("NAFO done:",nrow(df),"\n")
+  # if (args$debug) cat("NAFO done:",nrow(df),"\n")
 
   if (args$filtTrack$gearDone){
     test=do.call(chk_Gears, list(df=df,args=args))
@@ -217,8 +214,8 @@ apply_filters<-function(df = NULL, ...){
       }
     }
   }
-  if (args$debug) cat("GearSpecs done:",nrow(df),"\n")
+  # if (args$debug) cat("GearSpecs done:",nrow(df),"\n")
 
-  if (args$debug) cat("apply_filters done:",nrow(df),"\n")
+  # if (args$debug) cat("apply_filters done:",nrow(df),"\n")
   return(df)
 }

@@ -20,7 +20,7 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
     cat("\n", "VMS data requires a connection to the network.  It cannot be run locally")
     return(NULL)
   }
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
  vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
                                                                 mDate=as.Date(character()),

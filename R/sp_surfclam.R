@@ -25,14 +25,16 @@
 #' @export
 sp_surfclam <- function(...){
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
-  # Set up the surfclam-specific variables -----------------------------------------------------
   marfSpp=608
   mdCode = 13
-  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
-  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
-  # such that it's no longer correct
-  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
-  data <- do.call(get_all, args)
+
+  argsFn <- as.list(environment())
+  argsUser <- list(...)
+
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+
+  data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   return(data)
 }

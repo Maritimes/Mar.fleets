@@ -33,6 +33,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   # Set up the Pollock-specific variables -------------------------------------------------------
   if (toupper(component)=="WESTERN"){
     nafoCode= c('4XO%','4XP%','4XQ%','4XR%','4XS%','5%') #'4XU%' intentionally excluded as directed by HS
@@ -59,10 +60,12 @@ sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
   }
 
   marfSpp=170
-  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
-  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
-  # such that it's no longer correct
-  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
-  data <- do.call(get_all, args)
+
+  argsFn <- as.list(environment())
+  argsUser <- list(...)
+
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+
+  data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   return(data)
 }

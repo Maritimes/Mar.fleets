@@ -26,15 +26,18 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_silverhake <- function(year=NULL, ...){
-  # Set up the silver hake-specific variables -------------------------------------------------------
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+
   marfSpp=172
   nafoCode=c('4V%','4W%','4X%') #4VWX
   gearCode =12
   mdCode = 2
-  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
-  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
-  # such that it's no longer correct
-  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
-  data <- do.call(get_all, args)
+
+  argsFn <- as.list(environment())
+  argsUser <- list(...)
+
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+
+  data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   return(data)
 }

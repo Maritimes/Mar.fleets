@@ -24,15 +24,17 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_northernshrimp <- function( ...){
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
 
-  # # Set up the shrimp-specific variables -------------------------------------------------------
   marfSpp=702
   mdCode = c(16,28)
-  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
-  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
-  # such that it's no longer correct
-  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
-  data <- do.call(get_all, args)
+
+  argsFn <- as.list(environment())
+  argsUser <- list(...)
+
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+
+  data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   return(data)
 }

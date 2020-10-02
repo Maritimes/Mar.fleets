@@ -27,11 +27,9 @@
 #' }
 #' @noRd
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-match_trips <- function(isdbTrips = NULL,
-                        marfMatch = NULL,
-                        ...){
+match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
   clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
     return(df)

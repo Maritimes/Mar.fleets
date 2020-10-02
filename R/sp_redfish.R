@@ -25,8 +25,9 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_redfish <- function(unit = NULL, ...){
-  # Set up the redfish-specific variables -------------------------------------------------------
-  if (unit==2){
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+
+    if (unit==2){
     nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
     gearSpSize = seq(90,115,1)
   } else if (unit==3){
@@ -37,10 +38,12 @@ sp_redfish <- function(unit = NULL, ...){
   marfSpp=120
   gearCode = 12
   mdCode = 2
-  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
-  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
-  # such that it's no longer correct
-  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
-  data <- do.call(get_all, args)
+
+  argsFn <- as.list(environment())
+  argsUser <- list(...)
+
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+
+  data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   return(data)
 }

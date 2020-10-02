@@ -29,7 +29,8 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_haddock <- function(type = NULL, area= NULL, ...){
-  # Set up the Haddock-specific variables -------------------------------------------------------
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+
   if (toupper(type) == "MOBILE"){
     mdCode = c(2)
     gearCode = c(12)
@@ -47,12 +48,13 @@ sp_haddock <- function(type = NULL, area= NULL, ...){
     nafoCode=c('5ZEJ%', '5ZEM%', '5ZEU%')
     if (toupper(type) == "MOBILE") gearSpSize="all"
   }
-
   marfSpp=110
-  # combine hardcoded and user parameters into list (hardcoded values OVERRIDE
-  # user parameters -  you can't call a sp_*() but change the gear, mdCode etc
-  # such that it's no longer correct
-  args  <- Mar.utils::combine_lists(primary =as.list(environment()), ancilliary =  list(...), quietly=F)
-  data <- do.call(get_all, args)
+
+  argsFn <- as.list(environment())
+  argsUser <- list(...)
+
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+
+  data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   return(data)
 }

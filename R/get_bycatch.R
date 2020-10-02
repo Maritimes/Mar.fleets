@@ -12,14 +12,14 @@
 #' @export
 get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   args <- list(...)$args
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   if (is.null(marfSpID))  marfSpID <- args$marfSpp
   if (is.null(marfSpID)){
     cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
     return(NULL)
   }
-  utils::data("spLookups", envir = environment())
+  utils::data("spLookups", package = "Mar.bycatch")
   spLookups <- get("spLookups", envir  = environment())
-  if (args$debug) cat(deparse(sys.calls()[[sys.nframe()-1]]),"\n")
 
   if (all(is.na(isTrips)))return(NULL) #get_isdb$ISDB_TRIPS_MATCHED
 
