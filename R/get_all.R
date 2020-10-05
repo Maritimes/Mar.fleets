@@ -18,6 +18,7 @@ get_all <- function(...){
   }
 
   cxnCheck <- do.call(can_run, args)
+
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
     stop("Can't run as requested.")
   } else if (is.list(cxnCheck)){
@@ -32,7 +33,7 @@ get_all <- function(...){
   if (!is.null(isdb))                    bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
   # Capture the results in a list and return them ------------------------------------------------
   # if (!is.null(marf) & !(args$quietly)) {
-  #   cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
+  # cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   #   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
   #   cat("\n")
   # }

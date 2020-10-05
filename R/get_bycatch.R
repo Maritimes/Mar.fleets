@@ -18,7 +18,12 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
     cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
     return(NULL)
   }
-  utils::data("spLookups", package = "Mar.bycatch")
+
+  if(!("Mar.bycatch" %in% installed.packages())){
+    utils::data("spLookups", envir = environment())
+  }else{
+    utils::data("spLookups", package = "Mar.bycatch")
+  }
   spLookups <- get("spLookups", envir  = environment())
 
   if (all(is.na(isTrips)))return(NULL) #get_isdb$ISDB_TRIPS_MATCHED

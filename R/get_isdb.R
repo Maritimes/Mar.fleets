@@ -44,8 +44,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   args$dateStart <- dateArgs$dateStart
   args$dateEnd <- dateArgs$dateEnd
 
-
-  if (!"filtTrack" %in% names(args)) args<-set_defaults(args = args)
+#!!MMM - may eed to assign args differently in case called directly?
+  # if (!"filtTrack" %in% names(args)) args<-set_defaults(args = args)
    # if params are sent, we should overwrite the defaults
   if (!is.null(keepSurveyTrips)) args$keepSurveyTrips <- keepSurveyTrips
   if (!is.null(matchMarfis)) args$matchMarfis <- matchMarfis

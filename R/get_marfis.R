@@ -27,7 +27,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   args <-list(...)$args
   if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
-  if (!"filtTrack" %in% names(args)) args<-set_defaults(args = args)
+
+  #!!MMM - may eed to assign args differently in case called directly?
+  # if (!"filtTrack" %in% names(args)) args<-set_defaults(args = args)
   # if params are sent, we should overwrite the defaults
   if (!is.null(marfSpp))args$marfSpp <- marfSpp
   if (useDate != 'LANDED_DATE') args$useDate <- useDate

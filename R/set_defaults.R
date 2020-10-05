@@ -17,10 +17,7 @@ set_defaults <- function(...){
   }
 
   # keep track of what filters have been applied ------------------------------------------------
-  filtTrack<-new.env()
-  filtTrack$mdDone <- filtTrack$gearDone <- filtTrack$nafoDone <- filtTrack$gearSpecsDone <- filtTrack$canDoGearSpecs <- filtTrack$vessLenDone <- FALSE
-  argsDef <- list(filtTrack = filtTrack,
-                  mdCode = "all",
+  argsDef <- list(mdCode = "all",
                   gearCode = "all",
                   nafoCode = "all",
                   gearSpType = "all",
@@ -56,7 +53,6 @@ set_defaults <- function(...){
   # if (argsDef$debug==T | argsDef$quietly==F){
     # full listing of all of the parameters used
     paramDf <- argsDef
-    paramDf$filtTrack <-NULL
     paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
     paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
     paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateStart","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
@@ -65,8 +61,7 @@ set_defaults <- function(...){
     paramDf[paramDf$PARAMETER %in% names(argsRec$argsUser),"SOURCE"] <- "user-supplied"
     paramDf[paramDf$PARAMETER %in% names(argsRec$argsFn),"SOURCE"] <- "hardcoded for this fleet"
     paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
-    paramDf <- rbind(paramDf, c("filtTrack*", "<env>","<system>"))
-    toMatch <- c("TRUE", "FALSE", "<env>","c\\(.*","^[0-9]*$")
+    toMatch <- c("TRUE", "FALSE","c\\(.*","^[0-9]*$")
     paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
     paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
     cat("\n","-----------------------------------------------------------------------","\n",
@@ -74,8 +69,7 @@ set_defaults <- function(...){
         "The parameters hardcoded within the species wrapper functions (e.g. sp_swordfish()) cannot be overridden.","\n",
         "For example, sp_swordfish() always uses longline, and cannot be called with a gearcode for 'traps' or 'trawls'.", "\n\n", sep = "")
     print(paramDf)
-    cat('\n*\t "filtTrack" is an environment that is used to store the status of the filtering of the data','\n')
-    cat("-----------------------------------------------------------------------\n")
+    cat("\n","-----------------------------------------------------------------------\n")
   # }
   return(argsDef)
 }

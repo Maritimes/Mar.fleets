@@ -164,58 +164,30 @@ apply_filters<-function(df = NULL, ...){
     return(df)
   }
 
+  if (length(unique(df$MD_CODE))==1 ){
+    if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
+  }else if (length(args$mdCode)>0 && args$mdCode != "all"){
+    df=df[df$MD_CODE %in% args$mdCode,]
+  }
 
-  if(!args$filtTrack$mdDone){
-    if (length(unique(df$MD_CODE))==1 ){
-      if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
-      args$filtTrack$mdDone <- T
-    }else if (length(args$mdCode)>0 && args$mdCode != "all"){
-      df=df[df$MD_CODE %in% args$mdCode,]
-      args$filtTrack$mdDone <- T
-    }else if (args$mdCode == 'all'){
-      args$filtTrack$mdDone <- T
+  if (length(unique(df$GEAR_CODE))==1){
+    if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
+  }else if (length(args$gearCode)>0 && args$gearCode != "all"){
+    df=df[df$GEAR_CODE %in% args$gearCode,]
+  }
+
+  if (length(unique(df$NAFO))==1){
+    if(!args$quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
+  }else if (length(args$nafoCode)>0 && args$nafoCode != "all"){
+    nafoCode <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
+    df <- df[grep(paste(nafoCode, collapse = '|'), df$NAFO),]
+  }
+
+  # test=do.call(chk_Gears, list(df=df,args=args))
+
+    if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
+      df <- do.call(get_GearSpecs, list(df=df,args=args))
     }
-  }
-  # if (args$debug) cat("MD_CODE done:",nrow(df),"\n")
-  if(!args$filtTrack$gearDone){
-    if (length(unique(df$GEAR_CODE))==1){
-      if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
-      args$filtTrack$gearDone<-T
-    }else if (length(args$gearCode)>0 && args$gearCode != "all"){
-      df=df[df$GEAR_CODE %in% args$gearCode,]
-      args$filtTrack$gearDone<-T
-    } else if (args$gearCode == "all"){
-      args$filtTrack$gearDone<-T
-    }
-  }
-  # if (args$debug) cat("GEAR_CODE done:",nrow(df),"\n")
 
-  if(!args$filtTrack$nafoDone){
-    if (length(unique(df$NAFO))==1){
-      if(!args$quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
-      args$filtTrack$nafoDone<-T
-    }else if (length(args$nafoCode)>0 && args$nafoCode != "all"){
-      df=df[df$NAFO %in% args$nafoCode,]
-      args$filtTrack$nafoDone<-T
-    }
-  }
-  # if (args$debug) cat("NAFO done:",nrow(df),"\n")
-
-  if (args$filtTrack$gearDone){
-    test=do.call(chk_Gears, list(df=df,args=args))
-    if (length(test)>0) args$filtTrack$canDoGearSpecs <- TRUE
-  }
-
-  if(args$filtTrack$canDoGearSpecs){#only show if a gear selection has been made
-    if(!args$filtTrack$gearSpecsDone){
-      if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
-        df <- do.call(get_GearSpecs, list(df=df,args=args))
-        args$filtTrack$gearSpecsDone <- T
-      }
-    }
-  }
-  # if (args$debug) cat("GearSpecs done:",nrow(df),"\n")
-
-  # if (args$debug) cat("apply_filters done:",nrow(df),"\n")
   return(df)
 }

@@ -9,7 +9,6 @@
 #' @export
 get_fleet<-function(...){
   args <-list(...)
-  if (!"filtTrack" %in% names(args))   args <- do.call(set_defaults, args)
   if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   get_fleetBasic<-function(...){
     args <- list(...)
@@ -24,23 +23,19 @@ get_fleet<-function(...){
         # args$mdCode = as.numeric(args$mdCode)
         MON_DOCS = MON_DOCS[MON_DOCS$MON_DOC_DEFN_ID %in% args$mdCode,]
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$MON_DOC_ID %in% MON_DOCS$MON_DOC_ID,  ]
-        args$filtTrack$mdDone<-T
-      }
+        }
       if (all(args$gearCode != 'all')) {
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$gearCode,]
-        args$filtTrack$gearDone<-T
       }
       if (all(args$nafoCode != 'all')) {
         nafoCode <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
         NAFO_UNIT_AREAS = NAFO_UNIT_AREAS[grep(paste(nafoCode, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
-        args$filtTrack$nafoDone<-T
       }
       if (all(args$vessLen != 'all')) {
         vessLen = eval(args$vessLen)
         VESSELS = VESSELS[VESSELS$LOA>= min(vessLen) & VESSELS$LOA<= max(vessLen),]
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$VR_NUMBER_FISHING %in% VESSELS$VR_NUMBER,]
-        args$filtTrack$vessLenDone<-T
       }
       if ("GEAR" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
       GEARS =GEARS[,c("GEAR_CODE", "DESC_ENG")]
@@ -61,13 +56,11 @@ get_fleet<-function(...){
     }else{
       if (all(args$mdCode != 'all')) {
         where_m = paste0("AND MD.MON_DOC_DEFN_ID IN (",Mar.utils::SQL_in(args$mdCode),")")
-        args$filtTrack$mdDone<-T
       }else{
         where_m = "AND 1=1"
       }
       if (all(args$gearCode != 'all')) {
         where_g = paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(args$gearCode),")")
-        args$filtTrack$gearDone<-T
       }else{
         where_g =  "AND 1=1"
       }
@@ -80,7 +73,6 @@ get_fleet<-function(...){
         }else {
           where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(args$nafoCode),")")
         }
-        args$filtTrack$nafoDone<-T
       }else{
         where_n =  "AND 1=1"
       }
@@ -88,7 +80,6 @@ get_fleet<-function(...){
       if (all(args$vessLen != 'all')) {
         vessLen = eval(args$vessLen)
         where_vl =  paste0("AND V.LOA BETWEEN ",min(vessLen)," AND ",max(vessLen))
-        args$filtTrack$vessLenDone<-T
       }else{
         where_vl = "AND 1=1"
       }
@@ -130,7 +121,6 @@ get_fleet<-function(...){
     }
     return(theFleet)
   }
-
   df <- do.call(get_fleetBasic, args)
   # if (args$debug) cat("1 - nrow(get_fleetBasic):",nrow(df),"\n")
 
