@@ -24,7 +24,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_northernshrimp <- function( ...){
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
 
   marfSpp=702

@@ -26,7 +26,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_silverhake <- function(year=NULL, ...){
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
   marfSpp=172
   nafoCode=c('4V%','4W%','4X%') #4VWX

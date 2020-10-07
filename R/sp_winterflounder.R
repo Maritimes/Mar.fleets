@@ -24,7 +24,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_winterflounder <- function(...){
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
   marfSpp=143
   nafoCode=c('4X%','5Y%')

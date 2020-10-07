@@ -25,7 +25,6 @@
 sp_offshorelobster <- function(...){
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
 
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
   marfSpp=700
   mdCode = 19
 

@@ -86,8 +86,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   thisIsdbTrips <- thisMarfMatch<- NULL
 
   # MARFIS HAILOUT CONFIRMATION NUMBER -----------------------------------------------------------
-  #lastisdbTrips <<- isdbTrips[,c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")]
-  #lastmarfMatch <<- marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")]
   thisIsdbTrips <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
   thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")])
 

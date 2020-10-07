@@ -29,7 +29,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 sp_haddock <- function(type = NULL, area= NULL, ...){
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
   if (toupper(type) == "MOBILE"){
     mdCode = c(2)

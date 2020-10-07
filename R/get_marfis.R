@@ -188,7 +188,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     args <- list(...)$args
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     if(args$useLocal){
-      HAIL_IN_CALLS <- HAIL_OUTS <- NA
+      HAIL_IN_CALLS <-  NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"), env = environment(), quietly = TRUE)
       HIC_df <- HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
 
@@ -248,8 +248,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
 
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
   eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
-
   ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
+
   if (!is.null(ed) && nrow(ed)>0){
     ps<- unique(merge(ps, ed, all.x = T))
     if (nrow(ps)<1){
@@ -264,15 +264,24 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   hic<- do.call(getHIC, list(trips = ps$TRIP_ID, args=args))
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
-
     if (nrow(ps)<1){
       cat(paste0("\n","No MARFIS data meets criteria"))
       return(invisible(NULL))
     }
+  }else{
+    ps$CONF_NUMBER_HI <- ps$HAIL_OUT_ID_HI <- NA
   }
+
+
   hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
   if (!is.null(hoc) && nrow(hoc)>0){
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
+    if (nrow(ps)<1){
+      cat(paste0("\n","No MARFIS data meets criteria"))
+      return(invisible(NULL))
+    }
+  }else{
+    ps$CONF_NUMBER_HO <- ps$HAIL_OUT_ID_HO <- NA
   }
 
   colnames(ps)[colnames(ps)=="TRIP_ID"] <- "TRIP_ID_MARF"
