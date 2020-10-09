@@ -97,13 +97,11 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
                             c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                               'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                               'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS')]
-      # if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
       if (all(args$nafoCode != 'all')){
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
         nafoCodeSimp <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
         PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
       }
-      # if(debug)cat("\n","Remaining MDs): ", setdiff(debugMDs, unique(PS_df[PS_df$MON_DOC_ID %in% debugMDs,"MON_DOC_ID"])))
       PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
 
     }else{
@@ -142,6 +140,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       PS_df<- args$cxn$thecmd(args$cxn$channel, PSQry0)
       PS_df <- PS_df[PS_df$PRO_SPC_INFO_ID %in% allProSpc,]
     }
+
+    PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
+    PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
     # if (args$debug) cat("getPS done:",nrow(PS_df),"\n")
     return(PS_df)
   }

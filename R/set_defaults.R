@@ -37,20 +37,22 @@ set_defaults <- function(...){
                   usepkg = "rodbc",
                   useLocal = FALSE,
                   quietly=TRUE,
+                  debugISDBTrips = "_none_",
                   debug=FALSE
   )
-  argsCheck <- names(argsDef)
   argsDef[names(args)] <- args
   dateArgs <- Mar.utils::vali_dates(dateStart = argsDef$dateStart, dateEnd = argsDef$dateEnd, year = argsDef$year)
   argsDef$dateStart <- dateArgs$dateStart
   argsDef$dateEnd <- dateArgs$dateEnd
+  argsDef$year <- NULL
+
+  argsCheck <- names(argsDef)
+
   if (length(argsCheck) != length(argsDef)){
     jakes <- setdiff(names(argsDef),argsCheck)
     stop(paste0("COATES: This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }
-  argsDef$year <- NULL
 
-  # if (argsDef$debug==T | argsDef$quietly==F){
     # full listing of all of the parameters used
     paramDf <- argsDef
     paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
@@ -68,8 +70,9 @@ set_defaults <- function(...){
         "Following is a full list of the parameters that are being used.","\n",
         "The parameters hardcoded within the species wrapper functions (e.g. sp_swordfish()) cannot be overridden.","\n",
         "For example, sp_swordfish() always uses longline, and cannot be called with a gearcode for 'traps' or 'trawls'.", "\n\n", sep = "")
+    paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
     print(paramDf)
+
     cat("\n","-----------------------------------------------------------------------\n")
-  # }
   return(argsDef)
 }

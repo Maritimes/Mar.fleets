@@ -29,6 +29,8 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
+  colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
+
   if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
   clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
@@ -50,7 +52,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
   marf_CONF_all <- sort(unique(stats::na.omit(c(marfMatch$CONF_NUMBER_HI, marfMatch$CONF_NUMBER_HO))))
   marf_VR_LIC_all <- sort(unique(stats::na.omit(c(paste0( marfMatch$VR_NUMBER_FISHING,"_",marfMatch$LICENCE_ID),paste0(marfMatch$VR_NUMBER_LANDING,"_",marfMatch$LICENCE_ID)))))
-  isdbTrips$VR_LIC = paste0(isdbTrips$VR_NUMBER,"_",isdbTrips$MARFIS_LICENSE_NO)
+  isdbTrips$VR_LIC = paste0(isdbTrips$iVRS,"_",isdbTrips$iLICS )
 
   Marf_in_ISDB <-NA
   Marf_in_ISDB_trip <- NA
@@ -99,14 +101,13 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # these are more complicated because: I'm matching on multiple fields (vrn/lic/date),
   #                                     There are multiple vrn fields,
   #                                     The date field is checked against a range (not just ==)
-
-  isdbTrips_dets <- unique(isdbTrips[!is.na(isdbTrips$MARFIS_LICENSE_NO) &
-                                       !is.na(isdbTrips$VR_NUMBER)  &
+  isdbTrips_dets <- unique(isdbTrips[!is.na(isdbTrips$iLICS ) &
+                                       !is.na(isdbTrips$iVRS)  &
                                        !is.na(isdbTrips$BOARD_DATE) &
                                        !is.na(isdbTrips$LANDING_DATE),
-                                     c("TRIP_ID_ISDB","MARFIS_LICENSE_NO","VR_NUMBER","BOARD_DATE","LANDING_DATE")])
-  isdbTrips_dets$VR_LIC <- paste0(isdbTrips_dets$VR_NUMBER,"_",isdbTrips_dets$MARFIS_LICENSE_NO)
-  isdbTrips_dets$VR_NUMBER <- isdbTrips_dets$MARFIS_LICENSE_NO <- NULL
+                                     c("TRIP_ID_ISDB","iLICS","iVRS","BOARD_DATE","LANDING_DATE")])
+  isdbTrips_dets$VR_LIC <- paste0(isdbTrips_dets$iVRS,"_",isdbTrips_dets$iLICS )
+  isdbTrips_dets$iVRS <- isdbTrips_dets$iLICS  <- NULL
   marf_TRIPS_F <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID","VR_NUMBER_FISHING", args$useDate )])
   marf_TRIPS_F$VR_LIC <- paste0(marf_TRIPS_F$VR_NUMBER_FISHING,"_",marf_TRIPS_F$LICENCE_ID)
   marf_TRIPS_F$LICENCE_ID <- marf_TRIPS_F$VR_NUMBER_FISHING <- NULL
@@ -119,7 +120,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
   within <- isdb_marf_dets[isdb_marf_dets$LANDED_DATE >= isdb_marf_dets$BOARD_DATE & isdb_marf_dets$LANDED_DATE <= isdb_marf_dets$LANDING_DATE,]
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
-  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_DETS"] <- "good date"
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_DETS"] <- "within date bounds"
   isdb_marf_dets <- isdb_marf_dets[!(isdb_marf_dets$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB),]
   matches =  unique(rbind(matches, within[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
 
@@ -129,7 +130,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   close$CLOSEST<- with(close, pmin(BD, LD))
   close <- close[close$CLOSEST <2,]
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
-  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_DETS"] <- "close dates"
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_DETS"] <- "ISDB/MARF activity with 2 days"
   matches =  unique(rbind(matches, close[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
 
 

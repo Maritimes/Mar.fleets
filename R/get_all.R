@@ -30,13 +30,18 @@ get_all <- function(...){
   if (!is.null(fleet) & !is.null(marf)) isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, args=args))
 
   matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
-  if (!is.null(isdb))                    bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
+  if (!is.null(isdb)) bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
   # Capture the results in a list and return them ------------------------------------------------
   # if (!is.null(marf) & !(args$quietly)) {
   # cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
   #   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
   #   cat("\n")
   # }
+  if(!any(args$debugISDBTrips =="_none_")) {
+    args[["debugTripsRes"]] <- isdb$debugTrips
+    debugTripsMARFIS <- do.call(get_fleet, args)
+    marf[["debugTripsMARFIS"]] <- debugTripsMARFIS
+  }
   res=list()
   res[["fleet"]]<- fleet
   res[["marf"]]<- marf
