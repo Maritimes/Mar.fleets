@@ -108,10 +108,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
     if(!any(args$debugISDBTrips =="_none_")){
       mknownVess <- sub("_.*", "", mVR_LIC)
-      debugTrips$Is_Fleet_Vess <- sapply(debugTrips[, c("iVRS")], function(x) (x %in% mknownVess))
+      debugTrips$FLEET_VESS <- sapply(debugTrips[, c("iVRS")], function(x) (x %in% mknownVess))
       rm(mknownVess)
       mknownLic <- sub(".*_", "", mVR_LIC)
-      debugTrips$Is_Fleet_Lic <- sapply(debugTrips[, c("iLICS")], function(x) (x %in% mknownLic))
+      debugTrips$FLEET_LIC <- sapply(debugTrips[, c("iLICS")], function(x) (x %in% mknownLic))
       rm(mknownLic)
       debugTrips$ISDB_VESS_LIC <- sapply(paste0(debugTrips$iVRS,"_",debugTrips$iLICS), function(x) (x %in% mVR_LIC))
     }
@@ -126,9 +126,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
                         c("VR_NUMBER", "TRIP_ISDB", "TRIP", "TRIPCD_ID", "MARFIS_CONF_NUMBER", "MARFIS_LICENSE_NO")])
         }
       }
-      if(!any(args$debugISDBTrips =="_none_")) debugTrips$ISDB_SURVTRIP <- sapply(debugTrips[, c("TRIPCD_ID")], function(x) (x >= 7010 & x != 7099))
       ISTRIPS = ISTRIPS[(ISTRIPS$TRIPCD_ID < 7010 | ISTRIPS$TRIPCD_ID == 7099),]
     }
+
+    if(!any(args$debugISDBTrips =="_none_")) debugTrips$ISDB_SURVTRIP <- sapply(debugTrips[, c("TRIPCD_ID")], function(x) (x >= 7010 & x != 7099))
     if (nrow(ISTRIPS)>0){
       theTripCols <- c("MARFIS_CONF_NUMBER","iVRS","iLICS") #"LICENSE_NO",
       ISTRIPS[,theTripCols] <- suppressWarnings(as.numeric(as.character(unlist(ISTRIPS[,theTripCols]))))
@@ -140,7 +141,12 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     res <- list()
     res[["ISTRIPS"]] <- ISTRIPS
     res[["debugTrips"]] <- NA
-    if(!any(args$debugISDBTrips =="_none_")) res[["debugTrips"]] <- debugTrips
+    if(!any(args$debugISDBTrips =="_none_")) {
+      colnames(debugTrips)[colnames(debugTrips)=="iLICS"] <- "LICENSE"
+      colnames(debugTrips)[colnames(debugTrips)=="iVRS"] <- "VESSEL"
+      debugTrips<- debugTrips[,c("TRIP_ISDB",  "TRIP", "ISDB_TRIP_EXISTS", "BOARD_DATE", "LANDING_DATE", "ISDB_DATERANGE", "VESSEL", "FLEET_VESS", "LICENSE", "FLEET_LIC", "ISDB_VESS_LIC", "TRIPCD_ID", "ISDB_SURVTRIP")]
+      res[["debugTrips"]] <- debugTrips
+    }
     return(res)
   }
   get_isdb_sets<-function(isdbTrips=NULL,...){
@@ -221,10 +227,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
   isdb_TRIPS_all <- do.call(get_isdb_trips, list(mVR_LIC = VR_LIC_fleet, args = args))
   debugTrips <- isdb_TRIPS_all$debugTrips
-  if(!all(is.na(debugTrips))){
-    colnames(debugTrips)[colnames(debugTrips)=="iLICS"] <- "LICENSE"
-    colnames(debugTrips)[colnames(debugTrips)=="iVRS"] <- "VESSEL"
-  }
+  # if(!all(is.na(debugTrips))){
+  #
+  # }
   isdb_TRIPS_all <- isdb_TRIPS_all$ISTRIPS
 
   isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPS_all, args = args))
