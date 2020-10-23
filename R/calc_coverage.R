@@ -70,8 +70,8 @@ calc_coverage<-function(get_isdb = NULL,
                           agg.poly.field = NULL,
                           quietly = FALSE){
 
-    oTrips <- get_isdb$ISDB_TRIPS_MATCHED
-    oSets <- get_isdb$ISDB_SETS_MATCHED
+    oTrips <- get_isdb$ALL_ISDB_TRIPS
+    oSets <- get_isdb$ALL_ISDB_SETS
 
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
@@ -194,7 +194,6 @@ calc_coverage<-function(get_isdb = NULL,
   }else{
     o_s<-NA
   }
-
 
   #remove rows with no useful values
   allAreas =  unique(allAreas[rowSums(is.na(allAreas[,2:ncol(allAreas)]))!=ncol(allAreas)-1,])
