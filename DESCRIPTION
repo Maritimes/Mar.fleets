@@ -1,7 +1,7 @@
 Package: Mar.bycatch
 Type: Package
 Title: Facilitates Extraction of Commercial Fisheries Data for the Maritimes
-Version: 2020.10.14
+Version: 2020.10.23
 Author: Mike McMahon <mike.mcmahon@dfo-mpo.gc.ca>
 Maintainer: Mike McMahon <mike.mcmahon@dfo-mpo.gc.ca>
 Description: This package facilitates the identification and extraction of relevant commercial catch data for a given commercial fleet (Maritimes), and the identification and extraction of the available observer data associated with it.
@@ -33,4 +33,4 @@ Enhances:
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1

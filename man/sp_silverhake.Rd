@@ -33,6 +33,15 @@ information for the silver hake fleets:
   estimated discarded wt(kg) are all captured
   }
 }
+\note{
+Hardcoded parameters for this fleet are as follows:
+\itemize{
+  \item \code{marfSpp} = 172
+  \item \code{nafoCode} = c('4V\%','4W\%','4X\%')
+  \item \code{gearCode} = 12
+  \item \code{mdCode} = 2
+}
+}
 \examples{
 \dontrun{
 SilverHake <- sp_silverhake(data.dir = "C:/myData")
@@ -42,12 +51,8 @@ SilverHake <- sp_silverhake(data.dir = "C:/myData")
 Other species: 
 \code{\link{sp_haddock}()},
 \code{\link{sp_halibut}()},
-\code{\link{sp_northernshrimp}()},
-\code{\link{sp_offshorelobster}()},
 \code{\link{sp_pollock}()},
 \code{\link{sp_redfish}()},
-\code{\link{sp_surfclam}()},
-\code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}
 }
 \author{

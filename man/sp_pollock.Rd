@@ -35,6 +35,35 @@ information for the pollock fleets:
   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
   estimated discarded wt(kg) are all captured}
 }
+\note{
+Hardcoded parameters for this fleet are as follows:
+\itemize{
+  \item \code{marfSpp} =170
+}
+For component = "WESTERN"
+\itemize{
+\item \code{nafoCode} = c('4XO\%','4XP\%','4XQ\%','4XR\%','4XS\%','5\%') ("MOBILE")
+\item \code{nafoCode} = c('4XO\%','4XP\%','4XQ\%','4XR\%','4XS\%','5\%', '4XU\%') ("FIXED")
+\item \code{gearSpSize} = seq(90,115,1)
+}
+For component = "EASTERN"
+\itemize{
+\item \code{nafoCode} c('4XM\%','4XN\%','4V\%','4W\%')
+}
+For type = "MOBILE"
+\itemize{
+\item \code{mdCode} = c(2)
+\item \code{gearCode} = c(12)
+\item \code{gearSpSize} = seq(1,129,1) ("SMALL")
+\item \code{gearSpSize} = seq(130,999,1) ("LARGE")
+}
+For type = "FIXED"
+\itemize{
+\item \code{mdCode} = c(1, 29)
+\item \code{gearCode} = c(40,41)
+\item \code{gearSpSize} = 'all'
+}
+}
 \examples{
 \dontrun{
 Pollock_West_m_sm <- sp_pollock(type = "MOBILE",
@@ -51,12 +80,8 @@ Pollock_East_m_lg <- sp_pollock(type = "MOBILE",
 Other species: 
 \code{\link{sp_haddock}()},
 \code{\link{sp_halibut}()},
-\code{\link{sp_northernshrimp}()},
-\code{\link{sp_offshorelobster}()},
 \code{\link{sp_redfish}()},
 \code{\link{sp_silverhake}()},
-\code{\link{sp_surfclam}()},
-\code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}
 }
 \author{

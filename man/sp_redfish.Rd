@@ -32,6 +32,24 @@ information for the redfish fleets:
   estimated discarded wt(kg) are all captured
   }
 }
+\note{
+Hardcoded parameters for this fleet are as follows:
+\itemize{
+  \item \code{marfSpp} = 120
+  \item \code{gearCode} = 12
+  \item \code{mdCode} = 2
+}
+For unit = 2
+\itemize{
+\item \code{nafoCode} = c('4VS\%','4VN\%','4WF\%','4WG\%','4WJ\%','3PS\%')
+\item \code{gearSpSize} = seq(90,115,1)
+}
+For unit = 3
+\itemize{
+\item \code{nafoCode} = c('4X\%','5YF\%','4WD\%','4WE\%','4WH\%','4WK\%','4WL\%')
+\item \code{gearSpSize} = seq(110,115,1)
+}
+}
 \examples{
 \dontrun{
 Redfish <- sp_redfish(unit = 2, data.dir = "C:/myData")
@@ -41,12 +59,8 @@ Redfish <- sp_redfish(unit = 2, data.dir = "C:/myData")
 Other species: 
 \code{\link{sp_haddock}()},
 \code{\link{sp_halibut}()},
-\code{\link{sp_northernshrimp}()},
-\code{\link{sp_offshorelobster}()},
 \code{\link{sp_pollock}()},
 \code{\link{sp_silverhake}()},
-\code{\link{sp_surfclam}()},
-\code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}
 }
 \author{

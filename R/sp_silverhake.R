@@ -24,6 +24,13 @@
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @note Hardcoded parameters for this fleet are as follows:
+#' \itemize{
+#'   \item \code{marfSpp} = 172
+#'   \item \code{nafoCode} = c('4V\%','4W\%','4X\%')
+#'   \item \code{gearCode} = 12
+#'   \item \code{mdCode} = 2
+#' }
 #' @export
 sp_silverhake <- function(year=NULL, ...){
 

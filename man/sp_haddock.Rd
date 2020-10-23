@@ -34,6 +34,32 @@ information for the haddock fleets:
   estimated discarded wt(kg) are all captured
   }
 }
+\note{
+Hardcoded parameters for this fleet are as follows:
+\itemize{
+  \item \code{marfSpp} = 110
+}
+For type = MOBILE
+\itemize{
+\item \code{mdCode} = c(2)
+\item \code{gearCode } = c(12)
+\item \code{gearSpSize} = seq(130,999,1) (4X5Y)
+\item \code{gearSpSize} = 'all' (5ZJM)
+}
+For type = FIXED
+\itemize{
+\item \code{mdCode} = c(1, 29)
+\item \code{gearCode} = c(50,51)
+\item \code{gearSpSize} = 'all'
+}
+\itemize{
+\item \code{nafoCode} = c('4X\%', '5Y\%')
+}
+For area = 5ZJM
+\itemize{
+\item \code{nafoCode} = c('5ZEJ\%', '5ZEM\%', '5ZEU\%')
+}
+}
 \examples{
 \dontrun{
 Haddock_5ZJM_m <- sp_haddock(type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
@@ -45,13 +71,9 @@ Haddock_4X5Y_f <- sp_haddock(type = "FIXED", area = "4X5Y", data.dir = "C:/myDat
 \seealso{
 Other species: 
 \code{\link{sp_halibut}()},
-\code{\link{sp_northernshrimp}()},
-\code{\link{sp_offshorelobster}()},
 \code{\link{sp_pollock}()},
 \code{\link{sp_redfish}()},
 \code{\link{sp_silverhake}()},
-\code{\link{sp_surfclam}()},
-\code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}
 }
 \author{

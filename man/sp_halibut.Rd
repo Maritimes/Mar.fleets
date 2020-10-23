@@ -35,6 +35,15 @@ information for the halibut fleets:
   estimated discarded wt(kg) are all captured
   }
 }
+\note{
+Hardcoded parameters for this fleet are as follows:
+\itemize{
+  \item \code{marfSpp} = 130
+  \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
+  \item \code{gearCode} = c(50,51)
+  \item \code{mdCode} = c(1, 29)
+}
+}
 \examples{
 \dontrun{
 Halibut <- sp_halibut(vessLen = c(0,45), data.dir = "C:/myData")
@@ -43,13 +52,9 @@ Halibut <- sp_halibut(vessLen = c(0,45), data.dir = "C:/myData")
 \seealso{
 Other species: 
 \code{\link{sp_haddock}()},
-\code{\link{sp_northernshrimp}()},
-\code{\link{sp_offshorelobster}()},
 \code{\link{sp_pollock}()},
 \code{\link{sp_redfish}()},
 \code{\link{sp_silverhake}()},
-\code{\link{sp_surfclam}()},
-\code{\link{sp_swordfish}()},
 \code{\link{sp_winterflounder}()}
 }
 \author{

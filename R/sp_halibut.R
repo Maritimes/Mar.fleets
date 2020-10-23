@@ -26,6 +26,13 @@
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @note Hardcoded parameters for this fleet are as follows:
+#' \itemize{
+#'   \item \code{marfSpp} = 130
+#'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
+#'   \item \code{gearCode} = c(50,51)
+#'   \item \code{mdCode} = c(1, 29)
+#' }
 #' @export
 sp_halibut <- function(vessLen = c(0,999), ...){
 

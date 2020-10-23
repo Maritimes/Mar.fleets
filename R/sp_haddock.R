@@ -27,6 +27,31 @@
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @note Hardcoded parameters for this fleet are as follows:
+#' \itemize{
+#'   \item \code{marfSpp} = 110
+#' }
+#' For type = MOBILE
+#' \itemize{
+#' \item \code{mdCode} = c(2)
+#' \item \code{gearCode } = c(12)
+#' \item \code{gearSpSize} = seq(130,999,1) (4X5Y)
+#' \item \code{gearSpSize} = 'all' (5ZJM)
+#' }
+#' For type = FIXED
+#' \itemize{
+#' \item \code{mdCode} = c(1, 29)
+#' \item \code{gearCode} = c(50,51)
+#' \item \code{gearSpSize} = 'all'
+#' }
+# For area = 4X5Y
+#' \itemize{
+#' \item \code{nafoCode} = c('4X\%', '5Y\%')
+#' }
+#' For area = 5ZJM
+#' \itemize{
+#' \item \code{nafoCode} = c('5ZEJ\%', '5ZEM\%', '5ZEU\%')
+#' }
 #' @export
 sp_haddock <- function(type = NULL, area= NULL, ...){
 
