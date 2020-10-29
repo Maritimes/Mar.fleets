@@ -135,7 +135,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
         thisTrip_MATCHED$SET_MATCH <- "POS"
       }else{
         #multiple best?  A tie?
-        Warning("Something weird happened while attempting to matchh sets.  Please let Mike.McMahon@dfo-mpo.gc.ca know what you were just doing - maybe send him the script you just ran?")
+        Warning("Something weird happened while attempting to match sets.  Please let Mike.McMahon@dfo-mpo.gc.ca know what you were just doing - maybe send him the script you just ran?")
       }
 
 

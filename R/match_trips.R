@@ -130,7 +130,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   close$CLOSEST<- with(close, pmin(BD, LD))
   close <- close[close$CLOSEST <2,]
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
-  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_DETS"] <- "ISDB/MARF activity with 2 days"
+  isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_DETS"] <- "ISDB/MARF activity within 2 days"
   matches =  unique(rbind(matches, close[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
 
 
