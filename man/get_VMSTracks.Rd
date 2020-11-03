@@ -26,7 +26,7 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{calc_coveragio}()},
+\code{\link{calc_coverage}()},
 \code{\link{get_bycatch}()},
 \code{\link{plot_bycatch}()},
 \code{\link{plot_coverage_time}()}

@@ -26,7 +26,7 @@ This function can accept many parameters.
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{calc_coveragio}()},
+\code{\link{calc_coverage}()},
 \code{\link{get_vmstracks}()},
 \code{\link{plot_bycatch}()},
 \code{\link{plot_coverage_time}()}

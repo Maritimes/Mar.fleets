@@ -1,4 +1,4 @@
-#' @title calc_coveragio
+#' @title calc_coverage
 #' @description This function takes the results from get_marfis() and get_isdb()
 #' and produces a table showing the how the proportion of observed data varies
 #' across areas.  Different polygons can be provided, and the results will be
@@ -67,7 +67,7 @@
 #' @family simpleproducts
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-calc_coveragio<-function(get_isdb = NULL,
+calc_coverage<-function(get_isdb = NULL,
                         get_marfis = NULL,
                         marfMatchOnly = TRUE,
                         agg.poly.shp = NULL,
