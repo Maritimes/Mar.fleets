@@ -46,7 +46,7 @@ plot_bycatch(isdbSp = swordfish2018$bycatch[1,1],
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{calc_coverage}()},
+\code{\link{calc_coveragio}()},
 \code{\link{get_bycatch}()},
 \code{\link{get_vmstracks}()},
 \code{\link{plot_coverage_time}()}
