@@ -1,6 +1,6 @@
-#' @title sp_haddock
+#' @title fleet_redfish
 #' @description This function is a wrapper function that facilitates extracting the following
-#' information for the haddock fleets:
+#' information for the redfish fleets:
 #' \itemize{
 #'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -14,65 +14,45 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
-#' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
-#' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
+#' @param unit default is \code{NULL}. This is either "2" or "3".
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Haddock_5ZJM_m <- sp_haddock(type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
-#' }
-#' \dontrun{
-#' Haddock_4X5Y_f <- sp_haddock(type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
-#' }
-#' @family species
+#' Redfish <- fleet_redfish(unit = 2, data.dir = "C:/myData")
+#'                       }
+#' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = 110
+#'   \item \code{marfSpp} = 120
+#'   \item \code{gearCode} = 12
+#'   \item \code{mdCode} = 2
 #' }
-#' For type = MOBILE
+#' For unit = 2
 #' \itemize{
-#' \item \code{mdCode} = c(2)
-#' \item \code{gearCode } = c(12)
-#' \item \code{gearSpSize} = seq(130,999,1) (4X5Y)
-#' \item \code{gearSpSize} = 'all' (5ZJM)
+#' \item \code{nafoCode} = c('4VS\%','4VN\%','4WF\%','4WG\%','4WJ\%','3PS\%')
+#' \item \code{gearSpSize} = seq(90,115,1)
 #' }
-#' For type = FIXED
+#' For unit = 3
 #' \itemize{
-#' \item \code{mdCode} = c(1, 29)
-#' \item \code{gearCode} = c(50,51)
-#' \item \code{gearSpSize} = 'all'
-#' }
-# For area = 4X5Y
-#' \itemize{
-#' \item \code{nafoCode} = c('4X\%', '5Y\%')
-#' }
-#' For area = 5ZJM
-#' \itemize{
-#' \item \code{nafoCode} = c('5ZEJ\%', '5ZEM\%', '5ZEU\%')
+#' \item \code{nafoCode} = c('4X\%','5YF\%','4WD\%','4WE\%','4WH\%','4WK\%','4WL\%')
+#' \item \code{gearSpSize} = seq(110,115,1)
 #' }
 #' @export
-sp_haddock <- function(type = NULL, area= NULL, ...){
+fleet_redfish <- function(unit = NULL, ...){
 
-  if (toupper(type) == "MOBILE"){
-    mdCode = c(2)
-    gearCode = c(12)
-    gearSpSize = seq(130,999,1)
-    #gearSpSize = 'all'
-  }else if (toupper(type) == "FIXED"){
-    mdCode = c(1, 29)
-    gearCode = c(50,51)
-    gearSpSize = 'all'
+    if (unit==2){
+    nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
+    gearSpSize = seq(90,115,1)
+  } else if (unit==3){
+    nafoCode= c('4X%','5YF%','4WD%','4WE%','4WH%','4WK%','4WL%')
+    gearSpSize = seq(110,115,1)
   }
 
-  if (toupper(area) == "4X5Y"){
-    nafoCode=c('4X%', '5Y%')
-  }else if (toupper(area) == "5ZJM"){
-    nafoCode=c('5ZEJ%', '5ZEM%', '5ZEU%')
-    if (toupper(type) == "MOBILE") gearSpSize="all"
-  }
-  marfSpp=110
+  marfSpp=120
+  gearCode = 12
+  mdCode = 2
 
   argsFn <- as.list(environment())
   argsUser <- list(...)

@@ -1,4 +1,4 @@
-#' @title sp_pollock
+#' @title fleet_pollock
 #' @description This function is a wrapper function that facilitates extracting the following
 #' information for the pollock fleets:
 #' \itemize{
@@ -18,16 +18,16 @@
 #' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Pollock_West_m_sm <- sp_pollock(type = "MOBILE",
+#' Pollock_West_m_sm <- fleet_pollock(type = "MOBILE",
 #'                                 mesh="SMALL", component = "WESTERN",
 #'                                 data.dir = "C:/myData")
 #'                                 }
 #' \dontrun{
-#' Pollock_East_m_lg <- sp_pollock(type = "MOBILE",
+#' Pollock_East_m_lg <- fleet_pollock(type = "MOBILE",
 #'                                 mesh="LARGE", component = "EASTERN",
 #'                                 data.dir = "C:/myData")
 #'                                 }
-#' @family species
+#' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
@@ -60,7 +60,7 @@
 
 #' }
 #' @export
-sp_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
+fleet_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
 
   # Set up the Pollock-specific variables -------------------------------------------------------
   if (toupper(component)=="WESTERN"){

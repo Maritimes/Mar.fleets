@@ -9,6 +9,9 @@
 #' @param get_isdb default is \code{NULL}. This is the list output by the
 #' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
 #' trip and set information from ISDB related to the specified fleet
+#' @param marfMatchOnly default is \code{TRUE}.  This determines whether the
+#' function should be run on all ISDB data, or just on those that have been
+#' matched to MARFIS data (the default).
 #' @param agg.poly.shp default is \code{NULL}.  This is the shapefile that has
 #' polygons that should be checked for sufficient unique values of the
 #' sens.fields.  If NULL, NAFO zones will be used.  Otherwise, a path to any
@@ -16,8 +19,7 @@
 #' @param agg.poly.field default is \code{NULL}.  This identifies the field within
 #' the shapefile provided to agg.poly.shp that should be used to check for
 #' sufficient unique values of the sens.fields.
-#' @param quietly default is \code{FALSE}.  This indicates whether or not
-#' information about the matching process should be shown.
+#' @param ... other arguments passed to methods
 #' @family simpleproducts
 #' @return returns a list with 2 items - \code{summary} and \code{details}.
 #'
@@ -47,7 +49,8 @@
 #' \code{ISDB_SETS} in the results.
 #'
 #' Coordinates for MARFIS_* data comes from the db table "PRO_SPC_INFO", and
-#' coordinates for ISDB_* data come from "ISSETPROFILE" - using the first non-null
+#' coordinates for ISDB_*
+#'  data come from "ISSETPROFILE" - using the first non-null
 #' pair found while checking from P1-P4 in order.
 #'
 #' \item \code{_TRIPS} = Since a single trip can have sets across
@@ -66,12 +69,19 @@
 #' @export
 calc_coverage<-function(get_isdb = NULL,
                         get_marfis = NULL,
-                          agg.poly.shp = NULL,
-                          agg.poly.field = NULL,
-                          quietly = FALSE){
+                        marfMatchOnly = TRUE,
+                        agg.poly.shp = NULL,
+                        agg.poly.field = NULL,
+                        ...){
+  args <- list(...)$args
+  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
     oTrips <- get_isdb$ALL_ISDB_TRIPS
     oSets <- get_isdb$ALL_ISDB_SETS
+    if (marfMatchOnly){
+      oTrips <- oTrips[!is.na(oTrips$TRIP_ID_MARF), ]
+      oSets <- oSets[oSets$TRIP_ID %in% oTrips$TRIP_ID_ISDB,]
+    }
 
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
     if (!is.null(agg.poly.shp)){
@@ -87,7 +97,7 @@ calc_coverage<-function(get_isdb = NULL,
     allAreas = rbind(allAreas, "Bad coordinate")
     #by set
 
-    if (!quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
+    if (!args$quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
     if (!is.null(oSets)){
       OBS_area_s = Mar.utils::identify_area(oSets,
                                      agg.poly.shp = agg.poly.shp,
@@ -116,7 +126,7 @@ calc_coverage<-function(get_isdb = NULL,
 
 
   #by_trip
-  if (!quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
+  if (!args$quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
 
   if (!is.null(oTrips) && !is.null(oSets)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
@@ -173,24 +183,28 @@ calc_coverage<-function(get_isdb = NULL,
   if(is.data.frame(MAR_area_t)){
     m_t = determineArea(df = MAR_area_t, setField = "TRIP_ID_MARF" , agg.poly.field = agg.poly.field, newID = "MARFIS_TRIPS")
     allAreas = merge(allAreas,m_t$summary, by= agg.poly.field, all.x=T)
+    m_t = m_t$details
   }else{
     m_t<-NA
   }
   if(is.data.frame(OBS_area_t)){
     o_t = determineArea(df = OBS_area_t, setField = "TRIP_ID_ISDB" , agg.poly.field = agg.poly.field, newID = "ISDB_TRIPS")
     allAreas = merge(allAreas,o_t$summary, by= agg.poly.field, all.x=T)
+    o_t = o_t$details
   }else{
     o_t<-NA
   }
   if(is.data.frame(MAR_area_s)){
     m_s = determineArea(df = MAR_area_s, setField = "LOG_EFRT_STD_INFO_ID" , agg.poly.field = agg.poly.field, newID = "MARFIS_SETS")
     allAreas = merge(allAreas,m_s$summary, by= agg.poly.field, all.x=T)
+    m_s = m_s$details
   }else{
     m_s<-NA
   }
   if(is.data.frame(OBS_area_s)){
      o_s = determineArea(df = OBS_area_s, setField = "FISHSET_ID" , agg.poly.field = agg.poly.field, newID = "ISDB_SETS")
      allAreas = merge(allAreas,o_s$summary, by= agg.poly.field, all.x=T)
+     o_s = o_s$details
   }else{
     o_s<-NA
   }
@@ -200,9 +214,9 @@ calc_coverage<-function(get_isdb = NULL,
   res = list()
   res[["summary"]]<-allAreas
   res[["details"]]<-list()
-  res$details[["TRIPS_MARF"]] <- ifelse(!is.na(m_t),m_t, NA)
-  res$details[["TRIPS_ISDB"]] <- ifelse(!is.na(o_t),o_t, NA)
-  res$details[["SETS_MARF"]] <- ifelse(!is.na(m_s),m_s, NA)
-  res$details[["SETS_ISDB"]] <- ifelse(!is.na(o_s),o_s, NA)
+  res$details[["TRIPS_MARF"]] <- m_t
+  res$details[["TRIPS_ISDB"]] <- o_t
+  res$details[["SETS_MARF"]] <- m_s
+  res$details[["SETS_ISDB"]] <- o_s
   return(res)
 }

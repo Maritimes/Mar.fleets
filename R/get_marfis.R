@@ -289,7 +289,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   colnames(eff)[colnames(eff)=="TRIP_ID"] <- "TRIP_ID_MARF"
 
   ntrips = sort(unique(eff$TRIP_ID_MARF))
-  eff$SET_PER_DAY <- F
 
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records

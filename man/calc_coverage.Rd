@@ -7,9 +7,10 @@
 calc_coverage(
   get_isdb = NULL,
   get_marfis = NULL,
+  marfMatchOnly = TRUE,
   agg.poly.shp = NULL,
   agg.poly.field = NULL,
-  quietly = FALSE
+  ...
 )
 }
 \arguments{
@@ -21,6 +22,10 @@ trip and set information from ISDB related to the specified fleet}
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
 
+\item{marfMatchOnly}{default is \code{TRUE}.  This determines whether the
+function should be run on all ISDB data, or just on those that have been
+matched to MARFIS data (the default).}
+
 \item{agg.poly.shp}{default is \code{NULL}.  This is the shapefile that has
 polygons that should be checked for sufficient unique values of the
 sens.fields.  If NULL, NAFO zones will be used.  Otherwise, a path to any
@@ -30,8 +35,7 @@ polygon shapefile can be provided.}
 the shapefile provided to agg.poly.shp that should be used to check for
 sufficient unique values of the sens.fields.}
 
-\item{quietly}{default is \code{FALSE}.  This indicates whether or not
-information about the matching process should be shown.}
+\item{...}{other arguments passed to methods}
 }
 \value{
 returns a list with 2 items - \code{summary} and \code{details}.
@@ -68,7 +72,8 @@ this information is provided via as the values for \code{MARFIS_SETS} and
 \code{ISDB_SETS} in the results.
 
 Coordinates for MARFIS_* data comes from the db table "PRO_SPC_INFO", and
-coordinates for ISDB_* data come from "ISSETPROFILE" - using the first non-null
+coordinates for ISDB_*
+ data come from "ISSETPROFILE" - using the first non-null
 pair found while checking from P1-P4 in order.
 
 \item \code{_TRIPS} = Since a single trip can have sets across

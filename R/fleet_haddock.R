@@ -1,6 +1,6 @@
-#' @title sp_silverhake
+#' @title fleet_haddock
 #' @description This function is a wrapper function that facilitates extracting the following
-#' information for the silver hake fleets:
+#' information for the haddock fleets:
 #' \itemize{
 #'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -14,30 +14,65 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
+#' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
+#' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' SilverHake <- sp_silverhake(data.dir = "C:/myData")
+#' Haddock_5ZJM_m <- fleet_haddock(type = "MOBILE", area = "5ZJM", data.dir = "C:/myData")
 #' }
-#' @family species
+#' \dontrun{
+#' Haddock_4X5Y_f <- fleet_haddock(type = "FIXED", area = "4X5Y", data.dir = "C:/myData")
+#' }
+#' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = 172
-#'   \item \code{nafoCode} = c('4V\%','4W\%','4X\%')
-#'   \item \code{gearCode} = 12
-#'   \item \code{mdCode} = 2
+#'   \item \code{marfSpp} = 110
+#' }
+#' For type = MOBILE
+#' \itemize{
+#' \item \code{mdCode} = c(2)
+#' \item \code{gearCode } = c(12)
+#' \item \code{gearSpSize} = seq(130,999,1) (4X5Y)
+#' \item \code{gearSpSize} = 'all' (5ZJM)
+#' }
+#' For type = FIXED
+#' \itemize{
+#' \item \code{mdCode} = c(1, 29)
+#' \item \code{gearCode} = c(50,51)
+#' \item \code{gearSpSize} = 'all'
+#' }
+# For area = 4X5Y
+#' \itemize{
+#' \item \code{nafoCode} = c('4X\%', '5Y\%')
+#' }
+#' For area = 5ZJM
+#' \itemize{
+#' \item \code{nafoCode} = c('5ZEJ\%', '5ZEM\%', '5ZEU\%')
 #' }
 #' @export
-sp_silverhake <- function(year=NULL, ...){
+fleet_haddock <- function(type = NULL, area= NULL, ...){
 
-  marfSpp=172
-  nafoCode=c('4V%','4W%','4X%') #4VWX
-  gearCode =12
-  mdCode = 2
+  if (toupper(type) == "MOBILE"){
+    mdCode = c(2)
+    gearCode = c(12)
+    gearSpSize = seq(130,999,1)
+    #gearSpSize = 'all'
+  }else if (toupper(type) == "FIXED"){
+    mdCode = c(1, 29)
+    gearCode = c(50,51)
+    gearSpSize = 'all'
+  }
+
+  if (toupper(area) == "4X5Y"){
+    nafoCode=c('4X%', '5Y%')
+  }else if (toupper(area) == "5ZJM"){
+    nafoCode=c('5ZEJ%', '5ZEM%', '5ZEU%')
+    if (toupper(type) == "MOBILE") gearSpSize="all"
+  }
+  marfSpp=110
 
   argsFn <- as.list(environment())
   argsUser <- list(...)

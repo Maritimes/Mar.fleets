@@ -31,12 +31,15 @@ get_all <- function(...){
 
   matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
   if (!is.null(isdb)) bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
-  # Capture the results in a list and return them ------------------------------------------------
-  # if (!is.null(marf) & !(args$quietly)) {
-  # cat("\nTot MARF catch: ",sum(marf$MARF_TRIPS$RND_WEIGHT_KGS)/1000)
-  #   cat("\nTot MARF ntrips: ",length(unique(marf$MARF_TRIPS$TRIP_ID_MARF)))
-  #   cat("\n")
-  # }
+  if (!is.null(fleet))                  cov <- do.call(calc_coverage, list(get_isdb = isdb, get_marfis = marf, args=args))
+
+#add the determined areas onto each trip/set
+  colnames(cov$details$TRIPS_MARF)[2] <- colnames(cov$details$SETS_MARF)[2] <-  colnames(cov$details$TRIPS_ISDB)[2] <-  colnames(cov$details$SETS_ISDB)[2] <- "CALC_AREA"
+  marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, cov$details$TRIPS_MARF)
+  marf$MARF_SETS <- merge(marf$MARF_SETS, cov$details$SETS_MARF)
+  isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, cov$details$TRIPS_ISDB)
+  isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, cov$details$SETS_ISDB)
+
   if(!any(args$debugISDBTrips =="_none_")) {
     args[["debugTripsRes"]] <- isdb$debugTrips
     debugTripsMARFIS <- do.call(get_fleet, args)
@@ -46,6 +49,7 @@ get_all <- function(...){
   res[["fleet"]]<- fleet
   res[["marf"]]<- marf
   res[["isdb"]]<- isdb
+  res[["coverage"]]<- cov$summary
   res[["bycatch"]]<- bycatch
   return(res)
 }

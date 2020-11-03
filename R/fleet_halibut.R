@@ -1,6 +1,6 @@
-#' @title sp_winterflounder
+#' @title fleet_halibut
 #' @description This function is a wrapper function that facilitates extracting the following
-#' information for the winter flounder fleet:
+#' information for the halibut fleets:
 #' \itemize{
 #'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -14,30 +14,32 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
+#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
+#' "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
+#' for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
+#' of the following - \code{c(0,45)} or \code{seq(0,45,1)}.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' WinterFlounder <- sp_winterflounder(data.dir = "C:/myData")
+#' Halibut <- fleet_halibut(vessLen = c(0,45), data.dir = "C:/myData")
 #' }
-#' @family species
+#' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = 143
-#'   \item \code{nafoCode} = c('4X\%','5Y\%')
-#'   \item \code{gearCode} = 12
-#'   \item \code{gearSpSize} = seq(155,999,1)
-#'   \item \code{mdCode} = 2
+#'   \item \code{marfSpp} = 130
+#'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
+#'   \item \code{gearCode} = c(50,51)
+#'   \item \code{mdCode} = c(1, 29)
 #' }
 #' @export
-sp_winterflounder <- function(...){
+fleet_halibut <- function(vessLen = c(0,999), ...){
 
-  marfSpp=143
-  nafoCode=c('4X%','5Y%')
-  gearCode = 12
-  gearSpSize = seq(155,999,1)
-  mdCode = 2
+  marfSpp=130
+  nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%')
+  gearCode = c(50,51)
+  mdCode = c(1, 29)
 
   argsFn <- as.list(environment())
   argsUser <- list(...)
