@@ -6,9 +6,9 @@
 \usage{
 enable_local(
   data.dir = NULL,
-  fn.oracle.username = "_none_",
-  fn.oracle.password = "_none_",
-  fn.oracle.dsn = "_none_",
+  oracle.username = "_none_",
+  oracle.password = "_none_",
+  oracle.dsn = "_none_",
   usepkg = "rodbc"
 )
 }
@@ -17,19 +17,19 @@ enable_local(
 load existing data, this folder should identify the folder containing your
 *.rdata files.}
 
-\item{fn.oracle.username}{default is \code{'_none_'} This is your username for
+\item{oracle.username}{default is \code{'_none_'} This is your username for
 accessing oracle objects. If you have a value for \code{oracle.username}
 stored in your environment (e.g. from an rprofile file), this can be left out
 and that value will be used.  If a value for this is provided, it will take
 priority over your existing value.}
 
-\item{fn.oracle.password}{default is \code{'_none_'} This is your password for
+\item{oracle.password}{default is \code{'_none_'} This is your password for
 accessing oracle objects. If you have a value for \code{oracle.password}
 stored in your environment (e.g. from an rprofile file), this can be left out
 and that value will be used.  If a value for this is provided, it will take
 priority over your existing value.}
 
-\item{fn.oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
+\item{oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
 identifier for accessing oracle objects. If you have a value for
 \code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
 this can be left and that value will be used.  If a value for this is
