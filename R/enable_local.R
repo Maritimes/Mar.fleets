@@ -4,17 +4,17 @@
 #' @param data.dir  The default is your working directory. If you are hoping to
 #' load existing data, this folder should identify the folder containing your
 #' *.rdata files.
-#' @param fn.oracle.username default is \code{'_none_'} This is your username for
+#' @param oracle.username default is \code{'_none_'} This is your username for
 #' accessing oracle objects. If you have a value for \code{oracle.username}
 #' stored in your environment (e.g. from an rprofile file), this can be left out
 #' and that value will be used.  If a value for this is provided, it will take
 #' priority over your existing value.
-#' @param fn.oracle.password default is \code{'_none_'} This is your password for
+#' @param oracle.password default is \code{'_none_'} This is your password for
 #' accessing oracle objects. If you have a value for \code{oracle.password}
 #' stored in your environment (e.g. from an rprofile file), this can be left out
 #' and that value will be used.  If a value for this is provided, it will take
 #' priority over your existing value.
-#' @param fn.oracle.dsn default is \code{'_none_'} This is your dsn/ODBC
+#' @param oracle.dsn default is \code{'_none_'} This is your dsn/ODBC
 #' identifier for accessing oracle objects. If you have a value for
 #' \code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
 #' this can be left and that value will be used.  If a value for this is
@@ -26,14 +26,33 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 enable_local <- function(data.dir = NULL,
-                        fn.oracle.username = "_none_",
-                        fn.oracle.password = "_none_",
-                        fn.oracle.dsn = "_none_",
+                        oracle.username = "_none_",
+                        oracle.password = "_none_",
+                        oracle.dsn = "_none_",
                         usepkg = "rodbc"){
+ if (is.null(data.dir)|
+     oracle.username == "_none_"|
+     oracle.password == "_none_" |
+     oracle.dsn == "_none_")stop("Can't run as requested.")
+
+  args <- list(data.dir = data.dir,
+               oracle.username = oracle.username,
+               oracle.password = oracle.password,
+               oracle.dsn = oracle.dsn,
+               usepkg = usepkg,
+               debug = FALSE,
+               quietly = TRUE,
+               useLocal = FALSE
+               )
+  cxnCheck <- do.call(can_run, args)
+  if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
+    stop("Can't run as requested.")
+  }
   cat("Extracting MARFIS data...\n")
-  Mar.utils::get_data_tables(fn.oracle.username = fn.oracle.username,
-                                     fn.oracle.password = fn.oracle.password,
-                                     fn.oracle.dsn = fn.oracle.dsn,
+  Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
+                                     fn.oracle.password = oracle.password,
+                                     fn.oracle.dsn = oracle.dsn,
+                                     usepkg = usepkg,
                                      schema = "MARFISSCI",
                                      data.dir = data.dir,
                                      tables = c("GEARS","HAIL_IN_CALLS","HAIL_OUTS","LICENCE_SUBTYPES",
@@ -43,9 +62,10 @@ enable_local <- function(data.dir = NULL,
                                      env = environment(), quietly = TRUE)
 
   cat("Extracting ISDB data...\n")
-  Mar.utils::get_data_tables(fn.oracle.username = fn.oracle.username,
-                                     fn.oracle.password = fn.oracle.password,
-                                     fn.oracle.dsn = fn.oracle.dsn,
+  Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
+                                     fn.oracle.password = oracle.password,
+                                     fn.oracle.dsn = oracle.dsn,
+                                     usepkg = usepkg,
                                      schema = "ISDB",
                                      data.dir = data.dir,
                                      tables = c("ISFISHSETS","ISSETPROFILE_WIDE","ISTRIPS","ISVESSELS"),
