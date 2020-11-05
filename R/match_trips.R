@@ -118,15 +118,15 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   marf_TRIPS_F <- marf_TRIPS_L <- NULL
   isdb_marf_dets <-  merge(isdbTrips_dets, marf_TRIPS_dets, by.x = "VR_LIC", by.y = "VR_LIC")
 
-  within <- isdb_marf_dets[isdb_marf_dets$LANDED_DATE >= isdb_marf_dets$BOARD_DATE & isdb_marf_dets$LANDED_DATE <= isdb_marf_dets$LANDING_DATE,]
+  within <- isdb_marf_dets[isdb_marf_dets[,args$useDate] >= isdb_marf_dets$BOARD_DATE & isdb_marf_dets[,args$useDate] <= isdb_marf_dets$LANDING_DATE,]
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,"match_DETS"] <- "within date bounds"
   isdb_marf_dets <- isdb_marf_dets[!(isdb_marf_dets$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB),]
   matches =  unique(rbind(matches, within[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]))
 
   close<- isdb_marf_dets
-  close[,"BD"]<- abs(difftime(close$BOARD_DATE,close$LANDED_DATE, units="days"))
-  close[,"LD"]<- abs(difftime(close$LANDING_DATE,close$LANDED_DATE, units="days"))
+  close[,"BD"]<- abs(difftime(close$BOARD_DATE,close[,args$useDate], units="days"))
+  close[,"LD"]<- abs(difftime(close$LANDING_DATE,close[,args$useDate], units="days"))
   close$CLOSEST<- with(close, pmin(BD, LD))
   close <- close[close$CLOSEST <2,]
   isdbTrips[isdbTrips$TRIP_ID_ISDB %in% close$TRIP_ID_ISDB,"match_LICVRDATE"] <- TRUE
