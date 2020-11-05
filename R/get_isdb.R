@@ -252,7 +252,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (!all(is.na(sets))) {
       if (args$debug) cat("DEBUG: Matched", nrow(sets$MAP_ISDB_MARFIS_SETS), "ISDB sets","\n")
       isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
-      isdb_SETS_all$TRIP_ISDB<- NULL
+      isdb_SETS_all$TRIP_ID_ISDB<- NULL
     }else{
       if (args$debug) cat("DEBUG: Matched 0 ISDB sets","\n")
       isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
