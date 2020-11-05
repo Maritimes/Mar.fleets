@@ -65,11 +65,11 @@ debugTripsMARFIS = args$cxn$thecmd(args$cxn$channel, debugQry)
       debugTripsMARFIS$variable <- NULL
       names(debugTripsMARFIS)[names(debugTripsMARFIS) == "value"] <- "VR_NUMBER"
       #get max and min dates from each
-      minD <- stats::aggregate(DATE_FISHED ~ TRIP_ID, data = debugTripsMARFIS, min)
-      names(minD)[names(minD) == "DATE_FISHED"] <- "DATE_MIN"
+      minD <- stats::aggregate(args$useDate ~ TRIP_ID, data = debugTripsMARFIS, min)
+      names(minD)[names(minD) == args$useDate] <- "DATE_MIN"
       minD$DATE_MIN <- as.Date(minD$DATE_MIN)
-      maxD <- stats::aggregate(LANDED_DATE ~ TRIP_ID, data = debugTripsMARFIS, max)
-      names(maxD)[names(maxD) == "LANDED_DATE"] <- "DATE_MAX"
+      maxD <- stats::aggregate(args$useDate ~ TRIP_ID, data = debugTripsMARFIS, max)
+      names(maxD)[names(maxD) == args$useDate] <- "DATE_MAX"
       maxD$DATE_MAX <- as.Date(maxD$DATE_MAX)
       debugTripsMARFIS$DATE_FISHED <-debugTripsMARFIS$LANDED_DATE <- NULL
       debugTripsMARFIS <- unique(debugTripsMARFIS)
