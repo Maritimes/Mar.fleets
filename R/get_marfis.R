@@ -191,14 +191,14 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     if(args$useLocal){
       HAIL_IN_CALLS <-  NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"), env = environment(), quietly = TRUE)
-      HIC_df <- HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
+      HIC_df <- unique(HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID','HAIL_IN_TYPE_ID')]
 
     }else{
-      HICQry<-paste0("SELECT
+      HICQry<-paste0("SELECT DISTINCT
                     HI.TRIP_ID,
-                  HI.CONF_NUMBER,
-                --  HI.VR_NUMBER,
-                  HI.HAIL_OUT_ID
+                  HI.CONF_NUMBER
+                  --HI.HAIL_IN_TYPE_ID,
+                  --HI.HAIL_OUT_ID
                   FROM MARFISSCI.HAIL_IN_CALLS HI
                   WHERE
                   HI.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
@@ -207,7 +207,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     }
     HIC_df <- unique(HIC_df)
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
-    colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
+    # colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
     # if (args$debug) cat("getHIC done:",nrow(HIC_df),"\n")
     return(HIC_df)
   }
@@ -217,13 +217,13 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     if(args$useLocal){
       HAIL_OUTS <- NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"), env = environment(), quietly = TRUE)
-      HOC_df <- HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER','HAIL_OUT_ID')]
+      HOC_df <- unique(HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID')]
     }else{
-      HOCQry<-paste0("SELECT
+      HOCQry<-paste0("SELECT DISTINCT
                    HO.TRIP_ID,
-                   HO.CONF_NUMBER,
+                   HO.CONF_NUMBER
       --             HO.VR_NUMBER,
-                   HO.HAIL_OUT_ID
+      --             HO.HAIL_OUT_ID
                    FROM MARFISSCI.HAIL_OUTS HO
                    WHERE
                    HO.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
@@ -232,7 +232,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     }
     HOC_df<-unique(HOC_df)
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
-    colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
+    # colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     # if (args$debug) cat("getHOC done:",nrow(HOC_df),"\n")
     return(HOC_df)
   }
@@ -263,6 +263,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   }
 
   hic<- do.call(getHIC, list(trips = ps$TRIP_ID, args=args))
+  #a single trip can have multiple hoc - this adds a comma-separated list of all
+  #to each trip, ensuring a single rec per trip
+  hic<- aggregate(CONF_NUMBER_HI ~., hic, toString)
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
@@ -275,6 +278,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
 
 
   hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
+  #a single trip can have multiple hoc - this adds a comma-separated list of all
+  #to each trip, ensuring a single rec per trip
+  hoc<- aggregate(CONF_NUMBER_HO ~., hoc, toString)
   if (!is.null(hoc) && nrow(hoc)>0){
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
