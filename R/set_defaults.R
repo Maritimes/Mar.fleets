@@ -38,6 +38,7 @@ set_defaults <- function(...){
                   useLocal = FALSE,
                   quietly=TRUE,
                   debugISDBTrips = "_none_",
+                  HS = FALSE,
                   debug=FALSE
   )
   argsDef[names(args)] <- args

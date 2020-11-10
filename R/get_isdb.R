@@ -63,7 +63,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     mVRS <- as.numeric(unique(mVRS[!is.na(mVRS)]))
 
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS"), env = environment(), quietly = TRUE)
+      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS"),
+                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                 env = environment(), quietly = args$quietly)
       #NA dates are turned to 9999-01-01 so that they will not meet the criteria of being between our start and end dates
     }else{
       #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet
@@ -87,16 +89,16 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     ISTRIPS[is.na(ISTRIPS$LANDING_DATE),"LANDING_DATE"]<- '9999-01-01'
     ISTRIPS[is.na(ISTRIPS$BOARD_DATE),"BOARD_DATE"]<- '9999-01-01'
 
-    colnames(ISTRIPS)[colnames(ISTRIPS)=="MARFIS_LICENSE_NO"] <- "iLICS"
-    colnames(ISTRIPS)[colnames(ISTRIPS)=="LICENSE_NO"] <- "iVRS"
+    colnames(ISTRIPS)[colnames(ISTRIPS)=="MARFIS_LICENSE_NO"] <- "LIC"
+    colnames(ISTRIPS)[colnames(ISTRIPS)=="LICENSE_NO"] <- "VR"
     colnames(ISTRIPS)[colnames(ISTRIPS)=="TRIP_ID"] <- "TRIP_ISDB"
 
 
     if(!any(args$debugISDBTrips =="_none_")) {
-      debugTripsDets<- ISTRIPS[ISTRIPS$TRIP_ISDB %in% debugTrips$TRIP_ISDB,c("TRIP","TRIP_ISDB","TRIPCD_ID","BOARD_DATE","LANDING_DATE","iVRS","iLICS")]
+      debugTripsDets<- ISTRIPS[ISTRIPS$TRIP_ISDB %in% debugTrips$TRIP_ISDB,c("TRIP","TRIP_ISDB","TRIPCD_ID","BOARD_DATE","LANDING_DATE","VR","LIC")]
       debugTrips <- merge(debugTrips, debugTripsDets, all.x = T)
       rm(debugTripsDets)
-      debugTrips$ISDB_TRIP_EXISTS <- apply(debugTrips[, c("TRIP","TRIPCD_ID","iVRS","iLICS")], 1, function(x) any(!is.na(x)))
+      debugTrips$ISDB_TRIP_EXISTS <- apply(debugTrips[, c("TRIP","TRIPCD_ID","VR","LIC")], 1, function(x) any(!is.na(x)))
     }
 
     ISTRIPS = ISTRIPS[(ISTRIPS$LANDING_DATE >= as.Date(args$dateStart) & ISTRIPS$LANDING_DATE <= as.Date(args$dateEnd)) |
@@ -104,26 +106,25 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
     if(!any(args$debugISDBTrips =="_none_")) debugTrips$ISDB_DATERANGE <- sapply(debugTrips[, c("TRIP_ISDB")], function(x) (x %in% ISTRIPS$TRIP_ISDB))
 
-    ISTRIPS = ISTRIPS[,c("TRIP_ISDB", "TRIP", "TRIPCD_ID", "BOARD_DATE", "LANDING_DATE", "iVRS", "iLICS", "MARFIS_CONF_NUMBER")]
+    ISTRIPS = ISTRIPS[,c("TRIP_ISDB", "TRIP", "TRIPCD_ID", "BOARD_DATE", "LANDING_DATE", "VR", "LIC", "MARFIS_CONF_NUMBER")]
 
     if(!any(args$debugISDBTrips =="_none_")){
       mknownVess <- sub("_.*", "", mVR_LIC)
-      debugTrips$FLEET_VESS <- sapply(debugTrips[, c("iVRS")], function(x) (x %in% mknownVess))
+      debugTrips$FLEET_VESS <- sapply(debugTrips[, c("VR")], function(x) (x %in% mknownVess))
       rm(mknownVess)
       mknownLic <- sub(".*_", "", mVR_LIC)
-      debugTrips$FLEET_LIC <- sapply(debugTrips[, c("iLICS")], function(x) (x %in% mknownLic))
+      debugTrips$FLEET_LIC <- sapply(debugTrips[, c("LIC")], function(x) (x %in% mknownLic))
       rm(mknownLic)
-      debugTrips$ISDB_VESS_LIC <- sapply(paste0(debugTrips$iVRS,"_",debugTrips$iLICS), function(x) (x %in% mVR_LIC))
+      debugTrips$ISDB_VESS_LIC <- sapply(paste0(debugTrips$VR,"_",debugTrips$LIC), function(x) (x %in% mVR_LIC))
     }
 
-    ISTRIPS <- ISTRIPS[paste0(ISTRIPS$iVRS,"_",ISTRIPS$iLICS) %in% mVR_LIC,]
+    ISTRIPS <- ISTRIPS[paste0(ISTRIPS$VR,"_",ISTRIPS$LIC) %in% mVR_LIC,]
 
     if (!args$keepSurveyTrips){
-      if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID > 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
+      if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
         if (!args$quietly) {
           cat(paste0("\n","Dropping these survey trips:","\n"))
-          print(ISTRIPS[(ISTRIPS$TRIPCD_ID > 7010 & ISTRIPS$TRIPCD_ID != 7099),
-                        c("VR_NUMBER", "TRIP_ISDB", "TRIP", "TRIPCD_ID", "MARFIS_CONF_NUMBER", "MARFIS_LICENSE_NO")])
+          print(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])
         }
       }
       ISTRIPS = ISTRIPS[(ISTRIPS$TRIPCD_ID < 7010 | ISTRIPS$TRIPCD_ID == 7099),]
@@ -131,7 +132,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
     if(!any(args$debugISDBTrips =="_none_")) debugTrips$ISDB_SURVTRIP <- sapply(debugTrips[, c("TRIPCD_ID")], function(x) (x >= 7010 & x != 7099))
     if (nrow(ISTRIPS)>0){
-      theTripCols <- c("MARFIS_CONF_NUMBER","iVRS","iLICS") #"LICENSE_NO",
+      theTripCols <- c("MARFIS_CONF_NUMBER","VR","LIC") #"LICENSE_NO",
       ISTRIPS[,theTripCols] <- suppressWarnings(as.numeric(as.character(unlist(ISTRIPS[,theTripCols]))))
     }else{
       cat(paste0("\n","No ISDB trips found"))
@@ -142,8 +143,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     res[["ISTRIPS"]] <- ISTRIPS
     res[["debugTrips"]] <- NA
     if(!any(args$debugISDBTrips =="_none_")) {
-      colnames(debugTrips)[colnames(debugTrips)=="iLICS"] <- "LICENSE"
-      colnames(debugTrips)[colnames(debugTrips)=="iVRS"] <- "VESSEL"
+      colnames(debugTrips)[colnames(debugTrips)=="LIC"] <- "LICENSE"
+      colnames(debugTrips)[colnames(debugTrips)=="VR"] <- "VESSEL"
       debugTrips<- debugTrips[,c("TRIP_ISDB",  "TRIP", "ISDB_TRIP_EXISTS", "BOARD_DATE", "LANDING_DATE", "ISDB_DATERANGE", "VESSEL", "FLEET_VESS", "LICENSE", "FLEET_LIC", "ISDB_VESS_LIC", "TRIPCD_ID", "ISDB_SURVTRIP")]
       res[["debugTrips"]] <- debugTrips
     }
@@ -154,7 +155,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     badDate <- as.POSIXct(as.Date("2100-01-01"))
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"), env = environment(), quietly = TRUE)
+      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"),
+                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                 env = environment(), quietly = args$quietly)
       ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID")]
       ISSETPROFILE_WIDE<-ISSETPROFILE_WIDE[ISSETPROFILE_WIDE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
       ISSETPROFILE_WIDE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE_WIDE$DATE_TIME1 > badDate,
