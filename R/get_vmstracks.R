@@ -35,7 +35,7 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   colnames(vr_dates1)<-colnames(vr_dates2)<-c("VR_NUMBER","mDate", "OBS")
 
   if(!is.null(get_isdb)){
-    if (nrow(get_isdb$ISDB_SETS_MATCHED)>0 & nrow(get_isdb$ISDB_TRIPS_MATCHED)>0){
+    if (nrow(get_isdb$ISDB_SETS_MATCHED)>0 && nrow(get_isdb$ISDB_TRIPS_MATCHED)>0){
       obsDat<-merge(get_isdb$ISDB_SETS_MATCHED, get_isdb$ISDB_TRIPS_MATCHED, by.x="TRIP_ID", by.y="TRIP_ID_ISDB", all.x=T)
       vr_dates3 <- cbind(obsDat[,c("VR_NUMBER","DATE_TIME")],1)
       colnames(vr_dates3)<-c("VR_NUMBER","mDate", "OBS")

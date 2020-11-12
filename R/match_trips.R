@@ -125,7 +125,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   close$BD <- close$LD <- close$CLOSEST <- NULL
   close <- close[!close$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,]
 
-  if (nrow(within)>0 & nrow(close)>0){
+  if (nrow(within)>0 && nrow(close)>0){
     match_VRLIC <- rbind(within, close)
   }else if(nrow(within)>0){
     match_VRLIC <- within
@@ -175,7 +175,20 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   isdbTrips$TRIP_ID_MARFIS_OTHER <- NA
   #Find the most frequent trip_id_marf for the trip, and populate trip_id_marf
   #ties will get populated with c(xxxx,yyyy)
-  isdbTrips$TRIP_ID_MARF <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) Mar.utils::Mode(na.omit(r)))
+
+  # this is a little hacky, but the apply was adding a list instead of the
+  #desired column, so this coerces it.
+
+  TRIP_ID_MARF <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) Mar.utils::Mode(na.omit(r)))
+  if (is.list(TRIP_ID_MARF)){
+    TRIP_ID_MARF[sapply(TRIP_ID_MARF, function(x) length(x)>1)]<-NA
+    TRIP_ID_MARF <- t(as.data.frame(TRIP_ID_MARF))
+    colnames(TRIP_ID_MARF)<- "TRIP_ID_MARF"
+    # TRIP_ID_MARF <- t(TRIP_ID_MARF)[,1]
+  }
+  isdbTrips <- cbind(isdbTrips,TRIP_ID_MARF)
+
+  # isdbTrips$TRIP_ID_MARF <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) Mar.utils::Mode(na.omit(r)))
   isdbTrips$UNQ <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) length(unique(na.omit(r))))
   if (nrow(isdbTrips[isdbTrips$UNQ > 1,])>0){
     matchMulti <- isdbTrips[isdbTrips$UNQ > 1,]

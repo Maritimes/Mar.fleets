@@ -96,9 +96,8 @@ calc_coverage<-function(get_isdb = NULL,
     allAreas = rbind(allAreas, "Other")
     allAreas = rbind(allAreas, "Bad coordinate")
     #by set
-
     if (!args$quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
-    if (!is.null(oSets)){
+    if (!is.null(oSets) && nrow(oSets)>0){
       OBS_area_s = Mar.utils::identify_area(oSets,
                                      agg.poly.shp = agg.poly.shp,
                                      agg.poly.field = agg.poly.field)
@@ -106,7 +105,7 @@ calc_coverage<-function(get_isdb = NULL,
       OBS_area_s<- NA
     }
   #grab the first (valid) position from each set
-  if (!is.null(get_marfis$MARF_SETS)){
+  if (!is.null(get_marfis$MARF_SETS) && nrow(get_marfis$MARF_SETS)>0){
     MARF_sets_pos <- get_marfis$MARF_SETS[,c("MON_DOC_ID","TRIP_ID_MARF","LOG_EFRT_STD_INFO_ID","LATITUDE","LONGITUDE")]
     MARF_sets_pos <- MARF_sets_pos[with(MARF_sets_pos,order(LOG_EFRT_STD_INFO_ID)),]
     MARF_sets_pos <- MARF_sets_pos[!is.na(MARF_sets_pos$LATITUDE) & !is.na(MARF_sets_pos$LONGITUDE),]
@@ -128,7 +127,7 @@ calc_coverage<-function(get_isdb = NULL,
   #by_trip
   if (!args$quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
 
-  if (!is.null(oTrips) && !is.null(oSets)){
+  if (!is.null(oTrips) && (!is.null(oSets) && nrow(oSets)>0)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
                     oSets, all.y =TRUE, by.x = "TRIP_ID_ISDB", by.y = "TRIP_ID")
     OBS_area_t = Mar.utils::identify_area(O_trips,

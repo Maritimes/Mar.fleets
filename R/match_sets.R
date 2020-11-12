@@ -124,13 +124,13 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
       bestPos <- bestPos[bestPos$BADPOS ==F,]
       bestTim <- triptim[which.min(triptim$DUR_DIFF),]
       bestTim <- bestTim[bestTim$BADTIM ==F,]
-      if (nrow(bestPos)==1  & nrow(bestTim)==1){
+      if (nrow(bestPos)==1 && nrow(bestTim)==1){
         thisTrip_MATCHED <- thisTrip[rownames(bestPos),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
         thisTrip_MATCHED$SET_MATCH <- "POS AND TIME"
-      }else if(nrow(bestPos)==0 & nrow(bestTim)==1){
+      }else if(nrow(bestPos)==0 && nrow(bestTim)==1){
         thisTrip_MATCHED <- thisTrip[rownames(bestTim),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
         thisTrip_MATCHED$SET_MATCH <- "TIME"
-      }else if(nrow(bestPos)==1 & nrow(bestTim)==0){
+      }else if(nrow(bestPos)==1 && nrow(bestTim)==0){
         thisTrip_MATCHED <- thisTrip[rownames(bestPos),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
         thisTrip_MATCHED$SET_MATCH <- "POS"
       }else{

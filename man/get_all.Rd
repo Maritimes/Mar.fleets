@@ -10,7 +10,9 @@ get_all(...)
 \item{...}{other arguments passed to methods}
 }
 \value{
-returns a list including the fleet, and the resultant information from MARFIS, ISDB, and the bycatch
+returns a list including the fleet, and the resultant information
+from MARFIS, and ISDB.  Additionally, information about the bycatch and
+spatial coverage of the fishing activity is also returned.
 }
 \description{
 This function serves as a wrapper for calling \code{get_fleet(...)},\code{get_marfis(...)}
