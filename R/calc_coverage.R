@@ -12,13 +12,6 @@
 #' @param marfMatchOnly default is \code{TRUE}.  This determines whether the
 #' function should be run on all ISDB data, or just on those that have been
 #' matched to MARFIS data (the default).
-#' @param agg.poly.shp default is \code{NULL}.  This is the shapefile that has
-#' polygons that should be checked for sufficient unique values of the
-#' sens.fields.  If NULL, NAFO zones will be used.  Otherwise, a path to any
-#' polygon shapefile can be provided.
-#' @param agg.poly.field default is \code{NULL}.  This identifies the field within
-#' the shapefile provided to agg.poly.shp that should be used to check for
-#' sufficient unique values of the sens.fields.
 #' @param ... other arguments passed to methods
 #' @family simpleproducts
 #' @return returns a list with 2 items - \code{summary} and \code{details}.
@@ -76,34 +69,48 @@ calc_coverage<-function(get_isdb = NULL,
   args <- list(...)$args
   if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
-    oTrips <- get_isdb$ALL_ISDB_TRIPS
-    oSets <- get_isdb$ALL_ISDB_SETS
-    if (marfMatchOnly){
-      oTrips <- oTrips[!is.na(oTrips$TRIP_ID_MARF), ]
-      oSets <- oSets[oSets$TRIP_ID %in% oTrips$TRIP_ID_ISDB,]
-    }
+  oTrips <- get_isdb$ALL_ISDB_TRIPS
+  oSets <- get_isdb$ALL_ISDB_SETS
+  if (marfMatchOnly){
+    oTrips <- oTrips[!is.na(oTrips$TRIP_ID_MARF), ]
+    oSets <- oSets[oSets$TRIP_ID %in% oTrips$TRIP_ID_ISDB,]
+  }
 
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
-    if (!is.null(agg.poly.shp)){
-      agg.poly <- rgdal::readOGR(dsn = agg.poly.shp, verbose = FALSE)
-    }else{
-      agg.poly <- Mar.data::NAFOSubunits
-    }
-   if (is.null(agg.poly.field))agg.poly.field="NAFO_1"
 
-    allAreas = as.data.frame(sort(agg.poly@data[,agg.poly.field]))
-    colnames(allAreas)[1] <- agg.poly.field
-    allAreas = rbind(allAreas, "Other")
-    allAreas = rbind(allAreas, "Bad coordinate")
-    #by set
-    if (!args$quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
-    if (!is.null(oSets) && nrow(oSets)>0){
-      OBS_area_s = Mar.utils::identify_area(oSets,
-                                     agg.poly.shp = agg.poly.shp,
-                                     agg.poly.field = agg.poly.field)
-    }else{
-      OBS_area_s<- NA
+  if (is.null(agg.poly.shp)){
+    agg.poly.shp=getExportedValue("Mar.data", args$areas)
+    agg.poly.field = args$areasField
+    if (args$areas !=  "NAFOSubunits_sf" && agg.poly.field == "NAFO_1"){
+      if (args$areas == "ShrimpFAs_sf") agg.poly.field = "BOX_NAME"
+      if (args$areas == "MarStrata_sf") agg.poly.field = "StrataID"
+      if (args$areas == "MarStrata4VSW_sf") agg.poly.field = "StrataID"
     }
+  }else{
+    #use shapefile
+    agg.poly.shp <- sf::st_read(agg.poly.shp)
+  }
+
+  if ("sf" %in% class(agg.poly.shp)){
+    allAreas <- agg.poly.shp
+    sf::st_geometry(allAreas) <- NULL
+    allAreas = as.data.frame(allAreas[,agg.poly.field])
+
+  }else if ("SpatialPolygons" %in% class(agg.poly)){
+    allAreas = as.data.frame(sort(agg.poly@data[,agg.poly.field]))
+  }
+  colnames(allAreas)[1] <- agg.poly.field
+  allAreas = rbind(allAreas, "Outside of Defined Areas")
+  allAreas = rbind(allAreas, "Bad coordinate")
+  #by set
+  if (!args$quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
+  if (!is.null(oSets) && nrow(oSets)>0){
+    OBS_area_s = identify_area(oSets,
+                                          agg.poly.shp = agg.poly.shp,
+                                          agg.poly.field = agg.poly.field)
+  }else{
+    OBS_area_s<- NA
+  }
   #grab the first (valid) position from each set
   if (!is.null(get_marfis$MARF_SETS) && nrow(get_marfis$MARF_SETS)>0){
     MARF_sets_pos <- get_marfis$MARF_SETS[,c("MON_DOC_ID","TRIP_ID_MARF","LOG_EFRT_STD_INFO_ID","LATITUDE","LONGITUDE")]
@@ -115,14 +122,13 @@ calc_coverage<-function(get_isdb = NULL,
     MARF_sets_pos$LOG_EFRT_STD_INFO_ID <- NULL
     MARF_sets_pos <- unique(MARF_sets_pos[!is.na(MARF_sets_pos$MON_DOC_ID),])
     Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos )
-    MAR_area_s = Mar.utils::identify_area(get_marfis$MARF_SETS,
-                                        agg.poly.shp = agg.poly.shp,
-                                        agg.poly.field = agg.poly.field)
+    MAR_area_s = identify_area(get_marfis$MARF_SETS,
+                                          agg.poly.shp = agg.poly.shp,
+                                          agg.poly.field = agg.poly.field)
   }else{
     Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos )
     MAR_area_s<- NA
   }
-
 
   #by_trip
   if (!args$quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
@@ -130,16 +136,16 @@ calc_coverage<-function(get_isdb = NULL,
   if (!is.null(oTrips) && (!is.null(oSets) && nrow(oSets)>0)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
                     oSets, all.y =TRUE, by.x = "TRIP_ID_ISDB", by.y = "TRIP_ID")
-    OBS_area_t = Mar.utils::identify_area(O_trips,
-                                        agg.poly.shp = agg.poly.shp,
-                                        agg.poly.field = agg.poly.field)
+    OBS_area_t =identify_area(O_trips,
+                                          agg.poly.shp = agg.poly.shp,
+                                          agg.poly.field = agg.poly.field)
   }else{
     OBS_area_t<-NA
   }
 
-  MAR_area_t = Mar.utils::identify_area(Marf_Trip_pos,
-                                      agg.poly.shp = agg.poly.shp,
-                                      agg.poly.field = agg.poly.field)
+  MAR_area_t = identify_area(Marf_Trip_pos,
+                                        agg.poly.shp = agg.poly.shp,
+                                        agg.poly.field = agg.poly.field)
 
   determineArea<-function(df=NULL, setField = NULL,  agg.poly.field = NULL, newID = NULL){
     clean_df_field <- function(df=df, agg.poly.field = NULL){
@@ -148,36 +154,36 @@ calc_coverage<-function(get_isdb = NULL,
       return(df)
     }
     df = clean_df_field(df, agg.poly.field)
-  df_new = stats::aggregate(
-    x = list(cnt =  df[,setField]),
-    by = list(TRIP_ID = df[,setField],
-              area =  df[,agg.poly.field]
-    ),
-    length
-  )
-  #The following assigns each trip to the area
-  #with the most sets.
+    df_new = stats::aggregate(
+      x = list(cnt =  df[,setField]),
+      by = list(TRIP_ID = df[,setField],
+                area =  df[,agg.poly.field]
+      ),
+      length
+    )
+    #The following assigns each trip to the area
+    #with the most sets.
 
-  df_new <- data.table::setDT(df_new)
-  df_new <- df_new[df_new[, .I[which.max(cnt)], by=TRIP_ID]$V1]
-  df_new <- as.data.frame(df_new)
-  df_new$cnt<-NULL
-  coverageValues = stats::aggregate(
-    x = list(tmp = df_new$TRIP_ID),
-    by = list(area = df_new$area),
-    length
-  )
-  df_new[df_new$area == 99999,"area"]<-"Other"
-  colnames(df_new)[colnames(df_new)=="area"] <- agg.poly.field
-  colnames(df_new)[colnames(df_new)=="TRIP_ID"] <- setField
-  coverageValues[coverageValues$area == 99999,"area"]<-"Other"
-  colnames(coverageValues)[colnames(coverageValues)=="area"] <- agg.poly.field
-  colnames(coverageValues)[colnames(coverageValues)=="tmp"] <- newID
-  colnames(coverageValues)[colnames(coverageValues)=="TRIP_ID"] <- setField
-  res = list()
-  res[["summary"]]<-coverageValues
-  res[["details"]]<-df_new
-  return(res)
+    df_new <- data.table::setDT(df_new)
+    df_new <- df_new[df_new[, .I[which.max(cnt)], by=TRIP_ID]$V1]
+    df_new <- as.data.frame(df_new)
+    df_new$cnt<-NULL
+    coverageValues = stats::aggregate(
+      x = list(tmp = df_new$TRIP_ID),
+      by = list(area = df_new$area),
+      length
+    )
+    df_new[df_new$area == 99999,"area"]<-"Other"
+    colnames(df_new)[colnames(df_new)=="area"] <- agg.poly.field
+    colnames(df_new)[colnames(df_new)=="TRIP_ID"] <- setField
+    coverageValues[coverageValues$area == 99999,"area"]<-"Other"
+    colnames(coverageValues)[colnames(coverageValues)=="area"] <- agg.poly.field
+    colnames(coverageValues)[colnames(coverageValues)=="tmp"] <- newID
+    colnames(coverageValues)[colnames(coverageValues)=="TRIP_ID"] <- setField
+    res = list()
+    res[["summary"]]<-coverageValues
+    res[["details"]]<-df_new
+    return(res)
   }
   if(is.data.frame(MAR_area_t)){
     m_t = determineArea(df = MAR_area_t, setField = "TRIP_ID_MARF" , agg.poly.field = agg.poly.field, newID = "MARFIS_TRIPS")
@@ -201,13 +207,12 @@ calc_coverage<-function(get_isdb = NULL,
     m_s<-NA
   }
   if(is.data.frame(OBS_area_s)){
-     o_s = determineArea(df = OBS_area_s, setField = "FISHSET_ID" , agg.poly.field = agg.poly.field, newID = "ISDB_SETS")
-     allAreas = merge(allAreas,o_s$summary, by= agg.poly.field, all.x=T)
-     o_s = o_s$details
+    o_s = determineArea(df = OBS_area_s, setField = "FISHSET_ID" , agg.poly.field = agg.poly.field, newID = "ISDB_SETS")
+    allAreas = merge(allAreas,o_s$summary, by= agg.poly.field, all.x=T)
+    o_s = o_s$details
   }else{
     o_s<-NA
   }
-
   #remove rows with no useful values
   allAreas =  unique(allAreas[rowSums(is.na(allAreas[,2:ncol(allAreas)]))!=ncol(allAreas)-1,])
   res = list()

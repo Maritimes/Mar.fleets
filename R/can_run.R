@@ -9,7 +9,7 @@
 can_run <- function(...){
   args=list(...)
   if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
-  data.dir <- NA
+  # data.dir <- NA
   #for each vector below, [1] is the name of the schema
   ISDB = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
   MARFIS = c("MARFISSCI.GEARS","MARFISSCI.HAIL_IN_CALLS","MARFISSCI.HAIL_OUTS","MARFISSCI.LICENCE_SUBTYPES",

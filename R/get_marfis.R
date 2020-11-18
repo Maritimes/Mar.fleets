@@ -320,7 +320,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID")]) #, "OBS_PRESENT")])
-
   # ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
 

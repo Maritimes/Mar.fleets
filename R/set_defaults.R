@@ -24,6 +24,8 @@ set_defaults <- function(...){
                   gearSpSize = "all",
                   vessLen = "all",
                   useDate = "LANDED_DATE",
+                  areas = "NAFOSubunits_sf",
+                  areasField = "NAFO_1",
                   marfSpp = NULL,
                   dateStart = NULL,
                   dateEnd = NULL,
@@ -57,6 +59,7 @@ set_defaults <- function(...){
   # full listing of all of the parameters used
   paramDf <- argsDef
   paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
+
   paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
   paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateStart","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
   paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateEnd","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")

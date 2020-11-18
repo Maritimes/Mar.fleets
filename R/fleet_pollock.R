@@ -14,7 +14,7 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured}
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
-#' @param mesh default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
+#' @param mesh default is \code{'ALL'}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
 #' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
@@ -60,7 +60,7 @@
 
 #' }
 #' @export
-fleet_pollock <- function(type = NULL, mesh=NULL, component = NULL, ...){
+fleet_pollock <- function(type = NULL, mesh='ALL', component = NULL, ...){
 
   # Set up the Pollock-specific variables -------------------------------------------------------
   if (toupper(component)=="WESTERN"){

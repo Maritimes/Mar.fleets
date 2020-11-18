@@ -1,4 +1,4 @@
-#' @title sp_northernshrimp
+#' @title fleet_northernshrimp
 #' @description This function is a wrapper function that facilitates extracting the following
 #' information for the northern shrimp fleet:
 #' \itemize{
@@ -16,19 +16,19 @@
 #'   }
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' Shrimp <- sp_northernshrimp(data.dir = "C:/myData")
+#' Shrimp <- fleet_northernshrimp(data.dir = "C:/myData")
 #'                       }
 #' @family species
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-sp_northernshrimp <- function( ...){
+fleet_northernshrimp <- function( ...){
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
 
   marfSpp=702
   mdCode = c(16,28)
-
+  areas = "ShrimpFAs_sf"
   argsFn <- as.list(environment())
   argsUser <- list(...)
 
