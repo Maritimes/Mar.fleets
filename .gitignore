@@ -2,13 +2,15 @@
 .Rhistory
 .RData
 .Ruserdata
+*.Rproj
 *.xlsx
 *.png
 *.shp
 *.dbf
 *.shx
 *.prj
+*.xml
 /temp
 /crap
-/inst
+/inst/fleet*.R
 .Rprofile
