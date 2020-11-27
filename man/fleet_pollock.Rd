@@ -4,12 +4,12 @@
 \alias{fleet_pollock}
 \title{fleet_pollock}
 \usage{
-fleet_pollock(type = NULL, mesh = NULL, component = NULL, ...)
+fleet_pollock(type = NULL, mesh = "ALL", component = NULL, ...)
 }
 \arguments{
 \item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
-\item{mesh}{default is \code{NULL}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".}
+\item{mesh}{default is \code{'ALL'}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".}
 
 \item{component}{default is \code{NULL}. This is either "WESTERN" or "EASTERN".}
 

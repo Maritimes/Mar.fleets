@@ -10,4 +10,5 @@
 *.prj
 /temp
 /crap
+/inst
 .Rprofile

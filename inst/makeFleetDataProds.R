@@ -72,7 +72,7 @@ makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/w
       }
       # if (fleet[f] == "SWORDFISH"){
       #   theName <- "SWORDFISH"
-      #   this <- sp_swordfish(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
+      #   this <- fleet_swordfish(dateStart = bins[y], dateEnd =bins[y+1], useLocal =T, data.dir = data.dir, quietly = T)
       # }
 
       # cov <- calc_coverage(get_isdb = this$isdb, get_marfis = this$marf, quietly = T)
@@ -108,8 +108,8 @@ makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/w
   cat("\t","Completed in",round( difftime(Sys.time(),startTime1,units = "mins"),0),"mins\n")
   startTime2 <- NULL
 }
-makeFleetDataProds(startYr = 2017, binYears = 5, fleet= c('HADDOCK_FIX_5Z','POLLOCK_FIX_WEST','HALIBUT_45UND',
-                                                          'HALIBUT_45PLUS','HALIBUT','REDFISH_2','REDFISH_3',
-                                                          'HADDOCK_MOB_5Z','SILVERHAKE','WFLOUNDER','HADDOCK_MOB_4X5Y',
-                                                          'POLLOCK_MOB_WEST','POLLOCK_MOB_EAST'),
-                   saveDir = "C:/Users/McMahonM/Documents/Assistance/Bycatch/Loop202011_10")
+# makeFleetDataProds(startYr = 2017, binYears = 5, fleet= c('HADDOCK_FIX_5Z','POLLOCK_FIX_WEST','HALIBUT_45UND',
+#                                                           'HALIBUT_45PLUS','HALIBUT','REDFISH_2','REDFISH_3',
+#                                                           'HADDOCK_MOB_5Z','SILVERHAKE','WFLOUNDER','HADDOCK_MOB_4X5Y',
+#                                                           'POLLOCK_MOB_WEST','POLLOCK_MOB_EAST'),
+#                    saveDir = "C:/Users/McMahonM/Documents/Assistance/Bycatch/Loop202011_10")

@@ -96,11 +96,13 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-      PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc &
-                              PRO_SPC_INFO$SPECIES_CODE %in% args$marfSpp,
+      PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc,
                             c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                               'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                               'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS')]
+
+      if (all(args$marfSpp != 'all')) PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$SPECIES_CODE %in% args$marfSpp,]
+
       if (all(args$nafoCode != 'all')){
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
         nafoCodeSimp <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
@@ -124,8 +126,20 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
           where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(args$nafoCode),")")
         }
       }else{
-        where_n = "AND 1 = 1"
+        where_n = ""
       }
+      if (all(args$marfSpp != 'all')){
+        where_sp = paste0("AND PS.SPECIES_CODE IN (",Mar.utils::SQL_in(args$marfSpp, apo=F),")")
+      }else{
+        where_sp =  ""
+      }
+
+      if (args$HS){
+        where_HS <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
+      }else{
+        where_HS <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
+      }
+
       PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID,
                     PS.PRO_SPC_INFO_ID,
                     PS.MON_DOC_ID,
@@ -149,9 +163,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
                     WHERE PS.VR_NUMBER_FISHING = V.VR_NUMBER AND
                     PS.NAFO_UNIT_AREA_ID = N.AREA_ID AND
                     PS.TRIP_ID = T.TRIP_ID AND
-                    PS.PRO_SPC_INFO_ID BETWEEN ",min(allProSpc), " AND ", max(allProSpc), "
-                    AND PS.SPECIES_CODE IN ",Mar.utils::SQL_in(args$marfSpp, apo=F)," ",
-                      where_n    )
+                    PS.PRO_SPC_INFO_ID BETWEEN ",min(allProSpc), " AND ", max(allProSpc),"
+                    ",where_HS,"
+                    ",where_n, "
+                    ",where_sp)
       PS_df<- args$cxn$thecmd(args$cxn$channel, PSQry0)
       PS_df <- PS_df[PS_df$PRO_SPC_INFO_ID %in% allProSpc,]
     }

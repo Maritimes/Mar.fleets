@@ -81,11 +81,7 @@ calc_coverage<-function(get_isdb = NULL,
   if (is.null(agg.poly.shp)){
     agg.poly.shp=getExportedValue("Mar.data", args$areas)
     agg.poly.field = args$areasField
-    if (args$areas !=  "NAFOSubunits_sf" && agg.poly.field == "NAFO_1"){
-      if (args$areas == "ShrimpFAs_sf") agg.poly.field = "BOX_NAME"
-      if (args$areas == "MarStrata_sf") agg.poly.field = "StrataID"
-      if (args$areas == "MarStrata4VSW_sf") agg.poly.field = "StrataID"
-    }
+
   }else{
     #use shapefile
     agg.poly.shp <- sf::st_read(agg.poly.shp)
@@ -105,7 +101,7 @@ calc_coverage<-function(get_isdb = NULL,
   #by set
   if (!args$quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
   if (!is.null(oSets) && nrow(oSets)>0){
-    OBS_area_s = identify_area(oSets,
+    OBS_area_s = Mar.utils::identify_area(oSets,
                                           agg.poly.shp = agg.poly.shp,
                                           agg.poly.field = agg.poly.field)
   }else{
@@ -122,7 +118,7 @@ calc_coverage<-function(get_isdb = NULL,
     MARF_sets_pos$LOG_EFRT_STD_INFO_ID <- NULL
     MARF_sets_pos <- unique(MARF_sets_pos[!is.na(MARF_sets_pos$MON_DOC_ID),])
     Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos )
-    MAR_area_s = identify_area(get_marfis$MARF_SETS,
+    MAR_area_s = Mar.utils::identify_area(get_marfis$MARF_SETS,
                                           agg.poly.shp = agg.poly.shp,
                                           agg.poly.field = agg.poly.field)
   }else{
@@ -136,14 +132,14 @@ calc_coverage<-function(get_isdb = NULL,
   if (!is.null(oTrips) && (!is.null(oSets) && nrow(oSets)>0)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
                     oSets, all.y =TRUE, by.x = "TRIP_ID_ISDB", by.y = "TRIP_ID")
-    OBS_area_t =identify_area(O_trips,
+    OBS_area_t <- Mar.utils::identify_area(O_trips,
                                           agg.poly.shp = agg.poly.shp,
                                           agg.poly.field = agg.poly.field)
   }else{
     OBS_area_t<-NA
   }
 
-  MAR_area_t = identify_area(Marf_Trip_pos,
+  MAR_area_t = Mar.utils::identify_area(Marf_Trip_pos,
                                         agg.poly.shp = agg.poly.shp,
                                         agg.poly.field = agg.poly.field)
 

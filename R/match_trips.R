@@ -107,42 +107,32 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   rm(marf_TRIPS_F, marf_TRIPS_L, isdbTrips_dets, marf_TRIPS_dets)
   #use dates to check for overlaps
 
-  close<- isdb_marf_dets
-
-  if (args$HS){
-    within <- isdb_marf_dets[isdb_marf_dets[,args$useDate] >= isdb_marf_dets$BOARD_DATE & isdb_marf_dets[,args$useDate] <= isdb_marf_dets$LANDING_DATE,]
-    close[,"BD"]<- abs(difftime(close$BOARD_DATE,close[,args$useDate], units="days"))
-    close[,"LD"]<- abs(difftime(close$LANDING_DATE,close[,args$useDate], units="days"))
-  }else{
-    within <- isdb_marf_dets[isdb_marf_dets[,"T_DATE1"] <= isdb_marf_dets$LANDING_DATE & isdb_marf_dets[,"T_DATE2"] >= isdb_marf_dets$BOARD_DATE,]
-    close[,"BD"]<- abs(difftime(close$BOARD_DATE,close[,"T_DATE1"], units="days"))
-    close[,"LD"]<- abs(difftime(close$LANDING_DATE,close[,"T_DATE2"], units="days"))
-  }
-  within$match_VRLICDATE_DETS  <- "within date bounds"
-  close$CLOSEST<- with(close, pmin(BD, LD))
-  close <- close[close$CLOSEST <2,]
-  close$match_VRLICDATE_DETS  <- "ISDB/MARF activity within 2 days"
-  close$BD <- close$LD <- close$CLOSEST <- NULL
-  close <- close[!close$TRIP_ID_ISDB %in% within$TRIP_ID_ISDB,]
-
-  if (nrow(within)>0 && nrow(close)>0){
-    match_VRLIC <- rbind(within, close)
-  }else if(nrow(within)>0){
-    match_VRLIC <- within
-  }else if(nrow(close)>0){
-    match_VRLIC<- close
-  }else{
-    match_VRLIC <- isdb_marf_dets[FALSE,]
-  }
-
-  if (nrow(match_VRLIC)>0) {
+  match_VRLIC<- isdb_marf_dets
+  if(nrow(match_VRLIC)>0){
+    if (args$HS){
+      match_VRLIC[,"BD"]<- abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC[,args$useDate], units="days"))
+      match_VRLIC[,"LD"]<- abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC[,args$useDate], units="days"))
+      match_VRLIC[,"match_VRLICDATE_DETS"] <- "F"
+      match_VRLIC[which(match_VRLIC[,args$useDate]<= match_VRLIC$LANDING_DATE & match_VRLIC[,args$useDate] >= match_VRLIC$BOARD_DATE),"match_VRLICDATE_DETS"] <- "within date bounds"
+    }else{
+      match_VRLIC[,"BD"]<- abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC[,"T_DATE1"], units="days"))
+      match_VRLIC[,"LD"]<- abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC[,"T_DATE2"], units="days"))
+      match_VRLIC[,"match_VRLICDATE_DETS"] <- "F"
+      match_VRLIC[which(match_VRLIC[,"T_DATE1"] <= match_VRLIC$LANDING_DATE & match_VRLIC[,"T_DATE2"] >= match_VRLIC$BOARD_DATE),"match_VRLICDATE_DETS"] <- "within date bounds"
+    }
+    match_VRLIC$CLOSEST<- with(match_VRLIC, pmin(BD, LD))
+    match_VRLIC[which(match_VRLIC$match_VRLICDATE_DETS != "WITHIN" & match_VRLIC$CLOSEST <= 2),"match_VRLICDATE_DETS"]<-"ISDB/MARF activity within 2 days"
+    match_VRLIC<-match_VRLIC[match_VRLIC$match_VRLICDATE_DETS!="F",]
     match_VRLIC$match_VRLICDATE <- TRUE
     colnames(match_VRLIC)[colnames(match_VRLIC)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_VRLICDATE"
+    match_VRLIC$BD <- match_VRLIC$LD <- match_VRLIC$CLOSEST <- NULL
+  }else{
+    match_VRLIC <- data.frame(VR_LIC=NA,TRIP_ID_ISDB=NA,BOARD_DATE=NA,LANDING_DATE=NA,TRIP_ID_MARF=NA,LANDED_DATE=NA,T_DATE1=NA,T_DATE2=NA,match_VRLICDATE_DETS=NA,join=NA)
+    match_VRLIC <-match_VRLIC[FALSE,]
   }
-  rm(within,close)
+
   #MMM!!
-  #look for MARF_ID == 433342 making 2 matches with 100048271 and 100048936.
-  #for 2017 halibut
+  #look for MARF_ID == 433342 making 2 matches with 100048271 and 100048936 (2017 halibut)
   if (nrow(match_TRIP)>0){
     isdbTrips <- merge(isdbTrips, match_TRIP, all.x = T, by.x = c("ISDB_TRIP_O", "TRIP_ID_ISDB"), by.y=c("ISDB_TRIP_O", "TRIP_ID_ISDB"))
   }else{
@@ -164,6 +154,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   if (nrow(match_VRLIC)>0){
     isdbTrips$join <- paste0(isdbTrips$VR_LIC, "_", isdbTrips$TRIP_ID_ISDB)
     match_VRLIC$join <- paste0(match_VRLIC$VR_LIC, "_", match_VRLIC$TRIP_ID_ISDB)
+
     isdbTrips <- merge(isdbTrips, match_VRLIC[,c("TRIP_ID_MARF_VRLICDATE","match_VRLICDATE","match_VRLICDATE_DETS","join")], all.x = T, by.x = c("join"), by.y=c("join"))
     isdbTrips$join <- NULL
   }else{

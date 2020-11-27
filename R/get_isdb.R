@@ -230,6 +230,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
   isdb_TRIPS_all <- do.call(get_isdb_trips, list(mVR_LIC = VR_LIC_fleet, args = args))
   debugTrips <- isdb_TRIPS_all$debugTrips
+if (!is.null(isdb_TRIPS_all)){
 
   isdb_TRIPIDs_all <- unique(isdb_TRIPS_all$ISTRIPS)
 
@@ -243,6 +244,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (args$debug) cat("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
     isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED
     msum <- trips$MATCH_SUMMARY_TRIPS
+
     ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
     if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(BOARD_DATE, LANDING_DATE)), ]
     ISDB_MULTIMATCHES <- trips$ISDB_MULTIMATCHES
@@ -261,6 +263,13 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
     }
   }
+}else{
+  isdb_TRIPS_all <- NA
+  isdb_SETS_all <- NA
+  msum <- NA
+  ISDB_UNMATCHABLES <- NA
+  ISDB_MULTIMATCHES <- NA
+}
   # if(!any(args$debugISDBTrips =="_none_")) print(debugTrips)
   res= list()
   res[["ALL_ISDB_TRIPS"]]<- isdb_TRIPS_all

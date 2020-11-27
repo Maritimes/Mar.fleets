@@ -25,7 +25,7 @@
 plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL, subtitle = NULL){
   COMMON <- COMMON_fact <- EST_NUM_CAUGHT  <- ORD <- WT <- CATCH_TYPE <- NA
   ts = format(Sys.time(), "%Y%m%d_%H%M%S")
-  fn = paste0(isdbSp)
+  fn = paste0(isdbSp,collapse = "_")
 
   label <- hj <- NA
   df$label <- NA
@@ -37,8 +37,8 @@ plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
   dfLong<- dfLong[,c("SPEC", "label","EST_KEPT_WT", "EST_DISCARD_WT")]
   dfLong$ALL_WT <- dfLong$EST_KEPT_WT+dfLong$EST_DISCARD_WT
   dfLong <- dfLong[with(dfLong, order(-ALL_WT, -EST_KEPT_WT)), ]
-  dir_Spp_row_dfLong <- dfLong[dfLong$SPEC ==isdbSp,]
-  dfLong <- dfLong[dfLong$SPEC !=isdbSp,]
+  dir_Spp_row_dfLong <- dfLong[dfLong$SPEC %in% isdbSp,]
+  dfLong <- dfLong[!(dfLong$SPEC %in% isdbSp),]
   if (!is.null(showXSpp))dfLong<-utils::head(dfLong,showXSpp-1)
   dfLong <- rbind(dir_Spp_row_dfLong, dfLong)
   dfLong$ORD <- seq(1:nrow(dfLong))
@@ -68,8 +68,8 @@ plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
 
   # sort the data, ensure that the specified spp is first
   df <- df[with(df, order(-EST_NUM_CAUGHT, EST_KEPT_WT,EST_DISCARD_WT)), ]
-  dir_Spp_row <- df[df$SPEC ==isdbSp,]
-  df <- df[df$SPEC !=isdbSp,]
+  dir_Spp_row <- df[df$SPEC %in% isdbSp,]
+  df <- df[!(df$SPEC %in% isdbSp),]
   if (!is.null(showXSpp)){
     if (nrow(df)>= showXSpp-1) {
       df<-utils::head(df,showXSpp-1)

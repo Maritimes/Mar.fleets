@@ -29,7 +29,7 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   if (all(is.na(isTrips)))return(NULL) #get_isdb$ISDB_TRIPS_MATCHED
 
   ISCATCHES <- ISTRIPS <- NA
-  isdbSPP = spLookups[which(spLookups$MARFIS_CODE==marfSpID),c("SPECCD_ID")]
+  isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% marfSpID),c("SPECCD_ID")]
   isTrips<- unique(isTrips)
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
@@ -62,10 +62,10 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   )
   BYCATCH <- merge(BYCATCH, spLookups[,c("SPECCD_ID","COMMON", "SCIENTIFIC")], by.x="SPEC", by.y = "SPECCD_ID", all.x=T)
   BYCATCH <- BYCATCH[with(BYCATCH, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
-  dir_Spp_row <- BYCATCH[BYCATCH$SPEC ==isdbSPP,]
-  BYCATCH <- BYCATCH[BYCATCH$SPEC !=isdbSPP,]
+  dir_Spp_rows <- BYCATCH[BYCATCH$SPEC %in% isdbSPP,]
+  BYCATCH <- BYCATCH[!(BYCATCH$SPEC %in% isdbSPP),]
 
-  BYCATCH <- rbind(dir_Spp_row, BYCATCH)
+  BYCATCH <- rbind(dir_Spp_rows, BYCATCH)
 
   return(BYCATCH)
 }

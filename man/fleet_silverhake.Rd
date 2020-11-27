@@ -4,12 +4,9 @@
 \alias{fleet_silverhake}
 \title{fleet_silverhake}
 \usage{
-fleet_silverhake(year = NULL, ...)
+fleet_silverhake(...)
 }
 \arguments{
-\item{year}{default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-observer and bycatch data.}
-
 \item{...}{other arguments passed to methods}
 }
 \value{

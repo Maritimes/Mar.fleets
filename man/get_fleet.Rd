@@ -10,8 +10,19 @@ get_fleet(...)
 \item{...}{other arguments passed to methods}
 }
 \value{
-returns a data.frame with 6 columns - "GEAR_CODE", "GEAR_DESC",
-        "MD_CODE", "MD_DESC", "VR_NUMBER", "LICENCE_ID"
+returns a data.frame with the following columns:
+\itemize{
+  \item \code{MON_DOC_ID}
+  \item \code{GEAR_CODE }
+  \item \code{LICENCE_ID}
+  \item \code{PRO_SPC_INFO_ID}
+  \item \code{LOG_EFRT_STD_INFO_ID         }
+  \item \code{LANDED_DATE/DATE_FISHED} - one of these, depending on parameter \code{useDate}
+  \item \code{T_DATE1}
+  \item \code{T_DATE2}
+  \item \code{MD_CODE}
+  \item \code{VR_NUMBER}
+  }
 }
 \description{
 This function extracts all of the Vessel/Licence combinations

@@ -14,8 +14,6 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
-#' @param year default is \code{NULL}. This is a year (YYYY) for which you want to look at the marfis,
-#' observer and bycatch data.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
 #' SilverHake <- fleet_silverhake(data.dir = "C:/myData")
@@ -32,7 +30,7 @@
 #'   \item \code{mdCode} = 2
 #' }
 #' @export
-fleet_silverhake <- function(year=NULL, ...){
+fleet_silverhake <- function(...){
 
   marfSpp=172
   nafoCode=c('4V%','4W%','4X%') #4VWX
@@ -42,8 +40,12 @@ fleet_silverhake <- function(year=NULL, ...){
   argsFn <- as.list(environment())
   argsUser <- list(...)
 
-  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+    startTime=Sys.time()
+  }
 
   data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
+  if(exists("startTime")) cat("\n","Completed in",round( difftime(Sys.time(),startTime,units = "secs"),0),"secs\n")
   return(data)
 }

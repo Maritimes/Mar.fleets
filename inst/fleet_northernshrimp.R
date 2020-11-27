@@ -18,22 +18,32 @@
 #' @examples \dontrun{
 #' Shrimp <- fleet_northernshrimp(data.dir = "C:/myData")
 #'                       }
-#' @family species
+#' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' \itemize{
+#'   \item \code{marfSpp} = 702
+#'   \item \code{mdCode} = c(16,28)
+#'   \item \code{areas}  = "ShrimpFAs_sf"
+#' }
 #' @export
-fleet_northernshrimp <- function( ...){
+fleet_snowcrab <- function( ...){
   warning("This analytic has not been throughly reviewed.  Use at your own risk.")
 
   marfSpp=702
   mdCode = c(16,28)
   areas = "ShrimpFAs_sf"
+
   argsFn <- as.list(environment())
   argsUser <- list(...)
 
-  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+    startTime=Sys.time()
+  }
 
   data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
+  if(exists("startTime")) cat("\n","Completed in",round( difftime(Sys.time(),startTime,units = "secs"),0),"secs\n")
   return(data)
 }

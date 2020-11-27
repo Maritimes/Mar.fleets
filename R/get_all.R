@@ -26,32 +26,43 @@ get_all <- function(...){
   } else if (is.list(cxnCheck)){
     args[["cxn"]] <- cxnCheck
   }
-
+  fleet <- NA
+  marf<- NA
+  isdb <- NA
+  matchedTrips <- NA
+  bycatch <- NA
+  covSumm <- NA
   fleet <- do.call(get_fleet, args)
-  if (!is.null(fleet))                  marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
-  if (!is.null(fleet) & !is.null(marf)) isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, args=args))
-
-  matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
-  if (!is.null(isdb)) bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
-  if (!is.null(fleet))                  cov <- do.call(calc_coverage, list(get_isdb = isdb, get_marfis = marf, args=args))
-
-  #add the determined areas onto each trip/set
-
-  if (is.data.frame(cov$details$TRIPS_MARF)) {
-    colnames(cov$details$TRIPS_MARF)[2] <- "CALC_AREA"
-    marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, cov$details$TRIPS_MARF)
-  }
-  if (is.data.frame(cov$details$SETS_MARF)) {
-    colnames(cov$details$SETS_MARF)[2] <- "CALC_AREA"
-    marf$MARF_SETS <- merge(marf$MARF_SETS, cov$details$SETS_MARF)
-  }
-  if (is.data.frame(cov$details$TRIPS_ISDB)) {
-    colnames(cov$details$TRIPS_ISDB)[2] <- "CALC_AREA"
-    isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, cov$details$TRIPS_ISDB)
-  }
-  if (is.data.frame(cov$details$SETS_ISDB)) {
-    colnames(cov$details$SETS_ISDB)[2] <- "CALC_AREA"
-    isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, cov$details$SETS_ISDB)
+  if (class(fleet)=="data.frame"){
+    marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
+    if (any(!is.na(marf))){
+      isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, args=args))
+      if (length(isdb)>1 && class(isdb$ALL_ISDB_TRIPS)=="data.frame"){
+        matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
+        if (any(!is.na(matchedTrips))){
+          bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
+        }
+        cov <- do.call(calc_coverage, list(get_isdb = isdb, get_marfis = marf, args=args))
+        covSumm <- cov$summary
+        #add the determined areas onto each trip/set
+        if (is.data.frame(cov$details$TRIPS_MARF)) {
+          colnames(cov$details$TRIPS_MARF)[2] <- "CALC_AREA"
+          marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, cov$details$TRIPS_MARF)
+        }
+        if (is.data.frame(cov$details$SETS_MARF)) {
+          colnames(cov$details$SETS_MARF)[2] <- "CALC_AREA"
+          marf$MARF_SETS <- merge(marf$MARF_SETS, cov$details$SETS_MARF)
+        }
+        if (is.data.frame(cov$details$TRIPS_ISDB)) {
+          colnames(cov$details$TRIPS_ISDB)[2] <- "CALC_AREA"
+          isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, cov$details$TRIPS_ISDB)
+        }
+        if (is.data.frame(cov$details$SETS_ISDB)) {
+          colnames(cov$details$SETS_ISDB)[2] <- "CALC_AREA"
+          isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, cov$details$SETS_ISDB)
+        }
+      }
+    }
   }
 
   if(!any(args$debugISDBTrips =="_none_")) {
@@ -60,25 +71,28 @@ get_all <- function(...){
     marf[["debugTripsMARFIS"]] <- debugTripsMARFIS
   }
 
-  if ((is.data.frame(marf$MARF_TRIPS) && nrow(marf$MARF_TRIPS)>0) && (is.data.frame(isdb$ALL_ISDB_TRIPS) && nrow(isdb$ALL_ISDB_TRIPS)>0)){
-    #now that we've matched all that we can, create a little df of the marfis recs
-    #that should be matchable (i.e. have an isdb trip or have obs_id or obs_present),
-    #and add that to the marfis results
+  if(!is.na(marf) && !is.na(isdb) ){
+    if ((is.data.frame(marf$MARF_TRIPS) && nrow(marf$MARF_TRIPS)>0) && (is.data.frame(isdb$ALL_ISDB_TRIPS) && nrow(isdb$ALL_ISDB_TRIPS)>0)){
+      #now that we've matched all that we can, create a little df of the marfis recs
+      #that should be matchable (i.e. have an isdb trip or have obs_id or obs_present),
+      #and add that to the marfis results
 
-    MARF_UNMATCHABLES <- unique(marf$MARF_TRIPS[marf$MARF_TRIPS$TRIP_ID_MARF %in% marf$MARF_MATCH[(!is.na(marf$MARF_MATCH$OBS_PRESENT) | !is.na(marf$MARF_MATCH$OBS_ID)  | !is.na(marf$MARF_MATCH$ISDB_TRIP)) & !(marf$MARF_MATCH$TRIP_ID_MARF %in% isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),"TRIP_ID_MARF"],
-                                                !names(marf$MARF_TRIPS) %in% c("PRO_SPC_INFO_ID","DATE_FISHED", "LANDED_DATE","LOG_EFRT_STD_INFO_ID", "RND_WEIGHT_KGS","NAFO_UNIT_AREA_ID","NAFO_AREA", "CALC_AREA")])
-    MARF_UNMATCHABLES <- merge(MARF_UNMATCHABLES, unique(marf$MARF_MATCH[,c("TRIP_ID_MARF","ISDB_TRIP","OBS_ID","OBS_PRESENT")]))
-    MARF_UNMATCHABLES = MARF_UNMATCHABLES[with(MARF_UNMATCHABLES, order(T_DATE1, T_DATE2 )), ]
-    marf[["MARF_UNMATCHABLES"]] <- MARF_UNMATCHABLES
-  }else{
-    marf[["MARF_UNMATCHABLES"]] <- NA
+      MARF_UNMATCHABLES <- unique(marf$MARF_TRIPS[marf$MARF_TRIPS$TRIP_ID_MARF %in% marf$MARF_MATCH[(!is.na(marf$MARF_MATCH$OBS_PRESENT) | !is.na(marf$MARF_MATCH$OBS_ID)  | !is.na(marf$MARF_MATCH$ISDB_TRIP)) & !(marf$MARF_MATCH$TRIP_ID_MARF %in% isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),"TRIP_ID_MARF"],
+                                                  !names(marf$MARF_TRIPS) %in% c("PRO_SPC_INFO_ID","DATE_FISHED", "LANDED_DATE","LOG_EFRT_STD_INFO_ID", "RND_WEIGHT_KGS","NAFO_UNIT_AREA_ID","NAFO_AREA", "CALC_AREA")])
+      MARF_UNMATCHABLES <- merge(MARF_UNMATCHABLES, unique(marf$MARF_MATCH[,c("TRIP_ID_MARF","ISDB_TRIP","OBS_ID","OBS_PRESENT")]))
+      MARF_UNMATCHABLES = MARF_UNMATCHABLES[with(MARF_UNMATCHABLES, order(T_DATE1, T_DATE2 )), ]
+      marf[["MARF_UNMATCHABLES"]] <- MARF_UNMATCHABLES
+    }else{
+      marf[["MARF_UNMATCHABLES"]] <- NA
+    }
   }
+
 
   res=list()
   res[["fleet"]]<- fleet
   res[["marf"]]<- marf
   res[["isdb"]]<- isdb
-  res[["coverage"]]<- cov$summary
+  res[["coverage"]]<- covSumm
   res[["bycatch"]]<- bycatch
   return(res)
 }

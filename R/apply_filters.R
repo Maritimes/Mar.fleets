@@ -153,13 +153,11 @@ apply_filters<-function(df = NULL, ...){
       }else if (length(args$gearSpType)>0){
         #apply the requested filter
         gearSpecRelevant_types <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% args$gearSpType,"LOG_EFRT_STD_INFO_ID"]
-        # if (args$debug) cat("gearSpecRelevant_types done:",nrow(gearSpecRelevant_types),"\n")
         log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"LOG_EFRT_STD_INFO_ID"])
         df<-df[df$MON_DOC_ID %in% log_eff,]
         log_eff <- NA
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
       }
-      # if (args$debug) cat("typeFilt done:",nrow(df),"\n")
       return(df)
     }
 
@@ -169,13 +167,13 @@ apply_filters<-function(df = NULL, ...){
   }
 
   if (length(unique(df$MD_CODE))==1 ){
-    if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_DESC)," (",unique(df$MD_CODE),")"))
+    if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_CODE)))
   }else if (length(args$mdCode)>0 && args$mdCode != "all"){
     df=df[df$MD_CODE %in% args$mdCode,]
   }
 
   if (length(unique(df$GEAR_CODE))==1){
-    if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_DESC)," (",unique(df$GEAR_CODE),")"))
+    if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_CODE)))
   }else if (length(args$gearCode)>0 && args$gearCode != "all"){
     df=df[df$GEAR_CODE %in% args$gearCode,]
   }
@@ -187,11 +185,9 @@ apply_filters<-function(df = NULL, ...){
     df <- df[grep(paste(nafoCode, collapse = '|'), df$NAFO),]
   }
 
-  # test=do.call(chk_Gears, list(df=df,args=args))
-
-    if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
-      df <- do.call(get_GearSpecs, list(df=df,args=args))
-    }
+  if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
+    df <- do.call(get_GearSpecs, list(df=df,args=args))
+  }
 
   return(df)
 }

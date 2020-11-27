@@ -26,15 +26,6 @@ trip and set information from MARFIS related to the specified fleet}
 function should be run on all ISDB data, or just on those that have been
 matched to MARFIS data (the default).}
 
-\item{agg.poly.shp}{default is \code{NULL}.  This is the shapefile that has
-polygons that should be checked for sufficient unique values of the
-sens.fields.  If NULL, NAFO zones will be used.  Otherwise, a path to any
-polygon shapefile can be provided.}
-
-\item{agg.poly.field}{default is \code{NULL}.  This identifies the field within
-the shapefile provided to agg.poly.shp that should be used to check for
-sufficient unique values of the sens.fields.}
-
 \item{...}{other arguments passed to methods}
 }
 \value{

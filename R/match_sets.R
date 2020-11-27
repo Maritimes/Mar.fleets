@@ -51,23 +51,36 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
     df$BADTIM<- FALSE
     df$BADPOS<- FALSE
     #qc positions
-    df[(is.na(df[,lat.field]) | df[,lat.field] >  52 | df[,lat.field] < 35 |
-          is.na(df[,lon.field]) | df[,lon.field] < -75 | df[,lon.field] > -45),"BADPOS"]<-"TRUE"
+    df[(is.na(df[,lat.field]) || df[,lat.field] >  52 || df[,lat.field] < 35 ||
+          is.na(df[,lon.field]) || df[,lon.field] < -75 || df[,lon.field] > -45),"BADPOS"]<-"TRUE"
     #qc times would go here, and populate BADTIM if they're bad
+    df[is.na(df[,timeField]),"BADTIM"]<-TRUE
     nsets <- df[,c(tripField, timeField, lat.field, lon.field,"BADPOS", "BADTIM")]
     #cnt the nsets/trip with good time
+    if (nrow(nsets[nsets$BADTIM ==F,])>0){
     nsets_tim <- stats::aggregate(data=nsets[nsets$BADTIM ==F,],
                            nsets[,timeField]~nsets[,tripField],
                            FUN = function(x) length(unique(x))
     )
     colnames(nsets_tim) <- c(tripField, "CNT_TIM")
+    }else{
+      nsets_tim <- unique(nsets[,c(tripField), drop = F])
+      nsets_tim$CNT_TIM <- 0
+    }
+
+    if (nrow(nsets[nsets$BADPOS ==F,])>0){
     nsets_pos <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
                                   nsets[,lat.field]+nsets[,lon.field]~nsets[,tripField],
                                   FUN = function(x) length(unique(x))
     )
     colnames(nsets_pos) <- c(tripField, "CNT_POS")
+    }else{
+      nsets_pos <- unique(nsets[,c(tripField), drop = F])
+      nsets_pos$CNT_POS <- 0
+    }
 
     dets=merge(nsets_tim, nsets_pos, all=T)
+    dets[is.na(dets)] <- 0
     dets$MAXMATCH <- pmax(dets$CNT_TIM, dets$CNT_POS, na.rm = T)
 
     dets$CNT_TIM <- dets$CNT_POS <- NULL

@@ -77,8 +77,12 @@ fleet_haddock <- function(type = NULL, area= NULL, ...){
   argsFn <- as.list(environment())
   argsUser <- list(...)
 
-  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+  if((length(argsUser$debug)>0) && (argsUser$debug == TRUE)) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
+    startTime=Sys.time()
+  }
 
   data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
+  if(exists("startTime")) cat("\n","Completed in",round( difftime(Sys.time(),startTime,units = "secs"),0),"secs\n")
   return(data)
 }
