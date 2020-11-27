@@ -18,7 +18,9 @@ get_all <- function(...){
     if((length(args$debug)>0) && (args$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
     args <- do.call(set_defaults, args)
   }
-
+  if (args$debug) {
+    T_get_all=Sys.time()
+  }
   cxnCheck <- do.call(can_run, args)
 
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
@@ -94,5 +96,7 @@ get_all <- function(...){
   res[["isdb"]]<- isdb
   res[["coverage"]]<- covSumm
   res[["bycatch"]]<- bycatch
+  if(exists("T_get_all")) cat("\n","get_all() completed in",round( difftime(Sys.time(),T_get_all,units = "secs"),0),"secs\n")
+
   return(res)
 }

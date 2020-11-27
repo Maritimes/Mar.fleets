@@ -21,14 +21,25 @@
 get_fleet<-function(...){
   args <-list(...)
   if(!is.null(args$debugTripsRes)){
+    print(args$depth)
     debugTrips <- args$debugTripsRes
   }
 
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debug) {
+    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_get_fleet=Sys.time()
+  }
   get_fleetBasic<-function(...){
     args <- list(...)
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_get_fleetBasic=Sys.time()
+    }
     if(exists("debugTrips")) {
+      if (args$debug) {
+        Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
+        T_get_fleetBasic_dbTrips=Sys.time()
+      }
       debugTripsISDB <-debugTrips[,c("TRIP_ISDB","VESSEL","LICENSE", "BOARD_DATE", "LANDING_DATE")]
       # grab basic info from isdb debug
       isdbJoiner <- debugTripsISDB[!is.na(debugTripsISDB$VESSEL) & !is.na(debugTripsISDB$LICENSE),c("TRIP_ISDB","VESSEL","LICENSE")]
@@ -155,15 +166,16 @@ get_fleet<-function(...){
         debugTripsMARFISmissing[1:length(missingISDB),"TRIP_ISDB"] <- missingISDB
         debugTripsMARFIS <- rbind(debugTripsMARFISmissing,debugTripsMARFIS)
       }
+      if(exists("T_get_fleetBasic_dbTrips")) cat("\n","get_fleet() completed in",round( difftime(Sys.time(),T_get_fleetBasic_dbTrips,units = "secs"),0),"secs\n")
       return(debugTripsMARFIS)
 
     }
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
-                                 tables = c("PRO_SPC_INFO","TRIPS","MON_DOCS","MON_DOC_DEFNS","NAFO_UNIT_AREAS"),
+                                 tables = c("PRO_SPC_INFO","TRIPS","MON_DOCS","NAFO_UNIT_AREAS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-
+#"MON_DOC_DEFNS",
       TRIPS <- TRIPS[,c("TRIP_ID","EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
       colnames(TRIPS)[colnames(TRIPS)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
       colnames(TRIPS)[colnames(TRIPS)=="LATEST_DATE_TIME"] <- "T_DATE2"
@@ -275,14 +287,13 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                       ",table_CID,",
                       MARFISSCI.PRO_SPC_INFO PS,
                       MARFISSCI.MON_DOCS MD,
-                      MARFISSCI.GEARS G,
                       MARFISSCI.NAFO_UNIT_AREAS N,
                       MARFISSCI.VESSELS V,
                       MARFISSCI.TRIPS T
                     WHERE
                       MD.MON_DOC_ID = PS.MON_DOC_ID
                       ",join_CID,"
-                      AND PS.GEAR_CODE = G.GEAR_CODE
+
                       AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID
                       AND PS.VR_NUMBER_FISHING = V.VR_NUMBER
                       AND PS.TRIP_ID = T.TRIP_ID
@@ -293,22 +304,26 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                       ",where_vl,"
                       ",where_g
       )
+
+      #MARFISSCI.GEARS G,
+      # AND PS.GEAR_CODE = G.GEAR_CODE
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
 
     }
+    if(exists("T_get_fleetBasic")) cat("\n","get_fleetBasic() completed in",round( difftime(Sys.time(),T_get_fleetBasic,units = "secs"),0),"secs\n")
     return(theFleet)
   }
   df <- do.call(get_fleetBasic, args)
   if(exists("debugTrips")) return(df)
-
   df <- do.call(apply_filters, list(df=df,args=args))
-
   if(nrow(df)<1) {
     cat(paste0("\n","No records found"))
+    if(exists("T_get_fleet")) cat("\n","get_fleet() completed in",round( difftime(Sys.time(),T_get_fleet,units = "secs"),0),"secs\n")
     return(NA)
   }else{
     df$NAFO <-NULL
     df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, MD_CODE, GEAR_CODE )),])
+    if(exists("T_get_fleet")) cat("\n","get_fleet() completed in",round( difftime(Sys.time(),T_get_fleet,units = "secs"),0),"secs\n")
     return(df)
   }
 }

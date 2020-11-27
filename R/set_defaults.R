@@ -42,8 +42,24 @@ set_defaults <- function(...){
                   quietly=TRUE,
                   debugISDBTrips = "_none_",
                   HS = FALSE,
-                  debug=FALSE
+                  debug=FALSE,
+                  marfTabs = c("CONDITION_LICENCE_ASSIGN",
+                              "HAIL_IN_CALLS",
+                              "HAIL_OUTS",
+                              "LOG_EFRT_ENTRD_DETS",
+                              "LOG_EFRT_STD_INFO",
+                              "MON_DOC_ENTRD_DETS",
+                              "MON_DOCS",
+                              "NAFO_UNIT_AREAS",
+                              "PRO_SPC_INFO",
+                              "TRIPS",
+                              "VESSELS"),
+                  isdbTabs = c("ISFISHSETS",
+                              "ISSETPROFILE_WIDE",
+                              "ISTRIPS",
+                              "ISVESSELS")
   )
+  #"MARFISSCI.GEARS",MARFISSCI.LICENCE_SUBTYPES, "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.MON_DOC_DEFNS"
   argsDef[names(args)] <- args
   dateArgs <- Mar.utils::vali_dates(dateStart = argsDef$dateStart, dateEnd = argsDef$dateEnd, year = argsDef$year)
   argsDef$dateStart <- dateArgs$dateStart

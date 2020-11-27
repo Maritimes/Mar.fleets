@@ -31,7 +31,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
 
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+  if (args$debug) {
+    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    T_match_trips=Sys.time()
+  }
   clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
     return(df)
@@ -254,5 +257,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   res[["MATCH_SUMMARY_TRIPS"]] <- summ_df
   res[["ISDB_UNMATCHABLES"]] <- matchNone
   res[["ISDB_MULTIMATCHES"]] <- matchMulti
+  if(exists("T_match_trips")) cat("\n","match_trips() completed in",round( difftime(Sys.time(),T_match_trips,units = "secs"),0),"secs\n")
   return(res)
 }

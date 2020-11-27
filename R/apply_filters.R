@@ -6,7 +6,10 @@
 #' @noRd
 apply_filters<-function(df = NULL, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+   if (args$debug) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_apply_filters=Sys.time()
+  }
 
   chk_Gears <- function(df=df,...){
     args <- list(...)$args
@@ -188,6 +191,6 @@ apply_filters<-function(df = NULL, ...){
   if (!(args$gearSpType=="all" && args$gearSpSize=="all")){
     df <- do.call(get_GearSpecs, list(df=df,args=args))
   }
-
+  if(exists("T_apply_filters")) cat("\n","apply_filters() completed in",round( difftime(Sys.time(),T_apply_filters,units = "secs"),0),"secs\n")
   return(df)
 }

@@ -67,7 +67,10 @@ calc_coverage<-function(get_isdb = NULL,
                         agg.poly.field = NULL,
                         ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debug) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_calc_coverage=Sys.time()
+  }
 
   oTrips <- get_isdb$ALL_ISDB_TRIPS
   oSets <- get_isdb$ALL_ISDB_SETS
@@ -218,5 +221,6 @@ calc_coverage<-function(get_isdb = NULL,
   res$details[["TRIPS_ISDB"]] <- o_t
   res$details[["SETS_MARF"]] <- m_s
   res$details[["SETS_ISDB"]] <- o_s
+  if(exists("T_calc_coverage")) cat("\n","calc_coverage() completed in",round( difftime(Sys.time(),T_calc_coverage,units = "secs"),0),"secs\n")
   return(res)
 }

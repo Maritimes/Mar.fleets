@@ -12,7 +12,10 @@
 #' @export
 get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debug) {
+    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_get_bycatch=Sys.time()
+  }
   if (is.null(marfSpID))  marfSpID <- args$marfSpp
   if (is.null(marfSpID)){
     cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
@@ -66,6 +69,6 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   BYCATCH <- BYCATCH[!(BYCATCH$SPEC %in% isdbSPP),]
 
   BYCATCH <- rbind(dir_Spp_rows, BYCATCH)
-
+  if(exists("T_get_bycatch")) cat("\n","get_bycatch() completed in",round( difftime(Sys.time(),T_get_bycatch,units = "secs"),0),"secs\n")
   return(BYCATCH)
 }

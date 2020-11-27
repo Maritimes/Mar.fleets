@@ -25,7 +25,10 @@
 #' @export
 get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', nafoCode='all',  ...){
   args <-list(...)$args
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debug) {
+    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_get_marfis=Sys.time()
+  }
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
 
   #!!MMM - may eed to assign args differently in case called directly?
@@ -36,8 +39,12 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   if (nafoCode != 'all') args$nafoCode <- nafoCode
 
   getEff <- function(log_efrt = NULL, ...){
+
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_getEff=Sys.time()
+    }
     if(args$useLocal){
       LOG_EFRT_STD_INFO<-NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
@@ -84,11 +91,15 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
     # if (args$debug) cat("getEff done:",nrow(PS_sets),"\n")
+    if(exists("T_getEff")) cat("\n","getEff() completed in",round( difftime(Sys.time(),T_getEff,units = "secs"),0),"secs\n")
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_getPS=Sys.time()
+    }
     if(args$useLocal){
       PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- NA
       theseGears = unique(thisFleet$GEAR_CODE)
@@ -174,11 +185,16 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
     PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
     # if (args$debug) cat("getPS done:",nrow(PS_df),"\n")
+
+    if(exists("T_getPS")) cat("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
     return(PS_df)
   }
   getED <- function(mondocs = NULL, ...){
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_getED=Sys.time()
+    }
     if(args$useLocal){
       MON_DOC_ENTRD_DETS <- NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("MON_DOC_ENTRD_DETS"),
@@ -214,12 +230,16 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     }
     ED_df <- unique(ED_df)
 
+    if(exists("T_getED")) cat("\n","getED() completed in",round( difftime(Sys.time(),T_getED,units = "secs"),0),"secs\n")
     # if (args$debug) cat("getED done:",nrow(ED_df),"\n")
     return(ED_df)
   }
   getHIC <- function(trips = NULL, ...){
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_getHIC=Sys.time()
+    }
     if(args$useLocal){
       HAIL_IN_CALLS <-  NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"),
@@ -243,11 +263,16 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
     # colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
     # if (args$debug) cat("getHIC done:",nrow(HIC_df),"\n")
+
+    if(exists("T_getHIC")) cat("\n","getHIC() completed in",round( difftime(Sys.time(),T_getHIC,units = "secs"),0),"secs\n")
     return(HIC_df)
   }
   getHOC <- function(trips = NULL, ...){
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_getHOC=Sys.time()
+    }
     if(args$useLocal){
       HAIL_OUTS <- NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"),
@@ -270,6 +295,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
     # colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     # if (args$debug) cat("getHOC done:",nrow(HOC_df),"\n")
+
+    if(exists("T_getHOC")) cat("\n","getHOC() completed in",round( difftime(Sys.time(),T_getHOC,units = "secs"),0),"secs\n")
     return(HOC_df)
   }
 
@@ -342,5 +369,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   res[["MARF_MATCH"]] <- ps
   res[["MARF_TRIPS"]]<-trips
   res[["MARF_SETS"]]<-eff
+  if(exists("T_get_marfis")) cat("\n","get_marfis() completed in",round( difftime(Sys.time(),T_get_marfis,units = "secs"),0),"secs\n")
   return(res)
 }

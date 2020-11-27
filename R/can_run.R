@@ -8,14 +8,15 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+   if (args$debug) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_can_run=Sys.time()
+  }
+
   # data.dir <- NA
   #for each vector below, [1] is the name of the schema
-  ISDB = c("ISDB.ISFISHSETS","ISDB.ISSETPROFILE_WIDE","ISDB.ISTRIPS","ISDB.ISVESSELS")
-  MARFIS = c("MARFISSCI.GEARS","MARFISSCI.HAIL_IN_CALLS","MARFISSCI.HAIL_OUTS","MARFISSCI.LICENCE_SUBTYPES",
-             "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.LOG_EFRT_ENTRD_DETS",
-             "MARFISSCI.LOG_EFRT_STD_INFO","MARFISSCI.MON_DOC_DEFNS","MARFISSCI.MON_DOC_ENTRD_DETS",
-             "MARFISSCI.MON_DOCS","MARFISSCI.NAFO_UNIT_AREAS","MARFISSCI.PRO_SPC_INFO","MARFISSCI.VESSELS")
+  ISDB = paste0("ISDB.",args$isdbTabs)
+  MARFIS = paste0("MARFISSCI.",args$marfTabs)
   #connect_Oracle is just results of trying to establish connecion
   connect_Oracle <-function(...){
     args=list(...)$args
@@ -77,11 +78,13 @@ can_run <- function(...){
 
   if (args$useLocal){
     if (do.call(wantLocal,list(MARFIS,args=args))&do.call(wantLocal,list(ISDB,args=args))){
+     if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       return(TRUE)
     }else{
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
       cat(paste0(ISDB,".RData"),sep= "\n")
+      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       stop()
       #return(FALSE)
     }
@@ -90,6 +93,7 @@ can_run <- function(...){
     if (!is.list(cxnCheck)) {
       cat("\n","Cannot proceed online (Can't create a DB connection).",
           "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').","\n")
+      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       stop()
       # return(FALSE)
     }else{
@@ -97,9 +101,11 @@ can_run <- function(...){
       args[['cxn']] <- cxnCheck
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
+      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       return(cxnCheck)
     }else{
       cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
+      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       stop()
       #return(FALSE)
     }

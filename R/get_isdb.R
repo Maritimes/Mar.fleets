@@ -28,7 +28,10 @@
 #' @export
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debug) {
+    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+    T_get_isdb=Sys.time()
+  }
   if (is.null(get_marfis) & matchMarfis==TRUE){
     cat(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
     stop()
@@ -50,7 +53,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   if (!is.null(matchMarfis)) args$matchMarfis <- matchMarfis
   get_isdb_trips<-function(mVR_LIC = NULL,...){
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+        T_get_isdb_trips=Sys.time()
+    }
     if(!any(args$debugISDBTrips =="_none_")){
       #build a dataframe about the various debugISDBTrips to track when they are filtered from the Mar.bycatch results
       debugTrips <- data.frame(TRIP_ISDB =args$debugISDBTrips)
@@ -148,11 +154,15 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       debugTrips<- debugTrips[,c("TRIP_ISDB",  "TRIP", "ISDB_TRIP_EXISTS", "BOARD_DATE", "LANDING_DATE", "ISDB_DATERANGE", "VESSEL", "FLEET_VESS", "LICENSE", "FLEET_LIC", "ISDB_VESS_LIC", "TRIPCD_ID", "ISDB_SURVTRIP")]
       res[["debugTrips"]] <- debugTrips
     }
+    if(exists("T_get_isdb_trips")) cat("\n","get_isdb_trips() completed in",round( difftime(Sys.time(),T_get_isdb_trips,units = "secs"),0),"secs\n")
     return(res)
   }
   get_isdb_sets<-function(isdbTrips=NULL,...){
     args <- list(...)$args
-    if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debug) {
+      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      T_get_isdb_sets=Sys.time()
+    }
     badDate <- as.POSIXct(as.Date("2100-01-01"))
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"),
@@ -225,6 +235,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
 
     if (args$debug) cat("DEBUG: Found", nrow(ISSETPROFILE_WIDE), "ISDB sets","\n")
+
+    if(exists("T_get_isdb_sets")) cat("\n","get_isdb_sets() completed in",round( difftime(Sys.time(),T_get_isdb_sets,units = "secs"),0),"secs\n")
     return(ISSETPROFILE_WIDE)
   }
 
@@ -278,5 +290,6 @@ if (!is.null(isdb_TRIPS_all)){
   res[["ISDB_UNMATCHABLES"]] <- ISDB_UNMATCHABLES
   res[["ISDB_MULTIMATCHES"]] <- ISDB_MULTIMATCHES
   if(!any(args$debugISDBTrips =="_none_")) res[["debugTripsISDB"]] <- debugTrips
+  if(exists("T_get_isdb")) cat("\n","get_isdb() completed in",round( difftime(Sys.time(),T_get_isdb,units = "secs"),0),"secs\n")
   return(res)
 }

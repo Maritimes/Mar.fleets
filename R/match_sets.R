@@ -160,5 +160,6 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   }
   res= list()
   res[["MAP_ISDB_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
+  if(exists("T_match_sets")) cat("\n","match_sets() completed in",round( difftime(Sys.time(),T_match_sets,units = "secs"),0),"secs\n")
   return(res)
 }
