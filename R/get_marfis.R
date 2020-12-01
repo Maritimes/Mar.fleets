@@ -29,6 +29,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
     T_get_marfis=Sys.time()
   }
+
+  HAIL_OUTS <-HAIL_IN_CALLS <-MON_DOC_ENTRD_DETS <-LOG_EFRT_STD_INFO<-PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- TRIPS <- NA
+
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
 
   #!!MMM - may eed to assign args differently in case called directly?
@@ -46,7 +49,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       T_getEff=Sys.time()
     }
     if(args$useLocal){
-      LOG_EFRT_STD_INFO<-NA
+
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
@@ -101,7 +104,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       T_getPS=Sys.time()
     }
     if(args$useLocal){
-      PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- NA
+
       theseGears = unique(thisFleet$GEAR_CODE)
       all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),
@@ -196,7 +199,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       T_getED=Sys.time()
     }
     if(args$useLocal){
-      MON_DOC_ENTRD_DETS <- NA
+
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("MON_DOC_ENTRD_DETS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
@@ -241,7 +244,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       T_getHIC=Sys.time()
     }
     if(args$useLocal){
-      HAIL_IN_CALLS <-  NA
+
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
@@ -274,7 +277,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       T_getHOC=Sys.time()
     }
     if(args$useLocal){
-      HAIL_OUTS <- NA
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
@@ -328,7 +330,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   hic<- do.call(getHIC, list(trips = ps$TRIP_ID, args=args))
   #a single trip can have multiple hoc - this adds a comma-separated list of all
   #to each trip, ensuring a single rec per trip
-  hic<- aggregate(CONF_NUMBER_HI ~., hic, toString)
+  hic<- stats::aggregate(CONF_NUMBER_HI ~., hic, toString)
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
@@ -343,7 +345,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
   #a single trip can have multiple hoc - this adds a comma-separated list of all
   #to each trip, ensuring a single rec per trip
-  hoc<- aggregate(CONF_NUMBER_HO ~., hoc, toString)
+  hoc<- stats::aggregate(CONF_NUMBER_HO ~., hoc, toString)
   if (!is.null(hoc) && nrow(hoc)>0){
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){

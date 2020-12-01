@@ -173,7 +173,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # this is a little hacky, but the apply was adding a list instead of the
   #desired column, so this coerces it.
 
-  TRIP_ID_MARF <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) Mar.utils::Mode(na.omit(r)))
+  TRIP_ID_MARF <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) Mar.utils::Mode(stats::na.omit(r)))
   if (is.list(TRIP_ID_MARF)){
     TRIP_ID_MARF[sapply(TRIP_ID_MARF, function(x) length(x)>1)]<-NA
     TRIP_ID_MARF <- t(as.data.frame(TRIP_ID_MARF))
@@ -183,7 +183,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   isdbTrips <- cbind(isdbTrips,TRIP_ID_MARF)
 
   # isdbTrips$TRIP_ID_MARF <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) Mar.utils::Mode(na.omit(r)))
-  isdbTrips$UNQ <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) length(unique(na.omit(r))))
+  isdbTrips$UNQ <- apply(isdbTrips[,c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE")],1,function(r) length(unique(stats::na.omit(r))))
   if (nrow(isdbTrips[isdbTrips$UNQ > 1,])>0){
     matchMulti <- isdbTrips[isdbTrips$UNQ > 1,]
     matchMulti[,c("ISDB_TRIP_O","VR_LIC","UNQ", "TRIP_ID_MARFIS_OTHER", "TRIP_ID_MARF")] <- NULL

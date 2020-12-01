@@ -21,7 +21,9 @@ get_all <- function(...){
   if (args$debug) {
     T_get_all=Sys.time()
   }
-  cxnCheck <- do.call(can_run, args)
+  can_runCheck <- do.call(can_run, args)
+  args <- can_runCheck$args
+  cxnCheck <- can_runCheck$cxnCheck
 
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
     stop("Can't run as requested.")

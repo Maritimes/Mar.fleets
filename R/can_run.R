@@ -8,16 +8,35 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
-   if (args$debug) {
+  if (args$debug) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_can_run=Sys.time()
   }
 
-  # data.dir <- NA
-  #for each vector below, [1] is the name of the schema
-  ISDB = paste0("ISDB.",args$isdbTabs)
-  MARFIS = paste0("MARFISSCI.",args$marfTabs)
-  #connect_Oracle is just results of trying to establish connecion
+  marfTabs = c("CONDITION_LICENCE_ASSIGN",
+               "HAIL_IN_CALLS",
+               "HAIL_OUTS",
+               "LOG_EFRT_ENTRD_DETS",
+               "LOG_EFRT_STD_INFO",
+               "MON_DOC_ENTRD_DETS",
+               "MON_DOCS",
+               "NAFO_UNIT_AREAS",
+               "PRO_SPC_INFO",
+               "TRIPS",
+               "VESSELS")
+
+  #"MARFISSCI.GEARS",MARFISSCI.LICENCE_SUBTYPES, "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.MON_DOC_DEFNS"
+  #"GEARS","LICENCE_SUBTYPES", "LICENCE_VESSELS", "LICENCES","MON_DOC_DEFNS"
+  isdbTabs = c("ISFISHSETS",
+               "ISSETPROFILE_WIDE",
+               "ISTRIPS",
+               "ISVESSELS")
+
+  args[["marfTabs"]] <- marfTabs
+  args[["isdbTabs"]] <- isdbTabs
+  ISDB = paste0("ISDB.",isdbTabs)
+  MARFIS = paste0("MARFISSCI.",marfTabs)
+  #connect_Oracle is just results of trying to establish connection
   connect_Oracle <-function(...){
     args=list(...)$args
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
@@ -78,8 +97,12 @@ can_run <- function(...){
 
   if (args$useLocal){
     if (do.call(wantLocal,list(MARFIS,args=args))&do.call(wantLocal,list(ISDB,args=args))){
-     if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
-      return(TRUE)
+      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
+      res <- list()
+      res[["args"]]<-args
+      res[["cxnCheck"]]<-TRUE
+      return(res)
+      #return(TRUE)
     }else{
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
@@ -98,11 +121,18 @@ can_run <- function(...){
       # return(FALSE)
     }else{
       if (!args$quietly)  cat("\nDB connection established.\n")
-      args[['cxn']] <- cxnCheck
+      # args[['cxn']] <- cxnCheck
+      res <- list()
+      res[["args"]]<-args
+      res[["cxnCheck"]]<-TRUE
+      return(res)
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
       if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
-      return(cxnCheck)
+      res <- list()
+      res[["args"]]<-args
+      res[["cxnCheck"]]<-cxnCheck
+      return(res)
     }else{
       cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
       if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")

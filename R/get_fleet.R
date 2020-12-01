@@ -29,6 +29,9 @@ get_fleet<-function(...){
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
     T_get_fleet=Sys.time()
   }
+
+  PRO_SPC_INFO <- TRIPS <- MON_DOCS <- NAFO_UNIT_AREAS <- CONDITION_LICENCE_ASSIGN <- NA
+
   get_fleetBasic<-function(...){
     args <- list(...)
     if (args$debug) {
@@ -46,6 +49,7 @@ get_fleet<-function(...){
       isdbJoiner$join <-  paste0(isdbJoiner$VESSEL,"_",isdbJoiner$LICENSE)
       iVR_LIC <- isdbJoiner$join
       if(args$useLocal){
+
         Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
                                    tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","MON_DOCS","TRIPS"),
                                    usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
@@ -210,6 +214,7 @@ get_fleet<-function(...){
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
       }
       if (all(args$vessLen != 'all')) {
+        VESSELS <- NA
         Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("VESSELS"), usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
         vessLen = eval(args$vessLen)
         VESSELS = VESSELS[VESSELS$LOA>= min(vessLen) & VESSELS$LOA<= max(vessLen),]

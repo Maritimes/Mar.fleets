@@ -22,7 +22,10 @@
 #' @noRd
 match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, maxSetDiff_hr =48, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+  if (args$debug) {
+    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    T_match_sets=Sys.time()
+  }
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
   isdb_sets_o <- isdb_sets
@@ -148,7 +151,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
         thisTrip_MATCHED$SET_MATCH <- "POS"
       }else{
         #multiple best?  A tie?
-        Warning("Something weird happened while attempting to match sets.  Please let Mike.McMahon@dfo-mpo.gc.ca know what you were just doing - maybe send him the script you just ran?")
+        warning("Something weird happened while attempting to match sets.  Please let Mike.McMahon@dfo-mpo.gc.ca know what you were just doing - maybe send him the script you just ran?")
       }
 
 

@@ -32,6 +32,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
     T_get_isdb=Sys.time()
   }
+
+  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- NA
+
   if (is.null(get_marfis) & matchMarfis==TRUE){
     cat(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
     stop()
@@ -69,6 +72,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     mVRS <- as.numeric(unique(mVRS[!is.na(mVRS)]))
 
     if(args$useLocal){
+
       Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)

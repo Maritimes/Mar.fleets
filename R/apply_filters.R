@@ -10,6 +10,7 @@ apply_filters<-function(df = NULL, ...){
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_apply_filters=Sys.time()
   }
+  LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <-NA
 
   chk_Gears <- function(df=df,...){
     args <- list(...)$args
@@ -37,7 +38,7 @@ apply_filters<-function(df = NULL, ...){
   get_GearSpecs<- function(df = NULL, ...){
     args <- list(...)$args
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
-    LOG_EFRT_STD_INFO <- data.dir <- NA
+    data.dir <- NA
     gearSpcFilt <- c("Types","Sizes")
     if ("all" %in% args$gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
     if ("all" %in% args$gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]

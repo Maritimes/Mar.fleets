@@ -26,6 +26,15 @@ trip and set information from MARFIS related to the specified fleet}
 function should be run on all ISDB data, or just on those that have been
 matched to MARFIS data (the default).}
 
+\item{agg.poly.shp}{default is \code{NULL}.  This is either the path to the
+*.shp file of a shapefile, an sf spatial object; or an sp spatialpolygonsdataframe.
+ If NULL, NAFO zones will be used.}
+
+\item{agg.poly.field}{default is \code{NULL}.  This identifies the field within
+\code{agg.poly.shp} that contains the values that should be appended to the
+input dataframe. If NULL, "NAFO_BEST", will be used, which is the finest
+resolution NAFO subdivision.}
+
 \item{...}{other arguments passed to methods}
 }
 \value{

@@ -16,13 +16,15 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
     T_get_bycatch=Sys.time()
   }
+  ISCATCHES <- ISTRIPS <- NA
+
   if (is.null(marfSpID))  marfSpID <- args$marfSpp
   if (is.null(marfSpID)){
     cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
     return(NULL)
   }
 
-  if(!("Mar.bycatch" %in% installed.packages())){
+  if(!("Mar.bycatch" %in% utils::installed.packages())){
     utils::data("spLookups", envir = environment())
   }else{
     utils::data("spLookups", package = "Mar.bycatch")
@@ -31,7 +33,7 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
 
   if (all(is.na(isTrips)))return(NULL) #get_isdb$ISDB_TRIPS_MATCHED
 
-  ISCATCHES <- ISTRIPS <- NA
+
   isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% marfSpID),c("SPECCD_ID")]
   isTrips<- unique(isTrips)
   if(args$useLocal){

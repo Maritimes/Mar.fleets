@@ -44,33 +44,33 @@ enable_local <- function(data.dir = NULL,
                quietly = TRUE,
                useLocal = FALSE
                )
-  cxnCheck <- do.call(can_run, args)
+
+  can_runCheck <- do.call(can_run, args)
+  args <- can_runCheck$args
+  cxnCheck <- can_runCheck$cxnCheck
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
     stop("Can't run as requested.")
   }
-  cat("Extracting MARFIS data...\n")
+  cat("\nChecking for and/or extracting MARFIS data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
                                      fn.oracle.password = oracle.password,
                                      fn.oracle.dsn = oracle.dsn,
                                      usepkg = usepkg,
                                      schema = "MARFISSCI",
                                      data.dir = data.dir,
-                                     tables = c("HAIL_IN_CALLS","HAIL_OUTS",
-                                                "LOG_EFRT_ENTRD_DETS",
-                                                "LOG_EFRT_STD_INFO","MON_DOC_ENTRD_DETS",
-                                                "MON_DOCS","NAFO_UNIT_AREAS","PRO_SPC_INFO","VESSELS","TRIPS",
-                                                "CONDITION_LICENCE_ASSIGN"),
-                                     env = environment(), quietly = TRUE)
-  #"GEARS","LICENCE_SUBTYPES", "LICENCE_VESSELS", "LICENCES","MON_DOC_DEFNS"
+                                     checkOnly = TRUE,
+                                     tables = args$marfTabs,
+                                     env = environment(), quietly = FALSE)
 
-  cat("Extracting ISDB data...\n")
+  cat("\nChecking for and/or extracting ISDB data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
                                      fn.oracle.password = oracle.password,
                                      fn.oracle.dsn = oracle.dsn,
                                      usepkg = usepkg,
                                      schema = "ISDB",
                                      data.dir = data.dir,
-                                     tables = c("ISFISHSETS","ISSETPROFILE_WIDE","ISTRIPS","ISVESSELS"),
-                                     env = environment(), quietly = TRUE)
-cat(paste0("All tables successfully extracted to ", data.dir),"\n")
+                                     checkOnly = TRUE,
+                                     tables = args$isdbTabs,
+                                     env = environment(), quietly = FALSE)
+  cat(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
 }
