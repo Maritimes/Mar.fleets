@@ -203,7 +203,6 @@ get_fleet<-function(...){
                                                      CONDITION_LICENCE_ASSIGN$CONDITION_ID %in% args$conditionID),"LICENCE_ID"]
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$LICENCE_ID %in% licConds,  ]
       }
-
       if (all(args$mdCode != 'all')) {
         MON_DOCS = MON_DOCS[MON_DOCS$MON_DOC_DEFN_ID %in% args$mdCode,]
         PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$MON_DOC_ID %in% MON_DOCS$MON_DOC_ID,  ]

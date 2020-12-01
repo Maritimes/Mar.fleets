@@ -98,6 +98,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
+
     args <- list(...)$args
     if (args$debug) {
       Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
@@ -115,9 +116,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc,
                             c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                               'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
-                              'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS')]
-
-      if (all(args$marfSpp != 'all')) PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$SPECIES_CODE %in% args$marfSpp,]
+                              'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS','SPECIES_CODE')]
+      if (all(args$marfSpp != 'all')) PS_df_new <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
 
       if (all(args$nafoCode != 'all')){
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
@@ -313,7 +313,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
   }
-
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
   eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
   ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
