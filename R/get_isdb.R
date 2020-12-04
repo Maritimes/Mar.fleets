@@ -33,7 +33,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     T_get_isdb=Sys.time()
   }
 
-  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- NA
+  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- NA
 
   if (is.null(get_marfis) & matchMarfis==TRUE){
     cat(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
@@ -58,7 +58,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     args <- list(...)$args
     if (args$debug) {
       Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
-        T_get_isdb_trips=Sys.time()
+      T_get_isdb_trips=Sys.time()
     }
     if(!any(args$debugISDBTrips =="_none_")){
       #build a dataframe about the various debugISDBTrips to track when they are filtered from the Mar.bycatch results
@@ -110,7 +110,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       rm(debugTripsDets)
       debugTrips$ISDB_TRIP_EXISTS <- apply(debugTrips[, c("TRIP","TRIPCD_ID","VR","LIC")], 1, function(x) any(!is.na(x)))
     }
-
     ISTRIPS = ISTRIPS[(ISTRIPS$LANDING_DATE >= as.Date(args$dateStart) & ISTRIPS$LANDING_DATE <= as.Date(args$dateEnd)) |
                         (ISTRIPS$BOARD_DATE >= as.Date(args$dateStart) & ISTRIPS$BOARD_DATE <= as.Date(args$dateEnd)) ,]
 
@@ -129,7 +128,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     }
 
     ISTRIPS <- ISTRIPS[paste0(ISTRIPS$VR,"_",ISTRIPS$LIC) %in% mVR_LIC,]
-
     if (!args$keepSurveyTrips){
       if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
         if (!args$quietly) {
@@ -221,9 +219,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     colnames(coords)[2]<-"LONGITUDE"
     ISSETPROFILE_WIDE = cbind(ISSETPROFILE_WIDE,coords)
 
-    # ISSETPROFILE_WIDE$DATE_TIME1<-ISSETPROFILE_WIDE$DATE_TIME2<-ISSETPROFILE_WIDE$DATE_TIME3<-ISSETPROFILE_WIDE$DATE_TIME4<-NULL
-    # ISSETPROFILE_WIDE$LAT1<-ISSETPROFILE_WIDE$LAT2<-ISSETPROFILE_WIDE$LAT3<-ISSETPROFILE_WIDE$LAT4<-NULL
-    # ISSETPROFILE_WIDE$LONG1<-ISSETPROFILE_WIDE$LONG2<-ISSETPROFILE_WIDE$LONG3<-ISSETPROFILE_WIDE$LONG4<-NULL
     ISFISHSETS <- unique(ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")])
     ISSETPROFILE_WIDE <- unique(ISSETPROFILE_WIDE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE")])
 
@@ -232,61 +227,104 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (nrow(ISSETPROFILE_WIDE)==0){
       cat(paste0("\n","No ISDB sets"))
       return(NULL)
-      #return(invisible(NULL))
     }
-
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
-
-
     if (args$debug) cat("DEBUG: Found", nrow(ISSETPROFILE_WIDE), "ISDB sets","\n")
-
     if(exists("T_get_isdb_sets")) cat("\n","get_isdb_sets() completed in",round( difftime(Sys.time(),T_get_isdb_sets,units = "secs"),0),"secs\n")
     return(ISSETPROFILE_WIDE)
   }
 
   isdb_TRIPS_all <- do.call(get_isdb_trips, list(mVR_LIC = VR_LIC_fleet, args = args))
   debugTrips <- isdb_TRIPS_all$debugTrips
-if (!is.null(isdb_TRIPS_all)){
+  if (!is.null(isdb_TRIPS_all)){
+    isdb_TRIPIDs_all <- unique(isdb_TRIPS_all$ISTRIPS)
+    isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
+    trips <- NA
+    sets <- NA
+    msum <- NA
+    unmatchables <- NA
+    if (matchMarfis) {
 
-  isdb_TRIPIDs_all <- unique(isdb_TRIPS_all$ISTRIPS)
+      trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
+      if (args$debug) cat("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
+      isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED
+      msum <- trips$MATCH_SUMMARY_TRIPS
+      ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
+      if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(BOARD_DATE, LANDING_DATE)), ]
+      ISDB_MULTIMATCHES <- trips$ISDB_MULTIMATCHES
+      if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
+        sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, args = args))
+      }else{
+        sets <- NA
+      }
 
-  isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
-  trips <- NA
-  sets <- NA
-  msum <- NA
-  unmatchables <- NA
-  if (matchMarfis) {
-    trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
-    if (args$debug) cat("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
-    isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED
-    msum <- trips$MATCH_SUMMARY_TRIPS
+      if (!all(is.na(sets))) {
+        if (args$debug) cat("DEBUG: Matched", nrow(sets$MAP_ISDB_MARFIS_SETS), "ISDB sets","\n")
+        isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
+        isdb_SETS_all$TRIP_ID_ISDB<- isdb_SETS_all$TRIP_ID_MARF <- NULL
+        isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
 
-    ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
-    if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(BOARD_DATE, LANDING_DATE)), ]
-    ISDB_MULTIMATCHES <- trips$ISDB_MULTIMATCHES
-    if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
-      sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, args = args))
-    }else{
-      sets <- NA
+      }else{
+        if (args$debug) cat("DEBUG: Matched 0 ISDB sets","\n")
+        isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
+      }
     }
-
-    if (!all(is.na(sets))) {
-      if (args$debug) cat("DEBUG: Matched", nrow(sets$MAP_ISDB_MARFIS_SETS), "ISDB sets","\n")
-      isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
-      isdb_SETS_all$TRIP_ID_ISDB<- NULL
+    if(args$useLocal){
+    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
+                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                               env = environment(), quietly = args$quietly)
+    ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
+    catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_COMBINED_WT")]
+    catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
     }else{
-      if (args$debug) cat("DEBUG: Matched 0 ISDB sets","\n")
-      isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
+      trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
+      catchSQL = paste0("SELECT CA.SPECCD_ID,
+       CA.EST_COMBINED_WT,
+       FS.TRIP_ID,
+       CA.FISHSET_ID
+FROM
+ISDB.ISCATCHES CA,
+ISDB.ISFISHSETS FS
+WHERE
+CA.FISHSET_ID = FS.FISHSET_ID
+AND FS.TRIP_ID BETWEEN ",min(trips)," AND ",max(trips))
+      catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
+      catches <- catches[catches$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
     }
+    catches_trip_wide <- stats::aggregate(
+      x = list(EST_COMBINED_WT_TRIP = catches$EST_COMBINED_WT),
+      by = list(TRIP_ID = catches$TRIP_ID,
+                SPECCD_ID = catches$SPECCD_ID
+      ),
+      sum
+    )
+    catches_trip_wide <- reshape2::dcast(catches_trip_wide, TRIP_ID ~ SPECCD_ID, value.var = "EST_COMBINED_WT_TRIP")
+
+    spColsT <- paste0("sp_",colnames(catches_trip_wide)[-1])
+    names(catches_trip_wide)[-1] <- spColsT
+    isdb_TRIPS_all <- merge(isdb_TRIPS_all, catches_trip_wide, all.x = T, by.x="TRIP_ID_ISDB", by.y = "TRIP_ID")
+    isdb_TRIPS_all[,spColsT][is.na(isdb_TRIPS_all[,spColsT])] <- 0
+
+    catches_set_wide  <- stats::aggregate(
+      x = list(EST_COMBINED_WT_SET = catches$EST_COMBINED_WT),
+      by = list(FISHSET_ID = catches$FISHSET_ID,
+                SPECCD_ID = catches$SPECCD_ID
+      ),
+      sum
+    )
+    catches_set_wide <- reshape2::dcast(catches_set_wide, FISHSET_ID ~ SPECCD_ID, value.var = "EST_COMBINED_WT_SET")
+    spColsS <- paste0("sp_",colnames(catches_set_wide)[-1])
+    names(catches_set_wide)[-1] <- spColsS
+    isdb_SETS_all <- merge(isdb_SETS_all, catches_set_wide, all.x = T, by.x="FISHSET_ID", by.y = "FISHSET_ID")
+    isdb_SETS_all[,spColsS][is.na(isdb_SETS_all[,spColsS])] <- 0
+
+  }else{
+    isdb_TRIPS_all <- NA
+    isdb_SETS_all <- NA
+    msum <- NA
+    ISDB_UNMATCHABLES <- NA
+    ISDB_MULTIMATCHES <- NA
   }
-}else{
-  isdb_TRIPS_all <- NA
-  isdb_SETS_all <- NA
-  msum <- NA
-  ISDB_UNMATCHABLES <- NA
-  ISDB_MULTIMATCHES <- NA
-}
-  # if(!any(args$debugISDBTrips =="_none_")) print(debugTrips)
   res= list()
   res[["ALL_ISDB_TRIPS"]]<- isdb_TRIPS_all
   res[["ALL_ISDB_SETS"]] <- isdb_SETS_all

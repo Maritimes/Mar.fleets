@@ -51,19 +51,19 @@ get_all <- function(...){
         #add the determined areas onto each trip/set
         if (is.data.frame(cov$details$TRIPS_MARF)) {
           colnames(cov$details$TRIPS_MARF)[2] <- "CALC_AREA"
-          marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, cov$details$TRIPS_MARF)
+          marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, cov$details$TRIPS_MARF, all.x = T)
         }
         if (is.data.frame(cov$details$SETS_MARF)) {
           colnames(cov$details$SETS_MARF)[2] <- "CALC_AREA"
-          marf$MARF_SETS <- merge(marf$MARF_SETS, cov$details$SETS_MARF)
+          marf$MARF_SETS <- merge(marf$MARF_SETS, cov$details$SETS_MARF, all.x = T)
         }
         if (is.data.frame(cov$details$TRIPS_ISDB)) {
           colnames(cov$details$TRIPS_ISDB)[2] <- "CALC_AREA"
-          isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, cov$details$TRIPS_ISDB)
+          isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, cov$details$TRIPS_ISDB, all.x = T)
         }
         if (is.data.frame(cov$details$SETS_ISDB)) {
           colnames(cov$details$SETS_ISDB)[2] <- "CALC_AREA"
-          isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, cov$details$SETS_ISDB)
+          isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, cov$details$SETS_ISDB, all.x = T)
         }
       }
     }

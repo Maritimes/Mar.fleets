@@ -47,7 +47,7 @@ set_defaults <- function(...){
   # args marfTabs & isdbTabs set in can_run where they will always be run
   # (enable_local doesn't run this)
   argsDef[names(args)] <- args
-  dateArgs <- Mar.utils::vali_dates(dateStart = argsDef$dateStart, dateEnd = argsDef$dateEnd, year = argsDef$year)
+  dateArgs <- Mar.utils::vali_dates(dateStart = argsDef$dateStart, dateEnd = argsDef$dateEnd, year = argsDef$year, quietly = argsDef$quietly)
   argsDef$dateStart <- dateArgs$dateStart
   argsDef$dateEnd <- dateArgs$dateEnd
   argsDef$year <- NULL

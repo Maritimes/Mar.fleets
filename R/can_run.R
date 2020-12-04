@@ -121,7 +121,7 @@ can_run <- function(...){
       # return(FALSE)
     }else{
       if (!args$quietly)  cat("\nDB connection established.\n")
-      # args[['cxn']] <- cxnCheck
+      args[['cxn']] <- cxnCheck
       res <- list()
       res[["args"]]<-args
       res[["cxnCheck"]]<-TRUE

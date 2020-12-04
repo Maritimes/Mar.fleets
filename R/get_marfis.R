@@ -98,7 +98,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
-
     args <- list(...)$args
     if (args$debug) {
       Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
@@ -117,7 +116,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
                             c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                               'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                               'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS','SPECIES_CODE')]
-      if (all(args$marfSpp != 'all')) PS_df_new <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
+      if (all(args$marfSpp != 'all')) PS_df <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
 
       if (all(args$nafoCode != 'all')){
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
@@ -130,6 +129,12 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       colnames(PS_df)[colnames(PS_df)=="LATEST_DATE_TIME"] <- "T_DATE2"
       PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
       PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
+      if (args$HS){
+        PS_df <- PS_df[which(PS_df[,args$useDate] >= as.Date(args$dateStart) & PS_df[,args$useDate] <= as.Date(args$dateEnd)), ]
+      }else{
+        PS_df <- PS_df[which(PS_df$T_DATE1 <= as.Date(args$dateEnd) & PS_df$T_DATE2 >= as.Date(args$dateStart)), ]
+      }
+      PS_df$NAFO_UNIT_AREA_ID <- PS_df$SPECIES_CODE <- NULL
     }else{
       theseGears = unique(thisFleet$GEAR_CODE)
       all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
@@ -183,7 +188,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
                     ",where_HS,"
                     ",where_n, "
                     ",where_sp)
-      PS_df<- args$cxn$thecmd(args$cxn$channel, PSQry0)
+      PS_df <- args$cxn$thecmd(args$cxn$channel, PSQry0)
       PS_df <- PS_df[PS_df$PRO_SPC_INFO_ID %in% allProSpc,]
     }
 
@@ -308,7 +313,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   allProSpc <-  unique(stats::na.omit(thisFleet$PRO_SPC_INFO_ID))
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
   ps <- do.call(getPS, list(allProSpc = allProSpc, args=args))
-
   if (nrow(ps)<1){
     cat(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))

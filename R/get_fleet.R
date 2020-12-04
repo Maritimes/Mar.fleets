@@ -43,6 +43,7 @@ get_fleet<-function(...){
         Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
         T_get_fleetBasic_dbTrips=Sys.time()
       }
+
       debugTripsISDB <-debugTrips[,c("TRIP_ISDB","VESSEL","LICENSE", "BOARD_DATE", "LANDING_DATE")]
       # grab basic info from isdb debug
       isdbJoiner <- debugTripsISDB[!is.na(debugTripsISDB$VESSEL) & !is.na(debugTripsISDB$LICENSE),c("TRIP_ISDB","VESSEL","LICENSE")]
@@ -57,8 +58,9 @@ get_fleet<-function(...){
         debugTripsMARFIS <- unique(PRO_SPC_INFO[paste0(PRO_SPC_INFO$VR_NUMBER_FISHING,"_",PRO_SPC_INFO$LICENCE_ID) %in%  iVR_LIC |
                                                   paste0(PRO_SPC_INFO$VR_NUMBER_LANDING,"_",PRO_SPC_INFO$LICENCE_ID) %in%  iVR_LIC,
                                                 c("TRIP_ID","LICENCE_ID", "VR_NUMBER_FISHING", "VR_NUMBER_LANDING","NAFO_UNIT_AREA_ID", "GEAR_CODE", "DATE_FISHED","LANDED_DATE","MON_DOC_ID")])
-        debugTripsMARFIS <- merge(debugTripsMARFIS, NAFO_UNIT_AREAS[,c("NAFO_AREA","AREA_ID")], all.x = T, by.x = "NAFO_UNIT_AREA_ID", by.y = "AREA_ID")
+
         if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
+        debugTripsMARFIS <- merge(debugTripsMARFIS, NAFO_UNIT_AREAS[,c("NAFO_AREA","AREA_ID")], all.x = T, by.x = "NAFO_UNIT_AREA_ID", by.y = "AREA_ID")
         names(debugTripsMARFIS)[names(debugTripsMARFIS) == "NAFO_AREA"] <- "NAFO_AREAS"
         debugTripsMARFIS <- merge(debugTripsMARFIS,MON_DOCS[,c("MON_DOC_ID","MON_DOC_DEFN_ID")], all.x = T)
         names(debugTripsMARFIS)[names(debugTripsMARFIS) == "MON_DOC_DEFN_ID"] <- "MD_CODE"
@@ -233,7 +235,7 @@ get_fleet<-function(...){
       colnames(theFleet)[colnames(theFleet)=="MON_DOC_DEFN_ID"] <- "MD_CODE"
     }else{
       if (all(args$conditionID != 'all')){
-        table_CID <- "MARFISSCI.CONDITION_LICENCE_ASSIGN CLA"
+        table_CID <- "MARFISSCI.CONDITION_LICENCE_ASSIGN CLA,"
         join_CID <- "AND CLA.LICENCE_ID = PS.LICENCE_ID"
         where_CID <- paste0("AND (CLA.CONDITION_ID  IN (",Mar.utils::SQL_in(args$conditionID),")
 AND CLA.START_DATE <= to_date('",args$dateEnd,"','YYYY-MM-DD')
@@ -291,7 +293,7 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                       T.EARLIEST_DATE_TIME T_DATE1,
                       T.LATEST_DATE_TIME T_DATE2
                     FROM
-                      ",table_CID,",
+                      ",table_CID,"
                       MARFISSCI.PRO_SPC_INFO PS,
                       MARFISSCI.MON_DOCS MD,
                       MARFISSCI.NAFO_UNIT_AREAS N,
@@ -300,7 +302,6 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                     WHERE
                       MD.MON_DOC_ID = PS.MON_DOC_ID
                       ",join_CID,"
-
                       AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID
                       AND PS.VR_NUMBER_FISHING = V.VR_NUMBER
                       AND PS.TRIP_ID = T.TRIP_ID
@@ -311,11 +312,7 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                       ",where_vl,"
                       ",where_g
       )
-
-      #MARFISSCI.GEARS G,
-      # AND PS.GEAR_CODE = G.GEAR_CODE
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
-
     }
     if(exists("T_get_fleetBasic")) cat("\n","get_fleetBasic() completed in",round( difftime(Sys.time(),T_get_fleetBasic,units = "secs"),0),"secs\n")
     return(theFleet)
