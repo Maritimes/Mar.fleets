@@ -23,7 +23,8 @@ can_run <- function(...){
                "NAFO_UNIT_AREAS",
                "PRO_SPC_INFO",
                "TRIPS",
-               "VESSELS")
+               "VESSELS",
+               "GEARS")
 
   #"MARFISSCI.GEARS",MARFISSCI.LICENCE_SUBTYPES, "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.MON_DOC_DEFNS"
   #"GEARS","LICENCE_SUBTYPES", "LICENCE_VESSELS", "LICENCES","MON_DOC_DEFNS"

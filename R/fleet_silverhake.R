@@ -14,6 +14,8 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
+#' @param mesh default is \code{'ALL'}. This indicates whether or not the the
+#' fleet should be filtered by mesh size.  It can be either "ALL" or "SMALL"  (i.e. 55-65mm).
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
 #' SilverHake <- fleet_silverhake(data.dir = "C:/myData")
@@ -29,9 +31,16 @@
 #'   \item \code{gearCode} = 12
 #'   \item \code{mdCode} = 2
 #' }
+#'
+#' For mesh = "SMALL"
+#' \itemize{
+#' \item \code{gearSpSize} =  seq(55,65,1)
+#' }
 #' @export
-fleet_silverhake <- function(...){
-
+fleet_silverhake <- function(mesh = "all", ...){
+  if (toupper(mesh) == "SMALL"){
+    gearSpSize = seq(55,65,1)
+  }
   marfSpp=172
   nafoCode=c('4V%','4W%','4X%') #4VWX
   gearCode =12

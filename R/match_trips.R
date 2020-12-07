@@ -35,6 +35,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     T_match_trips=Sys.time()
   }
+  tripsN = length(unique(isdbTrips$TRIP_ID_ISDB))
   CLOSEST <- TRIP_ID_ISDB <- NA
   clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
@@ -234,10 +235,21 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   matchGood <- isdbTrips[!is.na(isdbTrips$TRIP_ID_MARF),]
   matchNone <- isdbTrips[is.na(isdbTrips$TRIP_ID_MARF) & is.na(isdbTrips$TRIP_ID_MARFIS_OTHER),]
   matchMulti <-  isdbTrips[is.na(isdbTrips$TRIP_ID_MARF) & !is.na(isdbTrips$TRIP_ID_MARFIS_OTHER),]
-
   if (nrow(matchGood)>0){
-  }else{
+    Obs_Trip_Name = nrow(matchGood[matchGood$match_TRIP==TRUE,])
+    Hail_In_Confirmation_Code = nrow(matchGood[matchGood$match_CONF_HI==TRUE,])
+    Hail_Out_Confirmation_Code = nrow(matchGood[matchGood$match_CONF_HO==TRUE,])
+    License_Vessel_Date_Combo = nrow(matchGood[matchGood$match_VRLICDATE==TRUE,])
+    Total_Matches = nrow(matchGood[(matchGood$match_VRLICDATE==TRUE | matchGood$match_CONF_HO==TRUE | matchGood$match_CONF_HI==TRUE | matchGood$match_TRIP==TRUE),])
+
+      }else{
     matchGood <- NA
+    Obs_Trip_Name = 0
+    Hail_In_Confirmation_Code = 0
+    Hail_Out_Confirmation_Code = 0
+    License_Vessel_Date_Combo = 0
+    Total_Matches = 0
+    # TRIPS_N = 0
   }
 
   if(nrow(matchNone)>0){
@@ -255,11 +267,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     matchMulti <- NA
   }
 
-  Obs_Trip_Name = nrow(matchGood[matchGood$match_TRIP==TRUE,])
-  Hail_In_Confirmation_Code = nrow(matchGood[matchGood$match_CONF_HI==TRUE,])
-  Hail_Out_Confirmation_Code = nrow(matchGood[matchGood$match_CONF_HO==TRUE,])
-  License_Vessel_Date_Combo = nrow(matchGood[matchGood$match_VRLICDATE==TRUE,])
-  Total_Matches = nrow(matchGood[(matchGood$match_VRLICDATE==TRUE | matchGood$match_CONF_HO==TRUE | matchGood$match_CONF_HI==TRUE | matchGood$match_TRIP==TRUE),])
 
   summ_df = as.data.frame(rbind(Obs_Trip_Name,
                                 Hail_In_Confirmation_Code,
@@ -267,7 +274,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
                                 License_Vessel_Date_Combo,
                                 Total_Matches))
   names(summ_df)<-"MATCHES_N"
-  summ_df$TRIPS_N <- nrow(matchGood)
+
+  summ_df$Total_ISDB_Trips <- tripsN
+
   res <- list()
   res[["ISDB_MARFIS_POST_MATCHED"]] <- isdbTrips
   res[["MATCH_SUMMARY_TRIPS"]] <- summ_df

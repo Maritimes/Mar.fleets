@@ -4,9 +4,12 @@
 \alias{fleet_silverhake}
 \title{fleet_silverhake}
 \usage{
-fleet_silverhake(...)
+fleet_silverhake(mesh = "all", ...)
 }
 \arguments{
+\item{mesh}{default is \code{'ALL'}. This indicates whether or not the the
+fleet should be filtered by mesh size.  It can be either "ALL" or "SMALL"  (i.e. 55-65mm).}
+
 \item{...}{other arguments passed to methods}
 }
 \value{
@@ -37,6 +40,11 @@ Hardcoded parameters for this fleet are as follows:
   \item \code{nafoCode} = c('4V\%','4W\%','4X\%')
   \item \code{gearCode} = 12
   \item \code{mdCode} = 2
+}
+
+For mesh = "SMALL"
+\itemize{
+\item \code{gearSpSize} =  seq(55,65,1)
 }
 }
 \examples{

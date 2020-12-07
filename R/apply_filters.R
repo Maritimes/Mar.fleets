@@ -10,12 +10,32 @@ apply_filters<-function(df = NULL, ...){
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_apply_filters=Sys.time()
   }
-  LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <-NA
+  LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
 
   chk_Gears <- function(df=df,...){
     args <- list(...)$args
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
-    allGears = tolower(unique(df$GEAR_DESC))
+
+    if (args$useLocal){
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("GEARS"),
+                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                 env = environment(), quietly = args$quietly)
+      if (!"DESC_ENG" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR_DESC"] <- "DESC_ENG"
+
+      GEARS = GEARS[,c("GEAR_CODE","DESC_ENG")]
+    }else{
+      grs = unique(df$GEAR_CODE)
+      gearQry <- paste0("SELECT DISTINCT
+                          GEAR_CODE,
+                          DESC_ENG
+                          FROM MARFISSCI.GEARS
+                          WHERE
+                          GEAR_CODE IN (",Mar.utils::SQL_in(grs),")")
+      GEARS <- args$cxn$thecmd(args$cxn$channel, gearQry)
+    }
+
+    GEARS = GEARS[GEARS$GEAR_CODE %in% df$GEAR_CODE,]
+    allGears = tolower(unique(GEARS$DESC_ENG))
     allGears = allGears[!allGears %in% c("trap net")]
     matchTrap=c('trap','pot')
     matchMesh=c('trawl','seine','net','midwtr', 'drag')
@@ -36,9 +56,9 @@ apply_filters<-function(df = NULL, ...){
   }
 
   get_GearSpecs<- function(df = NULL, ...){
+
     args <- list(...)$args
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
-    data.dir <- NA
     gearSpcFilt <- c("Types","Sizes")
     if ("all" %in% args$gearSpSize) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
     if ("all" %in% args$gearSpType) gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
@@ -63,7 +83,7 @@ apply_filters<-function(df = NULL, ...){
     # if (args$debug) cat("gearSpecDF done:",nrow(gearSpecDF),"\n")
 
     if(nrow(gearSpecDF)<1){
-      cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
+      if(!args$quietly) cat(paste0("\n","None of these records have gear specification information - aborting filter (1)"))
       return(df)
     }
     gearType <- do.call(chk_Gears, list(df, args=args))
@@ -82,7 +102,7 @@ apply_filters<-function(df = NULL, ...){
       grSpSize <- c(grSpSize, 4,66,67)
     }
     if (all(is.na(gearType))){
-      cat(paste0("\n","None of these records have gear specification information - aborting filter (2)"))
+      if(!args$quietly)cat(paste0("\n","None of these records have gear specification information - aborting filter (2)"))
       return(df)
     }
     #check if types exist at all for selection
@@ -111,7 +131,7 @@ apply_filters<-function(df = NULL, ...){
     # if (args$debug) cat("gearSpecRelevant done:",nrow(gearSpecRelevant),"\n")
 
     if(nrow(gearSpecRelevant)<1){
-      cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
+      if(!args$quietly)cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
       return(df)
     }
     availTypes<- sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID %in% grSpType,"DATA_VALUE"]))
@@ -122,6 +142,7 @@ apply_filters<-function(df = NULL, ...){
     sizeFilt <- function(df=NULL, ...){
       args <- list(...)$args
       if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
+      df_o <- nrow(df)
       if ('all' %in% args$gearSpSize){
         #just get all gear
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
@@ -145,12 +166,13 @@ apply_filters<-function(df = NULL, ...){
         log_eff <- NA
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Sizes"]
       }
-      # if (args$debug) cat("sizeFilt done:",nrow(df),"\n")
+      if (args$debug) cat("sizeFilt done:",df_o - nrow(df)," recs dropped\n")
       return(df)
     }
     typeFilt <- function(df=NULL, ...){
       args <- list(...)$args
       if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
+      df_o <- nrow(df)
       if ('all' %in% args$gearSpType){
         #just get all gear
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
@@ -162,6 +184,8 @@ apply_filters<-function(df = NULL, ...){
         log_eff <- NA
         gearSpcFilt <- gearSpcFilt[!gearSpcFilt %in% "Types"]
       }
+
+      if (args$debug) cat("typeFilt done:",df_o - nrow(df)," recs dropped\n")
       return(df)
     }
 

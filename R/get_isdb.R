@@ -244,7 +244,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     msum <- NA
     unmatchables <- NA
     if (matchMarfis) {
-
       trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
       if (args$debug) cat("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
       isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED

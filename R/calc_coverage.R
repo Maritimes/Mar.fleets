@@ -142,13 +142,13 @@ calc_coverage<-function(get_isdb = NULL,
   if (!is.null(oTrips) && (!is.null(oSets) && nrow(oSets)>0)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
                     oSets, all.y =TRUE, by.x = "TRIP_ID_ISDB", by.y = "TRIP_ID")
+
     OBS_area_t <- Mar.utils::identify_area(O_trips,
                                           agg.poly.shp = agg.poly.shp,
                                           agg.poly.field = agg.poly.field)
   }else{
     OBS_area_t<-NA
   }
-
   MAR_area_t = Mar.utils::identify_area(Marf_Trip_pos,
                                         agg.poly.shp = agg.poly.shp,
                                         agg.poly.field = agg.poly.field)
