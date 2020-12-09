@@ -5,13 +5,11 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @noRd
 set_defaults <- function(...){
-
   argsRec <- list(...)
   if (all(names(argsRec) %in% c("argsFn","argsUser"))){
     if((length(argsRec$argsUser$debug)>0) && (argsRec$argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
     args  <- Mar.utils::combine_lists(primary =argsRec$argsFn, ancilliary =  argsRec$argsUser, quietly=F)
   }else{
-    if (argsRec$debug)  Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
     if((length(argsRec$debug)>0) && (argsRec$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
     args <- argsRec
   }
@@ -76,6 +74,7 @@ set_defaults <- function(...){
 
   # full listing of all of the parameters used
   paramDf <- argsDef
+
   paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
   paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
   paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateStart","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")

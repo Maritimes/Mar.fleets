@@ -61,7 +61,6 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
 
   if(!is.null(get_isdb)){
     if (nrow(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),])>0 && nrow(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_SETS$TRIP_ID_MARF),])>0){
-      browser()
       obsDat<-merge(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),c("TRIP_ID_ISDB", "VR")],
                     get_isdb$ALL_ISDB_SETS[,c("TRIP_ID","DATE_TIME")],
                     by.x= "TRIP_ID_ISDB", by.y ="TRIP_ID", all.Y=T)
