@@ -1,4 +1,4 @@
-#' @ title get_vmstracks2
+#' @ title get_vmstracks
 #' @description This function takes the results from get_marfis() and get_isdb()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param get_marfis default is \code{NULL}. This is the list output by the
@@ -36,7 +36,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note
 #' @export
-get_vmstracks2<-function(get_marfis = NULL, get_isdb = NULL, ...){
+get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   # argsUser <- list(...)
   args<-set_defaults(argsUser = list(...))
   argsSent<-  list(...)
