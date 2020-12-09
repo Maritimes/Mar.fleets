@@ -1,4 +1,4 @@
-#' @ title get_vmstracks
+#' @ title get_vmstracks2
 #' @description This function takes the results from get_marfis() and get_isdb()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param get_marfis default is \code{NULL}. This is the list output by the
@@ -8,19 +8,44 @@
 #' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
 #' trip and set information from the ISDB database.
 #' @param ... other arguments passed to methods
+#' It is likely that you will need to provide values for the following 4
+#' parameters to enable a connection to oracle:
+#' \itemize{
+#'   \item \code{oracle.username} This is your username for
+#' accessing oracle objects. If you have a value for \code{oracle.username}
+#' stored in your environment (e.g. from an rprofile file), this can be left out
+#' and that value will be used.  If a value for this is provided, it will take
+#' priority over your existing value.
+#'   \item \code{oracle.password} This is your password for
+#' accessing oracle objects. If you have a value for \code{oracle.password}
+#' stored in your environment (e.g. from an rprofile file), this can be left out
+#' and that value will be used.  If a value for this is provided, it will take
+#' priority over your existing value.
+#'   \item \code{oracle.dsn} This is your dsn/ODBC
+#' identifier for accessing oracle objects. If you have a value for
+#' \code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
+#' this can be left and that value will be used.  If a value for this is
+#' provided, it will take priority over your existing value.
+#'   \item \code{usepkg} This indicates whether the
+#' connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to
+#' connect.  rodbc is slightly easier to setup, but roracle will extract data
+#' ~ 5x faster.
+#' }
 #' @family simpleproducts
 #' @return returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @note
 #' @export
-get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
-  args<-set_defaults(args = args)
+get_vmstracks2<-function(get_marfis = NULL, get_isdb = NULL, ...){
+  # argsUser <- list(...)
+  args<-set_defaults(argsUser = list(...))
   argsSent<-  list(...)
   args[names(argsSent)] <- argsSent
   if (args$useLocal==TRUE){
     cat("\n", "VMS data requires a connection to the network.  It cannot be run locally")
     return(NULL)
   }
-  if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  #if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
 
  vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
                                                                 mDate=as.Date(character()),
@@ -35,9 +60,13 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   colnames(vr_dates1)<-colnames(vr_dates2)<-c("VR_NUMBER","mDate", "OBS")
 
   if(!is.null(get_isdb)){
-    if (nrow(get_isdb$ISDB_SETS_MATCHED)>0 && nrow(get_isdb$ISDB_TRIPS_MATCHED)>0){
-      obsDat<-merge(get_isdb$ISDB_SETS_MATCHED, get_isdb$ISDB_TRIPS_MATCHED, by.x="TRIP_ID", by.y="TRIP_ID_ISDB", all.x=T)
-      vr_dates3 <- cbind(obsDat[,c("VR_NUMBER","DATE_TIME")],1)
+    if (nrow(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),])>0 && nrow(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_SETS$TRIP_ID_MARF),])>0){
+      browser()
+      obsDat<-merge(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),c("TRIP_ID_ISDB", "VR")],
+                    get_isdb$ALL_ISDB_SETS[,c("TRIP_ID","DATE_TIME")],
+                    by.x= "TRIP_ID_ISDB", by.y ="TRIP_ID", all.Y=T)
+
+      vr_dates3 <- cbind(obsDat[,c("VR","DATE_TIME")],1)
       colnames(vr_dates3)<-c("VR_NUMBER","mDate", "OBS")
     }
   }
@@ -45,8 +74,9 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   vr_dates<-rbind(vr_dates1, vr_dates2)
   vr_dates<-rbind(vr_dates, vr_dates3)
 
-  vr_dates<-unique(vr_dates)
+
   vr_dates <- vr_dates[!is.na(vr_dates$mDate),]
+  vr_dates<-unique(vr_dates)
   theDates<- as.Date(range(vr_dates$mDate))
   allVRs <- unique(vr_dates$VR_NUMBER)
 
