@@ -37,7 +37,7 @@ information for the silver hake fleets:
 Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 172
-  \item \code{nafoCode} = c('4V\%','4W\%','4X\%')
+  \item \code{nafoCode} = c('4V\%','4W\%','4X\%','5Y\%')
   \item \code{gearCode} = 12
   \item \code{mdCode} = 2
 }

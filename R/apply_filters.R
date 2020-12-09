@@ -20,9 +20,10 @@ apply_filters<-function(df = NULL, ...){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("GEARS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-      if (!"DESC_ENG" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR_DESC"] <- "DESC_ENG"
-
+      if ("GEAR_DESC" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR_DESC"] <- "DESC_ENG"
+      if ("GEAR" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
       GEARS = GEARS[,c("GEAR_CODE","DESC_ENG")]
+
     }else{
       grs = unique(df$GEAR_CODE)
       gearQry <- paste0("SELECT DISTINCT
