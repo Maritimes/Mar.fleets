@@ -19,25 +19,12 @@ trip and set information from the ISDB database.}
 It is likely that you will need to provide values for the following 4
 parameters to enable a connection to oracle:
 \itemize{
-  \item \code{oracle.username} This is your username for
-accessing oracle objects. If you have a value for \code{oracle.username}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.
-  \item \code{oracle.password} This is your password for
-accessing oracle objects. If you have a value for \code{oracle.password}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.
-  \item \code{oracle.dsn} This is your dsn/ODBC
-identifier for accessing oracle objects. If you have a value for
-\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-this can be left and that value will be used.  If a value for this is
-provided, it will take priority over your existing value.
-  \item \code{usepkg} This indicates whether the
-connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to
-connect.  rodbc is slightly easier to setup, but roracle will extract data
-~ 5x faster.
+  \item \code{oracle.username} This is your username for accessing oracle objects.
+  \item \code{oracle.password} This is your password for accessing oracle objects.
+  \item \code{oracle.dsn} This is your dsn/ODBC identifier for accessing oracle objects.
+  \item \code{usepkg} This indicates whether the connection to Oracle should
+  use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier
+  to setup, but roracle will extract data more quickly.
 }}
 }
 \value{
