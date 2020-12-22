@@ -10,6 +10,7 @@
 *.shx
 *.prj
 *.xml
+*.csv
 /temp
 /crap
 /inst/fleet*.R
