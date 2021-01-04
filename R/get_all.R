@@ -37,6 +37,8 @@ get_all <- function(...){
   bycatch <- NA
   covSumm <- NA
   fleet <- do.call(get_fleet2, args)
+  # fleet2Res<<-fleet
+  # stop()
   if (class(fleet)=="data.frame"){
     marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
     if (any(!is.na(marf))){
@@ -90,7 +92,6 @@ get_all <- function(...){
       marf[["MARF_UNMATCHABLES"]] <- NA
     }
   }
-
 
   res=list()
   res[["fleet"]]<- fleet
