@@ -13,21 +13,18 @@ can_run <- function(...){
     T_can_run=Sys.time()
   }
 
-  marfTabs = c("CONDITION_LICENCE_ASSIGN",
-               "HAIL_IN_CALLS",
+  marfTabs = c("HAIL_IN_CALLS",
                "HAIL_OUTS",
                "LOG_EFRT_ENTRD_DETS",
                "LOG_EFRT_STD_INFO",
+               "MARBYCATCH_LIC",
                "MON_DOC_ENTRD_DETS",
-               "MON_DOCS",
                "NAFO_UNIT_AREAS",
                "PRO_SPC_INFO",
                "TRIPS",
                "VESSELS",
                "GEARS")
 
-  #"MARFISSCI.GEARS",MARFISSCI.LICENCE_SUBTYPES, "MARFISSCI.LICENCE_VESSELS","MARFISSCI.LICENCES","MARFISSCI.MON_DOC_DEFNS"
-  #"GEARS","LICENCE_SUBTYPES", "LICENCE_VESSELS", "LICENCES","MON_DOC_DEFNS"
   isdbTabs = c("ISFISHSETS",
                "ISSETPROFILE_WIDE",
                "ISTRIPS",

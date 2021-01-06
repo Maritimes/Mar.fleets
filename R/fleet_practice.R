@@ -36,24 +36,20 @@
 #' @export
 fleet_practice <- function(...){
 
-  lics = data.frame("types" =     c(0, 1,10,11),
-                    "subtypes" = c(28,24,14,24))
-  # lics <- data.frame(types=integer(),
-  #                  subtypes=integer(),
-  #                  stringsAsFactors=FALSE)
-  # lics <- rbind(lics, c(0,28))
-  #
-  # , c(1,24),c(10,14),c(11,24))
-
-  # MARBYCATCH_LIC <- MARBYCATCH_LIC[which(((MARBYCATCH_LIC$LICENCE_TYPE_ID %in% c(0) & MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% c(28)) |
-  #                                           (MARBYCATCH_LIC$LICENCE_TYPE_ID %in% c(1) & MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% c(24)) |
-  #                                           (MARBYCATCH_LIC$LICENCE_TYPE_ID %in% c(10) & MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% c(14)) |
-  #                                           (MARBYCATCH_LIC$LICENCE_TYPE_ID %in% c(11) & MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% c(24))) &
-  #                                          MARBYCATCH_LIC$GEAR_TYPE_ID==1),]
-  marfSpp=130
+  #both lics and gearCode derived from results of Mar.bycatch
+  lics <- data.frame(rbind(c(0,28),
+                           c(1,24),
+                           c(1,NA),
+                           c(10,14),
+                           c(10,15),
+                           c(11,24),
+                           c(24,40)),
+                stringsAsFactors=FALSE)
+  names(lics) <- c("types","subtypes")
+  gearCode = 51 #c(10,12,41,51,52,53,59,98)
   nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%')
-  # gearCode = c(50,51)
-  # mdCode = c(1, 29)
+  licSpp = 199
+  marfSpp=130
 
   argsFn <- as.list(environment())
   argsUser <- list(...)
@@ -62,7 +58,6 @@ fleet_practice <- function(...){
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
     startTime=Sys.time()
   }
-
   data <- do.call(get_all, list(argsFn= argsFn, argsUser=argsUser))
   if(exists("startTime")) cat("\n","Completed in",round( difftime(Sys.time(),startTime,units = "secs"),0),"secs\n")
   return(data)

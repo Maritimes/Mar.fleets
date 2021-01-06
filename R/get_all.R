@@ -36,9 +36,7 @@ get_all <- function(...){
   matchedTrips <- NA
   bycatch <- NA
   covSumm <- NA
-  fleet <- do.call(get_fleet2, args)
-  # fleet2Res<<-fleet
-  # stop()
+  fleet <- do.call(get_fleet, args)
   if (class(fleet)=="data.frame"){
     marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
     if (any(!is.na(marf))){

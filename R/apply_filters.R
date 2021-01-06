@@ -195,12 +195,6 @@ apply_filters<-function(df = NULL, ...){
     return(df)
   }
 
-  if (length(unique(df$MD_CODE))==1 ){
-    if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_CODE)))
-  }else if (length(args$mdCode)>0 && args$mdCode != "all"){
-    df=df[df$MD_CODE %in% args$mdCode,]
-  }
-
   if (length(unique(df$GEAR_CODE))==1){
     if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_CODE)))
   }else if (length(args$gearCode)>0 && args$gearCode != "all"){

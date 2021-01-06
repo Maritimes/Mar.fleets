@@ -17,7 +17,7 @@
 #'   \item \code{VR_NUMBER}
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
+#' @expor
 get_fleet<-function(...){
   args <-list(...)
   if(!is.null(args$debugTripsRes)){
@@ -30,7 +30,7 @@ get_fleet<-function(...){
     T_get_fleet=Sys.time()
   }
 
-  PRO_SPC_INFO <- TRIPS <- MON_DOCS <- NAFO_UNIT_AREAS <- CONDITION_LICENCE_ASSIGN <- NA
+  MARBYCATCH_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- NA
 
   get_fleetBasic<-function(...){
     args <- list(...)
@@ -52,9 +52,9 @@ get_fleet<-function(...){
       if(args$useLocal){
 
         Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
-                                   tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","MON_DOCS","TRIPS"),
+                                   tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","TRIPS"),
                                    usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                   env = environment(), quietly = args$quietly)
+                                   env = environment(), quietly = args$quietly) # "MON_DOCS",
         debugTripsMARFIS <- unique(PRO_SPC_INFO[paste0(PRO_SPC_INFO$VR_NUMBER_FISHING,"_",PRO_SPC_INFO$LICENCE_ID) %in%  iVR_LIC |
                                                   paste0(PRO_SPC_INFO$VR_NUMBER_LANDING,"_",PRO_SPC_INFO$LICENCE_ID) %in%  iVR_LIC,
                                                 c("TRIP_ID","LICENCE_ID", "VR_NUMBER_FISHING", "VR_NUMBER_LANDING","NAFO_UNIT_AREA_ID", "GEAR_CODE", "DATE_FISHED","LANDED_DATE","MON_DOC_ID")])
@@ -62,7 +62,7 @@ get_fleet<-function(...){
         if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
         debugTripsMARFIS <- merge(debugTripsMARFIS, NAFO_UNIT_AREAS[,c("NAFO_AREA","AREA_ID")], all.x = T, by.x = "NAFO_UNIT_AREA_ID", by.y = "AREA_ID")
         names(debugTripsMARFIS)[names(debugTripsMARFIS) == "NAFO_AREA"] <- "NAFO_AREAS"
-        debugTripsMARFIS <- merge(debugTripsMARFIS,MON_DOCS[,c("MON_DOC_ID","MON_DOC_DEFN_ID")], all.x = T)
+        # debugTripsMARFIS <- merge(debugTripsMARFIS,MON_DOCS[,c("MON_DOC_ID","MON_DOC_DEFN_ID")], all.x = T)
         names(debugTripsMARFIS)[names(debugTripsMARFIS) == "MON_DOC_DEFN_ID"] <- "MD_CODE"
 
         debugTripsMARFIS = merge(debugTripsMARFIS, TRIPS[,c("TRIP_ID", "EARLIEST_DATE_TIME", "LATEST_DATE_TIME")], by="TRIP_ID", all.x = T)
@@ -134,7 +134,7 @@ get_fleet<-function(...){
       }else{
         debugTripsMARFIS[which(debugTripsMARFIS$T_DATE1 <= as.Date(args$dateEnd) & debugTripsMARFIS$T_DATE2 >= as.Date(args$dateStart)),"MARFIS_DATERANGE"]<-TRUE
       }
-      # Check if recs have coorect MD_CODE
+      # Check if recs have correct MD_CODE
       debugTripsMARFIS$MARFIS_MD_CODE <- FALSE
       debugTripsMARFIS[which(debugTripsMARFIS$MD_CODE %in% args$mdCode),"MARFIS_MD_CODE"]<-TRUE
       # check if recs have correct GEAR
@@ -179,83 +179,91 @@ get_fleet<-function(...){
     }
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
-                                 tables = c("PRO_SPC_INFO","TRIPS","MON_DOCS","NAFO_UNIT_AREAS"),
-                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                 env = environment(), quietly = args$quietly)
+                                 tables = c("MARBYCATCH_LIC","PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS"),
+                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
+      # "MON_DOCS",
       if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
-
-#"MON_DOC_DEFNS",
-      TRIPS <- TRIPS[,c("TRIP_ID","EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
+      NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[,c("AREA_ID", "NAFO_AREA")]
+      # MON_DOCS <- MON_DOCS[,c("MON_DOC_DEFN_ID","VR_NUMBER", "MON_DOC_ID")]
+      PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", args$useDate)]
+      PRO_SPC_INFO[,args$useDate]<- as.Date(PRO_SPC_INFO[,args$useDate])
+      TRIPS <- TRIPS[,c("TRIP_ID","VR_NUMBER", "EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
       colnames(TRIPS)[colnames(TRIPS)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
       colnames(TRIPS)[colnames(TRIPS)=="LATEST_DATE_TIME"] <- "T_DATE2"
       TRIPS$T_DATE1 <- as.Date(TRIPS$T_DATE1)
       TRIPS$T_DATE2 <- as.Date(TRIPS$T_DATE2)
-      if (args$HS) {
-        PRO_SPC_INFO <- merge(PRO_SPC_INFO, TRIPS, all.x=T)
-        PRO_SPC_INFO = PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= args$dateStart & PRO_SPC_INFO[,args$useDate] <= args$dateEnd),]
-      }else{
-        TRIPS <- TRIPS[which(TRIPS$T_DATE1 <= as.Date(args$dateEnd) &  TRIPS$T_DATE2 >= as.Date(args$dateStart)),]
-        PRO_SPC_INFO <- merge(PRO_SPC_INFO, TRIPS)
+      this <- NA
+      if (any(!is.na(args$lics))){
+        for (i in 1:nrow(args$lics)){
+          thisL <- ifelse(!is.na(args$lics[i,"types"]),paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics[i,"types"]),NA)
+          thisS <- ifelse(!is.na(args$lics[i,"subtypes"]),paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics[i,"subtypes"]),
+                          "MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == -99")
+          if (!is.na(thisL) & !is.na(thisS)) {
+            thisRow <- paste0("(",thisL, " & ",thisS,")")
+          }else if (!is.na(thisL)) {
+            thisRow <- paste0("(",thisL,")")
+          }else{
+            thisRow <- paste0("(",thisS,")")
+          }
+          if (i==1){
+            this <- thisRow
+          } else  if (i < nrow(args$lics)) {
+            this <- paste(this, "|", thisRow)
+          }
+        }
+        MARBYCATCH_LIC <- MARBYCATCH_LIC[which(eval(parse(text=this))),]
       }
-
-      if (all(args$conditionID != 'all')){
-        Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("CONDITION_LICENCE_ASSIGN"), usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
-        licConds <- CONDITION_LICENCE_ASSIGN[which(as.Date(CONDITION_LICENCE_ASSIGN$START_DATE) <= as.Date(args$dateEnd) &
-                                                     as.Date(CONDITION_LICENCE_ASSIGN$END_DATE) >= as.Date(args$dateStart) &
-                                                     CONDITION_LICENCE_ASSIGN$CONDITION_ID %in% args$conditionID),"LICENCE_ID"]
-        PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$LICENCE_ID %in% licConds,  ]
-      }
-      if (all(args$mdCode != 'all')) {
-        MON_DOCS = MON_DOCS[MON_DOCS$MON_DOC_DEFN_ID %in% args$mdCode,]
-        PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$MON_DOC_ID %in% MON_DOCS$MON_DOC_ID,  ]
+      if (all(args$licSpp != 'all')) {
+        MARBYCATCH_LIC <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$licSpp, ]
       }
       if (all(args$gearCode != 'all')) {
-        PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$gearCode,]
+        # browser()
+        # MARBYCATCH_LIC <- MARBYCATCH_LIC[MARBYCATCH_LIC$GEAR_CODE %in% args$gearCode, ] #this step could drop licences for which no gear was specified
+        PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$gearCode, ]
       }
       if (all(args$nafoCode != 'all')) {
         nafoCode <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
-        NAFO_UNIT_AREAS = NAFO_UNIT_AREAS[grep(paste(nafoCode, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
-        PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
+        NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(nafoCode, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
+        PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
       }
       if (all(args$vessLen != 'all')) {
         VESSELS <- NA
         Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("VESSELS"), usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
-        vessLen = eval(args$vessLen)
-        VESSELS = VESSELS[VESSELS$LOA>= min(vessLen) & VESSELS$LOA<= max(vessLen),]
-        PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$VR_NUMBER_FISHING %in% VESSELS$VR_NUMBER,]
+        vessLen <- eval(args$vessLen)
+        VESSELS <- VESSELS[VESSELS$LOA>= min(vessLen) & VESSELS$LOA<= max(vessLen),]
+        #dropped VR_NUMBER LANDING/VR_NUMBER_FISHING - grab from TRIPS
+        PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$VR_NUMBER_FISHING %in% VESSELS$VR_NUMBER| PRO_SPC_INFO$VR_NUMBER_LANDING %in% VESSELS$VR_NUMBER,]
       }
-      MON_DOCS= MON_DOCS[,c("MON_DOC_DEFN_ID","VR_NUMBER", "MON_DOC_ID")]
-      PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID",args$useDate, "T_DATE1", "T_DATE2" )]
-      NAFO_UNIT_AREAS = NAFO_UNIT_AREAS[,c("AREA_ID", "NAFO_AREA")]
+
+      if (args$HS) {
+        PRO_SPC_INFO <- PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= args$dateStart & PRO_SPC_INFO[,args$useDate] <= args$dateEnd),]
+        TRIPS <- TRIPS[TRIPS$TRIP_ID %in% PRO_SPC_INFO$TRIP_ID,]
+      }else{
+        TRIPS <- TRIPS[which(TRIPS$T_DATE1 <= as.Date(args$dateEnd) &  TRIPS$T_DATE2 >= as.Date(args$dateStart)),]
+        PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% TRIPS$TRIP_ID,]
+      }
+      PRO_SPC_INFO <- merge(PRO_SPC_INFO, TRIPS)
+      PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$LICENCE_ID %in% MARBYCATCH_LIC$LICENCE_ID,]
 
       theFleet = merge(PRO_SPC_INFO, NAFO_UNIT_AREAS, by.x="NAFO_UNIT_AREA_ID", by.y = "AREA_ID", all.x=T )
-      theFleet = merge(theFleet, MON_DOCS, by = "MON_DOC_ID", all.x=T)
-      theFleet$NAFO_UNIT_AREA_ID<-NULL
+      # theFleet = merge(theFleet, MON_DOCS, by = "MON_DOC_ID", all.x=T)
+      theFleet$NAFO_UNIT_AREA_ID<-theFleet$TRIP_ID <- NULL
       colnames(theFleet)[colnames(theFleet)=="NAFO_AREA"] <- "NAFO"
       colnames(theFleet)[colnames(theFleet)=="MON_DOC_DEFN_ID"] <- "MD_CODE"
     }else{
-      if (all(args$conditionID != 'all')){
-        table_CID <- "MARFISSCI.CONDITION_LICENCE_ASSIGN CLA,"
-        join_CID <- "AND CLA.LICENCE_ID = PS.LICENCE_ID"
-        where_CID <- paste0("AND (CLA.CONDITION_ID  IN (",Mar.utils::SQL_in(args$conditionID),")
-AND CLA.START_DATE <= to_date('",args$dateEnd,"','YYYY-MM-DD')
-AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
-      }else{
-        table_CID <- ""
-        join_CID <- ""
-        where_CID <- ""
-      }
+      #MARBYCATCH_LIC, filtered by spp, gear_code, and
+      where_spp <- where_g1 <- where_m <- where_vl <- ""
+      if (args$marfSpp !="all") where_spp <- paste0("AND SPECIES_CODE IN  (",Mar.utils::SQL_in(args$marfSpp),")")
+      if (all(args$gearCode != 'all')) where_g1 <-  paste0("AND GEAR_CODE IN (",Mar.utils::SQL_in(args$gearCode),")")
+      MB_LICQry<- paste0("SELECT *
+            FROM
+            MARFISSCI.MARBYCATCH_LIC
+                         WHERE 1=1
+                         ",where_spp,"
+                         ",where_g1)
+      MARBYCATCH_LIC <- args$cxn$thecmd(args$cxn$channel, MB_LICQry)
 
-      if (all(args$mdCode != 'all')) {
-        where_m = paste0("AND MD.MON_DOC_DEFN_ID IN (",Mar.utils::SQL_in(args$mdCode),")")
-      }else{
-        where_m = ""
-      }
-      if (all(args$gearCode != 'all')) {
-        where_g = paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(args$gearCode),")")
-      }else{
-        where_g =  ""
-      }
+      if (all(args$mdCode != 'all')) where_m = paste0("AND MD.MON_DOC_DEFN_ID IN (",Mar.utils::SQL_in(args$mdCode),")")
       if (all(args$nafoCode != 'all')) {
         #collapse all of the nafo values into a single long string, and check if a wildcard was sent;
         #if it was, we need to do multiple IN checks
@@ -269,12 +277,8 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
         where_n =  ""
       }
 
-      if (all(args$vessLen != 'all')) {
-        vessLen = eval(args$vessLen)
-        where_vl =  paste0("AND V.LOA BETWEEN ",min(vessLen)," AND ",max(vessLen))
-      }else{
-        where_vl = ""
-      }
+      if (all(args$vessLen != 'all')) where_vl =  paste0("AND V.LOA BETWEEN ",min(eval(args$vessLen))," AND ",max(eval(args$vessLen)))
+
       if (args$HS){
         where_HS <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
       }else{
@@ -293,7 +297,6 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                       T.EARLIEST_DATE_TIME T_DATE1,
                       T.LATEST_DATE_TIME T_DATE2
                     FROM
-                      ",table_CID,"
                       MARFISSCI.PRO_SPC_INFO PS,
                       MARFISSCI.MON_DOCS MD,
                       MARFISSCI.NAFO_UNIT_AREAS N,
@@ -301,23 +304,27 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
                       MARFISSCI.TRIPS T
                     WHERE
                       MD.MON_DOC_ID = PS.MON_DOC_ID
-                      ",join_CID,"
                       AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID
                       AND PS.VR_NUMBER_FISHING = V.VR_NUMBER
                       AND PS.TRIP_ID = T.TRIP_ID
-                      ",where_CID,"
                       ",where_HS,"
                       ",where_m,"
                       ",where_n,"
-                      ",where_vl,"
-                      ",where_g
+                      ",where_vl
       )
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
+      theFleet <- theFleet[theFleet$LICENCE_ID %in% MARBYCATCH_LIC$LICENCE_ID,]
+
     }
     if(exists("T_get_fleetBasic")) cat("\n","get_fleetBasic() completed in",round( difftime(Sys.time(),T_get_fleetBasic,units = "secs"),0),"secs\n")
     return(theFleet)
   }
   df <- do.call(get_fleetBasic, args)
+  # useLocal = FALSE is getting the following, which are not found by local (2020-12-22)
+  #LICENCE_ID LOG_EFRT_STD_INFO_ID
+  # 1     339546              1432422
+  # 2     339546              1432423
+  # 3     142072              1435136
   if(exists("debugTrips")) return(df)
   df <- do.call(apply_filters, list(df=df,args=args))
   if(nrow(df)<1) {
@@ -326,7 +333,7 @@ AND CLA.END_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
     return(NA)
   }else{
     df$NAFO <-NULL
-    df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, MD_CODE, GEAR_CODE )),])
+    df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),]) #MD_CODE,
     if(exists("T_get_fleet")) cat("\n","get_fleet() completed in",round( difftime(Sys.time(),T_get_fleet,units = "secs"),0),"secs\n")
     return(df)
   }

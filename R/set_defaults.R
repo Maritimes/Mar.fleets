@@ -15,14 +15,14 @@ set_defaults <- function(...){
   }
 
   # keep track of what filters have been applied ------------------------------------------------
-  argsDef <- list(marfSpp = "all",
-                  mdCode = "all",
+  argsDef <- list(lics <- data.frame(types = NA, subtypes=NA),
+                  licSpp = "all",
+                  marfSpp = "all",
                   gearCode = "all",
                   nafoCode = "all",
                   gearSpType = "all",
                   gearSpSize = "all",
                   vessLen = "all",
-                  conditionID = "all",
                   useDate = "LANDED_DATE",
                   areas = "NAFOSubunits_sf",
                   areasField = "NAFO_1",
