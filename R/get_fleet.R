@@ -207,14 +207,15 @@ get_fleet<-function(...){
           }
           if (i==1){
             this <- thisRow
-          } else  if (i < nrow(args$lics)) {
+          } else {
             this <- paste(this, "|", thisRow)
           }
         }
         MARBYCATCH_LIC <- MARBYCATCH_LIC[which(eval(parse(text=this))),]
       }
       if (all(args$licSpp != 'all')) {
-        MARBYCATCH_LIC <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$licSpp, ]
+        MARBYCATCH_LIC <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$licSpp |
+                                           MARBYCATCH_LIC$SPECIES_CODE %in% args$marfSpp, ]
       }
       if (all(args$gearCode != 'all')) {
         # browser()

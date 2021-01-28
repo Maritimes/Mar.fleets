@@ -1,7 +1,7 @@
-Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = "C:/git/wrangledData/", tables = c("MARBYCATCH_LIC"), usepkg='roracle', fn.oracle.username = 'mcmahonm', fn.oracle.dsn="PTRAN", fn.oracle.password = "KimoIsG00d", env = environment(), quietly = F)
+# Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = "C:/git/wrangledData/", tables = c("MARBYCATCH_LIC"), usepkg='roracle', fn.oracle.username = 'mcmahonm', fn.oracle.dsn="PTRAN", fn.oracle.password = "KimoIsG00d", env = environment(), quietly = F)
 R.utils::sourceDirectory("c:/git/Maritimes/Mar.bycatch/R/")
-flds <- c("LICENCE_ID","LICENCE_TYPE","LICENCE_TYPE_ID","LICENCE_SUBTYPE", "LICENCE_SUBTYPE_ID",
-          "GEAR", "GEAR_TYPE_ID","GEAR_CODE", "SPECIES", "SPECIES_CODE", "SPECIES_CATEGORY_ID")
+# flds <- c("LICENCE_ID","LICENCE_TYPE","LICENCE_TYPE_ID","LICENCE_SUBTYPE", "LICENCE_SUBTYPE_ID",
+#           "GEAR", "GEAR_TYPE_ID","GEAR_CODE", "SPECIES", "SPECIES_CODE", "SPECIES_CATEGORY_ID")
 yrField <- "LANDED_DATE"
 
 ####
@@ -37,7 +37,7 @@ offic_M_Trips <- length(unique(offic_M$TRIP_ID_MARF))
 # new = fleet_practice(year = 2015, data.dir = "c:/git/wrangledData/", useLocal = T)
 new_M <- new$marf$MARF_TRIPS
 new_M$YEAR <- lubridate::year(new_M[,yrField])
-new_M <- new_M[new_M$YEAR==2015,]
+# new_M <- new_M[new_M$YEAR==2015,]
 
 new_M_agg <- aggregate(
   x = list(col = new_M$RND_WEIGHT_KGS),
@@ -72,3 +72,4 @@ self_filter()
 
 nrow(new$fleet)
 nrow(offic$fleet)
+####
