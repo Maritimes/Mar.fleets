@@ -130,7 +130,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
       PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
       if (args$HS){
-        PS_df <- PS_df[which(PS_df[,args$useDate] >= as.Date(args$dateStart) & PS_df[,args$useDate] <= as.Date(args$dateEnd)), ]
+        PS_df <- PS_df[which(as.Date(PS_df[,args$useDate]) >= as.Date(args$dateStart) & as.Date(PS_df[,args$useDate]) <= as.Date(args$dateEnd)), ]
       }else{
         PS_df <- PS_df[which(PS_df$T_DATE1 <= as.Date(args$dateEnd) & PS_df$T_DATE2 >= as.Date(args$dateStart)), ]
       }
@@ -154,7 +154,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       }else{
         where_sp =  ""
       }
-
       if (args$HS){
         where_HS <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
       }else{
@@ -194,7 +193,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
 
     PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
     PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
-    # if (args$debug) cat("getPS done:",nrow(PS_df),"\n")
 
     if(exists("T_getPS")) cat("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
     return(PS_df)

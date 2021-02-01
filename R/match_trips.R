@@ -114,12 +114,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
   match_VRLIC<- isdb_marf_dets
   if(nrow(match_VRLIC)>0){
+    match_VRLIC[,"match_VRLICDATE_DETS"] <- NA
     if (args$HS){
       match_VRLIC[,"T1"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC[,args$useDate], units="days")))
       match_VRLIC[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC[,args$useDate], units="days")))
       match_VRLIC$CLOSEST1<- with(match_VRLIC, pmin(T1, T2))
       match_VRLIC$CLOSEST <- rowMeans(match_VRLIC[,c("T1", "T2")])
-      match_VRLIC[,"match_VRLICDATE_DETS"] <- "F"
      }else{
       match_VRLIC[,"T1"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC[,"T_DATE1"], units="days")))
       match_VRLIC[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC[,"T_DATE1"], units="days")))
@@ -127,26 +127,21 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_VRLIC[,"T4"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC[,"T_DATE2"], units="days")))
       match_VRLIC$CLOSEST1 <- with(match_VRLIC, pmin(T1, T2, T3, T4))
       match_VRLIC$CLOSEST <- rowMeans(match_VRLIC[,c("T1", "T2", "T3", "T4")])
-      match_VRLIC[,"match_VRLICDATE_DETS"] <- "F"
     }
-  }
-
+    # 100028543
     match_VRLIC<- data.frame(data.table::setDT(match_VRLIC)[, {tmp <- CLOSEST; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB])
-
-    match_VRLIC <- match_VRLIC[match_VRLIC$CLOSEST1 <= 2,]
-    # if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 > 4,])>0)  match_VRLIC[match_VRLIC$CLOSEST1 > 4, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity 5 or more days apart"
-    # if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 == 4,])>0) match_VRLIC[match_VRLIC$CLOSEST1 == 4, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 4 days"
-    # if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 == 3,])>0) match_VRLIC[match_VRLIC$CLOSEST1 == 3, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 3 days"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 == 2,])>0) match_VRLIC[match_VRLIC$CLOSEST1 == 2, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 2 days"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 == 1,])>0) match_VRLIC[match_VRLIC$CLOSEST1 == 1, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 1 days"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 == 0,])>0) match_VRLIC[match_VRLIC$CLOSEST1 == 0, "match_VRLICDATE_DETS"] <- "ISDB/MARF overlap"
-    match_VRLIC$T1 <-match_VRLIC$T2 <-match_VRLIC$T3 <-match_VRLIC$T4 <-match_VRLIC$CLOSEST1 <- match_VRLIC$CLOSEST <-NULL
+    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 30,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 30, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a month different"
+    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 8,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 8, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a week different"
+    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 8,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 8, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within a week"
+    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 3,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 3, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 2 days"
+    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 2,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 2, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 1 day"
+    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 1,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 1, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
+    match_VRLIC$T1 <- match_VRLIC$T2 <- match_VRLIC$T3 <- match_VRLIC$T4 <- match_VRLIC$CLOSEST1 <- match_VRLIC$CLOSEST <-NULL
     if (nrow(match_VRLIC)>0) match_VRLIC$match_VRLICDATE <- TRUE
 
     colnames(match_VRLIC)[colnames(match_VRLIC)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_VRLICDATE"
 
-  #MMM!!
-  #look for MARF_ID == 433342 making 2 matches with 100048271 and 100048936 (2017 halibut)
+  }
     possRows <- nrow(isdbTrips)
   if (nrow(match_TRIP)>0){
     if(nrow(match_TRIP)>possRows) warning("duplicating trips due to non-unique match_TRIP match")
