@@ -193,6 +193,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
 
     PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
     PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
+    PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
+    PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
 
     if(exists("T_getPS")) cat("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
     return(PS_df)
