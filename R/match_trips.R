@@ -151,10 +151,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_VRLIC = rbind(withinners, match_VRLIC)
     }
 
-    if (nrow(match_VRLIC)!= length(unique(match_VRLIC$TRIP_ID_ISDB))){
-      cat("single isdb trip matches mult Marf trips\n That's weird, please let Mike.McMahon@dfo-mpo.gc.ca know what your query was when this appeared")
-
-    }
     match_VRLIC$T1 <- match_VRLIC$T2 <- match_VRLIC$T3 <- match_VRLIC$T4 <- match_VRLIC$CLOSEST1 <- match_VRLIC$CLOSEST <-NULL
   }
   possRows <- nrow(isdbTrips)
