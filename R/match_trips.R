@@ -148,7 +148,16 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (nrow(withinners)>0) {
       match_VRLIC <- match_VRLIC[!(match_VRLIC$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB),]
       withinners[,"match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
-      match_VRLIC = rbind(withinners, match_VRLIC)
+    }
+    if(nrow(match_VRLIC>0)){
+      #a single marfis trip can get matched against multiple ISDB recs based on vr/lic/date - only retain the closest in time
+      match_VRLIC <- data.table::as.data.table(match_VRLIC)
+      match_VRLIC <- as.data.frame(match_VRLIC[match_VRLIC[, .I[CLOSEST1 == min(CLOSEST1)], by=TRIP_ID_MARF_VRLICDATE]$V1])
+    }
+    if (nrow(withinners)>0 & nrow(match_VRLIC)>0) {
+      match_VRLIC <- rbind(withinners, match_VRLIC)
+    }else if (nrow(withinners)>0){
+      match_VRLIC <- withinners
     }
 
     match_VRLIC$T1 <- match_VRLIC$T2 <- match_VRLIC$T3 <- match_VRLIC$T4 <- match_VRLIC$CLOSEST1 <- match_VRLIC$CLOSEST <-NULL
@@ -192,7 +201,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
   #populate all of the NAs for the match fields with F that weren't matched
   isdbTrips[c("match_TRIP", "match_CONF_HI","match_CONF_HO","match_VRLICDATE")][is.na(isdbTrips[c("match_TRIP", "match_CONF_HI","match_CONF_HO","match_VRLICDATE")])] <- FALSE
-
   getMode <- function(x, na.rm = TRUE) {
     x <- unlist(x)
     if (na.rm) {
