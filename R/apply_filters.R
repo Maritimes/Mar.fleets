@@ -6,7 +6,7 @@
 #' @noRd
 apply_filters<-function(df = NULL, ...){
   args <- list(...)$args
-   if (args$debug) {
+  if (args$debug) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_apply_filters=Sys.time()
   }
@@ -28,7 +28,7 @@ apply_filters<-function(df = NULL, ...){
       grs = unique(df$GEAR_CODE)
       gearQry <- paste0("SELECT DISTINCT
                           GEAR_CODE,
-                          DESC_ENG
+                          DESC_ENG GEAR_DESC
                           FROM MARFISSCI.GEARS
                           WHERE
                           GEAR_CODE IN (",Mar.utils::SQL_in(grs),")")
@@ -36,7 +36,7 @@ apply_filters<-function(df = NULL, ...){
     }
 
     GEARS = GEARS[GEARS$GEAR_CODE %in% df$GEAR_CODE,]
-    allGears = tolower(unique(GEARS$DESC_ENG))
+    allGears = tolower(unique(GEARS$GEAR_DESC))
     allGears = allGears[!allGears %in% c("trap net")]
     matchTrap=c('trap','pot')
     matchMesh=c('trawl','seine','net','midwtr', 'drag')
@@ -68,15 +68,37 @@ apply_filters<-function(df = NULL, ...){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-      gearSpecDF <- LOG_EFRT_STD_INFO[which(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME >= args$dateStart
-                                            & LOG_EFRT_STD_INFO$FV_FISHED_DATETIME <= args$dateEnd),]
+      if(args$HS){
+        gearSpecDF <- LOG_EFRT_STD_INFO[which(as.Date(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME) >= args$dateStart
+                                              & as.Date(LOG_EFRT_STD_INFO$FV_FISHED_DATETIME) <= args$dateEnd),]
+      }else{
+        tmp <- merge(LOG_EFRT_STD_INFO, df[,c("LOG_EFRT_STD_INFO_ID", "T_DATE1", "T_DATE2")])
+
+        gearSpecDF <- tmp[which(as.Date(tmp$FV_FISHED_DATETIME) >= tmp$T_DATE1 & as.Date(tmp$FV_FISHED_DATETIME) <= tmp$T_DATE2),]
+      }
     }else{
-      gearSpecDFQry <- paste0("SELECT DISTINCT
+
+      if (args$HS){
+        gearSpecDFQry <- paste0("SELECT DISTINCT
                           LOG_EFRT_STD_INFO.MON_DOC_ID,
                           LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
                           FROM MARFISSCI.LOG_EFRT_STD_INFO
                           WHERE
                           LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
+      }else{
+        gearSpecDFQry <- "SELECT DISTINCT
+        I.MON_DOC_ID,
+        I.LOG_EFRT_STD_INFO_ID
+        --P.TRIP_ID,
+        --I.FV_FISHED_DATETIME,
+        --T.EARLIEST_DATE_TIME T_DATE1,
+        --T.LATEST_DATE_TIME T_DATE2
+        FROM MARFISSCI.LOG_EFRT_STD_INFO I, MARFISSCI.PRO_SPC_INFO P, MARFISSCI.TRIPS T
+        WHERE
+        I.LOG_EFRT_STD_INFO_ID = P.LOG_EFRT_STD_INFO_ID
+        AND P.TRIP_ID = T.TRIP_ID
+        AND I.FV_FISHED_DATETIME BETWEEN T.EARLIEST_DATE_TIME AND T.LATEST_DATE_TIME"
+      }
       gearSpecDF <- args$cxn$thecmd(args$cxn$channel, gearSpecDFQry)
     }
     gearSpecDF <- gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,]
@@ -196,19 +218,19 @@ apply_filters<-function(df = NULL, ...){
   }
 
   if (length(unique(df$MD_CODE))==1 ){
-    if(!args$quietly)cat(paste0("\n","mdCode defaulting to only available type: ",unique(df$MD_CODE)))
+    if(!args$quietly)cat(paste0("mdCode defaulting to only available type: ",unique(df$MD_CODE),"\n"))
   }else if (length(args$mdCode)>0 && args$mdCode != "all"){
     df=df[df$MD_CODE %in% args$mdCode,]
   }
 
   if (length(unique(df$GEAR_CODE))==1){
-    if(!args$quietly)cat(paste0("\n","gearCode defaulting to only available type: ",unique(df$GEAR_CODE)))
+    if(!args$quietly)cat(paste0("gearCode defaulting to only available type: ",unique(df$GEAR_CODE),"\n"))
   }else if (length(args$gearCode)>0 && args$gearCode != "all"){
     df=df[df$GEAR_CODE %in% args$gearCode,]
   }
 
   if (length(unique(df$NAFO))==1){
-    if(!args$quietly)cat(paste0("\n","nafoCode defaulting to only available type: ",unique(df$NAFO)))
+    if(!args$quietly)cat(paste0("nafoCode defaulting to only available type: ",unique(df$NAFO),"\n"))
   }else if (length(args$nafoCode)>0 && args$nafoCode != "all"){
     nafoCode <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
     df <- df[grep(paste(nafoCode, collapse = '|'), df$NAFO),]
