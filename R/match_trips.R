@@ -123,7 +123,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_VRLIC[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC[,args$useDate], units="days")))
       match_VRLIC$CLOSEST1<- with(match_VRLIC, pmin(T1, T2))
       match_VRLIC$CLOSEST <- rowMeans(match_VRLIC[,c("T1", "T2")])
-      withinners <- match_VRLIC[(match_VRLIC[,args$useDate] >= match_VRLIC$BOARD_DATE & match_VRLIC[,args$useDate] <= match_VRLIC$LANDING_DATE) , ]
     }else{
       match_VRLIC[,"T1"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC$T_DATE1, units="days")))
       match_VRLIC[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC$T_DATE1, units="days")))
@@ -131,8 +130,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_VRLIC[,"T4"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC$T_DATE2, units="days")))
       match_VRLIC$CLOSEST1 <- with(match_VRLIC, pmin(T1, T2, T3, T4))
       match_VRLIC$CLOSEST <- rowMeans(match_VRLIC[,c("T1", "T2", "T3", "T4")])
-      withinners <-  match_VRLIC[(match_VRLIC$T_DATE1 >= match_VRLIC$BOARD_DATE & match_VRLIC$T_DATE1 <= match_VRLIC$LANDING_DATE) |
-                                   (match_VRLIC$T_DATE2 >= match_VRLIC$BOARD_DATE & match_VRLIC$T_DATE2 <= match_VRLIC$LANDING_DATE) , ]
     }
     #below we first find the closest trips in time using the smallest difference of all calculated times
     match_VRLIC<- data.frame(data.table::setDT(match_VRLIC)[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB])
@@ -145,6 +142,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 3,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 3, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 2 days"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 2,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 2, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 1 day"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 1,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 1, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal A)"
+
+    if (args$HS){
+      withinners <- match_VRLIC[(match_VRLIC[,args$useDate] >= match_VRLIC$BOARD_DATE & match_VRLIC[,args$useDate] <= match_VRLIC$LANDING_DATE) , ]
+    }else{
+      withinners <-  match_VRLIC[(match_VRLIC$T_DATE1 >= match_VRLIC$BOARD_DATE & match_VRLIC$T_DATE1 <= match_VRLIC$LANDING_DATE) |
+                                   (match_VRLIC$T_DATE2 >= match_VRLIC$BOARD_DATE & match_VRLIC$T_DATE2 <= match_VRLIC$LANDING_DATE) , ]
+    }
+
     if (nrow(withinners)>0) {
       match_VRLIC <- match_VRLIC[!(match_VRLIC$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB),]
       withinners[,"match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
