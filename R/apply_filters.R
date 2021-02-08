@@ -5,6 +5,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @noRd
 apply_filters<-function(df = NULL, ...){
+  #MMM need to add gear filter results to ISDBdebugtrips results
   args <- list(...)$args
   if (args$debug) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
