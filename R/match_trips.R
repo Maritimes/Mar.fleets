@@ -137,12 +137,13 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_VRLIC<- data.frame(data.table::setDT(match_VRLIC)[, {tmp <- CLOSEST; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB])
 
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 8,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 8, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a week different"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 30,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 30, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a month different"
+    # if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 30,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 30, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a month different"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 8,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 8, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within a week"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 3,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 3, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 2 days"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 2,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 2, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 1 day"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 1,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 1, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal A)"
-
+    #hard cutoff - anything more than 2 weeks different is not a match, and is dropped here
+    match_VRLIC <- match_VRLIC[match_VRLIC$CLOSEST1 <=15,]
     if (args$HS){
       withinners <- match_VRLIC[(match_VRLIC[,args$useDate] >= match_VRLIC$BOARD_DATE & match_VRLIC[,args$useDate] <= match_VRLIC$LANDING_DATE) , ]
     }else{
