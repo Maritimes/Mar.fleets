@@ -79,9 +79,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")])
   p <- strsplit(as.character(thisMarfMatch$CONF_NUMBER_HO), ',')
   tmp3 <- data.frame(CONF_NUMBER_HO=unlist(p), TRIP_ID_MARF=rep(thisMarfMatch$TRIP_ID_MARF, sapply(p, FUN=length)))
-  match_CONF_HO <- unique(merge(thisIsdbTrips, tmp3, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
-  colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
-  if (nrow(match_CONF_HO)>0) match_CONF_HO$match_CONF_HO <- TRUE
+  # browser()
+  if (nrow(tmp3)>0){
+    match_CONF_HO <- unique(merge(thisIsdbTrips, tmp3, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
+    colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
+    if (nrow(match_CONF_HO)>0) match_CONF_HO$match_CONF_HO <- TRUE
+  }else{
+    match_CONF_HO<-tmp3 #need a table with no rows later
+  }
   rm(thisIsdbTrips, thisMarfMatch, p, tmp3)
 
   # VRN, LICENCE and DATE RANGE --------------------------------------------------------
@@ -200,7 +205,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       isdbTrips <- merge(isdbTrips, match_VRLIC[,c("TRIP_ID_MARF_VRLICDATE","match_VRLICDATE","match_VRLICDATE_DETS","T_DATE1", "T_DATE2", "join")], all.x = T, by.x = c("join"), by.y=c("join"))
 
     }
-         isdbTrips$join <- NULL
+    isdbTrips$join <- NULL
   }else{
     isdbTrips$TRIP_ID_MARF_VRLICDATE <- NA
     isdbTrips$match_VRLICDATE <- FALSE
@@ -242,7 +247,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   isdbTrips <- cbind(isdbTrips,t(mTripIDs))
   colnames(isdbTrips)[colnames(isdbTrips)=="1"] <- "TRIP_ID_MARF"
   colnames(isdbTrips)[colnames(isdbTrips)=="2"] <- "TRIP_ID_MARFIS_OTHER"
-
   ###
   selectTrip <- which(isdbTrips$TRIP_ID_MARF_TRIP != isdbTrips$TRIP_ID_MARF)
   if (all(!is.na(selectTrip))) isdbTrips[selectTrip,"match_TRIP"] <-FALSE

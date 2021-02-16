@@ -373,8 +373,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
   #a single trip can have multiple hoc - this adds a comma-separated list of all
   #to each trip, ensuring a single rec per trip
-  hoc<- stats::aggregate(CONF_NUMBER_HO ~., hoc, toString)
   if (!is.null(hoc) && nrow(hoc)>0){
+    hoc<- stats::aggregate(CONF_NUMBER_HO ~., hoc, toString)
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
       cat(paste0("\n","No MARFIS data meets criteria"))
@@ -392,7 +392,32 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID")]) #, "OBS_PRESENT")])
-  # ps <- merge(ps, spd, all.x = T)
+
+  trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
+  trips <-
+  aggregate(
+    x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
+    by = list(TRIP_ID_MARF = trips$TRIP_ID_MARF,
+              MON_DOC_ID =trips$MON_DOC_ID,
+              VR_NUMBER_FISHING = trips$VR_NUMBER_FISHING,
+              #PRO_SPC_INFO_ID = trips$PRO_SPC_INFO_ID,
+              LICENCE_ID = trips$LICENCE_ID,
+              GEAR_CODE = trips$GEAR_CODE,
+              #DATE_FISHED = trips$DATE_FISHED,
+              #LANDED_DATE = trips$LANDED_DATE,
+              VR_NUMBER_LANDING = trips$VR_NUMBER_LANDING,
+              #LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
+              #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
+              #NAFO_AREA = trips$NAFO_AREA,
+              LOA = trips$LOA,
+              T_DATE1 = trips$T_DATE1,
+              T_DATE2 = trips$T_DATE2,
+              OBS_PRESENT = trips$OBS_PRESENT
+    ),
+    FUN = sum
+  )
+  trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
+   # ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
 
   res<- list()
