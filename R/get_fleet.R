@@ -96,7 +96,6 @@ get_fleet<-function(...){
                       AND PS.TRIP_ID = T.TRIP_ID
                       AND (ps.vr_number_fishing ||'_' || PS.LICENCE_ID IN (",Mar.utils::SQL_in(isdbJoiner$join),") OR
                            ps.vr_number_landing ||'_' || PS.LICENCE_ID IN (",Mar.utils::SQL_in(isdbJoiner$join),"))")
-
         debugTripsMARFIS = args$cxn$thecmd(args$cxn$channel, debugQry)
 
       }
@@ -252,19 +251,47 @@ get_fleet<-function(...){
       colnames(theFleet)[colnames(theFleet)=="NAFO_AREA"] <- "NAFO"
       colnames(theFleet)[colnames(theFleet)=="MON_DOC_DEFN_ID"] <- "MD_CODE"
     }else{
+
+      where_spp <- where_g1 <- where_m <- where_vl <- where_mb <- ""
       #MARBYCATCH_LIC, filtered by spp, gear_code, and
-      where_spp <- where_g1 <- where_m <- where_vl <- ""
-      if (args$marfSpp !="all") where_spp <- paste0("AND SPECIES_CODE IN  (",Mar.utils::SQL_in(args$marfSpp),")")
+
+      cat("need to add lic and sublic to this section, akin to below:")
+      # this <- NA
+
+      if (any(!is.na(args$lics))){
+        for (i in 1:nrow(args$lics)){
+          thisL <- ifelse(!is.na(args$lics[i,"types"]),paste0("MARBYCATCH_LIC.LICENCE_TYPE_ID = ",args$lics[i,"types"]),NA)
+          thisS <- ifelse(!is.na(args$lics[i,"subtypes"]),paste0("MARBYCATCH_LIC.LICENCE_SUBTYPE_ID = ",args$lics[i,"subtypes"]),
+                          "MARBYCATCH_LIC.LICENCE_SUBTYPE_ID = -99")
+          if (!is.na(thisL) & !is.na(thisS)) {
+            thisRow <- paste0("(",thisL, " AND ",thisS,")")
+          }else if (!is.na(thisL)) {
+            thisRow <- paste0("(",thisL,")")
+          }else{
+            thisRow <- paste0("(",thisS,")")
+          }
+          if (i==1){
+            where_mb <- thisRow
+          } else {
+            where_mb <- paste(where_mb, "OR", thisRow)
+          }
+        }
+        where_mb = paste0("AND (",where_mb,")")
+      }
+      ###
       if (all(args$gearCode != 'all')) where_g1 <-  paste0("AND GEAR_CODE IN (",Mar.utils::SQL_in(args$gearCode),")")
       MB_LICQry<- paste0("SELECT *
             FROM
             MARFISSCI.MARBYCATCH_LIC
                          WHERE 1=1
-                         ",where_spp,"
+                         ",where_mb,"
+                         --",where_spp,"
                          ",where_g1)
-      MARBYCATCH_LIC <- args$cxn$thecmd(args$cxn$channel, MB_LICQry)
 
-      if (all(args$mdCode != 'all')) where_m = paste0("AND MD.MON_DOC_DEFN_ID IN (",Mar.utils::SQL_in(args$mdCode),")")
+
+      MARBYCATCH_LIC <- args$cxn$thecmd(args$cxn$channel, MB_LICQry)
+      if (args$marfSpp !="all") where_spp <- paste0("AND PS.SPECIES_CODE IN  (",Mar.utils::SQL_in(args$marfSpp),")")
+
       if (all(args$nafoCode != 'all')) {
         #collapse all of the nafo values into a single long string, and check if a wildcard was sent;
         #if it was, we need to do multiple IN checks
@@ -308,14 +335,47 @@ get_fleet<-function(...){
                       AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID
                       AND PS.VR_NUMBER_FISHING = V.VR_NUMBER
                       AND PS.TRIP_ID = T.TRIP_ID
+                      ",where_spp,"
                       ",where_HS,"
-                      ",where_m,"
                       ",where_n,"
                       ",where_vl
       )
+
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
       theFleet <- theFleet[theFleet$LICENCE_ID %in% MARBYCATCH_LIC$LICENCE_ID,]
-
+cat("The following (Halibut 2017) LICENCE_ID/VR_NUMBER combos were found to be part of the fleet in the local check, but not the remote (see code)\n
+    They ARE also found by v.1 of Mar.bycatch and therefore probably math Heath's extractions\n
+    Something about the remote approach is causing them to be dropped\n")
+# LICENCE_ID VR_NUMBER
+# 3234      142077    100216
+# 17299     101143    100830
+# 16345     102663    100951
+# 52        700065    100989
+# 8715      101471    101014
+# 2386      318054    101649
+# 2033      142075    102339
+# 11924     318054    103225
+# 8572      100780    103395
+# 15110     102727    104031
+# 17317     100944    105126
+# 1168      142514    105367
+# 5503      101263    105558
+# 2228      142077    105574
+# 221       142327    106331
+# 10244     142074    106543
+# 15355     100496    106622
+# 10        322474    106793
+# 10273     322474    107266
+# 12009     322474    107551
+# 293       142327    107553
+# 10152     318054    107815
+# 3         142076    107878
+# 1214      142075    107899
+# 4003      142514    107899
+# 15146     100307    107999
+# 12122     142076    108200
+# 315       142327    108259
+# 10188     318054    108291
     }
     if(exists("T_get_fleetBasic")) cat("\n","get_fleetBasic() completed in",round( difftime(Sys.time(),T_get_fleetBasic,units = "secs"),0),"secs\n")
     return(theFleet)

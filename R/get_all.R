@@ -23,12 +23,9 @@ get_all <- function(...){
   }
   can_runCheck <- do.call(can_run, args)
   args <- can_runCheck$args
-  cxnCheck <- can_runCheck$cxnCheck
-
-  if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
+  # cxnCheck <- can_runCheck$cxnCheck
+  if (!(is.list(args$cxn) || args$cxn==TRUE)){
     stop("Can't run as requested.")
-  } else if (is.list(cxnCheck)){
-    args[["cxn"]] <- cxnCheck
   }
   fleet <- NA
   marf<- NA
@@ -88,6 +85,12 @@ get_all <- function(...){
     }else{
       marf[["MARF_UNMATCHABLES"]] <- NA
     }
+    #restrict ISDB data to only that that was matched to MARFIS
+    if (args$dropUnmatchedISDB){
+      isdb$ALL_ISDB_TRIPS <- isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),]
+      isdb$ALL_ISDB_SETS <- isdb$ALL_ISDB_SETS[!is.na(isdb$ALL_ISDB_SETS$TRIP_ID_MARF),]
+    }
+
   }
 
   res=list()

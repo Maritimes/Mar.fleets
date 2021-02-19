@@ -8,6 +8,7 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
+  args  <- Mar.utils::combine_lists(primary =args, ancilliary =  set_defaults(), quietly=T)
   if (args$debug) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_can_run=Sys.time()
@@ -96,18 +97,16 @@ can_run <- function(...){
   if (args$useLocal){
     if (do.call(wantLocal,list(MARFIS,args=args))&do.call(wantLocal,list(ISDB,args=args))){
       if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
+      args[['cxn']] <- TRUE
       res <- list()
       res[["args"]]<-args
-      res[["cxnCheck"]]<-TRUE
       return(res)
-      #return(TRUE)
     }else{
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
       cat(paste0(ISDB,".RData"),sep= "\n")
       if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       stop()
-      #return(FALSE)
     }
   }else{
     cxnCheck <- do.call(connect_Oracle, list(args=args))
@@ -122,8 +121,6 @@ can_run <- function(...){
       args[['cxn']] <- cxnCheck
       res <- list()
       res[["args"]]<-args
-      res[["cxnCheck"]]<-cxnCheck
-
       return(res)
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
@@ -131,7 +128,6 @@ can_run <- function(...){
       if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       res <- list()
       res[["args"]]<-args
-      res[["cxnCheck"]]<-cxnCheck
       return(res)
     }else{
       cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")

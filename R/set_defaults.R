@@ -31,6 +31,7 @@ set_defaults <- function(...){
                   year = NULL,
                   keepSurveyTrips = FALSE,
                   matchMarfis = TRUE,
+                  dropUnmatchedISDB = TRUE,
                   data.dir = file.path(getwd(), "data"),
                   oracle.username = "_none_",
                   oracle.password = "_none_",
