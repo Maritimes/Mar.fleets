@@ -53,17 +53,40 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
+      if ("CUSER" %in% names(LOG_EFRT_STD_INFO)){
+        #do the appropriate tweaks if haven't been done
+        LOG_EFRT_STD_INFO$CUSER <- NULL
+        LOG_EFRT_STD_INFO$CDATE <- NULL
+        LOG_EFRT_STD_INFO$UUSER <- NULL
+        LOG_EFRT_STD_INFO$UDATE <- NULL
+        LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)] =
+          as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)], 1, 2)) +
+          as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)], 3, 4)) / 60 +
+          as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)], 5, 6)) / 3600
+        LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)] =
+          as.numeric(substr(LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)], 1, 2)) +
+          as.numeric(substr(LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)], 3, 4)) / 60 +
+          as.numeric(substr(LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)], 5, 6)) / 3600
+        LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)] = -1 *
+          (as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)], 1, 2)) +
+             as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)], 3, 4)) / 60 +
+             as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)], 5, 6)) / 3600)
+        LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)] = -1 *
+          (as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 1, 2)) +
+             as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 3, 4)) / 60 +
+             as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 5, 6)) / 3600)
+        LOG_EFRT_STD_INFO$LATITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE),LOG_EFRT_STD_INFO$DET_LATITUDE,LOG_EFRT_STD_INFO$ENT_LATITUDE)
+        LOG_EFRT_STD_INFO$LONGITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE),LOG_EFRT_STD_INFO$DET_LONGITUDE,LOG_EFRT_STD_INFO$ENT_LONGITUDE)
+        save( LOG_EFRT_STD_INFO, file=file.path(data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
+      }
+        LOG_EFRT_STD_INFO$LATITUDE_EFRT <- LOG_EFRT_STD_INFO$LONGITUDE_EFRT <- NULL
       PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
       colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
       PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
       PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
-      PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)] <- (as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 1, 2))
-                                                     + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 3, 4))/60
-                                                     + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 5, 6))/3600)
-      PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)] <- -1 * (as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 1, 2))
-                                                            + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 3, 4))/60
-                                                            + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 5, 6))/3600)
-    }else{
+
+
+     }else{
       PSQry1 <-paste0("SELECT DISTINCT
                         EF.LOG_EFRT_STD_INFO_ID,
                         EF.FV_FISHED_DATETIME  EF_FISHED_DATETIME,
@@ -130,7 +153,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
       PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
       if (args$HS){
-        PS_df <- PS_df[which(PS_df[,args$useDate] >= as.Date(args$dateStart) & PS_df[,args$useDate] <= as.Date(args$dateEnd)), ]
+        PS_df <- PS_df[which(as.Date(PS_df[,args$useDate]) >= as.Date(args$dateStart) & as.Date(PS_df[,args$useDate]) <= as.Date(args$dateEnd)), ]
       }else{
         PS_df <- PS_df[which(PS_df$T_DATE1 <= as.Date(args$dateEnd) & PS_df$T_DATE2 >= as.Date(args$dateStart)), ]
       }
@@ -154,7 +177,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       }else{
         where_sp =  ""
       }
-
       if (args$HS){
         where_HS <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
       }else{
@@ -194,7 +216,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
 
     PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
     PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
-    # if (args$debug) cat("getPS done:",nrow(PS_df),"\n")
+    PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
+    PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
 
     if(exists("T_getPS")) cat("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
     return(PS_df)
@@ -350,8 +373,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
   #a single trip can have multiple hoc - this adds a comma-separated list of all
   #to each trip, ensuring a single rec per trip
-  hoc<- stats::aggregate(CONF_NUMBER_HO ~., hoc, toString)
   if (!is.null(hoc) && nrow(hoc)>0){
+    hoc<- stats::aggregate(CONF_NUMBER_HO ~., hoc, toString)
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
       cat(paste0("\n","No MARFIS data meets criteria"))
@@ -369,7 +392,32 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID")]) #, "OBS_PRESENT")])
-  # ps <- merge(ps, spd, all.x = T)
+
+  trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
+  trips <-
+  aggregate(
+    x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
+    by = list(TRIP_ID_MARF = trips$TRIP_ID_MARF,
+              MON_DOC_ID =trips$MON_DOC_ID,
+              VR_NUMBER_FISHING = trips$VR_NUMBER_FISHING,
+              #PRO_SPC_INFO_ID = trips$PRO_SPC_INFO_ID,
+              LICENCE_ID = trips$LICENCE_ID,
+              GEAR_CODE = trips$GEAR_CODE,
+              #DATE_FISHED = trips$DATE_FISHED,
+              #LANDED_DATE = trips$LANDED_DATE,
+              VR_NUMBER_LANDING = trips$VR_NUMBER_LANDING,
+              #LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
+              #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
+              #NAFO_AREA = trips$NAFO_AREA,
+              LOA = trips$LOA,
+              T_DATE1 = trips$T_DATE1,
+              T_DATE2 = trips$T_DATE2,
+              OBS_PRESENT = trips$OBS_PRESENT
+    ),
+    FUN = sum
+  )
+  trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
+   # ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
 
   res<- list()

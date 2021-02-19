@@ -79,8 +79,11 @@ calc_coverage<-function(get_isdb = NULL,
     T_calc_coverage=Sys.time()
   }
 
-  oTrips <- get_isdb$ALL_ISDB_TRIPS
-  oSets <- get_isdb$ALL_ISDB_SETS
+  # oTrips <- get_isdb$ALL_ISDB_TRIPS
+  # oSets <- get_isdb$ALL_ISDB_SETS
+  oTrips <- get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),]
+  oSets <- get_isdb$ALL_ISDB_SETS[!is.na(get_isdb$ALL_ISDB_SETS$TRIP_ID_MARF),]
+
   if (marfMatchOnly){
     oTrips <- oTrips[!is.na(oTrips$TRIP_ID_MARF), ]
     oSets <- oSets[oSets$TRIP_ID %in% oTrips$TRIP_ID_ISDB,]
@@ -127,7 +130,7 @@ calc_coverage<-function(get_isdb = NULL,
     MARF_sets_pos <- as.data.frame(MARF_sets_pos)
     MARF_sets_pos$LOG_EFRT_STD_INFO_ID <- NULL
     MARF_sets_pos <- unique(MARF_sets_pos[!is.na(MARF_sets_pos$MON_DOC_ID),])
-    Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos )
+    Marf_Trip_pos<-merge(get_marfis$MARF_TRIPS, MARF_sets_pos, all.x = T )
     MAR_area_s = Mar.utils::identify_area(get_marfis$MARF_SETS,
                                           agg.poly.shp = agg.poly.shp,
                                           agg.poly.field = agg.poly.field)

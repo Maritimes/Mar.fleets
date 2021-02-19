@@ -80,8 +80,7 @@ get_all <- function(...){
       #now that we've matched all that we can, create a little df of the marfis recs
       #that should be matchable (i.e. have an isdb trip or have obs_id or obs_present),
       #and add that to the marfis results
-
-      MARF_UNMATCHABLES <- unique(marf$MARF_TRIPS[marf$MARF_TRIPS$TRIP_ID_MARF %in% marf$MARF_MATCH[(!is.na(marf$MARF_MATCH$OBS_PRESENT) | !is.na(marf$MARF_MATCH$OBS_ID)  | !is.na(marf$MARF_MATCH$ISDB_TRIP)) & !(marf$MARF_MATCH$TRIP_ID_MARF %in% isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),"TRIP_ID_MARF"],
+      MARF_UNMATCHABLES <- unique(marf$MARF_TRIPS[marf$MARF_TRIPS$TRIP_ID_MARF %in% marf$MARF_MATCH[((!is.na(marf$MARF_MATCH$OBS_PRESENT)& marf$MARF_MATCH$OBS_PRESENT != "N") | !is.na(marf$MARF_MATCH$OBS_ID)  | !is.na(marf$MARF_MATCH$ISDB_TRIP)) & !(marf$MARF_MATCH$TRIP_ID_MARF %in% isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),"TRIP_ID_MARF"],
                                                   !names(marf$MARF_TRIPS) %in% c("PRO_SPC_INFO_ID","DATE_FISHED", "LANDED_DATE","LOG_EFRT_STD_INFO_ID", "RND_WEIGHT_KGS","NAFO_UNIT_AREA_ID","NAFO_AREA", "CALC_AREA")])
       MARF_UNMATCHABLES <- merge(MARF_UNMATCHABLES, unique(marf$MARF_MATCH[,c("TRIP_ID_MARF","ISDB_TRIP","OBS_ID","OBS_PRESENT")]))
       MARF_UNMATCHABLES = MARF_UNMATCHABLES[with(MARF_UNMATCHABLES, order(T_DATE1, T_DATE2 )), ]

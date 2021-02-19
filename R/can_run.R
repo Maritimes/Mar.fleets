@@ -12,7 +12,6 @@ can_run <- function(...){
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_can_run=Sys.time()
   }
-
   marfTabs = c("HAIL_IN_CALLS",
                "HAIL_OUTS",
                "LOG_EFRT_ENTRD_DETS",
@@ -76,7 +75,8 @@ can_run <- function(...){
     if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
     #1 check if local copies available '
     if (grepl(x = tables[1], pattern = "MARFIS")>0){
-      #marfis is annoying because some files are prefaced with marfissci
+      #marfis is annoying because some files are prefaced with marfis and some with marfissci
+      #need to look for both
       tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
       tabs2 = gsub(tabs1,pattern = "MARFISSCI", replacement = "MARFIS")
       localDataCheck1 <- sapply(X =tabs1, file.exists)
@@ -122,10 +122,12 @@ can_run <- function(...){
       args[['cxn']] <- cxnCheck
       res <- list()
       res[["args"]]<-args
-      res[["cxnCheck"]]<-TRUE
+      res[["cxnCheck"]]<-cxnCheck
+
       return(res)
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
+      cat("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
       if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       res <- list()
       res[["args"]]<-args
