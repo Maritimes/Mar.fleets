@@ -210,6 +210,7 @@ get_fleet<-function(...){
             this <- paste(this, "|", thisRow)
           }
         }
+
         MARBYCATCH_LIC <- MARBYCATCH_LIC[which(eval(parse(text=this))),]
       }
       if (all(args$licSpp != 'all')) {
@@ -251,12 +252,7 @@ get_fleet<-function(...){
       colnames(theFleet)[colnames(theFleet)=="NAFO_AREA"] <- "NAFO"
       colnames(theFleet)[colnames(theFleet)=="MON_DOC_DEFN_ID"] <- "MD_CODE"
     }else{
-
-      where_spp <- where_g1 <- where_m <- where_vl <- where_mb <- ""
-      #MARBYCATCH_LIC, filtered by spp, gear_code, and
-
-      cat("need to add lic and sublic to this section, akin to below:")
-      # this <- NA
+      where_spp <- where_g1 <- where_m <- where_vl <- where_mb <- where_n <- ""
 
       if (any(!is.na(args$lics))){
         for (i in 1:nrow(args$lics)){
@@ -278,31 +274,25 @@ get_fleet<-function(...){
         }
         where_mb = paste0("AND (",where_mb,")")
       }
-      ###
-      if (all(args$gearCode != 'all')) where_g1 <-  paste0("AND GEAR_CODE IN (",Mar.utils::SQL_in(args$gearCode),")")
+      if (all(args$licSpp !="all")) where_spp <- paste0("AND (MARBYCATCH_LIC.SPECIES_CODE IN  (",Mar.utils::SQL_in(args$licSpp),") OR
+                                                               MARBYCATCH_LIC.SPECIES_CODE IN  (",Mar.utils::SQL_in(args$marfSpp),"))")
       MB_LICQry<- paste0("SELECT *
             FROM
             MARFISSCI.MARBYCATCH_LIC
                          WHERE 1=1
-                         ",where_mb,"
-                         --",where_spp,"
-                         ",where_g1)
-
-
+                         ",where_mb,
+                         where_spp)
       MARBYCATCH_LIC <- args$cxn$thecmd(args$cxn$channel, MB_LICQry)
-      if (args$marfSpp !="all") where_spp <- paste0("AND PS.SPECIES_CODE IN  (",Mar.utils::SQL_in(args$marfSpp),")")
 
+
+      if (all(args$gearCode != 'all')) where_g1 <-  paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(args$gearCode),")")
       if (all(args$nafoCode != 'all')) {
-        #collapse all of the nafo values into a single long string, and check if a wildcard was sent;
-        #if it was, we need to do multiple IN checks
         chk <- grepl(pattern = "%", x = paste0(args$nafoCode,collapse = ''))
         if (chk){
           where_n = paste0("AND (", paste0("N.AREA LIKE ('",args$nafoCode,"')", collapse = " OR "),")")
         }else {
           where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(args$nafoCode),")")
         }
-      }else{
-        where_n =  ""
       }
 
       if (all(args$vessLen != 'all')) where_vl =  paste0("AND V.LOA BETWEEN ",min(eval(args$vessLen))," AND ",max(eval(args$vessLen)))
@@ -335,59 +325,19 @@ get_fleet<-function(...){
                       AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID
                       AND PS.VR_NUMBER_FISHING = V.VR_NUMBER
                       AND PS.TRIP_ID = T.TRIP_ID
-                      ",where_spp,"
+                      ",where_g1,"
                       ",where_HS,"
                       ",where_n,"
                       ",where_vl
       )
 
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
-      browser()
       theFleet <- theFleet[theFleet$LICENCE_ID %in% MARBYCATCH_LIC$LICENCE_ID,]
-cat("The following (Halibut 2017) LICENCE_ID/VR_NUMBER combos were found to be part of the fleet in the local check, but not the remote (see code)\n
-    They ARE also found by v.1 of Mar.bycatch and therefore probably math Heath's extractions\n
-    Something about the remote approach is causing them to be dropped\n
-    These seem present in theFleet, but are missing in MARBYCATCH_LIC")
-# LICENCE_ID VR_NUMBER
-# 3234      142077    100216
-# 17299     101143    100830
-# 16345     102663    100951
-# 52        700065    100989
-# 8715      101471    101014
-# 2386      318054    101649
-# 2033      142075    102339
-# 11924     318054    103225
-# 8572      100780    103395
-# 15110     102727    104031
-# 17317     100944    105126
-# 1168      142514    105367
-# 5503      101263    105558
-# 2228      142077    105574
-# 221       142327    106331
-# 10244     142074    106543
-# 15355     100496    106622
-# 10        322474    106793
-# 10273     322474    107266
-# 12009     322474    107551
-# 293       142327    107553
-# 10152     318054    107815
-# 3         142076    107878
-# 1214      142075    107899
-# 4003      142514    107899
-# 15146     100307    107999
-# 12122     142076    108200
-# 315       142327    108259
-# 10188     318054    108291
     }
     if(exists("T_get_fleetBasic")) cat("\n","get_fleetBasic() completed in",round( difftime(Sys.time(),T_get_fleetBasic,units = "secs"),0),"secs\n")
     return(theFleet)
   }
   df <- do.call(get_fleetBasic, args)
-  # useLocal = FALSE is getting the following, which are not found by local (2020-12-22)
-  #LICENCE_ID LOG_EFRT_STD_INFO_ID
-  # 1     339546              1432422
-  # 2     339546              1432423
-  # 3     142072              1435136
   if(exists("debugTrips")) return(df)
   df <- do.call(apply_filters, list(df=df,args=args))
   if(nrow(df)<1) {
@@ -397,7 +347,10 @@ cat("The following (Halibut 2017) LICENCE_ID/VR_NUMBER combos were found to be p
   }else{
     df$NAFO <-NULL
     df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),]) #MD_CODE,
+    res <- list()
+    res[["FLEET"]] <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),c("VR_NUMBER", "LICENCE_ID", "GEAR_CODE")])
+    res[["FLEET_ACTIVITY"]]<- df
     if(exists("T_get_fleet")) cat("\n","get_fleet() completed in",round( difftime(Sys.time(),T_get_fleet,units = "secs"),0),"secs\n")
-    return(df)
+    return(res)
   }
 }

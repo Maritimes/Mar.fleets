@@ -2,7 +2,7 @@
 #' @description This function extracts all of the MARFIS records for vessels with
 #' particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
-#' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
+#' the columns "LICENCE_ID","VR_NUMBER" and GEAR_CODE.  It can take the results from
 #' \code{Mar.bycatch::get_fleet()}
 #' @param marfSpp default is \code{NULL}. This is a MARFIS species code.  Some of these can be found
 #' in spLookups

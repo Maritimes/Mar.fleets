@@ -34,10 +34,10 @@ get_all <- function(...){
   bycatch <- NA
   covSumm <- NA
   fleet <- do.call(get_fleet, args)
-  if (class(fleet)=="data.frame"){
-    marf <- do.call(get_marfis, list(thisFleet=fleet,args=args))
+  if (class(fleet) =="list" && class(fleet$FLEET_ACTIVITY)=="data.frame"){
+    marf <- do.call(get_marfis, list(thisFleet=fleet$FLEET_ACTIVITY,args=args))
     if (any(!is.na(marf))){
-      isdb <- do.call(get_isdb, list(thisFleet=fleet,get_marfis = marf, matchMarfis = T, args=args))
+      isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, matchMarfis = T, args=args))
       if (length(isdb)>1 && class(isdb$ALL_ISDB_TRIPS)=="data.frame"){
         matchedTrips <- unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"])
         if (any(!is.na(matchedTrips))){

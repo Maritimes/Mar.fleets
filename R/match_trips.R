@@ -59,6 +59,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # MARFIS TRIP NAME ----------------------------------------------------------------------------
   thisIsdbTrips <- unique(isdbTrips[!is.na(isdbTrips$ISDB_TRIP_O),c("TRIP_ID_ISDB", "ISDB_TRIP_O")])
   thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("TRIP_ID_MARF","ISDB_TRIP_M")])
+  browser()
   match_TRIP <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
   colnames(match_TRIP)[colnames(match_TRIP)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_TRIP"
   if (nrow(match_TRIP)>0) match_TRIP$match_TRIP <- TRUE
@@ -148,7 +149,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 2,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 2, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 1 day"
     if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 1,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 1, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal A)"
     #hard cutoff - anything more than 2 weeks different is not a match, and is dropped here
-    match_VRLIC <- match_VRLIC[match_VRLIC$CLOSEST1 <=15,]
+     match_VRLIC <- match_VRLIC[match_VRLIC$CLOSEST1 <=args$matchMaxDayDiff,]
     if (args$HS){
       withinners <- match_VRLIC[(match_VRLIC[,args$useDate] >= match_VRLIC$BOARD_DATE & match_VRLIC[,args$useDate] <= match_VRLIC$LANDING_DATE) , ]
     }else{

@@ -31,6 +31,7 @@ set_defaults <- function(...){
                   year = NULL,
                   keepSurveyTrips = FALSE,
                   matchMarfis = TRUE,
+                  matchMaxDayDiff = 15,
                   dropUnmatchedISDB = TRUE,
                   data.dir = file.path(getwd(), "data"),
                   oracle.username = "_none_",
@@ -75,11 +76,13 @@ set_defaults <- function(...){
 
   # full listing of all of the parameters used
   paramDf <- argsDef
-
   paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
   paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
-  paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateStart","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
-  paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateEnd","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
+
+  # paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateStart","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
+  # paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateEnd","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
+  paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argsDef$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
+  paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argsDef$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
   paramDf$SOURCE <- NA
   paramDf[paramDf$PARAMETER %in% names(argsRec$argsUser),"SOURCE"] <- "user-supplied"
   paramDf[paramDf$PARAMETER %in% names(argsRec$argsFn),"SOURCE"] <- "hardcoded for this fleet"
