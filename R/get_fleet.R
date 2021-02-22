@@ -342,10 +342,12 @@ get_fleet<-function(...){
       )
 
       theFleet = args$cxn$thecmd(args$cxn$channel, fleetQry)
+      browser()
       theFleet <- theFleet[theFleet$LICENCE_ID %in% MARBYCATCH_LIC$LICENCE_ID,]
 cat("The following (Halibut 2017) LICENCE_ID/VR_NUMBER combos were found to be part of the fleet in the local check, but not the remote (see code)\n
     They ARE also found by v.1 of Mar.bycatch and therefore probably math Heath's extractions\n
-    Something about the remote approach is causing them to be dropped\n")
+    Something about the remote approach is causing them to be dropped\n
+    These seem present in theFleet, but are missing in MARBYCATCH_LIC")
 # LICENCE_ID VR_NUMBER
 # 3234      142077    100216
 # 17299     101143    100830
