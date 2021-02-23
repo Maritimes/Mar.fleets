@@ -218,8 +218,6 @@ get_fleet<-function(...){
                                            MARBYCATCH_LIC$SPECIES_CODE %in% args$marfSpp, ]
       }
       if (all(args$gearCode != 'all')) {
-        # browser()
-        # MARBYCATCH_LIC <- MARBYCATCH_LIC[MARBYCATCH_LIC$GEAR_CODE %in% args$gearCode, ] #this step could drop licences for which no gear was specified
         PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$gearCode, ]
       }
       if (all(args$nafoCode != 'all')) {

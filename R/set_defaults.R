@@ -24,6 +24,7 @@ set_defaults <- function(...){
                   gearSpSize = "all",
                   vessLen = "all",
                   useDate = "LANDED_DATE",
+                  useReportedNAFO = TRUE,
                   areas = "NAFOSubunits_sf",
                   areasField = "NAFO_1",
                   dateStart = NULL,

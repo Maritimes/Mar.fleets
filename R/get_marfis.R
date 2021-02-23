@@ -34,9 +34,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
 
-  #!!MMM - may eed to assign args differently in case called directly?
-  # if (!"filtTrack" %in% names(args)) args<-set_defaults(args = args)
-  # if params are sent, we should overwrite the defaults
   if (!is.null(marfSpp))args$marfSpp <- marfSpp
   if (useDate != 'LANDED_DATE') args$useDate <- useDate
   if (nafoCode != 'all') args$nafoCode <- nafoCode
@@ -94,7 +91,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
                         EF.MON_DOC_ID,
                         EF.FV_NUM_OF_GEAR_UNITS,
                         EF.FV_DURATION_IN_HOURS,
-                      --  EF.FV_GEAR_CODE,
                         EF.DET_LATITUDE,
                         EF.DET_LONGITUDE,
                         EF.ENT_LATITUDE,
@@ -116,7 +112,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
     }
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
-    # if (args$debug) cat("getEff done:",nrow(PS_sets),"\n")
     if(exists("T_getEff")) cat("\n","getEff() completed in",round( difftime(Sys.time(),T_getEff,units = "secs"),0),"secs\n")
     return(PS_sets)
   }
@@ -142,9 +137,13 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       if (all(args$marfSpp != 'all')) PS_df <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
 
       if (all(args$nafoCode != 'all')){
+        if (useReportedNAFO){
+          cat("useReportedNAFO not implemented yet - PS_df only as \n")
+        }
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
         nafoCodeSimp <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
         PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
+
       }
       PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
       PS_df = merge(PS_df, TRIPS[,c("TRIP_ID", "EARLIEST_DATE_TIME", "LATEST_DATE_TIME")], by="TRIP_ID", all.x = T)
@@ -163,6 +162,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
 
       if (all(args$nafoCode != 'all')){
+        if (useReportedNAFO){
+          cat("useReportedNAFO not implemented yet - PS_df only as \n")
+        }
         chk <- grepl(pattern = "%", x = paste0(args$nafoCode,collapse = ''))
         if (chk){
           where_n = paste0("AND (", paste0("N.AREA LIKE ('",args$nafoCode,"')", collapse = " OR "),")")
@@ -284,8 +286,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       HICQry<-paste0("SELECT DISTINCT
                     HI.TRIP_ID,
                   HI.CONF_NUMBER
-                  --HI.HAIL_IN_TYPE_ID,
-                  --HI.HAIL_OUT_ID
                   FROM MARFISSCI.HAIL_IN_CALLS HI
                   WHERE
                   HI.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
@@ -315,8 +315,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       HOCQry<-paste0("SELECT DISTINCT
                    HO.TRIP_ID,
                    HO.CONF_NUMBER
-      --             HO.VR_NUMBER,
-      --             HO.HAIL_OUT_ID
                    FROM MARFISSCI.HAIL_OUTS HO
                    WHERE
                    HO.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
