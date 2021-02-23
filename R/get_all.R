@@ -68,8 +68,9 @@ get_all <- function(...){
 
   if(!any(args$debugISDBTrips =="_none_")) {
     args[["debugTripsRes"]] <- isdb$debugTrips
+
     debugTripsMARFIS <- do.call(get_fleet, args)
-    marf[["debugTripsMARFIS"]] <- debugTripsMARFIS
+    if (!is.na(debugTripsMARFIS)) marf[["debugTripsMARFIS"]] <- debugTripsMARFIS
   }
 
   if(!is.na(marf) && !is.na(isdb) ){

@@ -59,7 +59,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # MARFIS TRIP NAME ----------------------------------------------------------------------------
   thisIsdbTrips <- unique(isdbTrips[!is.na(isdbTrips$ISDB_TRIP_O),c("TRIP_ID_ISDB", "ISDB_TRIP_O")])
   thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("TRIP_ID_MARF","ISDB_TRIP_M")])
-  browser()
+  # browser()
   match_TRIP <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
   colnames(match_TRIP)[colnames(match_TRIP)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_TRIP"
   if (nrow(match_TRIP)>0) match_TRIP$match_TRIP <- TRUE
