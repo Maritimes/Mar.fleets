@@ -26,19 +26,17 @@
 #' \itemize{
 #'   \item \code{a df - more dets necessary}
 #'   \item \code{gearCode} = c(71)
-#'   \item \code{licSpp} = 612
 #'   \item \code{marfSpp} = 612
 #' }
 #' @export
 fleet_scallop_offshore <- function(...){
 
   #both lics and gearCode derived from results of Mar.bycatch
-  lics <- data.frame(rbind(c(10,15),
-                           c(9,35)),
+  lics <- data.frame(rbind(c(10,15,612),
+                           c(9,35,612)),
                 stringsAsFactors=FALSE)
   names(lics) <- c("types","subtypes")
   gearCode = 71  #drag
-  licSpp = 612
   marfSpp=612
 
   argsFn <- as.list(environment())

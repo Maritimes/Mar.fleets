@@ -32,7 +32,7 @@ get_all <- function(...){
   isdb <- NA
   matchedTrips <- NA
   bycatch <- NA
-  covSumm <- NA
+  locSumm <- NA
   fleet <- do.call(get_fleet, args)
   if (class(fleet) =="list" && class(fleet$FLEET_ACTIVITY)=="data.frame"){
     marf <- do.call(get_marfis, list(thisFleet=fleet$FLEET_ACTIVITY,args=args))
@@ -43,24 +43,24 @@ get_all <- function(...){
         if (any(!is.na(matchedTrips))){
           bycatch <- do.call(get_bycatch, list(isTrips = matchedTrips, marfSpID = args$marfSpp, args=args))
         }
-        cov <- do.call(calc_coverage, list(get_isdb = isdb, get_marfis = marf, args=args))
-        covSumm <- cov$summary
+        loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
+        locSumm <- loc$summary
         #add the determined areas onto each trip/set
-        if (is.data.frame(cov$details$TRIPS_MARF)) {
-          colnames(cov$details$TRIPS_MARF)[2] <- "CALC_AREA"
-          marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, cov$details$TRIPS_MARF, all.x = T)
+        if (is.data.frame(loc$details$TRIPS_MARF)) {
+          colnames(loc$details$TRIPS_MARF)[2] <- "CALC_AREA"
+          marf$MARF_TRIPS <- merge(marf$MARF_TRIPS, loc$details$TRIPS_MARF, all.x = T)
         }
-        if (is.data.frame(cov$details$SETS_MARF)) {
-          colnames(cov$details$SETS_MARF)[2] <- "CALC_AREA"
-          marf$MARF_SETS <- merge(marf$MARF_SETS, cov$details$SETS_MARF, all.x = T)
+        if (is.data.frame(loc$details$SETS_MARF)) {
+          colnames(loc$details$SETS_MARF)[2] <- "CALC_AREA"
+          marf$MARF_SETS <- merge(marf$MARF_SETS, loc$details$SETS_MARF, all.x = T)
         }
-        if (is.data.frame(cov$details$TRIPS_ISDB)) {
-          colnames(cov$details$TRIPS_ISDB)[2] <- "CALC_AREA"
-          isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, cov$details$TRIPS_ISDB, all.x = T)
+        if (is.data.frame(loc$details$TRIPS_ISDB)) {
+          colnames(loc$details$TRIPS_ISDB)[2] <- "CALC_AREA"
+          isdb$ALL_ISDB_TRIPS <- merge(isdb$ALL_ISDB_TRIPS, loc$details$TRIPS_ISDB, all.x = T)
         }
-        if (is.data.frame(cov$details$SETS_ISDB)) {
-          colnames(cov$details$SETS_ISDB)[2] <- "CALC_AREA"
-          isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, cov$details$SETS_ISDB, all.x = T)
+        if (is.data.frame(loc$details$SETS_ISDB)) {
+          colnames(loc$details$SETS_ISDB)[2] <- "CALC_AREA"
+          isdb$ALL_ISDB_SETS <- merge(isdb$ALL_ISDB_SETS, loc$details$SETS_ISDB, all.x = T)
         }
       }
     }
@@ -98,7 +98,7 @@ get_all <- function(...){
   res[["fleet"]]<- fleet
   res[["marf"]]<- marf
   res[["isdb"]]<- isdb
-  res[["coverage"]]<- covSumm
+  res[["location_summary"]]<- locSumm
   res[["bycatch"]]<- bycatch
   if(exists("T_get_all")) cat("\n","get_all() completed in",round( difftime(Sys.time(),T_get_all,units = "secs"),0),"secs\n")
 

@@ -31,25 +31,23 @@
 #'   \item \code{marfSpp} = 130
 #'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
 #'   \item \code{gearCode} = c(51)
-#'   \item \code{licSpp} = 199
 #'   \item \code{marfSpp} = 130
 #' }
 #' @export
 fleet_halibut <- function(...){
 
   #both lics and gearCode derived from results of Mar.bycatch
-  lics <- data.frame(rbind(c(0,28),
-                           c(1,24),
-                           c(1,NA),
-                           c(10,14),
-                           c(10,15),
-                           c(11,24),
-                           c(24,40)),
+  lics <- data.frame(rbind(c(0,28,199),
+                           c(1,24,199),
+                           c(1,-99,199),
+                           c(10,14,199),
+                           c(10,15,199),
+                           c(11,24,199),
+                           c(24,40,199)),
                 stringsAsFactors=FALSE)
   names(lics) <- c("types","subtypes")
   gearCode = 51 #c(10,12,41,51,52,53,59,98)
   nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%')
-  licSpp = 199
   marfSpp=130
 
   argsFn <- as.list(environment())

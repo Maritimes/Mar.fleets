@@ -1,6 +1,6 @@
-#' @title fleet_scallop_inshore
-#' @description This is a wrapper function that facilitates extracting the following
-#' information for the inshore scallop fleet:
+#' @title fleet_lpelagics
+#' @description This function is a wrapper function that facilitates extracting the following
+#' information for the halibut fleet:
 #' \itemize{
 #'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -14,9 +14,13 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
+#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
+#' "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
+#' for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
+#' of the following - \code{c(0,45)} or \code{seq(0,45,1)}.
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' stuff <- fleet_scallop_inshore(data.dir = "C:/myData")
+#' stuff <- fleet_lpelagics(data.dir = "C:/myData")
 #' }
 #' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
@@ -24,30 +28,36 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{a df - more dets necessary}
-#'   \item \code{gearCode} = c(71)
-#'   \item \code{marfSpp} = 612
+#'   \item \code{marfSpp} = 130
+#'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
+#'   \item \code{gearCode} = c(51)
 #' }
 #' @export
-fleet_scallop_inshore <- function(...){
+fleet_lpelagics <- function(...){
 
   #both lics and gearCode derived from results of Mar.bycatch
-  lics <- data.frame(rbind(c(0,18,612),
-                           c(1,16,612),
-                           c(1,17,612),
-                           c(1,-99,612),
-                           c(1,19,612),
-                           c(6,-99,612),
-                           c(9,45,612),
-                           c(11,19,612),
-                           c(11,45,612),
-                           c(11,17,612),
-                           c(11,18,612),
-                           c(11,16,612)),
+  lics <- data.frame(rbind(c(1,-99,251),
+                           c(0,-99,251),
+                           c(11,-99,251),
+                           c(1,-99,254),
+                           c(1,-99,257),
+                           c(11,-99,257),
+                           c(0,-99,257),
+                           c(9,25,259),
+                           c(10,15,259),
+                           c(1, 47,259),
+                           c(6,-99,259),
+                           c(11,-99,259),
+                           c(0,-99,259),
+                           c(1,-99,259),
+                           c(1,25,259),
+                           c(1,1,379),
+                           c(6,-99,379)),
                 stringsAsFactors=FALSE)
   names(lics) <- c("types","subtypes", "species_codes")
-  gearCode = 71  #drag
-  marfSpp=612
+  gearCode = c(51,60,81) #c(10,12,41,51,52,53,59,98)
+  #nafoCode=c('3N%','3O%','3PS%','4V%','4W%','4X%','5%')
+  marfSpp=c(251,254,257,259,379)
 
   argsFn <- as.list(environment())
   argsUser <- list(...)

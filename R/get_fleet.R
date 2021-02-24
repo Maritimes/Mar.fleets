@@ -192,28 +192,17 @@ get_fleet<-function(...){
       this <- NA
       if (any(!is.na(args$lics))){
         for (i in 1:nrow(args$lics)){
-          thisL <- ifelse(!is.na(args$lics[i,"types"]),paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics[i,"types"]),NA)
-          thisS <- ifelse(!is.na(args$lics[i,"subtypes"]),paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics[i,"subtypes"]),
-                          "MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == -99")
-          if (!is.na(thisL) & !is.na(thisS)) {
-            thisRow <- paste0("(",thisL, " & ",thisS,")")
-          }else if (!is.na(thisL)) {
-            thisRow <- paste0("(",thisL,")")
-          }else{
-            thisRow <- paste0("(",thisS,")")
-          }
+          thisL <-   paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics[i,"types"])
+          thisS <-   paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics[i,"subtypes"])
+          thisSpp <- paste0("MARBYCATCH_LIC$SPECIES_CODE == ",args$lics[i,"species_codes"])
+          thisRow <- paste0("(",thisL, " & ",thisS," & ",thisSpp,")")
           if (i==1){
             this <- thisRow
           } else {
             this <- paste(this, "|", thisRow)
           }
         }
-
         MARBYCATCH_LIC <- MARBYCATCH_LIC[which(eval(parse(text=this))),]
-      }
-      if (all(args$licSpp != 'all')) {
-        MARBYCATCH_LIC <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$licSpp |
-                                           MARBYCATCH_LIC$SPECIES_CODE %in% args$marfSpp, ]
       }
       if (all(args$gearCode != 'all')) {
         PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$gearCode, ]
@@ -252,16 +241,10 @@ get_fleet<-function(...){
 
       if (any(!is.na(args$lics))){
         for (i in 1:nrow(args$lics)){
-          thisL <- ifelse(!is.na(args$lics[i,"types"]),paste0("MARBYCATCH_LIC.LICENCE_TYPE_ID = ",args$lics[i,"types"]),NA)
-          thisS <- ifelse(!is.na(args$lics[i,"subtypes"]),paste0("MARBYCATCH_LIC.LICENCE_SUBTYPE_ID = ",args$lics[i,"subtypes"]),
-                          "MARBYCATCH_LIC.LICENCE_SUBTYPE_ID = -99")
-          if (!is.na(thisL) & !is.na(thisS)) {
-            thisRow <- paste0("(",thisL, " AND ",thisS,")")
-          }else if (!is.na(thisL)) {
-            thisRow <- paste0("(",thisL,")")
-          }else{
-            thisRow <- paste0("(",thisS,")")
-          }
+          thisL <- paste0("MARBYCATCH_LIC.LICENCE_TYPE_ID = ",args$lics[i,"types"])
+          thisS <- paste0("MARBYCATCH_LIC.LICENCE_SUBTYPE_ID = ",args$lics[i,"subtypes"])
+          thisSpp <- paste0("MARBYCATCH_LIC.SPECIES_CODE = ",args$lics[i,"species_codes"])
+            thisRow <- paste0("(",thisL, " AND ",thisS," AND ",thisSpp,")")
           if (i==1){
             where_mb <- thisRow
           } else {
@@ -270,9 +253,7 @@ get_fleet<-function(...){
         }
         where_mb = paste0("AND (",where_mb,")")
       }
-      if (all(args$licSpp !="all")) where_spp <- paste0("AND (MARBYCATCH_LIC.SPECIES_CODE IN  (",Mar.utils::SQL_in(args$licSpp),") OR
-                                                               MARBYCATCH_LIC.SPECIES_CODE IN  (",Mar.utils::SQL_in(args$marfSpp),"))")
-      MB_LICQry<- paste0("SELECT *
+            MB_LICQry<- paste0("SELECT *
             FROM
             MARFISSCI.MARBYCATCH_LIC
                          WHERE 1=1

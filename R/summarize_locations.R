@@ -1,4 +1,4 @@
-#' @title calc_coverage
+#' @title summarize_locations
 #' @description This function takes the results from get_marfis() and get_isdb()
 #' and produces a table showing the how the proportion of observed data varies
 #' across areas.  Different polygons can be provided, and the results will be
@@ -67,7 +67,7 @@
 #' @family simpleproducts
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-calc_coverage<-function(get_isdb = NULL,
+summarize_locations<-function(get_isdb = NULL,
                         get_marfis = NULL,
                         marfMatchOnly = TRUE,
                         agg.poly.shp = NULL,
@@ -76,7 +76,7 @@ calc_coverage<-function(get_isdb = NULL,
   args <- list(...)$args
   if (args$debug) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
-    T_calc_coverage=Sys.time()
+    T_summarize_locations=Sys.time()
   }
 
   # oTrips <- get_isdb$ALL_ISDB_TRIPS
@@ -177,7 +177,7 @@ calc_coverage<-function(get_isdb = NULL,
     df_new <- df_new[df_new[, .I[which.max(cnt)], by=TRIP_ID]$V1]
     df_new <- as.data.frame(df_new)
     df_new$cnt<-NULL
-    coverageValues = stats::aggregate(
+    locValues = stats::aggregate(
       x = list(tmp = df_new$TRIP_ID),
       by = list(area = df_new$area),
       length
@@ -185,12 +185,12 @@ calc_coverage<-function(get_isdb = NULL,
     df_new[df_new$area == 99999,"area"]<-"Other"
     colnames(df_new)[colnames(df_new)=="area"] <- agg.poly.field
     colnames(df_new)[colnames(df_new)=="TRIP_ID"] <- setField
-    coverageValues[coverageValues$area == 99999,"area"]<-"Other"
-    colnames(coverageValues)[colnames(coverageValues)=="area"] <- agg.poly.field
-    colnames(coverageValues)[colnames(coverageValues)=="tmp"] <- newID
-    colnames(coverageValues)[colnames(coverageValues)=="TRIP_ID"] <- setField
+    locValues[locValues$area == 99999,"area"]<-"Other"
+    colnames(locValues)[colnames(locValues)=="area"] <- agg.poly.field
+    colnames(locValues)[colnames(locValues)=="tmp"] <- newID
+    colnames(locValues)[colnames(locValues)=="TRIP_ID"] <- setField
     res = list()
-    res[["summary"]]<-coverageValues
+    res[["summary"]]<-locValues
     res[["details"]]<-df_new
     return(res)
   }
@@ -231,6 +231,6 @@ calc_coverage<-function(get_isdb = NULL,
   res$details[["TRIPS_ISDB"]] <- o_t
   res$details[["SETS_MARF"]] <- m_s
   res$details[["SETS_ISDB"]] <- o_s
-  if(exists("T_calc_coverage")) cat("\n","calc_coverage() completed in",round( difftime(Sys.time(),T_calc_coverage,units = "secs"),0),"secs\n")
+  if(exists("T_summarize_locations")) cat("\n","summarize_locations() completed in",round( difftime(Sys.time(),T_summarize_locations,units = "secs"),0),"secs\n")
   return(res)
 }
