@@ -25,6 +25,7 @@ set_defaults <- function(...){
                   vessLen = "all",
                   useDate = "LANDED_DATE",
                   useReportedNAFO = TRUE,
+                  manual_fleet=NULL,
                   areas = "NAFOSubunits_sf",
                   areasField = "NAFO_1",
                   dateStart = NULL,

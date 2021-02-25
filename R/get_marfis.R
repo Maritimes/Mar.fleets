@@ -23,7 +23,7 @@
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', nafoCode='all',  ...){
+get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', nafoCode='all',  ...){
   args <-list(...)$args
   if (args$debug) {
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
@@ -33,8 +33,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
   HAIL_OUTS <-HAIL_IN_CALLS <-MON_DOC_ENTRD_DETS <-LOG_EFRT_STD_INFO<-PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- TRIPS <- NA
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
-
-  if (!is.null(marfSpp))args$marfSpp <- marfSpp
+  if (marfSpp !='all')args$marfSpp <- marfSpp
   if (useDate != 'LANDED_DATE') args$useDate <- useDate
   if (nafoCode != 'all') args$nafoCode <- nafoCode
 
@@ -122,7 +121,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp=NULL,  useDate = 'LANDED_DATE', n
       T_getPS=Sys.time()
     }
     if(args$useLocal){
-
+      browser()
       theseGears = unique(thisFleet$GEAR_CODE)
       all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),

@@ -8,7 +8,7 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
-  args  <- Mar.utils::combine_lists(primary =args, ancilliary =  set_defaults(), quietly=T)
+  args  <- Mar.utils::combine_lists(primary =args, ancilliary =  set_defaults(argsUser = list(...)), quietly=T)
   if (args$debug) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
     T_can_run=Sys.time()

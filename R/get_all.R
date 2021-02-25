@@ -33,7 +33,12 @@ get_all <- function(...){
   matchedTrips <- NA
   bycatch <- NA
   locSumm <- NA
-  fleet <- do.call(get_fleet, args)
+  if (!is.null(args$manual_fleet) && class(args$manual_fleet)=="data.frame"){
+   fleet <- list()
+   fleet[["FLEET_ACTIVITY"]]<- manual_fleet
+  } else{
+    fleet <- do.call(get_fleet, args)
+  }
   if (class(fleet) =="list" && class(fleet$FLEET_ACTIVITY)=="data.frame"){
     marf <- do.call(get_marfis, list(thisFleet=fleet$FLEET_ACTIVITY,args=args))
     if (any(!is.na(marf))){
