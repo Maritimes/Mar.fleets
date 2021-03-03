@@ -71,9 +71,13 @@ Haddock_4X5Y_f <- fleet_haddock(type = "FIXED", area = "4X5Y", data.dir = "C:/my
 \seealso{
 Other fleets: 
 \code{\link{fleet_halibut}()},
+\code{\link{fleet_lpelagics}()},
 \code{\link{fleet_pollock}()},
 \code{\link{fleet_redfish}()},
+\code{\link{fleet_scallop_inshore}()},
+\code{\link{fleet_scallop_offshore}()},
 \code{\link{fleet_silverhake}()},
+\code{\link{fleet_surfclam}()},
 \code{\link{fleet_winterflounder}()}
 }
 \author{

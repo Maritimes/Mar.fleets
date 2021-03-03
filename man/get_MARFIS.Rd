@@ -6,7 +6,7 @@
 \usage{
 get_marfis(
   thisFleet = NULL,
-  marfSpp = NULL,
+  marfSpp = "all",
   useDate = "LANDED_DATE",
   nafoCode = "all",
   ...
@@ -14,7 +14,7 @@ get_marfis(
 }
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
-the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from
+the columns "LICENCE_ID","VR_NUMBER" and GEAR_CODE.  It can take the results from
 \code{Mar.bycatch::get_fleet()}}
 
 \item{marfSpp}{default is \code{NULL}. This is a MARFIS species code.  Some of these can be found
@@ -46,7 +46,8 @@ particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 \seealso{
 Other coreFuncs: 
 \code{\link{get_fleet}()},
-\code{\link{get_isdb}()}
+\code{\link{get_isdb}()},
+\code{\link{set_defaults2}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

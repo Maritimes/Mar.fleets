@@ -1,98 +1,122 @@
-# @title set_defaults
+#' @title set_defaults
 #' @description This function ensures that all possible parameters are provided.  They will be
 #' overwritten by any sent directly to the fleet_<species> or get_all functions.
+#' @param lics default is \code{'all'}
+#' @param marfSpp default is \code{'all'}
+#' @param gearCode default is \code{'all'}
+#' @param nafoCode default is \code{'all'}
+#' @param gearSpType default is \code{'all'}
+#' @param gearSpSize default is \code{'all'}
+#' @param vessLen default is \code{'all'}
+#' @param useDate default is \code{'LANDED_DATE'}
+#' @param fleetOnly default is \code{TRUE}
+#' @param useReportedNAFO default is \code{TRUE}
+#' @param manual_fleetdefault is \code{FALSE}
+#' @param areas default is \code{'NAFOSubunits_sf'}
+#' @param areasField default is \code{'NAFO_1'}
+#' @param dateStart default is \code{NULL}
+#' @param dateEnd default is \code{NULL}
+#' @param year default is \code{NULL}
+#' @param keepSurveyTrips default is \code{FALSE}
+#' @param matchMarfis default is \code{TRUE}
+#' @param matchMaxDayDiff default is \code{15}
+#' @param dropUnmatchedISDB default is \code{TRUE}
+#' @param data.dir default is \code{'file.path(getwd(), "data")'}
+#' @param oracle.username default is \code{'_none_'}
+#' @param oracle.password default is \code{'_none_'}
+#' @param oracle.dsn default is \code{'_none_'}
+#' @param usepkg default is \code{'rodbc'}
+#' @param useLocal default is \code{FALSE}
+#' @param quietlydefault is \code{TRUE}
+#' @param debugISDBTrips default is \code{'_none_'}
+#' @param HS default is \code{FALSE}
+#' @param debug default is \code{FALSE}
+#' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @noRd
-set_defaults <- function(...){
-  argsRec <- list(...)
-  if (all(names(argsRec) %in% c("argsFn","argsUser"))){
-    if((length(argsRec$argsUser$debug)>0) && (argsRec$argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
-    args  <- Mar.utils::combine_lists(primary =argsRec$argsFn, ancilliary =  argsRec$argsUser, quietly=F)
-  }else{
-    if((length(argsRec$debug)>0) && (argsRec$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
-    args <- argsRec
+#' @export
+set_defaults <- function(lics = "all",
+                         marfSpp = "all",
+                         gearCode = "all",
+                         nafoCode = "all",
+                         gearSpType = "all",
+                         gearSpSize = "all",
+                         vessLen = "all",
+                         useDate = "LANDED_DATE",
+                         fleetOnly = T,
+                         fleet = NULL,
+                         useReportedNAFO = TRUE,
+                         manual_fleet=F,
+                         areas = "NAFOSubunits_sf",
+                         areasField = "NAFO_1",
+                         dateStart = NULL,
+                         dateEnd = NULL,
+                         year = NULL,
+                         keepSurveyTrips = FALSE,
+                         matchMarfis = TRUE,
+                         matchMaxDayDiff = 15,
+                         dropUnmatchedISDB = TRUE,
+                         data.dir = file.path(getwd(), "data"),
+                         oracle.username = "_none_",
+                         oracle.password = "_none_",
+                         oracle.dsn = "_none_",
+                         usepkg = "rodbc",
+                         useLocal = FALSE,
+                         quietly=TRUE,
+                         debugISDBTrips = "_none_",
+                         HS = FALSE,
+                         debug=FALSE,
+                         ...){
+  defaults <- as.list(environment())
+  sentArgs <- list(...)
+  #ensure hardcoded args take priority over user args
+  submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser)
+  #ensure submitted args take priority over default args
+  argg <- Mar.utils::combine_lists(primary =  submittedArgs, ancilliary = defaults)
+
+  # have all of our arguments - further process some of them ------------------------------------------------------------------------------------------------
+  # convert year (if present to dateStart and dateEnd)
+  dateArgs <- Mar.utils::vali_dates(dateStart = argg$dateStart, dateEnd = argg$dateEnd, year = argg$year, quietly = argg$quietly)
+  argg$dateStart <- dateArgs$dateStart
+  argg$dateEnd <- dateArgs$dateEnd
+  argg$year <- NULL
+
+  #set the field to use for non-NAFO
+  if (argg$areas !=  "NAFOSubunits_sf" && argg$areasField == "NAFO_1"){
+    if (argg$areas == "Strata_Mar_sf") argg$areasField = "StrataID"
+    if (argg$areas == "Strata_Mar_4VSW_sf") argg$areasField = "StrataID"
+
+    if (argg$areas == "LFAs_sf") argg$areasField = "LFA"
+    if (argg$areas == "Grids_Lobster_sf") argg$areasField = "GRID"
+
+    if (argg$areas == "Areas_Snowcrab_sf") argg$areasField = "AREA3"
+    if (argg$areas == "Areas_Snowcrab_Slope_sf") argg$areasField = "AREA2"
+    if (argg$areas == "Areas_Shrimp_sf") argg$areasField = "BOX_NAME"
+    if (argg$areas == "Areas_Surfclam_sf") argg$areasField = "AREA"
+    if (argg$areas == "Areas_Halibut_sf") argg$areasField = "Strata"
+    if (argg$areas == "Areas_Scallop_sf") argg$areasField = "StrataID"
   }
 
-  # keep track of what filters have been applied ------------------------------------------------
-  argsDef <- list(lics <- data.frame(types = NA, subtypes=NA),
-                  licSpp = "all",
-                  marfSpp = "all",
-                  gearCode = "all",
-                  nafoCode = "all",
-                  gearSpType = "all",
-                  gearSpSize = "all",
-                  vessLen = "all",
-                  useDate = "LANDED_DATE",
-                  useReportedNAFO = TRUE,
-                  manual_fleet=NULL,
-                  areas = "NAFOSubunits_sf",
-                  areasField = "NAFO_1",
-                  dateStart = NULL,
-                  dateEnd = NULL,
-                  year = NULL,
-                  keepSurveyTrips = FALSE,
-                  matchMarfis = TRUE,
-                  matchMaxDayDiff = 15,
-                  dropUnmatchedISDB = TRUE,
-                  data.dir = file.path(getwd(), "data"),
-                  oracle.username = "_none_",
-                  oracle.password = "_none_",
-                  oracle.dsn = "_none_",
-                  usepkg = "rodbc",
-                  useLocal = FALSE,
-                  quietly=TRUE,
-                  debugISDBTrips = "_none_",
-                  HS = FALSE,
-                  debug=FALSE
-  )
-  # args marfTabs & isdbTabs set in can_run where they will always be run
-  # (enable_local doesn't run this)
-  argsDef[names(args)] <- args
-  dateArgs <- Mar.utils::vali_dates(dateStart = argsDef$dateStart, dateEnd = argsDef$dateEnd, year = argsDef$year, quietly = argsDef$quietly)
-  argsDef$dateStart <- dateArgs$dateStart
-  argsDef$dateEnd <- dateArgs$dateEnd
-  argsDef$year <- NULL
-  if (argsDef$areas !=  "NAFOSubunits_sf" && argsDef$areasField == "NAFO_1"){
-    if (argsDef$areas == "Strata_Mar_sf") argsDef$areasField = "StrataID"
-    if (argsDef$areas == "Strata_Mar_4VSW_sf") argsDef$areasField = "StrataID"
-
-    if (argsDef$areas == "LFAs_sf") argsDef$areasField = "LFA"
-    if (argsDef$areas == "Grids_Lobster_sf") argsDef$areasField = "GRID"
-
-    if (argsDef$areas == "Areas_Snowcrab_sf") argsDef$areasField = "AREA3"
-    if (argsDef$areas == "Areas_Snowcrab_Slope_sf") argsDef$areasField = "AREA2"
-    if (argsDef$areas == "Areas_Shrimp_sf") argsDef$areasField = "BOX_NAME"
-    if (argsDef$areas == "Areas_Surfclam_sf") argsDef$areasField = "AREA"
-    if (argsDef$areas == "Areas_Halibut_sf") argsDef$areasField = "Strata"
-    if (argsDef$areas == "Areas_Scallop_sf") argsDef$areasField = "StrataID"
+  # notify user on unknown sent parameters
+  jakes <- setdiff(names(argg),names(defaults))
+  if (length(jakes)>0){
+    warning(paste0("This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }
 
-
-  argsCheck <- names(argsDef)
-
-  if (length(argsCheck) != length(argsDef)){
-    jakes <- setdiff(names(argsDef),argsCheck)
-    stop(paste0("COATES: This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
-  }
-
-  # full listing of all of the parameters used
-  paramDf <- argsDef
-  paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
-  paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
-
-  # paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateStart","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
-  # paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.POSIXct(as.integer(paramDf[paramDf$PARAMETER=="dateEnd","VALUE"]),origin = "1970-01-01"), "%Y-%m-%d")
-  paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argsDef$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
-  paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argsDef$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
-  paramDf$SOURCE <- NA
-  paramDf[paramDf$PARAMETER %in% names(argsRec$argsUser),"SOURCE"] <- "user-supplied"
-  paramDf[paramDf$PARAMETER %in% names(argsRec$argsFn),"SOURCE"] <- "hardcoded for this fleet"
-  paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
-  toMatch <- c("TRUE", "FALSE","c\\(.*","^[0-9]*$")
-  paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
-  paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
-  if(!argsDef$quietly){
+  if(!argg$quietly){
+    #create a table outlining info about params
+    paramDf <- argg
+    paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
+    paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
+    paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argg$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
+    paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argg$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
+    paramDf$SOURCE <- NA
+    paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
+    paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
+    paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"
+    toMatch <- c("TRUE", "FALSE","c\\(.*","^[0-9]*$")
+    paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
+    paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
     cat("\n","-----------------------------------------------------------------------","\n",
         "Following is a full list of the parameters that are being used.","\n",
         "The parameters hardcoded within the species wrapper functions (e.g. fleet_swordfish()) cannot be overridden.","\n",
@@ -103,5 +127,5 @@ set_defaults <- function(...){
 
     cat("\n","-----------------------------------------------------------------------\n")
   }
-  return(argsDef)
+  return(argg)
 }

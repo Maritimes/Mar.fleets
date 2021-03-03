@@ -121,7 +121,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       T_getPS=Sys.time()
     }
     if(args$useLocal){
-      browser()
       theseGears = unique(thisFleet$GEAR_CODE)
       all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),

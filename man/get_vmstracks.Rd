@@ -39,10 +39,9 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{calc_coverage}()},
 \code{\link{get_bycatch}()},
 \code{\link{plot_bycatch}()},
-\code{\link{plot_coverage_time}()}
+\code{\link{summarize_locations}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

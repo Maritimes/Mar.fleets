@@ -42,14 +42,15 @@
 #' @export
 fleet_redfish <- function(unit = NULL, ...){
 
-    if (unit==2){
+  if (!is.null(unit)){
+  if (unit==2){
     nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
     gearSpSize = seq(90,115,1)
   } else if (unit==3){
     nafoCode= c('4X%','5YF%','4WD%','4WE%','4WH%','4WK%','4WL%')
     gearSpSize = seq(110,115,1)
   }
-
+}
   marfSpp=120
   gearCode = 12
   mdCode = 2

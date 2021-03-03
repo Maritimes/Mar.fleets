@@ -4,15 +4,15 @@
 \alias{fleet_halibut}
 \title{fleet_halibut}
 \usage{
-fleet_halibut(vessLen = c(0, 999), ...)
+fleet_halibut(...)
 }
 \arguments{
+\item{...}{other arguments passed to methods}
+
 \item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
 "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
 for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
 of the following - \code{c(0,45)} or \code{seq(0,45,1)}.}
-
-\item{...}{other arguments passed to methods}
 }
 \value{
 list of objects, including marfis data, isdb data, information for matching isdb
@@ -20,7 +20,7 @@ and marfis data, and a summary of bycatch
 }
 \description{
 This function is a wrapper function that facilitates extracting the following
-information for the halibut fleets:
+information for the halibut fleet:
 \itemize{
   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -40,21 +40,25 @@ Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 130
   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
-  \item \code{gearCode} = c(50,51)
-  \item \code{mdCode} = c(1, 29)
+  \item \code{gearCode} = c(51)
+  \item \code{marfSpp} = 130
 }
 }
 \examples{
 \dontrun{
-Halibut <- fleet_halibut(vessLen = c(0,45), data.dir = "C:/myData")
+stuff <- fleet_halibut(data.dir = "C:/myData")
 }
 }
 \seealso{
 Other fleets: 
 \code{\link{fleet_haddock}()},
+\code{\link{fleet_lpelagics}()},
 \code{\link{fleet_pollock}()},
 \code{\link{fleet_redfish}()},
+\code{\link{fleet_scallop_inshore}()},
+\code{\link{fleet_scallop_offshore}()},
 \code{\link{fleet_silverhake}()},
+\code{\link{fleet_surfclam}()},
 \code{\link{fleet_winterflounder}()}
 }
 \author{

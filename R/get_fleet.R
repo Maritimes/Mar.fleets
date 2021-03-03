@@ -17,7 +17,7 @@
 #'   \item \code{VR_NUMBER}
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @expor
+#' @export
 get_fleet<-function(...){
   args <-list(...)
   if(!is.null(args$debugTripsRes)){
@@ -192,10 +192,11 @@ get_fleet<-function(...){
       this <- NA
       if (any(!is.na(args$lics))){
         for (i in 1:nrow(args$lics)){
-          thisL <-   paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics[i,"types"])
-          thisS <-   paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics[i,"subtypes"])
-          thisSpp <- paste0("MARBYCATCH_LIC$SPECIES_CODE == ",args$lics[i,"species_codes"])
-          thisRow <- paste0("(",thisL, " & ",thisS," & ",thisSpp,")")
+          thisL <-   paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics$lic_type[i])
+          thisS <-   paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics$lic_subtype[i])
+          thisG <- paste0("MARBYCATCH_LIC$GEAR_CODE == ",args$lics$lic_gear[i])
+          thisSpp <- paste0("MARBYCATCH_LIC$SPECIES_CODE == ",args$lics$lic_sp[i])
+          thisRow <- paste0("(",thisL, " & ",thisS," & ",thisG," & ",thisSpp,")")
           if (i==1){
             this <- thisRow
           } else {
@@ -204,8 +205,8 @@ get_fleet<-function(...){
         }
         MARBYCATCH_LIC <- MARBYCATCH_LIC[which(eval(parse(text=this))),]
       }
-      if (all(args$gearCode != 'all')) {
-        PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$gearCode, ]
+      if (all(args$lics$lic_gear != 'all')) {
+        PRO_SPC_INFO <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% c(args$lics$lic_gear), ]
       }
       if (all(args$nafoCode != 'all')) {
         nafoCode <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)

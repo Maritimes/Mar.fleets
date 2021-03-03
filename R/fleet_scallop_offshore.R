@@ -35,7 +35,7 @@ fleet_scallop_offshore <- function(...){
   lics <- data.frame(rbind(c(10,15,612),
                            c(9,35,612)),
                 stringsAsFactors=FALSE)
-  names(lics) <- c("types","subtypes")
+  names(lics) <- c("types","subtypes", "species_codes")
   gearCode = 71  #drag
   marfSpp=612
 

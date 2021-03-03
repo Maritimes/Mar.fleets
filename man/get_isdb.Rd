@@ -53,7 +53,8 @@ those vessels with particular combinations of VR and licence.
 \seealso{
 Other coreFuncs: 
 \code{\link{get_fleet}()},
-\code{\link{get_marfis}()}
+\code{\link{get_marfis}()},
+\code{\link{set_defaults2}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

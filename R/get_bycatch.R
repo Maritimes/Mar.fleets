@@ -2,7 +2,6 @@
 #' @description This function takes a vector of ISDB trip IDs and a marfis species code
 #' and generates a dataframe of all of the bycatche species from the ISDB db
 #' @param isTrips default is \code{NULL} This is a vector of trip_ids from ISDB
-#' @param marfSpID default is \code{NULL}.  This is the Marfis species ID for the targeted species
 #' @param ... other arguments passed to methods
 #' @family simpleproducts
 #' @return returns a dataframe of the bycatch information for the requested species (using the requested)
@@ -10,19 +9,19 @@
 #' @note This function can accept many parameters.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
+get_bycatch<-function(isTrips = NULL, ...){
   args <- list(...)$args
   if (args$debug) {
     Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
     T_get_bycatch=Sys.time()
   }
   ISCATCHES <- ISTRIPS <- NA
+  marfSpp <- unique(args$lics$spp)
 
-  if (is.null(marfSpID))  marfSpID <- args$marfSpp
-  if (is.null(marfSpID)){
-    cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
-    return(NULL)
-  }
+  # if (is.null(marfSpID)){
+  #   cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
+  #   return(NULL)
+  # }
 
   if(!("Mar.bycatch" %in% utils::installed.packages())){
     utils::data("spLookups", envir = environment())
@@ -34,7 +33,7 @@ get_bycatch<-function(isTrips = NULL, marfSpID = NULL, ...){
   if (all(is.na(isTrips)))return(NULL) #get_isdb$ISDB_TRIPS_MATCHED
 
 
-  isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% marfSpID),c("SPECCD_ID")]
+  isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% marfSpp),c("SPECCD_ID")]
   isTrips<- unique(isTrips)
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),

@@ -10,20 +10,24 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_all <- function(...){
-  args <- list(...)
-  if (all(names(args) %in% c("argsFn","argsUser"))){
-    if((length(args$argsUser$debug)>0) && (args$argsUser$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
-    args <- do.call(set_defaults, list(argsFn= args$argsFn, argsUser=args$argsUser))
+  # grab user submitted and combine -------------------------------------------------------------------------------------------------------------------------
+  submittedArgs <- list(...)
+  if ("argsFn" %in% names(submittedArgs) && "argsUser" %in% names(submittedArgs)){
+    argsFn <- submittedArgs$argsFn
+    argsUser <- submittedArgs$argsUser
+    args <- do.call(set_defaults, list(argsFn=argsFn, argsUser=argsUser))
+    rm(list=c("argsFn","argsUser","submittedArgs"))
   }else{
-    if((length(args$debug)>0) && (args$debug == TRUE)) Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()]]))
-    args <- do.call(set_defaults, args)
+    browser()
+    cat("args = ??")
   }
-  if (args$debug) {
+  if(args$debug == TRUE) {
+    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
     T_get_all=Sys.time()
   }
+
   can_runCheck <- do.call(can_run, args)
   args <- can_runCheck$args
-  # cxnCheck <- can_runCheck$cxnCheck
   if (!(is.list(args$cxn) || args$cxn==TRUE)){
     stop("Can't run as requested.")
   }
@@ -33,9 +37,9 @@ get_all <- function(...){
   matchedTrips <- NA
   bycatch <- NA
   locSumm <- NA
-  if (!is.null(args$manual_fleet) && class(args$manual_fleet)=="data.frame"){
-   fleet <- list()
-   fleet[["FLEET_ACTIVITY"]]<- manual_fleet
+  if (!(args$manual_fleet) && class(args$manual_fleet)=="data.frame"){
+    fleet <- list()
+    fleet[["FLEET_ACTIVITY"]]<- manual_fleet
   } else{
     fleet <- do.call(get_fleet, args)
   }
