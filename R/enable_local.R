@@ -46,8 +46,8 @@ enable_local <- function(data.dir = NULL,
                )
 
   can_runCheck <- do.call(can_run, args)
-  args <- can_runCheck$args
-  cxnCheck <- can_runCheck$cxnCheck
+  args <- can_runCheck
+  cxnCheck <- args$cxn
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
     stop("Can't run as requested.")
   }

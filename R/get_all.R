@@ -18,16 +18,17 @@ get_all <- function(...){
     args <- do.call(set_defaults, list(argsFn=argsFn, argsUser=argsUser))
     rm(list=c("argsFn","argsUser","submittedArgs"))
   }else{
-    browser()
-    cat("args = ??")
+    args<- submittedArgs
+    args$cxn <- get("cxn", envir = .GlobalEnv)
+
+
   }
   if(args$debug == TRUE) {
     Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe()-1]]))
     T_get_all=Sys.time()
   }
-
-  can_runCheck <- do.call(can_run, args)
-  args <- can_runCheck$args
+  can_runCheck <- do.call(can_run, as.list(args))
+  args <- can_runCheck
   if (!(is.list(args$cxn) || args$cxn==TRUE)){
     stop("Can't run as requested.")
   }
@@ -37,7 +38,7 @@ get_all <- function(...){
   matchedTrips <- NA
   bycatch <- NA
   locSumm <- NA
-  if (!(args$manual_fleet) && class(args$manual_fleet)=="data.frame"){
+  if (class(args$manual_fleet)=="data.frame"){
     fleet <- list()
     fleet[["FLEET_ACTIVITY"]]<- manual_fleet
   } else{

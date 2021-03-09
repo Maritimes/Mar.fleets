@@ -135,7 +135,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       if (all(args$marfSpp != 'all')) PS_df <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
 
       if (all(args$nafoCode != 'all')){
-        if (useReportedNAFO){
+        if (args$useReportedNAFO){
           cat("useReportedNAFO not implemented yet - PS_df only as \n")
         }
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)

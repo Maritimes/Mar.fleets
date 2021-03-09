@@ -85,8 +85,8 @@ can_run <- function(...){
                "ISTRIPS",
                "ISVESSELS")
 
-  # args[["marfTabs"]] <- marfTabs
-  # args[["isdbTabs"]] <- isdbTabs
+  args[["marfTabs"]] <- marfTabs
+  args[["isdbTabs"]] <- isdbTabs
   ISDB = paste0("ISDB.",isdbTabs)
   MARFIS = paste0("MARFISSCI.",marfTabs)
 
