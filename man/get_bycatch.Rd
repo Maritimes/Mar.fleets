@@ -4,12 +4,10 @@
 \alias{get_bycatch}
 \title{get_bycatch}
 \usage{
-get_bycatch(isTrips = NULL, marfSpID = NULL, ...)
+get_bycatch(isTrips = NULL, ...)
 }
 \arguments{
 \item{isTrips}{default is \code{NULL} This is a vector of trip_ids from ISDB}
-
-\item{marfSpID}{default is \code{NULL}.  This is the Marfis species ID for the targeted species}
 
 \item{...}{other arguments passed to methods}
 }

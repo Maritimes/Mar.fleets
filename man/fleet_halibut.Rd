@@ -51,9 +51,11 @@ stuff <- fleet_halibut(data.dir = "C:/myData")
 }
 \seealso{
 Other fleets: 
+\code{\link{fleet_generic}()},
 \code{\link{fleet_haddock}()},
 \code{\link{fleet_lpelagics}()},
 \code{\link{fleet_pollock}()},
+\code{\link{fleet_redfishB}()},
 \code{\link{fleet_redfish}()},
 \code{\link{fleet_scallop_inshore}()},
 \code{\link{fleet_scallop_offshore}()},

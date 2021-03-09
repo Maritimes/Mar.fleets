@@ -32,7 +32,7 @@ associated with a particular fleet for a particular date range.
 Other coreFuncs: 
 \code{\link{get_isdb}()},
 \code{\link{get_marfis}()},
-\code{\link{set_defaults2}()}
+\code{\link{set_defaults}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

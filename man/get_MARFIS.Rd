@@ -47,7 +47,7 @@ particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 Other coreFuncs: 
 \code{\link{get_fleet}()},
 \code{\link{get_isdb}()},
-\code{\link{set_defaults2}()}
+\code{\link{set_defaults}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
