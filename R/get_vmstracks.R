@@ -47,9 +47,9 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   colnames(vr_dates1)<-colnames(vr_dates2)<-c("VR_NUMBER","mDate", "OBS")
 
   if(!is.null(get_isdb)){
-    if (nrow(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),])>0 && nrow(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_SETS$TRIP_ID_MARF),])>0){
-      obsDat<-merge(get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),c("TRIP_ID_ISDB", "VR")],
-                    get_isdb$ALL_ISDB_SETS[,c("TRIP_ID","DATE_TIME")],
+    if (nrow(get_isdb$ISDB_TRIPS[!is.na(get_isdb$ISDB_TRIPS$TRIP_ID_MARF),])>0 && nrow(get_isdb$ISDB_TRIPS[!is.na(get_isdb$ISDB_SETS$TRIP_ID_MARF),])>0){
+      obsDat<-merge(get_isdb$ISDB_TRIPS[!is.na(get_isdb$ISDB_TRIPS$TRIP_ID_MARF),c("TRIP_ID_ISDB", "VR")],
+                    get_isdb$ISDB_SETS[,c("TRIP_ID","DATE_TIME")],
                     by.x= "TRIP_ID_ISDB", by.y ="TRIP_ID", all.Y=T)
 
       vr_dates3 <- cbind(obsDat[,c("VR","DATE_TIME")],1)

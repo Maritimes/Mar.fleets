@@ -325,8 +325,8 @@ AND FS.TRIP_ID BETWEEN ",min(trips)," AND ",max(trips))
     ISDB_MULTIMATCHES <- NA
   }
   res= list()
-  res[["ALL_ISDB_TRIPS"]]<- isdb_TRIPS_all
-  res[["ALL_ISDB_SETS"]] <- isdb_SETS_all
+  res[["ISDB_TRIPS"]]<- isdb_TRIPS_all
+  res[["ISDB_SETS"]] <- isdb_SETS_all
   res[["MATCH_SUMMARY_TRIPS"]] <- msum
   res[["ISDB_UNMATCHABLES"]] <- ISDB_UNMATCHABLES
   res[["ISDB_MULTIMATCHES"]] <- ISDB_MULTIMATCHES

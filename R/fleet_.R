@@ -35,8 +35,11 @@
 #'   \item \code{marfSpp} = 608
 #' }
 #' @export
-fleet_ <- function(fleet="REDFISH", area = "all", gearSpecs = "all", ...){
+fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
+  if (is.null(fleet)){
+    stop("Please provide a fleet")
+  }
   # get the fleet's parameters
   data("licCore")
   data("licAreas")
@@ -56,28 +59,41 @@ fleet_ <- function(fleet="REDFISH", area = "all", gearSpecs = "all", ...){
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
   args <- do.call(can_run, args)
 
-  #set up results list
+  #set up results list, and populate according to arguments
   data <- list()
 
-  fleet <- do.call(get_fleet, args)
-  data[["fleet"]]<- fleet
+  if (args$returnFleet){
+    fleet <- do.call(get_fleet, args)
+    data[["fleet"]]<- fleet
+  }
+  if (args$returnMARFIS){
+    marf <- do.call(get_marfis, list(thisFleet=fleet$FLEET_ACTIVITY,args=args))
+    data[["marf"]]<- marf
+  }
 
-  marf <- do.call(get_marfis, list(thisFleet=fleet$FLEET_ACTIVITY,args=args))
-  data[["marf"]]<- marf
+  if (args$returnISDB){
+    isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, matchMarfis = T, args=args))
 
-  isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, matchMarfis = T, args=args))
-  if (length(isdb)>1 && class(isdb$ALL_ISDB_TRIPS)=="data.frame"){
-    data[["isdb"]]<- isdb
+    if(args$dropUnmatchedISDB){
+      isdb$ISDB_TRIPS <- isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF),]
+      isdb$ISDB_SETS <- isdb$ISDB_SETS[!is.na(isdb$ISDB_SETS$TRIP_ID_MARF),]
+    }
 
-    bycatch <- do.call(get_bycatch, list(isTrips = unique(isdb$ALL_ISDB_TRIPS[!is.na(isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"]), args=args))
-    data[["bycatch"]]<- bycatch
+    if (length(isdb)>1 && class(isdb$ISDB_TRIPS)=="data.frame"){
+      data[["isdb"]]<- isdb
 
-    loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
-    data[["location_sumary"]]<- loc
+      if (args$returnBycatch){
+        bycatch <- do.call(get_bycatch, list(isTrips = unique(isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"]), args=args))
+        data[["bycatch"]]<- bycatch
+      }
+
+      if (args$returnLocations){
+        loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
+        data[["location_sumary"]]<- loc
+      }
+    }
   }
 
 
-
-
-  return(data)
+return(data)
 }

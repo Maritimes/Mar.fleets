@@ -7,7 +7,11 @@
 #' @param marfSpp default is \code{'all'}
 #' @param vessLen default is \code{'all'}
 #' @param useDate default is \code{'LANDED_DATE'}
-#' @param fleetOnly default is \code{TRUE}
+#' @param returnFleet default is \code{TRUE}
+#' @param returnMARFIS default is \code{TRUE}
+#' @param returnISDB default is \code{TRUE}
+#' @param returnBycatch default is \code{TRUE}
+#' @param returnLocations default is \code{TRUE}
 #' @param useReportedNAFO default is \code{TRUE}
 #' @param manual_fleetdefault is \code{FALSE}
 #' @param areas default is \code{'NAFOSubunits_sf'}
@@ -39,7 +43,11 @@ set_defaults <- function(lics = data.frame(FLEET =character(), LIC_TYPE = intege
                          marfSpp = "all",
                          vessLen = "all",
                          useDate = "LANDED_DATE",
-                         fleetOnly = T,
+                         returnFleet = T,
+                         returnMARFIS = T,
+                         returnISDB = T,
+                         returnBycatch = T,
+                         returnLocations = T,
                          fleet = NULL,
                          useReportedNAFO = TRUE,
                          manual_fleet=F,

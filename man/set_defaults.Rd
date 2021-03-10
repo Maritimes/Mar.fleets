@@ -5,12 +5,13 @@
 \title{set_defaults}
 \usage{
 set_defaults(
-  lics = "all",
+  lics = data.frame(FLEET = character(), LIC_TYPE = integer(), LIC_SUBTYPE = integer(),
+    LIC_SP = integer(), LIC_GEAR = integer(), stringsAsFactors = FALSE),
+  gearSpecs = data.frame(FLEET = character(), FLEET_GEARSPECS_ID = character(), MIN =
+    integer(), MAX = integer(), TYPE = character(), stringsAsFactors = FALSE),
+  area = data.frame(FLEET = character(), FLEET_AREA_ID = character(), AREA_TYPE =
+    character(), AREA = character(), stringsAsFactors = FALSE),
   marfSpp = "all",
-  gearCode = "all",
-  nafoCode = "all",
-  gearSpType = "all",
-  gearSpSize = "all",
   vessLen = "all",
   useDate = "LANDED_DATE",
   fleetOnly = T,
@@ -42,15 +43,11 @@ set_defaults(
 \arguments{
 \item{lics}{default is \code{'all'}}
 
+\item{gearSpecs}{default is \code{'all'}}
+
+\item{area}{default is \code{'all'}}
+
 \item{marfSpp}{default is \code{'all'}}
-
-\item{gearCode}{default is \code{'all'}}
-
-\item{nafoCode}{default is \code{'all'}}
-
-\item{gearSpType}{default is \code{'all'}}
-
-\item{gearSpSize}{default is \code{'all'}}
 
 \item{vessLen}{default is \code{'all'}}
 

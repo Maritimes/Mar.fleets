@@ -79,10 +79,8 @@ summarize_locations<-function(get_isdb = NULL,
     T_summarize_locations=Sys.time()
   }
 
-  # oTrips <- get_isdb$ALL_ISDB_TRIPS
-  # oSets <- get_isdb$ALL_ISDB_SETS
-  oTrips <- get_isdb$ALL_ISDB_TRIPS[!is.na(get_isdb$ALL_ISDB_TRIPS$TRIP_ID_MARF),]
-  oSets <- get_isdb$ALL_ISDB_SETS[!is.na(get_isdb$ALL_ISDB_SETS$TRIP_ID_MARF),]
+  oTrips <- get_isdb$ISDB_TRIPS[!is.na(get_isdb$ISDB_TRIPS$TRIP_ID_MARF),]
+  oSets <- get_isdb$ISDB_SETS[!is.na(get_isdb$ISDB_SETS$TRIP_ID_MARF),]
 
   if (marfMatchOnly){
     oTrips <- oTrips[!is.na(oTrips$TRIP_ID_MARF), ]
