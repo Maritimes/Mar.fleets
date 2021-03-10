@@ -14,7 +14,11 @@ set_defaults(
   marfSpp = "all",
   vessLen = "all",
   useDate = "LANDED_DATE",
-  fleetOnly = T,
+  returnFleet = T,
+  returnMARFIS = T,
+  returnISDB = T,
+  returnBycatch = T,
+  returnLocations = T,
   fleet = NULL,
   useReportedNAFO = TRUE,
   manual_fleet = F,
@@ -53,7 +57,15 @@ set_defaults(
 
 \item{useDate}{default is \code{'LANDED_DATE'}}
 
-\item{fleetOnly}{default is \code{TRUE}}
+\item{returnFleet}{default is \code{TRUE}}
+
+\item{returnMARFIS}{default is \code{TRUE}}
+
+\item{returnISDB}{default is \code{TRUE}}
+
+\item{returnBycatch}{default is \code{TRUE}}
+
+\item{returnLocations}{default is \code{TRUE}}
 
 \item{useReportedNAFO}{default is \code{TRUE}}
 

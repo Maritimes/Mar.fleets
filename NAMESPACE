@@ -2,7 +2,7 @@
 
 export(enable_local)
 export(fleet_)
-export(get_all)
+export(fleet_redfish)
 export(get_bycatch)
 export(get_fleet)
 export(get_isdb)
