@@ -2,11 +2,9 @@
 #' @description This function ensures that all possible parameters are provided.  They will be
 #' overwritten by any sent directly to the fleet_<species> or get_all functions.
 #' @param lics default is \code{'all'}
+#' @param gearSpecs default is \code{'all'}
+#' @param area default is \code{'all'}
 #' @param marfSpp default is \code{'all'}
-#' @param gearCode default is \code{'all'}
-#' @param nafoCode default is \code{'all'}
-#' @param gearSpType default is \code{'all'}
-#' @param gearSpSize default is \code{'all'}
 #' @param vessLen default is \code{'all'}
 #' @param useDate default is \code{'LANDED_DATE'}
 #' @param fleetOnly default is \code{TRUE}
@@ -35,12 +33,10 @@
 #' @family coreFuncs
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-set_defaults <- function(lics = "all",
+set_defaults <- function(lics = data.frame(FLEET =character(), LIC_TYPE = integer(), LIC_SUBTYPE = integer(), LIC_SP =integer(), LIC_GEAR =integer(), stringsAsFactors=FALSE),
+                         gearSpecs = data.frame(FLEET =character(), FLEET_GEARSPECS_ID =character(), MIN =integer(), MAX =integer(), TYPE =character(), stringsAsFactors=FALSE),
+                         area = data.frame(FLEET =character(), FLEET_AREA_ID=character(),  AREA_TYPE=character(),  AREA =character(), stringsAsFactors=FALSE),
                          marfSpp = "all",
-                         gearCode = "all",
-                         nafoCode = "all",
-                         gearSpType = "all",
-                         gearSpSize = "all",
                          vessLen = "all",
                          useDate = "LANDED_DATE",
                          fleetOnly = T,

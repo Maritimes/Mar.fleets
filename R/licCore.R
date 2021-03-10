@@ -1,7 +1,8 @@
 #' licCore Metadata
 #'
 #' This is an rda file with codes for identifying participants in different fleets.  It includes the fields identified below:
-#'
+#' @docType data
+#' @usage data(licCore)
 #' @format  rda
 #' \describe{
 #' \item{FLEET}{name of fleet}

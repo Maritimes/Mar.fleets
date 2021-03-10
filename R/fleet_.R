@@ -1,4 +1,4 @@
-#' @title fleet_redfishB
+#' @title fleet_
 #' @description This function is a wrapper function that facilitates extracting information for the surfclam fleet.
 #' @param fleetOnly default is \code{TRUE}.  If TRUE, this function will return information about this fleet, specifically,
 #' a list item containing:
@@ -35,24 +35,17 @@
 #'   \item \code{marfSpp} = 608
 #' }
 #' @export
-fleet_redfishB <- function(fleet="REDFISH", unit = "2", ...){
-  # get the fleet
-  # lics <- getFleetInfo(fleet = fleet)
-  lics =  readxl::read_xlsx( path = "data/fleetDefnsCore.xlsx",sheet = "Sheet1")
-  lics = lics[lics$FLEET==fleet,]
+fleet_ <- function(fleet="REDFISH", area = "all", gearSpecs = "all", ...){
 
-  if (!is.null(unit)){
-    if (unit==2){
-      nafoCode= c('4VS%','4VN%','4WF%','4WG%','4WJ%','3PS%') #"4VSB" "4VSC" "4VSE" "4VSU" "4VSV" - add others to remove U
-      gearSpSize = seq(90,115,1)
-    } else if (unit==3){
-      nafoCode= c('4X%','5YF%','4WD%','4WE%','4WH%','4WK%','4WL%')
-      gearSpSize = seq(110,115,1)
-    }
-  }
+  # get the fleet's parameters
+  data("licCore")
+  data("licAreas")
+  data("licGearSpecs")
+  lics <- licCore[licCore$FLEET==fleet,]
+  area = licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,]
+  gearSpecs = licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ]
 
-
-    argsFn <- as.list(environment())
+  argsFn <- as.list(environment())
 
   # grab user submitted and combine -------------------------------------------------------------------------------------------------------------------------
   argsUser <- list(...)
@@ -66,7 +59,6 @@ fleet_redfishB <- function(fleet="REDFISH", unit = "2", ...){
   #set up results list
   data <- list()
 
-# Do stuff, and add to results ----------------------------------------------------------------------------------------------------------------------------
   fleet <- do.call(get_fleet, args)
   data[["fleet"]]<- fleet
 
