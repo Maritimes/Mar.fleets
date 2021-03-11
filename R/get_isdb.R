@@ -28,8 +28,8 @@
 #' @export
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
-  if (args$debug) {
-    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit){
+    catw()
     T_get_isdb=Sys.time()
   }
 
@@ -56,8 +56,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   if (!is.null(matchMarfis)) args$matchMarfis <- matchMarfis
   get_isdb_trips<-function(mVR_LIC = NULL,...){
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_get_isdb_trips=Sys.time()
     }
     if(!any(args$debugISDBTrips =="_none_")){
@@ -146,7 +146,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       cat(paste0("\n","No ISDB trips found"))
       return(invisible(NULL))
     }
-    if (args$debug) cat("DEBUG: Found", nrow(ISTRIPS), "ISDB trips","\n")
+    if (args$debuggit) cat("DEBUG: Found", nrow(ISTRIPS), "ISDB trips","\n")
     res <- list()
     res[["ISTRIPS"]] <- ISTRIPS
     res[["debugTrips"]] <- NA
@@ -161,8 +161,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   }
   get_isdb_sets<-function(isdbTrips=NULL,...){
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_get_isdb_sets=Sys.time()
     }
     badDate <- as.POSIXct(as.Date("2100-01-01"))
@@ -229,7 +229,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       return(NULL)
     }
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
-    if (args$debug) cat("DEBUG: Found", nrow(ISSETPROFILE_WIDE), "ISDB sets","\n")
+    if (args$debuggit) cat("DEBUG: Found", nrow(ISSETPROFILE_WIDE), "ISDB sets","\n")
     if(exists("T_get_isdb_sets")) cat("\n","get_isdb_sets() completed in",round( difftime(Sys.time(),T_get_isdb_sets,units = "secs"),0),"secs\n")
     return(ISSETPROFILE_WIDE)
   }
@@ -245,7 +245,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     unmatchables <- NA
     if (matchMarfis) {
       trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
-      if (args$debug) cat("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
+      if (args$debuggit) cat("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
       isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED
       msum <- trips$MATCH_SUMMARY_TRIPS
       ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
@@ -258,13 +258,13 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       }
 
       if (!all(is.na(sets))) {
-        if (args$debug) cat("DEBUG: Matched", nrow(sets$MAP_ISDB_MARFIS_SETS), "ISDB sets","\n")
+        if (args$debuggit) cat("DEBUG: Matched", nrow(sets$MAP_ISDB_MARFIS_SETS), "ISDB sets","\n")
         isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
         isdb_SETS_all$TRIP_ID_ISDB<- isdb_SETS_all$TRIP_ID_MARF <- NULL
         isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
 
       }else{
-        if (args$debug) cat("DEBUG: Matched 0 ISDB sets","\n")
+        if (args$debuggit) cat("DEBUG: Matched 0 ISDB sets","\n")
         isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
       }
     }

@@ -21,7 +21,6 @@
 #' @family simpleproducts
 #' @return returns a dataframe of the VMS data.  The OBS field contains a value>0 if the trip was observed.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @note
 #' @export
 get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   # argsUser <- list(...)
@@ -32,7 +31,7 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
     cat("\n", "VMS data requires a connection to the network.  It cannot be run locally")
     return(NULL)
   }
-  #if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit) catw()
 
  vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
                                                                 mDate=as.Date(character()),

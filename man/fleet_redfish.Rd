@@ -4,16 +4,18 @@
 \alias{fleet_redfish}
 \title{fleet_redfish}
 \usage{
-fleet_redfish(unit = NULL, useLocal = NULL, year = NULL, ...)
+fleet_redfish(unit = NULL, useLocal = NULL, ...)
 }
 \arguments{
 \item{unit}{default is \code{NULL}.  Valid selections include \code{"UNIT2"} and \code{"UNIT3"}}
 
-\item{useLocal}{default is \code{NULL}.  Valid selections are  \code{"TRUE"} and \code{"FALSE"}
-if \code{TRUE}, then the following parameters are necessary:
+\item{useLocal}{default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}
+
+if \code{TRUE}, then the following parameter is necessary:
 ' \itemize{
   \item \code{data.dir} - This is a path on your computer to where your .RData files are stored.
   }
+
 if \code{FALSE}, then the following parameters are necessary:
 ' \itemize{
   \item \code{oracle.username} - your existing oracle login name
@@ -22,15 +24,9 @@ if \code{FALSE}, then the following parameters are necessary:
   \item \code{usepkg} - default is \code{"rodbc"}, but \code{"roracle"} is also valid
   }}
 
-\item{year}{default is \code{NULL}.  This can be a 4 digit year to extract that years' data. Alternatively,
-\code{dateStart} and \code{dateEnd} can be entered as "YYYY-MM-DD" to extract longer or shorter windows of data}
-
 \item{...}{
   Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
   \describe{
-    \item{\code{lics}}{default is \code{'all'}}
-    \item{\code{gearSpecs}}{default is \code{'all'}}
-    \item{\code{area}}{default is \code{'all'}}
     \item{\code{marfSpp}}{default is \code{'all'}}
     \item{\code{vessLen}}{default is \code{'all'}}
     \item{\code{useDate}}{default is \code{'LANDED_DATE'}}
@@ -40,6 +36,7 @@ if \code{FALSE}, then the following parameters are necessary:
     \item{\code{returnBycatch}}{default is \code{TRUE}}
     \item{\code{returnLocations}}{default is \code{TRUE}}
     \item{\code{useReportedNAFO}}{default is \code{TRUE}}
+    \item{\code{manual_fleet}}{default is \code{FALSE}}
     \item{\code{areas}}{default is \code{'NAFOSubunits_sf'}}
     \item{\code{areasField}}{default is \code{'NAFO_1'}}
     \item{\code{dateStart}}{default is \code{NULL}}
@@ -53,15 +50,18 @@ if \code{FALSE}, then the following parameters are necessary:
     \item{\code{oracle.password}}{default is \code{'_none_'}}
     \item{\code{oracle.dsn}}{default is \code{'_none_'}}
     \item{\code{usepkg}}{default is \code{'rodbc'}}
+    \item{\code{quietly}}{default is \code{TRUE}}
     \item{\code{debugISDBTrips}}{default is \code{'_none_'}}
     \item{\code{HS}}{default is \code{FALSE}}
-    \item{\code{debug}}{default is \code{FALSE}}
   }}
+
+\item{year}{default is \code{NULL}.  This can be a 4 digit year to extract that years' data. Alternatively,
+\code{dateStart} and \code{dateEnd} can be entered, each in the format "YYYY-MM-DD" to extract longer or shorter windows of data}
 }
 \value{
 list of objects, including marfis data, isdb data, information for matching isdb
 and marfis data, and a summary of bycatch, specifically:
-#' a list item containing:
+a list item containing:
 \itemize{
   \item \code{FLEET} - This is a dataframe of the unique combinations of (MARFIS) LICENCE_ID, VR_NUMBER and GEAR_CODE that
   was found for this fleet during the specified period
@@ -80,7 +80,11 @@ and marfis data, and a summary of bycatch, specifically:
   }
 }
 \description{
-This function is a wrapper function that facilitates extracting information for the redfish fleets.
+This is a wrapper function that facilitates extracting information for the redfish fleets.
+All of the information used to identify this fleet are stored in the package's associated data files - licCore, licAreas,
+and licGearSpecs.  Depending on user selections which will vary with the different wrappers (e.g. mobile vs fixed, western
+vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), different fleets are identified, and their
+data is extracted.
 }
 \note{
 Hardcoded parameters for this fleet are as follows:

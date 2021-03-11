@@ -25,8 +25,8 @@
 #' @export
 get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', nafoCode='all',  ...){
   args <-list(...)$args
-  if (args$debug) {
-    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit){
+    catw()
     T_get_marfis=Sys.time()
   }
 
@@ -40,8 +40,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   getEff <- function(log_efrt = NULL, ...){
 
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_getEff=Sys.time()
     }
     if(args$useLocal){
@@ -73,7 +73,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
              as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 5, 6)) / 3600)
         LOG_EFRT_STD_INFO$LATITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE),LOG_EFRT_STD_INFO$DET_LATITUDE,LOG_EFRT_STD_INFO$ENT_LATITUDE)
         LOG_EFRT_STD_INFO$LONGITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE),LOG_EFRT_STD_INFO$DET_LONGITUDE,LOG_EFRT_STD_INFO$ENT_LONGITUDE)
-        save( LOG_EFRT_STD_INFO, file=file.path(data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
+        save( LOG_EFRT_STD_INFO, file=file.path(args$data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
       }
         LOG_EFRT_STD_INFO$LATITUDE_EFRT <- LOG_EFRT_STD_INFO$LONGITUDE_EFRT <- NULL
       PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
@@ -116,8 +116,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   }
   getPS <- function(allProSpc = NULL, ...){
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_getPS=Sys.time()
     }
     if(args$useLocal){
@@ -160,7 +160,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
 
       if (all(args$nafoCode != 'all')){
-        if (useReportedNAFO){
+        if (args$useReportedNAFO){
           cat("useReportedNAFO not implemented yet - PS_df only as \n")
         }
         chk <- grepl(pattern = "%", x = paste0(args$nafoCode,collapse = ''))
@@ -224,8 +224,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   }
   getED <- function(mondocs = NULL, ...){
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_getED=Sys.time()
     }
     if(args$useLocal){
@@ -264,13 +264,13 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     ED_df <- unique(ED_df)
 
     if(exists("T_getED")) cat("\n","getED() completed in",round( difftime(Sys.time(),T_getED,units = "secs"),0),"secs\n")
-    # if (args$debug) cat("getED done:",nrow(ED_df),"\n")
+    # if (args$debuggit) cat("getED done:",nrow(ED_df),"\n")
     return(ED_df)
   }
   getHIC <- function(trips = NULL, ...){
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_getHIC=Sys.time()
     }
     if(args$useLocal){
@@ -293,15 +293,15 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     HIC_df <- unique(HIC_df)
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
     # colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
-    # if (args$debug) cat("getHIC done:",nrow(HIC_df),"\n")
+    # if (args$debuggit) cat("getHIC done:",nrow(HIC_df),"\n")
 
     if(exists("T_getHIC")) cat("\n","getHIC() completed in",round( difftime(Sys.time(),T_getHIC,units = "secs"),0),"secs\n")
     return(HIC_df)
   }
   getHOC <- function(trips = NULL, ...){
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_getHOC=Sys.time()
     }
     if(args$useLocal){
@@ -322,7 +322,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     HOC_df<-unique(HOC_df)
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
     # colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
-    # if (args$debug) cat("getHOC done:",nrow(HOC_df),"\n")
+    # if (args$debuggit) cat("getHOC done:",nrow(HOC_df),"\n")
 
     if(exists("T_getHOC")) cat("\n","getHOC() completed in",round( difftime(Sys.time(),T_getHOC,units = "secs"),0),"secs\n")
     return(HOC_df)
@@ -391,7 +391,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
   trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
   trips <-
-  aggregate(
+    stats::aggregate(
     x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
     by = list(TRIP_ID_MARF = trips$TRIP_ID_MARF,
               MON_DOC_ID =trips$MON_DOC_ID,

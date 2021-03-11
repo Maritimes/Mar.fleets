@@ -74,8 +74,8 @@ summarize_locations<-function(get_isdb = NULL,
                         agg.poly.field = NULL,
                         ...){
   args <- list(...)$args
-  if (args$debug) {
-    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit){
+    catw()
     T_summarize_locations=Sys.time()
   }
 

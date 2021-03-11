@@ -1,7 +1,7 @@
 #' @title set_defaults
 #' @description This function ensures that all possible parameters are provided.  They will be
 #' overwritten by any sent directly to the fleet_<species> or get_all functions.
-#' @param lics default is \code{'all'}
+#' @param lics default is an empty dataframe\code{'all'}
 #' @param gearSpecs default is \code{'all'}
 #' @param area default is \code{'all'}
 #' @param marfSpp default is \code{'all'}
@@ -13,7 +13,7 @@
 #' @param returnBycatch default is \code{TRUE}
 #' @param returnLocations default is \code{TRUE}
 #' @param useReportedNAFO default is \code{TRUE}
-#' @param manual_fleetdefault is \code{FALSE}
+#' @param manual_fleet default is \code{FALSE}
 #' @param areas default is \code{'NAFOSubunits_sf'}
 #' @param areasField default is \code{'NAFO_1'}
 #' @param dateStart default is \code{NULL}
@@ -29,7 +29,7 @@
 #' @param oracle.dsn default is \code{'_none_'}
 #' @param usepkg default is \code{'rodbc'}
 #' @param useLocal default is \code{FALSE}
-#' @param quietlydefault is \code{TRUE}
+#' @param quietly default is \code{TRUE}
 #' @param debugISDBTrips default is \code{'_none_'}
 #' @param HS default is \code{FALSE}
 #' @param debug default is \code{FALSE}
@@ -37,9 +37,9 @@
 #' @family coreFuncs
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-set_defaults <- function(lics = data.frame(FLEET =character(), LIC_TYPE = integer(), LIC_SUBTYPE = integer(), LIC_SP =integer(), LIC_GEAR =integer(), stringsAsFactors=FALSE),
-                         gearSpecs = data.frame(FLEET =character(), FLEET_GEARSPECS_ID =character(), MIN =integer(), MAX =integer(), TYPE =character(), stringsAsFactors=FALSE),
-                         area = data.frame(FLEET =character(), FLEET_AREA_ID=character(),  AREA_TYPE=character(),  AREA =character(), stringsAsFactors=FALSE),
+set_defaults <- function(lics = 'all',
+                         gearSpecs = 'all',
+                         area = 'all',
                          marfSpp = "all",
                          vessLen = "all",
                          useDate = "LANDED_DATE",
@@ -48,7 +48,6 @@ set_defaults <- function(lics = data.frame(FLEET =character(), LIC_TYPE = intege
                          returnISDB = T,
                          returnBycatch = T,
                          returnLocations = T,
-                         fleet = NULL,
                          useReportedNAFO = TRUE,
                          manual_fleet=F,
                          areas = "NAFOSubunits_sf",
@@ -69,12 +68,14 @@ set_defaults <- function(lics = data.frame(FLEET =character(), LIC_TYPE = intege
                          quietly=TRUE,
                          debugISDBTrips = "_none_",
                          HS = FALSE,
-                         debug=FALSE,
+                         debuggit=FALSE,
                          ...){
   defaults <- as.list(environment())
   sentArgs <- list(...)
+
   #ensure hardcoded args take priority over user args
   submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser)
+
   #ensure submitted args take priority over default args
   argg <- Mar.utils::combine_lists(primary =  submittedArgs, ancilliary = defaults)
 
@@ -115,6 +116,7 @@ set_defaults <- function(lics = data.frame(FLEET =character(), LIC_TYPE = intege
     paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argg$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
     paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argg$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
     paramDf$SOURCE <- NA
+
     paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
     paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
     paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"

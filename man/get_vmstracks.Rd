@@ -34,9 +34,6 @@ returns a dataframe of the VMS data.  The OBS field contains a value>0 if the tr
 This function takes the results from get_marfis() and get_isdb()
 and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
-\note{
-
-}
 \seealso{
 Other simpleproducts: 
 \code{\link{get_bycatch}()},

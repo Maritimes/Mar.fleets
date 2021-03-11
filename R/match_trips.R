@@ -31,12 +31,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
 
-  if (args$debug) {
-    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+  if (args$debuggit){
+    catw()
     T_match_trips=Sys.time()
   }
   tripsN = length(unique(isdbTrips$TRIP_ID_ISDB))
-  CLOSEST <- TRIP_ID_ISDB <- NA
+  CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- NA
   clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
     df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
     return(df)

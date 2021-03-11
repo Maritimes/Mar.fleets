@@ -30,8 +30,8 @@ get_fleet<-function(...){
     debugTrips <- args$debugTripsRes
   }
 
-  if (args$debug) {
-    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit){
+    catw()
     T_get_fleet=Sys.time()
   }
 
@@ -39,13 +39,13 @@ get_fleet<-function(...){
 
   get_fleetLicences<-function(...){
     args <- list(...)
-    if (args$debug) {
-      Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+    if (args$debuggit){
+      catw()
       T_get_fleetLicences=Sys.time()
     }
     if(exists("debugTrips")) {
-      if (args$debug) {
-        Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
+      if (args$debuggit){
+        catw()
         T_get_fleetBasic_dbTrips=Sys.time()
       }
 
@@ -222,6 +222,11 @@ get_fleet<-function(...){
 
   get_fleetActivity<- function(validLics = NULL, ...){
     args <- list(...)$args
+    if (args$debuggit){
+      catw()
+      T_get_fleetActivity=Sys.time()
+    }
+
     if(!is.null(args$debugTripsRes)){
       print(args$depth)
       debugTrips <- args$debugTripsRes
@@ -360,19 +365,19 @@ get_fleet<-function(...){
   get_fleetGear<-function(df = NULL, ...){
     #MMM need to add gear filter results to ISDBdebugtrips results
     args <- list(...)$args
-    if (args$debug) {
-      Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
+    if (args$debuggit){
+      catw()
       T_apply_filters=Sys.time()
     }
     LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
 
     get_GearSpecs<- function(df = NULL, ...){
       args <- list(...)$args
-      if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+      if (args$debuggit) catw()
       chk_Gears <- function(df=df,...){
         #this function figures out what categories of gears we're dealing with, and will let us determine what filters might be possible
         args <- list(...)$args
-        if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=2)
+        if (args$debuggit) catw()
 
         if (args$useLocal){
           Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("GEARS"),
@@ -507,7 +512,7 @@ get_fleet<-function(...){
       sizeFilt <- function(df=NULL, ...){
         # browser()
         args <- list(...)$args
-        if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
+        if (args$debuggit) catw()
         df_o <- nrow(df)
         if (!is.na(args$gearSpecs$MIN)){
           gearSpecRelevant <- gearSpecRelevant[grep("[[:digit:]]", gearSpecRelevant$DATA_VALUE), ]
@@ -535,7 +540,7 @@ get_fleet<-function(...){
       }
       typeFilt <- function(df=NULL, ...){
         args <- list(...)$args
-        if (args$debug) Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]),lvl=3)
+        if (args$debuggit) catw()
 
         df_o <- nrow(df)
         if (!is.na(args$gearSpecs$TYPE)){

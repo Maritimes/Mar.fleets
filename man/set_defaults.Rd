@@ -5,12 +5,9 @@
 \title{set_defaults}
 \usage{
 set_defaults(
-  lics = data.frame(FLEET = character(), LIC_TYPE = integer(), LIC_SUBTYPE = integer(),
-    LIC_SP = integer(), LIC_GEAR = integer(), stringsAsFactors = FALSE),
-  gearSpecs = data.frame(FLEET = character(), FLEET_GEARSPECS_ID = character(), MIN =
-    integer(), MAX = integer(), TYPE = character(), stringsAsFactors = FALSE),
-  area = data.frame(FLEET = character(), FLEET_AREA_ID = character(), AREA_TYPE =
-    character(), AREA = character(), stringsAsFactors = FALSE),
+  lics = "all",
+  gearSpecs = "all",
+  area = "all",
   marfSpp = "all",
   vessLen = "all",
   useDate = "LANDED_DATE",
@@ -19,7 +16,6 @@ set_defaults(
   returnISDB = T,
   returnBycatch = T,
   returnLocations = T,
-  fleet = NULL,
   useReportedNAFO = TRUE,
   manual_fleet = F,
   areas = "NAFOSubunits_sf",
@@ -40,12 +36,12 @@ set_defaults(
   quietly = TRUE,
   debugISDBTrips = "_none_",
   HS = FALSE,
-  debug = FALSE,
+  debuggit = FALSE,
   ...
 )
 }
 \arguments{
-\item{lics}{default is \code{'all'}}
+\item{lics}{default is an empty dataframe\code{'all'}}
 
 \item{gearSpecs}{default is \code{'all'}}
 
@@ -68,6 +64,8 @@ set_defaults(
 \item{returnLocations}{default is \code{TRUE}}
 
 \item{useReportedNAFO}{default is \code{TRUE}}
+
+\item{manual_fleet}{default is \code{FALSE}}
 
 \item{areas}{default is \code{'NAFOSubunits_sf'}}
 
@@ -99,17 +97,15 @@ set_defaults(
 
 \item{useLocal}{default is \code{FALSE}}
 
+\item{quietly}{default is \code{TRUE}}
+
 \item{debugISDBTrips}{default is \code{'_none_'}}
 
 \item{HS}{default is \code{FALSE}}
 
-\item{debug}{default is \code{FALSE}}
-
 \item{...}{other arguments passed to methods}
 
-\item{manual_fleetdefault}{is \code{FALSE}}
-
-\item{quietlydefault}{is \code{TRUE}}
+\item{debug}{default is \code{FALSE}}
 }
 \description{
 This function ensures that all possible parameters are provided.  They will be

@@ -8,8 +8,8 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
-  if (args$debug) {
-    Mar.utils::where_now(inf = as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit){
+    catw()
     T_can_run=Sys.time()
   }
 

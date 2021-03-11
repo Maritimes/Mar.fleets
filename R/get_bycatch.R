@@ -11,8 +11,8 @@
 #' @export
 get_bycatch<-function(isTrips = NULL, ...){
   args <- list(...)$args
-  if (args$debug) {
-    Mar.utils::where_now(as.character(sys.calls()[[sys.nframe() - 1]]))
+  if (args$debuggit){
+    catw()
     T_get_bycatch=Sys.time()
   }
   ISCATCHES <- ISTRIPS <- NA
