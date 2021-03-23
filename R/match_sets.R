@@ -23,7 +23,7 @@
 match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, maxSetDiff_hr =48, ...){
   args <- list(...)$args
   if (args$debuggit){
-    catw()
+    Mar.utils::where_now()
     T_match_sets=Sys.time()
   }
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA

@@ -25,10 +25,18 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   utils::data("licCore", envir = environment())
   utils::data("licAreas", envir = environment())
   utils::data("licGearSpecs", envir = environment())
-
   lics <- licCore[licCore$FLEET==fleet,]
-  area <- licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,]
-  gearSpecs <- licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ]
+  if (!is.null(area)) {
+    area <- licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,]
+  }else{
+    area <- licAreas[FALSE,]
+  }
+  #
+  if (!is.null(gearSpecs)) {
+    gearSpecs <- licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ]
+  }else{
+    gearSpecs = licGearSpecs[FALSE,]
+  }
 
   rm(list = c("licCore", "licAreas", "licGearSpecs", "fleet"))
 
@@ -37,15 +45,16 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   # grab user submitted and combine -------------------------------------------------------------------------------------------------------------------------
   argsUser <- list(...)
   if (argsUser$debuggit){
-    catw()
+    Mar.utils::where_now()
+    print(lics)
+    print(area)
+    print(gearSpecs)
   }
-
   # add remaining default args ------------------------------------------------------------------------------------------------------------------------------
   args <- do.call(set_defaults, list(argsFn=argsFn, argsUser=argsUser))
 
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
   args <- do.call(can_run, args)
-
   #set up results list, and populate according to arguments
   data <- list()
   if (args$returnFleet){

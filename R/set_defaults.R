@@ -67,6 +67,7 @@ set_defaults <- function(lics = 'all',
                          useLocal = FALSE,
                          quietly=TRUE,
                          debugISDBTrips = "_none_",
+                         debugLics = NULL,
                          HS = FALSE,
                          debuggit=FALSE,
                          ...){
@@ -74,10 +75,10 @@ set_defaults <- function(lics = 'all',
   sentArgs <- list(...)
 
   #ensure hardcoded args take priority over user args
-  submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser)
+  submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser, quietly = T)
 
   #ensure submitted args take priority over default args
-  argg <- Mar.utils::combine_lists(primary =  submittedArgs, ancilliary = defaults)
+  argg <- Mar.utils::combine_lists(primary =  submittedArgs, ancilliary = defaults, quietly = T)
 
   # have all of our arguments - further process some of them ------------------------------------------------------------------------------------------------
   # convert year (if present to dateStart and dateEnd)

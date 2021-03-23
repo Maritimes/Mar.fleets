@@ -9,8 +9,7 @@
 can_run <- function(...){
   args=list(...)
   if (args$debuggit){
-    catw()
-    T_can_run=Sys.time()
+    Mar.utils::where_now()
   }
 
   connect_Oracle <-function(...){
@@ -92,18 +91,13 @@ can_run <- function(...){
 
   if (args$useLocal){
     if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args))){
-      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       args[['cxn']] <- TRUE
-      # res <- list()
-      # res[["args"]]<-args
-
       res <- args
       return(res)
     }else{
       cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       cat(paste0(MARFIS,".RData"),sep= "\n")
       cat(paste0(ISDB,".RData"),sep= "\n")
-      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       stop()
     }
   }else{
@@ -111,28 +105,21 @@ can_run <- function(...){
     if (!is.list(cxnCheck)) {
       cat("\n","Cannot proceed online (Can't create a DB connection).",
           "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').","\n")
-      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
       stop()
       # return(FALSE)
     }else{
       if (!args$quietly)  cat("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
-      # res <- list()
-      # res[["args"]]<-args
       res <- args
       return(res)
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
       cat("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
-      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
-      # res <- list()
-      # res[["args"]]<-args
       res <- args
       return(res)
     }else{
       cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
-      if(exists("T_can_run")) cat("\n","can_run() completed in",round( difftime(Sys.time(),T_can_run,units = "secs"),0),"secs\n")
-      stop()
+           stop()
       #return(FALSE)
     }
   }

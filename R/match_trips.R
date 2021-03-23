@@ -32,7 +32,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
 
   if (args$debuggit){
-    catw()
+    Mar.utils::where_now()
     T_match_trips=Sys.time()
   }
   tripsN = length(unique(isdbTrips$TRIP_ID_ISDB))

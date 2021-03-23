@@ -12,7 +12,7 @@
 get_bycatch<-function(isTrips = NULL, ...){
   args <- list(...)$args
   if (args$debuggit){
-    catw()
+    Mar.utils::where_now()
     T_get_bycatch=Sys.time()
   }
   ISCATCHES <- ISTRIPS <- NA

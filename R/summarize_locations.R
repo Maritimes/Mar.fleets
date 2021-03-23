@@ -75,7 +75,7 @@ summarize_locations<-function(get_isdb = NULL,
                         ...){
   args <- list(...)$args
   if (args$debuggit){
-    catw()
+    Mar.utils::where_now()
     T_summarize_locations=Sys.time()
   }
 

@@ -26,7 +26,7 @@
 get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', nafoCode='all',  ...){
   args <-list(...)$args
   if (args$debuggit){
-    catw()
+    Mar.utils::where_now()
     T_get_marfis=Sys.time()
   }
 
@@ -41,7 +41,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_getEff=Sys.time()
     }
     if(args$useLocal){
@@ -117,7 +117,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   getPS <- function(allProSpc = NULL, ...){
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_getPS=Sys.time()
     }
     if(args$useLocal){
@@ -225,7 +225,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   getED <- function(mondocs = NULL, ...){
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_getED=Sys.time()
     }
     if(args$useLocal){
@@ -270,7 +270,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   getHIC <- function(trips = NULL, ...){
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_getHIC=Sys.time()
     }
     if(args$useLocal){
@@ -301,7 +301,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   getHOC <- function(trips = NULL, ...){
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_getHOC=Sys.time()
     }
     if(args$useLocal){

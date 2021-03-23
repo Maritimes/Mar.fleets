@@ -29,7 +29,7 @@
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
   if (args$debuggit){
-    catw()
+    Mar.utils::where_now()
     T_get_isdb=Sys.time()
   }
 
@@ -57,7 +57,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   get_isdb_trips<-function(mVR_LIC = NULL,...){
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_get_isdb_trips=Sys.time()
     }
     if(!any(args$debugISDBTrips =="_none_")){
@@ -162,7 +162,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   get_isdb_sets<-function(isdbTrips=NULL,...){
     args <- list(...)$args
     if (args$debuggit){
-      catw()
+      Mar.utils::where_now()
       T_get_isdb_sets=Sys.time()
     }
     badDate <- as.POSIXct(as.Date("2100-01-01"))
