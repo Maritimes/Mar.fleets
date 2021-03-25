@@ -1,6 +1,6 @@
-#' @title fleet_halibut
+#' @title fleet_silverhake
 #' @description This function is a wrapper function that facilitates extracting the following
-#' information for the halibut fleet:
+#' information for the silver hake fleets:
 #' \itemize{
 #'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -14,13 +14,11 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
-#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
-#' "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
-#' for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
-#' of the following - \code{c(0,45)} or \code{seq(0,45,1)}.
+#' @param mesh default is \code{'ALL'}. This indicates whether or not the the
+#' fleet should be filtered by mesh size.  It can be either "ALL" or "SMALL"  (i.e. 55-65mm).
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' stuff <- fleet_halibut(data.dir = "C:/myData")
+#' SilverHake <- fleet_silverhake(data.dir = "C:/myData")
 #' }
 #' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
@@ -28,13 +26,21 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = 130
-#'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
-#'   \item \code{gearCode} = c(51)
-#'   \item \code{marfSpp} = 130
+#'   \item \code{marfSpp} = 172
+#'   \item \code{nafoCode} = c('4V\%','4W\%','4X\%','5Y\%')
+#'   \item \code{gearCode} = 12
+#'   \item \code{mdCode} = 2
+#' }
+#'
+#' For mesh = "SMALL"
+#' \itemize{
+#' \item \code{gearSpSize} =  seq(55,65,1)
 #' }
 #' @export
-fleet_halibut <- function(vessLen = NULL, useLocal = NULL, ...){
-  data = fleet_(fleet = "HALIBUT", marfSpp = 130, area = "ALL", useLocal = useLocal,...)
+fleet_silverhake <- function(mesh='ALL', useLocal=NULL, ...){
+  mesh <- toupper(mesh)
+  gearSpecs <- ifelse(mesh == "ALL", "ALL","SMALL")
+  data <- fleet_(fleet = "SHAKE", marfSpp = 172, area = "ALL", gearSpecs = gearSpecs, useLocal = useLocal,...)
   return(data)
-}
+  }
+

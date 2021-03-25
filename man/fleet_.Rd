@@ -67,7 +67,15 @@ test <- fleet_(fleet="POLLOCK_MOBILE", area="WESTERN", gearSpecs="SMALL" )
 }
 \seealso{
 Other fleets: 
-\code{\link{fleet_redfish}()}
+\code{\link{fleet_haddock}()},
+\code{\link{fleet_halibut}()},
+\code{\link{fleet_pollock}()},
+\code{\link{fleet_redfish}()},
+\code{\link{fleet_scallop}()},
+\code{\link{fleet_silverhake}()},
+\code{\link{fleet_snowcrab}()},
+\code{\link{fleet_surfclam}()},
+\code{\link{fleet_winterflounder}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

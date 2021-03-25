@@ -35,6 +35,7 @@ set_defaults(
   useLocal = FALSE,
   quietly = TRUE,
   debugISDBTrips = "_none_",
+  debugLics = NULL,
   HS = FALSE,
   debuggit = FALSE,
   ...

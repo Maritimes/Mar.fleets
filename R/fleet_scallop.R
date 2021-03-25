@@ -1,6 +1,6 @@
-#' @title fleet_halibut
-#' @description This function is a wrapper function that facilitates extracting the following
-#' information for the halibut fleet:
+#' @title fleet_scallop
+#' @description This is a wrapper function that facilitates extracting the following
+#' information for the inshore scallop fleet:
 #' \itemize{
 #'   \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
 #'   selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
@@ -14,13 +14,10 @@
 #'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
 #'   estimated discarded wt(kg) are all captured
 #'   }
-#' @param vessLen default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
-#' "all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
-#' for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
-#' of the following - \code{c(0,45)} or \code{seq(0,45,1)}.
+#' @param fleet default is NULL.  Valid values are "INSHORE" or "OFFSHORE"
 #' @param ... other arguments passed to methods
 #' @examples \dontrun{
-#' stuff <- fleet_halibut(data.dir = "C:/myData")
+#' stuff <- fleet_scallop(data.dir = "C:/myData")
 #' }
 #' @family fleets
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
@@ -28,13 +25,14 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = 130
-#'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
-#'   \item \code{gearCode} = c(51)
-#'   \item \code{marfSpp} = 130
+#'   \item \code{a df - more dets necessary}
+#'   \item \code{gearCode} = c(71)
+#'   \item \code{marfSpp} = 612
 #' }
 #' @export
-fleet_halibut <- function(vessLen = NULL, useLocal = NULL, ...){
-  data = fleet_(fleet = "HALIBUT", marfSpp = 130, area = "ALL", useLocal = useLocal,...)
+fleet_scallop <- function(fleet = NULL, useLocal = NULL, ...){
+  fleet <- toupper(fleet)
+  fleet <- ifelse(fleet == "OFFSHORE", "SCALLOP_OFF", "SCALLOP_INSH")
+  data <- fleet_(fleet = fleet, marfSpp = 612, area = "ALL", gearSpecs = "ALL", useLocal = useLocal,...)
   return(data)
 }

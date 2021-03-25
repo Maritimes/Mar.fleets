@@ -46,6 +46,7 @@ get_fleet<-function(...){
       message(paste("\tLost: ",paste0(theseMissing, collapse=", ")))
     }
     assign(x = "missing", value = missing, envir = fleetEnv)
+    if (length(missing)==0) message("No missing records remain")
   }
 
   changeDetector <- function(pre_ = NULL, post_ = NULL, fields = NULL, flagTxt = NULL){
@@ -211,12 +212,13 @@ get_fleet<-function(...){
 
       # Filter licences to only those matching known combos if type, subtype, gear and spp ----------------------------------------------------------------------
       theseLics <- NA
-      browser()
+      # browser()
       for (i in 1:nrow(args$lics)){
-        thisL <-   paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics$LIC_TYPE[i])
-        thisS <-   paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics$LIC_SUBTYPE[i])
-        thisG <- paste0("MARBYCATCH_LIC$GEAR_CODE == ",args$lics$LIC_GEAR[i])
-        thisSpp <- paste0("MARBYCATCH_LIC$SPECIES_CODE == ",args$lics$LIC_SP[i])
+
+        thisL <- ifelse(is.na(args$lics$LIC_TYPE[i]),"1==1", paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics$LIC_TYPE[i]))
+        thisS <- ifelse(is.na(args$lics$LIC_SUBTYPE[i]),"1==1",  paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics$LIC_SUBTYPE[i]))
+        thisG <- ifelse(is.na(args$lics$LIC_GEAR[i]),"1==1", paste0("MARBYCATCH_LIC$GEAR_CODE == ",args$lics$LIC_GEAR[i]))
+        thisSpp <- ifelse(is.na(args$lics$LIC_SP[i]),"1==1", paste0("MARBYCATCH_LIC$SPECIES_CODE == ",args$lics$LIC_SP[i]))
         thisLicRow <- paste0("(",thisL, " & ",thisS," & ",thisG," & ",thisSpp,")")
         if (i==1){
           theseLics <- thisLicRow
@@ -224,15 +226,33 @@ get_fleet<-function(...){
           theseLics <- paste(theseLics, "|", thisLicRow)
         }
       }
-      MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
+      if (all(is.na(args$lics$LIC_TYPE))){
+         MARBYCATCH_LIC_L <- MARBYCATCH_LIC
+      } else{
+        MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
+      }
       updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_L$LICENCE_ID, flagTxt ="checking lic type")
-      MARBYCATCH_LIC_S <- MARBYCATCH_LIC_L[MARBYCATCH_LIC_L$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_S$LICENCE_ID, flagTxt ="checking lic subtype")
-      MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$GEAR_CODE %in% args$lics$LIC_GEAR,]
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_G$LICENCE_ID, flagTxt ="checking lic gear")
-      MARBYCATCH_LIC_SP <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$lics$LIC_SP,]
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_SP$LICENCE_ID, flagTxt ="checking lic spp")
 
+      if (all(is.na(args$lics$LIC_SUBTYPE))){
+        MARBYCATCH_LIC_S <- MARBYCATCH_LIC
+      } else{
+        MARBYCATCH_LIC_S <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
+      }
+      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_S$LICENCE_ID, flagTxt ="checking lic subtype")
+
+      if (all(is.na(args$lics$LIC_GEAR))){
+        MARBYCATCH_LIC_G <- MARBYCATCH_LIC
+      } else{
+        MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$GEAR_CODE %in% args$lics$LIC_GEAR,]
+      }
+      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_G$LICENCE_ID, flagTxt ="checking lic gear")
+
+      if (all(is.na(args$lics$LIC_SP))){
+        MARBYCATCH_LIC_SP <- MARBYCATCH_LIC
+      } else{
+        MARBYCATCH_LIC_SP <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$SPECIES_CODE %in% args$lics$LIC_SP,]
+      }
+      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_SP$LICENCE_ID, flagTxt ="checking lic spp")
       MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
       updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt ="initial lic type/subtype/gear/sp filter")
       if (args$debuggit) changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
@@ -249,12 +269,12 @@ get_fleet<-function(...){
       theseLicAreas <- NA
 
       if (nrow(args$area)>0){
-        theseLicAreas = paste0("MARBYCATCH_LIC$AREA %in% c('", paste0(args$area$AREA, collapse = "','"),"')")
-        MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLicAreas))),]
-        updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt = "areas filtered")
-        if (args$debuggit) changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
-        MARBYCATCH_LIC <- MARBYCATCH_LIC_new
-
+        message("!! Not filtering licences by where they're allowed to fish - drops far more than Heath ever did")
+        # theseLicAreas = paste0("MARBYCATCH_LIC$AREA %in% c('", paste0(args$area$AREA, collapse = "','"),"')")
+        # MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLicAreas))),]
+        # updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt = "areas filtered")
+        # if (args$debuggit) changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+        # MARBYCATCH_LIC <- MARBYCATCH_LIC_new
       }
     } else{
       #must work on remote get_fleetLicences()
@@ -587,7 +607,7 @@ get_fleet<-function(...){
         df_new<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
 
         updateMissing(missing = fleetEnv$missing, known = df_new$LICENCE_ID, flagTxt = "sets filtered by gear size")
-        dropIndicator(dfPre = df, dfPost = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
+        changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
         df<- df_new
         log_eff <- NA
       }
@@ -606,7 +626,7 @@ get_fleet<-function(...){
         log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"MON_DOC_ID"])
         df_new<-df[df$MON_DOC_ID %in% log_eff,]
         updateMissing(missing = fleetEnv$missing, known = df_new$LICENCE_ID, flagTxt = "sets filtered by gear type")
-        dropIndicator(dfPre = df, dfPost = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear type")
+        changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear type")
         df<- df_new
         log_eff <- NA
       }
