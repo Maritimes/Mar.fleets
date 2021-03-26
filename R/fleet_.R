@@ -25,18 +25,15 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   utils::data("licCore", envir = environment())
   utils::data("licAreas", envir = environment())
   utils::data("licGearSpecs", envir = environment())
+
+  licCore <- get("licCore", envir  = environment())
+  licAreas <- get("licAreas", envir  = environment())
+  licGearSpecs <- get("licGearSpecs", envir  = environment())
+
+
   lics <- licCore[licCore$FLEET==fleet,]
-  if (!is.null(area)) {
-    area <- licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,]
-  }else{
-    area <- licAreas[FALSE,]
-  }
-  #
-  if (!is.null(gearSpecs)) {
-    gearSpecs <- licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ]
-  }else{
-    gearSpecs = licGearSpecs[FALSE,]
-  }
+  areas <- ifelse(is.null(area), licAreas[FALSE,], licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,])
+  gearSpecs <- ifelse(is.null(gearSpecs), licGearSpecs[FALSE,],  licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ])
 
   rm(list = c("licCore", "licAreas", "licGearSpecs", "fleet"))
 

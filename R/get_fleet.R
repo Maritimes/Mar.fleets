@@ -36,28 +36,7 @@ get_fleet<-function(...){
   fleetEnv$missing =NA
   if (length(args$debugLics)>0) fleetEnv$missing = args$debugLics
 
-  updateMissing<-function(missing = NA, known = NULL, flagTxt = NULL){
-    if (all(is.na(missing))) return(NA)
 
-    theseMissing = sort(missing[!(missing %in% known) ])
-    missing <- sort(missing[!(missing %in% theseMissing)])
-    if (length(theseMissing)>0){
-      if (!is.null(flagTxt)) message(flagTxt)
-      message(paste("\tLost: ",paste0(theseMissing, collapse=", ")))
-    }
-    assign(x = "missing", value = missing, envir = fleetEnv)
-    if (length(missing)==0) message("No missing records remain")
-  }
-
-  changeDetector <- function(pre_ = NULL, post_ = NULL, fields = NULL, flagTxt = NULL){
-    if (!is.null(flagTxt)) message(flagTxt)
-    if (is.data.frame(pre_) & is.data.frame(post_)) {
-      message(paste0("\t",deparse(substitute(pre_))," (nrow change): ", nrow(pre_)," --> ", nrow(post_)))
-      for (i in 1:length(fields)){
-        message(paste0("\tunique records in ", fields[i],": ", length(unique(pre_[,fields[i]]))," --> ", length(unique(post_[,fields[i]]))))
-      }
-    }
-  }
 
   MARBYCATCH_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- NA
 
@@ -208,7 +187,7 @@ get_fleet<-function(...){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
                                  tables = c("MARBYCATCH_LIC"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC$LICENCE_ID, flagTxt ="initial")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC$LICENCE_ID, flagTxt ="initial")
 
       # Filter licences to only those matching known combos if type, subtype, gear and spp ----------------------------------------------------------------------
       theseLics <- NA
@@ -231,51 +210,51 @@ get_fleet<-function(...){
       } else{
         MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
       }
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_L$LICENCE_ID, flagTxt ="checking lic type")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_L$LICENCE_ID, flagTxt ="checking lic type")
 
       if (all(is.na(args$lics$LIC_SUBTYPE))){
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC
       } else{
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
       }
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_S$LICENCE_ID, flagTxt ="checking lic subtype")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_S$LICENCE_ID, flagTxt ="checking lic subtype")
 
       if (all(is.na(args$lics$LIC_GEAR))){
         MARBYCATCH_LIC_G <- MARBYCATCH_LIC
       } else{
         MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$GEAR_CODE %in% args$lics$LIC_GEAR,]
       }
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_G$LICENCE_ID, flagTxt ="checking lic gear")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_G$LICENCE_ID, flagTxt ="checking lic gear")
 
       if (all(is.na(args$lics$LIC_SP))){
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC
       } else{
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$SPECIES_CODE %in% args$lics$LIC_SP,]
       }
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_SP$LICENCE_ID, flagTxt ="checking lic spp")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_SP$LICENCE_ID, flagTxt ="checking lic spp")
       MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt ="initial lic type/subtype/gear/sp filter")
-      if (args$debuggit) changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt ="initial lic type/subtype/gear/sp filter")
+      if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
       MARBYCATCH_LIC <- MARBYCATCH_LIC_new
 
       # Filter licences by desired date range -------------------------------------------------------------------------------------------------------------------
       dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
       MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=dateFilt))),]
-      updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt = "lic start end dates applied")
-      if (args$debuggit) changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt = "lic start end dates applied")
+      if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
       MARBYCATCH_LIC <- MARBYCATCH_LIC_new
 
       # Filter licences by those valid for specified areas ------------------------------------------------------------------------------------------------------
       theseLicAreas <- NA
 
-      if (nrow(args$area)>0){
-        message("!! Not filtering licences by where they're allowed to fish - drops far more than Heath ever did")
-        # theseLicAreas = paste0("MARBYCATCH_LIC$AREA %in% c('", paste0(args$area$AREA, collapse = "','"),"')")
-        # MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLicAreas))),]
-        # updateMissing(missing = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt = "areas filtered")
-        # if (args$debuggit) changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
-        # MARBYCATCH_LIC <- MARBYCATCH_LIC_new
-      }
+      # if (nrow(args$area)>0){
+      #   message("!! Not filtering licences by where they're allowed to fish - drops far more than Heath ever did")
+      #   # theseLicAreas = paste0("MARBYCATCH_LIC$AREA %in% c('", paste0(args$area$AREA, collapse = "','"),"')")
+      #   # MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLicAreas))),]
+      #   # Mar.utils::updateExpected(expected = fleetEnv$missing, known = MARBYCATCH_LIC_new$LICENCE_ID, flagTxt = "areas filtered")
+      #   # if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+      #   # MARBYCATCH_LIC <- MARBYCATCH_LIC_new
+      # }
     } else{
       #must work on remote get_fleetLicences()
     }
@@ -302,28 +281,10 @@ get_fleet<-function(...){
       PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", args$useDate)]
       PRO_SPC_INFO[,args$useDate]<- as.Date(PRO_SPC_INFO[,args$useDate])
       PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$LICENCE_ID %in% validLics,]
-      updateMissing(missing = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt = "PS filtered by valid lics")
-      if (args$debuggit) changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by valid lics")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt = "PS filtered by valid lics")
+      if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by valid lics")
       PRO_SPC_INFO <- PRO_SPC_INFO_new
 
-      # limit fishing activity to fleet-specified gears ---------------------------------------------------------------------------------------------------------
-      PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% unique(args$lics$LIC_GEAR),]
-      updateMissing(missing = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt = "PS filtered by gear")
-      if (args$debuggit) changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by gear")
-      PRO_SPC_INFO <- PRO_SPC_INFO_new
-
-      # limit fishing activity to fleet-specified areas ---------------------------------------------------------------------------------------------------------
-      if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
-      NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[,c("AREA_ID", "NAFO_AREA")]
-      PRO_SPC_INFO = merge(PRO_SPC_INFO, NAFO_UNIT_AREAS, by.x="NAFO_UNIT_AREA_ID", by.y = "AREA_ID", all.x=T )
-      if (nrow(args$area)>0){
-        nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
-        NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(nafoCode, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
-        PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
-        updateMissing(missing = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt =  "PS filtered by licence NAFO")
-        if (args$debuggit) changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by licenced NAFO")
-        PRO_SPC_INFO <- PRO_SPC_INFO_new
-      }
 
       # Limit fishing activity to desired date range ------------------------------------------------------------------------------------------------------------
       TRIPS <- TRIPS[,c("TRIP_ID","VR_NUMBER", "EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
@@ -339,23 +300,45 @@ get_fleet<-function(...){
         PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% TRIPS$TRIP_ID,]
       }
       PRO_SPC_INFO_new <- merge(PRO_SPC_INFO_new, TRIPS)
-      updateMissing(missing = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt =  "PS filtered by dates")
-      if (args$debuggit) changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by dates")
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt =  "PS filtered by dates")
+      if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by dates")
       PRO_SPC_INFO <- PRO_SPC_INFO_new
 
-      # Limit fishing activity to vessels to those of desired length  -------------------------------------------------------------------------------------------
-      if (all(args$vessLen != 'all')) {
-        cat("/n<Note that this is filtering vessels by the lengths reported in MARFIS - not ISDB>/n")
-        VESSELS <- NA
-        Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("VESSELS"), usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
-        vessLen <- eval(args$vessLen)
-        VESSELS <- VESSELS[VESSELS$LOA>= min(vessLen) & VESSELS$LOA<= max(vessLen),]
-        PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$VR_NUMBER_FISHING %in% VESSELS$VR_NUMBER| PRO_SPC_INFO$VR_NUMBER_LANDING %in% VESSELS$VR_NUMBER,]
-        updateMissing(missing = missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt =  "PS filtered by vessLen")
-        if (args$debuggit) changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by vessLen")
-        # if (args$debuggit)message(paste0("TRIPS (n): ",nrow(PRO_SPC_INFO)))
+      # limit fishing activity to fleet-specified areas ---------------------------------------------------------------------------------------------------------
+      if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
+      NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[,c("AREA_ID", "NAFO_AREA")]
+      PRO_SPC_INFO = merge(PRO_SPC_INFO, NAFO_UNIT_AREAS, by.x="NAFO_UNIT_AREA_ID", by.y = "AREA_ID", all.x=T )
+      if (nrow(args$area)>0){
+        nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
+        NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(nafoCode, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
+        PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
+        Mar.utils::updateExpected(expected = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt =  "PS filtered by licence NAFO")
+        if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by licenced NAFO")
         PRO_SPC_INFO <- PRO_SPC_INFO_new
       }
+
+      # limit fishing activity to fleet-specified gears ---------------------------------------------------------------------------------------------------------
+      PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% unique(args$lics$LIC_GEAR),]
+      Mar.utils::updateExpected(expected = fleetEnv$missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt = "PS filtered by gear")
+      if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by gear")
+      PRO_SPC_INFO <- PRO_SPC_INFO_new
+
+
+      #datefilt was here
+
+      # Limit fishing activity to vessels to those of desired length  -------------------------------------------------------------------------------------------
+      # if (all(args$vessLen != 'all')) {
+      #   cat("/n<Note that this is filtering vessels by the lengths reported in MARFIS - not ISDB>/n")
+      #   VESSELS <- NA
+      #   Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("VESSELS"), usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
+      #   vessLen <- eval(args$vessLen)
+      #   VESSELS <- VESSELS[VESSELS$LOA>= min(vessLen) & VESSELS$LOA<= max(vessLen),]
+      #   PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$VR_NUMBER_FISHING %in% VESSELS$VR_NUMBER| PRO_SPC_INFO$VR_NUMBER_LANDING %in% VESSELS$VR_NUMBER,]
+      #   Mar.utils::updateExpected(expected = missing, known = PRO_SPC_INFO_new$LICENCE_ID, flagTxt =  "PS filtered by vessLen")
+      #   if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by vessLen")
+      #   # if (args$debuggit)message(paste0("TRIPS (n): ",nrow(PRO_SPC_INFO)))
+      #   PRO_SPC_INFO <- PRO_SPC_INFO_new
+      # }
 
 
 
@@ -500,7 +483,7 @@ get_fleet<-function(...){
         gearSpecDF <- tmp[which(as.Date(tmp$FV_FISHED_DATETIME) >= tmp$T_DATE1 & as.Date(tmp$FV_FISHED_DATETIME) <= tmp$T_DATE2),]
       }
 
-      # updateMissing(missing = fleetEnv$missing, known = df$LICENCE_ID, flagTxt = "filtered sets by date")
+      # Mar.utils::updateExpected(expected = fleetEnv$missing, known = df$LICENCE_ID, flagTxt = "filtered sets by date")
       # if (args$debuggit)message(paste0("SETS (n): ",nrow(df)))
 
     }else{
@@ -581,8 +564,6 @@ get_fleet<-function(...){
       if(!args$quietly)cat(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
       return(df)
     }
-    # availTypes<- sort(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID %in% grSpType,"DATA_VALUE"]))
-    # availSizes<- sort(as.numeric(unique(gearSpecRelevant[gearSpecRelevant$COLUMN_DEFN_ID %in% grSpSize,"DATA_VALUE"])))
 
     sizeFilt <- function(df=NULL, ...){
       args <- list(...)$args
@@ -599,20 +580,18 @@ get_fleet<-function(...){
           gearSpSizeSm <- seq(1,129,1)
           smGear <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSizeSm,"LOG_EFRT_STD_INFO_ID"]
           gearSpecRelevant_size <- gearSpecRelevant[!(gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% smGear),"LOG_EFRT_STD_INFO_ID"]
-        }
-        gearSpecRelevant_size <- gearSpecRelevant[which(gearSpecRelevant$DATA_VALUE >=  args$gearSpecs$MIN &
+        }else{
+          gearSpecRelevant_size <- gearSpecRelevant[which(gearSpecRelevant$DATA_VALUE >=  args$gearSpecs$MIN &
                                                           gearSpecRelevant$DATA_VALUE <=  args$gearSpecs$MAX),"LOG_EFRT_STD_INFO_ID"]
-
+        }
         log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
         df_new<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
 
-        updateMissing(missing = fleetEnv$missing, known = df_new$LICENCE_ID, flagTxt = "sets filtered by gear size")
-        changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
+        Mar.utils::updateExpected(expected = fleetEnv$missing, known = df_new$LICENCE_ID, flagTxt = "sets filtered by gear size")
+        Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
         df<- df_new
         log_eff <- NA
       }
-
-      if (args$debuggit)message(paste0("GEARS (n): ",nrow(df)))
       return(df)
     }
     typeFilt <- function(df=NULL, ...){
@@ -625,8 +604,8 @@ get_fleet<-function(...){
         gearSpecRelevant_types <- gearSpecRelevant[toupper(gearSpecRelevant$DATA_VALUE) %in% args$gearSpecs$TYPE,"LOG_EFRT_STD_INFO_ID"]
         log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"MON_DOC_ID"])
         df_new<-df[df$MON_DOC_ID %in% log_eff,]
-        updateMissing(missing = fleetEnv$missing, known = df_new$LICENCE_ID, flagTxt = "sets filtered by gear type")
-        changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear type")
+        Mar.utils::updateExpected(expected = fleetEnv$missing, known = df_new$LICENCE_ID, flagTxt = "sets filtered by gear type")
+        Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear type")
         df<- df_new
         log_eff <- NA
       }
@@ -646,7 +625,7 @@ get_fleet<-function(...){
   df <- do.call(get_fleetActivity, list(validLics=validLics, args=args))
   df <- do.call(get_fleetGear, list(df=df,args=args))
   if(nrow(df)<1) {
-    msg("\n","No records found")
+    message("\n","No records found")
     return(NA)
   }else{
     df$NAFO <-NULL

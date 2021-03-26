@@ -1,38 +1,60 @@
 #' @title set_defaults
 #' @description This function ensures that all possible parameters are provided.  They will be
 #' overwritten by any sent directly to the fleet_<species> or get_all functions.
+#' @details  The desired date range can be specified multiple ways.
+#' \itemize{
+#' \item{\code{year}} can be used if data should be extracted for an entire calendar year (i.e. Jan 1 --> Dec 31)
+#' \item{\code{dateStart}} can be used on it's own, or with a valid entry of dateEnd.  If used on its own, it will extract 1 full year of data (e.g. Jun18, 2018 --> June18, 2019).
+#' \item{\code{dateEnd}} must be associated with a valid entry of dateStart to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).
+#' }
+#' Depending on your value for \code{useLocal}, different values become necessary
+#' @param dateStart default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateStart = "20190219"}
+#' @param dateEnd default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateEnd = "20190219"}
+#' @param year default is \code{NULL} format is \code{YYYY}, e.g. \code{year = 2018}
 #' @param lics default is an empty dataframe\code{'all'}
 #' @param gearSpecs default is \code{'all'}
 #' @param area default is \code{'all'}
-#' @param marfSpp default is \code{'all'}
-#' @param vessLen default is \code{'all'}
-#' @param useDate default is \code{'LANDED_DATE'}
-#' @param returnFleet default is \code{TRUE}
-#' @param returnMARFIS default is \code{TRUE}
-#' @param returnISDB default is \code{TRUE}
-#' @param returnBycatch default is \code{TRUE}
-#' @param returnLocations default is \code{TRUE}
-#' @param useReportedNAFO default is \code{TRUE}
+#' @param marfSpp default is \code{'all'} The marfis species code, usually sent by the fleet wrapper
+#' @param useDate default is \code{'LANDED_DATE'} Which ISDB date should be used while filtering ISDB data? "DATE_FISHED", or "LANDED_DATE"
+#' @param returnFleet default is \code{TRUE} Do you want a list object containing fleet information as part of your results?
+#' @param returnMARFIS default is \code{TRUE} Do you want a list object containing marfis trip and set information as part of your results? (requires returnFleet==T)
+#' @param returnISDB default is \code{TRUE} Do you want a list object containing isdb trip and set information as part of your results? (requires returnFleet==T & returnMARFIS ==T)
+#' @param returnBycatch default is \code{TRUE} Do you want a dataframe of all of the species caught during ISDB sets as part of your results?
+#' @param returnLocations default is \code{TRUE} Do you want a dataframe of the locations of the various sets as part of your results?
+#' @param useReportedNAFO default is \code{TRUE} (NOT YET IMPLEMENTED)
 #' @param manual_fleet default is \code{FALSE}
 #' @param areas default is \code{'NAFOSubunits_sf'}
 #' @param areasField default is \code{'NAFO_1'}
-#' @param dateStart default is \code{NULL}
-#' @param dateEnd default is \code{NULL}
-#' @param year default is \code{NULL}
 #' @param keepSurveyTrips default is \code{FALSE}
 #' @param matchMarfis default is \code{TRUE}
 #' @param matchMaxDayDiff default is \code{15}
 #' @param dropUnmatchedISDB default is \code{TRUE}
-#' @param data.dir default is \code{'file.path(getwd(), "data")'}
-#' @param oracle.username default is \code{'_none_'}
-#' @param oracle.password default is \code{'_none_'}
-#' @param oracle.dsn default is \code{'_none_'}
-#' @param usepkg default is \code{'rodbc'}
 #' @param useLocal default is \code{FALSE}
+#' @details  Depending on your value for \code{useLocal}, different values become necessary
+##' \itemize{
+##'  \item{"useLocal == TRUE"}
+#'     \itemize{
+#'       \item param \code{data.dir} required
+#'     }
+##'  \item{"useLocal == FALSE"}
+#'     \itemize{
+#'       \item param \code{oracle.username} required
+#'       \item param \code{oracle.password} required
+#'       \item param \code{oracle.dsn} required
+#'       \item param \code{usepkg} required
+#'     }
+#'  }
+#' @param data.dir default is \code{'file.path(getwd(), "data")'} Necessary for useLocal == T.  This is the path to a folder where your *.rdata files are stored.
+#' @param oracle.username default is \code{'_none_'} This is your username for accessing oracle objects.
+#' @param oracle.password default is \code{'_none_'} This is your password for accessing oracle objects.
+#' @param oracle.dsn default is \code{'_none_'}  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"
+#' @param usepkg default is \code{'rodbc'} This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+#' be slightly easier to setup, but roracle will extract data faster.
 #' @param quietly default is \code{TRUE}
 #' @param debugISDBTrips default is \code{'_none_'}
 #' @param HS default is \code{FALSE}
-#' @param debug default is \code{FALSE}
+#' @param debuggit default is \code{FALSE}
+#' @param debugLics default is \code{FALSE}
 #' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}

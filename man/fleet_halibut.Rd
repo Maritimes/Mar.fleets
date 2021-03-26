@@ -7,23 +7,68 @@
 fleet_halibut(vessLen = NULL, useLocal = NULL, ...)
 }
 \arguments{
-\item{vessLen}{default is \code{NULL}.  This is a vector of vessel lengths.  If it is not NULL or
-"all", it will be used to restrict vessels by their size.  The supplied vector will only be assessed
-for its max and min values, so if you wanted vessels up to and including 45ft, you could enter either
-of the following - \code{c(0,45)} or \code{seq(0,45,1)}.}
+\item{vessLen}{default is \code{NULL}.  Valid selections are pending.  NULL returns all vessels, "45LESS" will return vessels which their MARFIS licences
+indicate they are less than 45 feet.  Licenced lengths in MARFIS can be different than what is stored in ISDB.}
 
-\item{...}{other arguments passed to methods}
+\item{useLocal}{default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}
+
+if \code{TRUE}, then the following parameter is necessary:
+' \itemize{
+  \item \code{data.dir} - This is a path on your computer to where your .RData files are stored.
+  }
+
+if \code{FALSE}, then the following parameters are necessary:
+' \itemize{
+  \item \code{oracle.username} - your existing oracle login name
+  \item \code{oracle.password} - your existing oracle password
+  \item \code{oracle.dsn} - usually "PTRAN" - the name of the database you're connecting to
+  \item \code{usepkg} - default is \code{"rodbc"}, but \code{"roracle"} is also valid
+  }}
+
+\item{...}{
+  Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
+  \describe{
+    \item{\code{dateStart}}{default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateStart = "20190219"}}
+    \item{\code{dateEnd}}{default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateEnd = "20190219"}}
+    \item{\code{year}}{default is \code{NULL} format is \code{YYYY}, e.g. \code{year = 2018}}
+    \item{\code{marfSpp}}{default is \code{'all'} The marfis species code, usually sent by the fleet wrapper}
+    \item{\code{useDate}}{default is \code{'LANDED_DATE'} Which ISDB date should be used while filtering ISDB data? "DATE_FISHED", or "LANDED_DATE"}
+    \item{\code{returnFleet}}{default is \code{TRUE} Do you want a list object containing fleet information as part of your results?}
+    \item{\code{returnMARFIS}}{default is \code{TRUE} Do you want a list object containing marfis trip and set information as part of your results? (requires returnFleet==T)}
+    \item{\code{returnISDB}}{default is \code{TRUE} Do you want a list object containing isdb trip and set information as part of your results? (requires returnFleet==T & returnMARFIS ==T)}
+    \item{\code{returnBycatch}}{default is \code{TRUE} Do you want a dataframe of all of the species caught during ISDB sets as part of your results?}
+    \item{\code{returnLocations}}{default is \code{TRUE} Do you want a dataframe of the locations of the various sets as part of your results?}
+    \item{\code{useReportedNAFO}}{default is \code{TRUE} (NOT YET IMPLEMENTED)}
+    \item{\code{manual_fleet}}{default is \code{FALSE}}
+    \item{\code{areas}}{default is \code{'NAFOSubunits_sf'}}
+    \item{\code{areasField}}{default is \code{'NAFO_1'}}
+    \item{\code{keepSurveyTrips}}{default is \code{FALSE}}
+    \item{\code{matchMarfis}}{default is \code{TRUE}}
+    \item{\code{matchMaxDayDiff}}{default is \code{15}}
+    \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}}
+    \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'} Necessary for useLocal == T.  This is the path to a folder where your *.rdata files are stored.}
+    \item{\code{oracle.username}}{default is \code{'_none_'} This is your username for accessing oracle objects.}
+    \item{\code{oracle.password}}{default is \code{'_none_'} This is your password for accessing oracle objects.}
+    \item{\code{oracle.dsn}}{default is \code{'_none_'}  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
+    \item{\code{usepkg}}{default is \code{'rodbc'} This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+be slightly easier to setup, but roracle will extract data faster.}
+    \item{\code{quietly}}{default is \code{TRUE}}
+    \item{\code{debugISDBTrips}}{default is \code{'_none_'}}
+    \item{\code{HS}}{default is \code{FALSE}}
+    \item{\code{debuggit}}{default is \code{FALSE}}
+    \item{\code{debugLics}}{default is \code{FALSE}}
+  }}
 }
 \value{
-list of objects, including marfis data, isdb data, information for matching isdb
-and marfis data, and a summary of bycatch
-}
-\description{
-This function is a wrapper function that facilitates extracting the following
-information for the halibut fleet:
+specific returned objects can be specified by the user, but the default result is a list of objects, including marfis data, isdb data, information for matching isdb
+and marfis data, and a summary of bycatch, specifically:
+a list item containing:
 \itemize{
-  \item \code{fleet} - This is a dataframe of identifiers for all of the various trips undertaken by the
-  selected fleet for the specified period (e.g. VRNs, licence IDs, Monitoring Document #s, etc)
+  \item \code{FLEET} - This is a dataframe of the unique combinations of (MARFIS) LICENCE_ID, VR_NUMBER and GEAR_CODE that
+  was found for this fleet during the specified period
+  \item \code{FLEET_ACTIVITY} - This is a dataframe of identifiers for all of the (MARFIS) fishing activity undertaken
+  by vessels of this fleet during the specified period (i.e. LICENCE_ID, PRO_SPC_INFO_ID, LOG_EFRT_STD_INFO_ID, GEAR_CODE,
+  MON_DOC_ID, VR_NUMBER, and several dates associated with the trip)
   \item \code{marf} - This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
   the trips, the sets, and a special dataframe containing information that can be used to link
   the commercial data to the ISDB data
@@ -34,6 +79,13 @@ information for the halibut fleet:
   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
   estimated discarded wt(kg) are all captured
   }
+}
+\description{
+This is a wrapper function that facilitates extracting information for the redfish fleets.
+All of the information used to identify this fleet are stored in the package's associated data files - licCore, licAreas,
+and licGearSpecs.  Depending on user selections which will vary with the different wrappers (e.g. mobile vs fixed, western
+vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), different fleets are identified, and their
+data is extracted.
 }
 \note{
 Hardcoded parameters for this fleet are as follows:
@@ -46,11 +98,23 @@ Hardcoded parameters for this fleet are as follows:
 }
 \examples{
 \dontrun{
-stuff <- fleet_halibut(data.dir = "C:/myData")
-}
+db <- fleet_halibut(vessLen = NULL,
+                    useLocal = F,
+                    year = 2018,
+                    oracle.username = "<name>",
+                    oracle.password="<password>",
+                    oracle.dsn="PTRAN",
+                    usepkg = "roracle"
+                    )
+local <- fleet_halibut(vessLen = "45LESS",
+                       year = 2018,
+                       useLocal = T,
+                       data.dir = "c:/data_folder"
+                      )
+                       }
 }
 \seealso{
-Other fleets: 
+Other fleets:
 \code{\link{fleet_haddock}()},
 \code{\link{fleet_pollock}()},
 \code{\link{fleet_redfish}()},
