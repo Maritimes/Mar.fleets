@@ -28,7 +28,7 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   argsSent<-  list(...)
   args[names(argsSent)] <- argsSent
   if (args$useLocal==TRUE){
-    cat("\n", "VMS data requires a connection to the network.  It cannot be run locally")
+    message("\n", "VMS data requires a connection to the network.  It cannot be run locally")
     return(NULL)
   }
   if (args$debuggit) Mar.utils::where_now()
@@ -74,7 +74,7 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
                                     rowNum = 1000000,
                                     quietly = args$quietly)
   if (is.null(allVMS)){
-    cat("\n", "No VMS data could be found matching your parameters")
+    message("\n", "No VMS data could be found matching your parameters")
     return(NULL)
   }
   all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)

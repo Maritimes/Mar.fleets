@@ -110,7 +110,7 @@ summarize_locations<-function(get_isdb = NULL,
   allAreas = rbind(allAreas, "Outside of Defined Areas")
   allAreas = rbind(allAreas, "Bad coordinate")
   #by set
-  if (!args$quietly)cat(paste0("\n", "Figuring out which area each set occurred in..."))
+  if (!args$quietly)message(paste0("\n", "Figuring out which area each set occurred in..."))
   if (!is.null(oSets) && nrow(oSets)>0){
     OBS_area_s = Mar.utils::identify_area(oSets,
                                           agg.poly.shp = agg.poly.shp,
@@ -138,7 +138,7 @@ summarize_locations<-function(get_isdb = NULL,
   }
 
   #by_trip
-  if (!args$quietly)cat(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
+  if (!args$quietly)message(paste0("\n", "Figuring out the area in which the most sets occurred during each trip.","\n"))
 
   if (!is.null(oTrips) && (!is.null(oSets) && nrow(oSets)>0)){
     O_trips = merge(oTrips[,!names(oTrips) %in% c("BOARD_DATE","LANDING_DATE")],
@@ -229,6 +229,6 @@ summarize_locations<-function(get_isdb = NULL,
   res$details[["TRIPS_ISDB"]] <- o_t
   res$details[["SETS_MARF"]] <- m_s
   res$details[["SETS_ISDB"]] <- o_s
-  if(exists("T_summarize_locations")) cat("\n","summarize_locations() completed in",round( difftime(Sys.time(),T_summarize_locations,units = "secs"),0),"secs\n")
+  if(exists("T_summarize_locations")) message("\n","summarize_locations() completed in",round( difftime(Sys.time(),T_summarize_locations,units = "secs"),0),"secs\n")
   return(res)
 }

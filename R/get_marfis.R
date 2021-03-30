@@ -111,7 +111,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     }
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
-    if(exists("T_getEff")) cat("\n","getEff() completed in",round( difftime(Sys.time(),T_getEff,units = "secs"),0),"secs\n")
+    if(exists("T_getEff")) message("\n","getEff() completed in",round( difftime(Sys.time(),T_getEff,units = "secs"),0),"secs\n")
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
@@ -136,7 +136,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
       if (all(args$nafoCode != 'all')){
         if (args$useReportedNAFO){
-          cat("useReportedNAFO not implemented yet - PS_df only as \n")
+          message("useReportedNAFO not implemented yet - PS_df only as \n")
         }
         PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
         nafoCodeSimp <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
@@ -161,7 +161,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
       if (all(args$nafoCode != 'all')){
         if (args$useReportedNAFO){
-          cat("useReportedNAFO not implemented yet - PS_df only as \n")
+          message("useReportedNAFO not implemented yet - PS_df only as \n")
         }
         chk <- grepl(pattern = "%", x = paste0(args$nafoCode,collapse = ''))
         if (chk){
@@ -219,7 +219,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
     PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
 
-    if(exists("T_getPS")) cat("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
+    if(exists("T_getPS")) message("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
     return(PS_df)
   }
   getED <- function(mondocs = NULL, ...){
@@ -263,8 +263,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     }
     ED_df <- unique(ED_df)
 
-    if(exists("T_getED")) cat("\n","getED() completed in",round( difftime(Sys.time(),T_getED,units = "secs"),0),"secs\n")
-    # if (args$debuggit) cat("getED done:",nrow(ED_df),"\n")
+    if(exists("T_getED")) message("\n","getED() completed in",round( difftime(Sys.time(),T_getED,units = "secs"),0),"secs\n")
+    # if (args$debuggit) message("getED done:",nrow(ED_df),"\n")
     return(ED_df)
   }
   getHIC <- function(trips = NULL, ...){
@@ -293,9 +293,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     HIC_df <- unique(HIC_df)
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
     # colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
-    # if (args$debuggit) cat("getHIC done:",nrow(HIC_df),"\n")
+    # if (args$debuggit) message("getHIC done:",nrow(HIC_df),"\n")
 
-    if(exists("T_getHIC")) cat("\n","getHIC() completed in",round( difftime(Sys.time(),T_getHIC,units = "secs"),0),"secs\n")
+    if(exists("T_getHIC")) message("\n","getHIC() completed in",round( difftime(Sys.time(),T_getHIC,units = "secs"),0),"secs\n")
     return(HIC_df)
   }
   getHOC <- function(trips = NULL, ...){
@@ -322,9 +322,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     HOC_df<-unique(HOC_df)
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
     # colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
-    # if (args$debuggit) cat("getHOC done:",nrow(HOC_df),"\n")
+    # if (args$debuggit) message("getHOC done:",nrow(HOC_df),"\n")
 
-    if(exists("T_getHOC")) cat("\n","getHOC() completed in",round( difftime(Sys.time(),T_getHOC,units = "secs"),0),"secs\n")
+    if(exists("T_getHOC")) message("\n","getHOC() completed in",round( difftime(Sys.time(),T_getHOC,units = "secs"),0),"secs\n")
     return(HOC_df)
   }
 
@@ -333,7 +333,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
   ps <- do.call(getPS, list(allProSpc = allProSpc, args=args))
   if (nrow(ps)<1){
-    cat(paste0("\n","No MARFIS data meets criteria"))
+    message(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
   }
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
@@ -343,7 +343,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   if (!is.null(ed) && nrow(ed)>0){
     ps<- unique(merge(ps, ed, all.x = T))
     if (nrow(ps)<1){
-      cat(paste0("\n","No MARFIS data meets criteria"))
+      message(paste0("\n","No MARFIS data meets criteria"))
       return(invisible(NULL))
     }
 
@@ -358,7 +358,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   if (!is.null(hic) && nrow(hic)>0){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
-      cat(paste0("\n","No MARFIS data meets criteria"))
+      message(paste0("\n","No MARFIS data meets criteria"))
       return(invisible(NULL))
     }
   }else{
@@ -373,7 +373,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     hoc<- stats::aggregate(CONF_NUMBER_HO ~., hoc, toString)
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
-      cat(paste0("\n","No MARFIS data meets criteria"))
+      message(paste0("\n","No MARFIS data meets criteria"))
       return(invisible(NULL))
     }
   }else{
@@ -420,6 +420,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   res[["MARF_MATCH"]] <- ps
   res[["MARF_TRIPS"]]<-trips
   res[["MARF_SETS"]]<-eff
-  if(exists("T_get_marfis")) cat("\n","get_marfis() completed in",round( difftime(Sys.time(),T_get_marfis,units = "secs"),0),"secs\n")
+  if(exists("T_get_marfis")) message("\n","get_marfis() completed in",round( difftime(Sys.time(),T_get_marfis,units = "secs"),0),"secs\n")
   return(res)
 }

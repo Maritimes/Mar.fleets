@@ -19,7 +19,7 @@ get_bycatch<-function(isTrips = NULL, ...){
   marfSpp <- unique(args$lics$spp)
 
   # if (is.null(marfSpID)){
-  #   cat("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
+  #   message("\n", "Please provide a value for marfSpID to indicate which species was directed for.")
   #   return(NULL)
   # }
 
@@ -70,6 +70,6 @@ get_bycatch<-function(isTrips = NULL, ...){
   BYCATCH <- BYCATCH[!(BYCATCH$SPEC %in% isdbSPP),]
 
   BYCATCH <- rbind(dir_Spp_rows, BYCATCH)
-  if(exists("T_get_bycatch")) cat("\n","get_bycatch() completed in",round( difftime(Sys.time(),T_get_bycatch,units = "secs"),0),"secs\n")
+  if(exists("T_get_bycatch")) message("\n","get_bycatch() completed in",round( difftime(Sys.time(),T_get_bycatch,units = "secs"),0),"secs\n")
   return(BYCATCH)
 }

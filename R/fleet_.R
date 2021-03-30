@@ -11,10 +11,6 @@
 #' @return list of objects, including marfis data, isdb data, information for matching isdb
 #' and marfis data, and a summary of bycatch
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @note Hardcoded parameters for this fleet are as follows:
-#' \itemize{
-#'   \item \code{marfSpp} = 608
-#' }
 #' @export
 fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
@@ -32,8 +28,16 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
 
   lics <- licCore[licCore$FLEET==fleet,]
-  areas <- ifelse(is.null(area), licAreas[FALSE,], licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,])
-  gearSpecs <- ifelse(is.null(gearSpecs), licGearSpecs[FALSE,],  licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ])
+  if(is.null(area)){
+    area <-  licAreas[FALSE,]
+  } else {
+    area <-  licAreas[licAreas$FLEET == fleet & licAreas$FLEET_AREA_ID == area,]
+  }
+  if (is.null(gearSpecs)){
+    gearSpecs <- licGearSpecs[FALSE,]
+  }else{
+    gearSpecs <- licGearSpecs[licGearSpecs$FLEET == fleet & licGearSpecs$FLEET_GEARSPECS_ID == gearSpecs, ]
+  }
 
   rm(list = c("licCore", "licAreas", "licGearSpecs", "fleet"))
 

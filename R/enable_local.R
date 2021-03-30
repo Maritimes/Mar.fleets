@@ -51,7 +51,7 @@ enable_local <- function(data.dir = NULL,
   if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
     stop("Can't run as requested.")
   }
-  cat("\nChecking for and/or extracting MARFIS data...\n")
+  message("\nChecking for and/or extracting MARFIS data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
                                      fn.oracle.password = oracle.password,
                                      fn.oracle.dsn = oracle.dsn,
@@ -62,7 +62,7 @@ enable_local <- function(data.dir = NULL,
                                      tables = args$marfTabs,
                                      env = environment(), quietly = FALSE)
 
-  cat("\nChecking for and/or extracting ISDB data...\n")
+  message("\nChecking for and/or extracting ISDB data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
                                      fn.oracle.password = oracle.password,
                                      fn.oracle.dsn = oracle.dsn,
@@ -72,5 +72,5 @@ enable_local <- function(data.dir = NULL,
                                      checkOnly = TRUE,
                                      tables = args$isdbTabs,
                                      env = environment(), quietly = FALSE)
-  cat(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
+  message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
 }

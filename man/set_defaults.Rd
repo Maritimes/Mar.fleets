@@ -42,100 +42,106 @@ set_defaults(
 )
 }
 \arguments{
-\item{lics}{default is an empty dataframe\code{'all'}}
+\item{lics}{default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying the licence types, subtypes, gear and licence species valid
+for a particular fleet.  This information comes from licCore.}
 
-\item{gearSpecs}{default is \code{'all'}}
+\item{gearSpecs}{default is \code{'all'}. Fleet wrappers may populate it with a dataframe specifying the particular specifications for a fleets' gear.
+For example, certain fleets must use particular mesh sizes or shapes. This information comes from licGearSpecs.}
 
-\item{area}{default is \code{'all'}}
+\item{area}{default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from licAreas.}
 
-\item{marfSpp}{default is \code{'all'} The marfis species code, usually sent by the fleet wrapper}
+\item{marfSpp}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
 
-\item{useDate}{default is \code{'LANDED_DATE'} Which ISDB date should be used while filtering ISDB data? "DATE_FISHED", or "LANDED_DATE"}
+\item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data? "DATE_FISHED", or "LANDED_DATE"?}
 
-\item{returnFleet}{default is \code{TRUE} Do you want a list object containing fleet information as part of your results?}
+\item{returnFleet}{default is \code{TRUE}. Do you want a list object containing fleet information as part of your results?}
 
-\item{returnMARFIS}{default is \code{TRUE} Do you want a list object containing marfis trip and set information as part of your results? (requires returnFleet==T)}
+\item{returnMARFIS}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires returnFleet==T)}
 
-\item{returnISDB}{default is \code{TRUE} Do you want a list object containing isdb trip and set information as part of your results? (requires returnFleet==T & returnMARFIS ==T)}
+\item{returnISDB}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires returnFleet==T & returnMARFIS ==T)}
 
-\item{returnBycatch}{default is \code{TRUE} Do you want a dataframe of all of the species caught during ISDB sets as part of your results?}
+\item{returnBycatch}{default is \code{TRUE}. Do you want a dataframe of all of the species caught during ISDB sets as part of your results?}
 
-\item{returnLocations}{default is \code{TRUE} Do you want a dataframe of the locations of the various sets as part of your results?}
+\item{returnLocations}{default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?}
 
 \item{useReportedNAFO}{default is \code{TRUE} (NOT YET IMPLEMENTED)}
 
-\item{manual_fleet}{default is \code{FALSE}}
+\item{manual_fleet}{default is \code{FALSE}.}
 
-\item{areas}{default is \code{'NAFOSubunits_sf'}}
+\item{areas}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
+Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
 
-\item{areasField}{default is \code{'NAFO_1'}}
+\item{areasField}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
+should be compared against.}
 
-\item{dateStart}{default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateStart = "20190219"}}
+\item{dateStart}{default is \code{NULL}.  This identifies the start date of the search window, in the format \code{YYYYMMDD} (e.g. \code{dateStart = "20190219"}).
+If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).  ,}
 
-\item{dateEnd}{default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateEnd = "20190219"}}
+\item{dateEnd}{default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateEnd = "20190219"}. \code{dateEnd} must be associated with a valid entry of
+\code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
 
-\item{year}{default is \code{NULL} format is \code{YYYY}, e.g. \code{year = 2018}}
+\item{year}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
+\code{YYYY}, e.g. \code{year = 2018}}
 
-\item{keepSurveyTrips}{default is \code{FALSE}}
+\item{keepSurveyTrips}{default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
+ensures these trips are retained.}
 
-\item{matchMarfis}{default is \code{TRUE}}
+\item{matchMarfis}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
 
-\item{matchMaxDayDiff}{default is \code{15}}
+\item{matchMaxDayDiff}{default is \code{15}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
+matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.}
 
-\item{dropUnmatchedISDB}{default is \code{TRUE}}
+\item{dropUnmatchedISDB}{default is \code{TRUE}.}
 
-\item{data.dir}{default is \code{'file.path(getwd(), "data")'} Necessary for useLocal == T.  This is the path to a folder where your *.rdata files are stored.}
+\item{data.dir}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.  This is the path to a folder where your *.rdata files are stored.}
 
-\item{oracle.username}{default is \code{'_none_'} This is your username for accessing oracle objects.}
+\item{oracle.username}{default is \code{'_none_'}. This is your username for accessing oracle objects.}
 
-\item{oracle.password}{default is \code{'_none_'} This is your password for accessing oracle objects.}
+\item{oracle.password}{default is \code{'_none_'}. This is your password for accessing oracle objects.}
 
-\item{oracle.dsn}{default is \code{'_none_'}  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
+\item{oracle.dsn}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
 
-\item{usepkg}{default is \code{'rodbc'} This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
 
-\item{useLocal}{default is \code{FALSE}}
+\item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires VPN).}
 
-\item{quietly}{default is \code{TRUE}}
+\item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.}
 
-\item{debugISDBTrips}{default is \code{'_none_'}}
+\item{debugISDBTrips}{default is \code{'_none_'}. If a vector of ISDB trip IDs is provided, the script will attempt to provide information about what aspects
+of the trips match the fleet (and which don't).}
 
-\item{debugLics}{default is \code{FALSE}}
+\item{debugLics}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
+consideration.}
 
-\item{HS}{default is \code{FALSE}}
+\item{HS}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
 
-\item{debuggit}{default is \code{FALSE}}
+\item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}
 }
 \description{
-This function ensures that all possible parameters are provided.  They will be
-overwritten by any sent directly to the fleet_<species> or get_all functions.
+This function provides all of the possible parameters understood by this package. Some can be overwritten by thefleet_ wrappers.
 }
 \details{
-The desired date range can be specified multiple ways.
-\itemize{
-\item{\code{year}} can be used if data should be extracted for an entire calendar year (i.e. Jan 1 --> Dec 31)
-\item{\code{dateStart}} can be used on it's own, or with a valid entry of dateEnd.  If used on its own, it will extract 1 full year of data (e.g. Jun18, 2018 --> June18, 2019).
-\item{\code{dateEnd}} must be associated with a valid entry of dateStart to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).
-}
-Depending on your value for \code{useLocal}, different values become necessary
+The desired date range can be specified multiple ways - either using \code{year} (alone), \code{dateStart} (alone) or \code{dateStart} with \code{dateEnd} (explained below).
 
-Depending on your value for \code{useLocal}, different values become necessary
 \itemize{
- \item{"useLocal == TRUE"}
+\item{useLocal} Depending on your value for \code{useLocal}, different values become necessary.  \code{useLocal=TRUE}
+\itemize{
+ \item{useLocal=TRUE} This implies that you have local data you want to use.
     \itemize{
-      \item param \code{data.dir} required
+      \item param \code{data.dir} required.  This is the path to your local data
     }
- \item{"useLocal == FALSE"}
-    \itemize{
+ \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data. Include all of the following:
+  \itemize{
       \item param \code{oracle.username} required
       \item param \code{oracle.password} required
       \item param \code{oracle.dsn} required
       \item param \code{usepkg} required
     }
- }
+}
+}
 }
 \seealso{
 Other coreFuncs: 

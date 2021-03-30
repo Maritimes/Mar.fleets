@@ -1,9 +1,9 @@
 #' @title fleet_silverhake
-#' @description This is a wrapper function that facilitates extracting information for the redfish fleets.
-#' All of the information used to identify this fleet are stored in the package's associated data files - licCore, licAreas,
-#' and licGearSpecs.  Depending on user selections which will vary with the different wrappers (e.g. mobile vs fixed, western
-#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), different fleets are identified, and their
-#' data is extracted.
+#' @description This is a wrapper function that facilitates extracting information for the silver hake fleet.
+#' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
+#' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
+#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
+#' different fleets are identified, and their data is extracted.
 #' @param mesh default is \code{'ALL'}. This indicates whether or not the the
 #' fleet should be filtered by mesh size.  It can be either "ALL" or "SMALL"  (i.e. 55-65mm).
 #' @param useLocal default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}

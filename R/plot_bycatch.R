@@ -64,7 +64,7 @@ plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
 
   ggplot2::ggsave(plot = s, filename = paste0(fn,"_stacked_",ts,".png"), width = 14, height=8.5)
   gc()
-  cat("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_stacked_",ts,".png")))
+  message("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_stacked_",ts,".png")))
 
   # sort the data, ensure that the specified spp is first
   df <- df[with(df, order(-EST_NUM_CAUGHT, EST_KEPT_WT,EST_DISCARD_WT)), ]
@@ -74,7 +74,7 @@ plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
     if (nrow(df)>= showXSpp-1) {
       df<-utils::head(df,showXSpp-1)
     }else{
-      cat("\n","Can't show the requested number of species - there are less than that in the data")
+      message("\n","Can't show the requested number of species - there are less than that in the data")
     }
   }
 
@@ -102,7 +102,7 @@ plot_bycatch <- function(isdbSp = NULL,  df=NULL, showXSpp = NULL, title = NULL,
     ggplot2::ggsave(plot = p, filename = paste0(fn,"_tot_",ts,".png"), width = 14, height=8.5)
     gc()
 
-    cat("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_tot",ts,".png")))
-    cat("\n")
+    message("\n", "Plot written to ", paste0(getwd(),"/", paste0(fn,"_tot",ts,".png")))
+    message("\n")
   }
 }

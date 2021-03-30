@@ -29,14 +29,14 @@ can_run <- function(...){
     tables <- gsub("ISDB","OBSERVER", tables)
     fails = 0
     for (t in 1:length(tables)){
-      if (!args$quietly) cat(paste0("Checking access to ",tables[t],": "))
+      if (!args$quietly)message(paste0("Checking access to ",tables[t],": "))
       qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM<=1")
       test = args$cxn$thecmd(args$cxn$channel, qry, rows_at_time = 1)
       if (is.character(test)) {
         fails=fails+1
-        if (!args$quietly) cat(" failed","\n")
+        if (!args$quietly)message(" failed","\n")
       }else{
-        if (!args$quietly) cat(" success","\n")
+        if (!args$quietly)message(" success","\n")
       }
     }
     if (fails>0){
@@ -95,30 +95,30 @@ can_run <- function(...){
       res <- args
       return(res)
     }else{
-      cat(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
-      cat(paste0(MARFIS,".RData"),sep= "\n")
-      cat(paste0(ISDB,".RData"),sep= "\n")
+      message(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
+      message(paste0(MARFIS,".RData"),sep= "\n")
+      message(paste0(ISDB,".RData"),sep= "\n")
       stop()
     }
   }else{
     cxnCheck <- do.call(connect_Oracle, list(args=args))
     if (!is.list(cxnCheck)) {
-      cat("\n","Cannot proceed online (Can't create a DB connection).",
+      message("\n","Cannot proceed online (Can't create a DB connection).",
           "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').","\n")
       stop()
       # return(FALSE)
     }else{
-      if (!args$quietly)  cat("\nDB connection established.\n")
+      if (!args$quietly)  message("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
       res <- args
       return(res)
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
-      cat("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
+      message("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
       res <- args
       return(res)
     }else{
-      cat("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
+      message("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
            stop()
       #return(FALSE)
     }

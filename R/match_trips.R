@@ -43,7 +43,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
-    if (!args$quietly)cat(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
+    if (!args$quietly)message(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
     return(NULL)
   }
   marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "LOA","ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2",args$useDate)])
@@ -289,7 +289,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
 
   if(nrow(matchMulti)>0){
-    if (!args$quietly) cat("\n","Multimatch(es) detected")
+    if (!args$quietly)message("\n","Multimatch(es) detected")
     matchMulti[,c("match_TRIP","match_CONF_HI","match_CONF_HO","match_VRLICDATE","match_VRLICDATE_DETS","TRIP_ID_MARF")] <- NULL
 
     colnames(matchMulti)[colnames(matchMulti)=="TRIP_ID_MARFIS_OTHER"] <- "POTENTIAL_TRIP_ID_MARF"
@@ -312,6 +312,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   res[["MATCH_SUMMARY_TRIPS"]] <- summ_df
   res[["ISDB_UNMATCHABLES"]] <- matchNone
   res[["ISDB_MULTIMATCHES"]] <- matchMulti
-  if(exists("T_match_trips")) cat("\n","match_trips() completed in",round( difftime(Sys.time(),T_match_trips,units = "secs"),0),"secs\n")
+  if(exists("T_match_trips")) message("\n","match_trips() completed in",round( difftime(Sys.time(),T_match_trips,units = "secs"),0),"secs\n")
   return(res)
 }

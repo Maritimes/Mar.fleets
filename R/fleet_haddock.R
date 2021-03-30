@@ -1,9 +1,9 @@
 #' @title fleet_haddock
-#' @description This is a wrapper function that facilitates extracting information for the redfish fleets.
-#' All of the information used to identify this fleet are stored in the package's associated data files - licCore, licAreas,
-#' and licGearSpecs.  Depending on user selections which will vary with the different wrappers (e.g. mobile vs fixed, western
-#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), different fleets are identified, and their
-#' data is extracted.
+#' @description This is a wrapper function that facilitates extracting information for the haddock fleets.
+#' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
+#' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
+#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
+#' different fleets are identified, and their data is extracted.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
 #' @param useLocal default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}
