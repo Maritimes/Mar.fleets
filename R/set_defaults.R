@@ -22,9 +22,9 @@
 #' @param returnLocations default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?
 #' @param useReportedNAFO default is \code{TRUE} (NOT YET IMPLEMENTED)
 #' @param manual_fleet default is \code{FALSE}.
-#' @param areas default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
+#' @param areaFile default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
 #' Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.
-#' @param areasField default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
+#' @param areaFileField default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 #' should be compared against.
 #' @param keepSurveyTrips default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
 #' ensures these trips are retained.
@@ -63,6 +63,14 @@
 #' @param debuggit default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
 #' consideration.
+#' @param debugVRs default is \code{NULL}.  If a vector of VR numbers is provided, the script will provide information about when the script drops them from
+#' consideration.
+#' @param debugMARFTripIDs default is \code{NULL}.  If a vector of MARFIS trip IDs is provided, the script will provide information about when the script drops them from
+#' consideration.
+#' @param debugISDBTripIDs default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the script will provide information about when the script drops them from
+#' consideration.  Trip "names" are typically in a format like "J18-1234" or "J18-1234A".s
+#' @param debugISDBTripNames default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
+#' consideration.
 #' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
@@ -71,7 +79,6 @@ set_defaults <- function(lics = 'all',
                          gearSpecs = 'all',
                          area = 'all',
                          marfSpp = "all",
-                         vessLen = "all",
                          useDate = "LANDED_DATE",
                          returnFleet = T,
                          returnMARFIS = T,
@@ -80,8 +87,8 @@ set_defaults <- function(lics = 'all',
                          returnLocations = T,
                          useReportedNAFO = TRUE,
                          manual_fleet=F,
-                         areas = "NAFOSubunits_sf",
-                         areasField = "NAFO_1",
+                         areaFile = "NAFOSubunits_sf",
+                         areaFileField = "NAFO_1",
                          dateStart = NULL,
                          dateEnd = NULL,
                          year = NULL,
@@ -92,18 +99,20 @@ set_defaults <- function(lics = 'all',
                          data.dir = file.path(getwd(), "data"),
                          oracle.username = "_none_",
                          oracle.password = "_none_",
-                         oracle.dsn = "_none_",
+                         oracle.dsn = "PTRAN",
                          usepkg = "rodbc",
                          useLocal = FALSE,
                          quietly=TRUE,
-                         debugISDBTrips = "_none_",
                          debugLics = NULL,
+                         debugVRs = NULL,
+                         debugMARFTripIDs = NULL,
+                         debugISDBTripIDs = NULL,
+                         debugISDBTripNames = NULL,
                          HS = FALSE,
                          debuggit=FALSE,
                          ...){
   defaults <- as.list(environment())
   sentArgs <- list(...)
-
   #ensure hardcoded args take priority over user args
   submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser, quietly = T)
 
@@ -118,19 +127,17 @@ set_defaults <- function(lics = 'all',
   argg$year <- NULL
 
   #set the field to use for non-NAFO
-  if (argg$areas !=  "NAFOSubunits_sf" && argg$areasField == "NAFO_1"){
-    if (argg$areas == "Strata_Mar_sf") argg$areasField = "StrataID"
-    if (argg$areas == "Strata_Mar_4VSW_sf") argg$areasField = "StrataID"
-
-    if (argg$areas == "LFAs_sf") argg$areasField = "LFA"
-    if (argg$areas == "Grids_Lobster_sf") argg$areasField = "GRID"
-
-    if (argg$areas == "Areas_Snowcrab_sf") argg$areasField = "AREA3"
-    if (argg$areas == "Areas_Snowcrab_Slope_sf") argg$areasField = "AREA2"
-    if (argg$areas == "Areas_Shrimp_sf") argg$areasField = "BOX_NAME"
-    if (argg$areas == "Areas_Surfclam_sf") argg$areasField = "AREA"
-    if (argg$areas == "Areas_Halibut_sf") argg$areasField = "Strata"
-    if (argg$areas == "Areas_Scallop_sf") argg$areasField = "StrataID"
+  if (argg$areaFile !=  "NAFOSubunits_sf" && argg$areaFileField == "NAFO_1"){
+    if (argg$areaFile == "Strata_Mar_sf") argg$areaFileField = "StrataID"
+    if (argg$areaFile == "Strata_Mar_4VSW_sf") argg$areaFileField = "StrataID"
+    if (argg$areaFile == "LFAs_sf") argg$areaFileField = "LFA"
+    if (argg$areaFile == "Grids_Lobster_sf") argg$areaFileField = "GRID"
+    if (argg$areaFile == "Areas_Snowcrab_sf") argg$areaFileField = "AREA3"
+    if (argg$areaFile == "Areas_Snowcrab_Slope_sf") argg$areaFileField = "AREA2"
+    if (argg$areaFile == "Areas_Shrimp_sf") argg$areaFileField = "BOX_NAME"
+    if (argg$areaFile == "Areas_Surfclam_sf") argg$areaFileField = "AREA"
+    if (argg$areaFile == "Areas_Halibut_sf") argg$areaFileField = "Strata"
+    if (argg$areaFile == "Areas_Scallop_sf") argg$areaFileField = "StrataID"
   }
 
   # notify user on unknown sent parameters
@@ -139,10 +146,10 @@ set_defaults <- function(lics = 'all',
     warning(paste0("This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }
 
-  if(!argg$quietly){
-    #create a table outlining info about params
     paramDf <- argg
+    paramDf <- replace(paramDf, sapply(paramDf, is.data.frame), "<see results$params$fleet$...>")
     paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
+    paramDf <- replace(paramDf, sapply(paramDf, is.null), "<NULL>")
     paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
     paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argg$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
     paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argg$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
@@ -151,18 +158,20 @@ set_defaults <- function(lics = 'all',
     paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
     paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
     paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"
+    if("year" %in% names(sentArgs$argsUser)){
+      paramDf[paramDf$PARAMETER == "dateStart","SOURCE"] <- "derived from user-supplied 'year'"
+      paramDf[paramDf$PARAMETER == "dateEnd","SOURCE"] <- "derived from user-supplied 'year'"
+    }
+
     toMatch <- c("TRUE", "FALSE","c\\(.*","^[0-9]*$")
     paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
     paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
-    message("\n","-----------------------------------------------------------------------","\n",
-        "Following is a full list of the parameters that are being used.","\n",
-        "The parameters hardcoded within the species wrapper functions (e.g. fleet_swordfish()) cannot be overridden.","\n",
-        "For example, fleet_swordfish() always uses longline, and cannot be called with a gearcode for 'traps' or 'trawls'.", "\n\n", sep = "")
     paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
     paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
-    print(paramDf)
-
-    message("\n","-----------------------------------------------------------------------\n")
-  }
-  return(argg)
+    paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
+    paramDf <- rbind(paramDf, c("metadata","Mar.bycatch version", utils::packageDescription("Mar.bycatch")$Version))
+res <- list()
+res[["params"]]<- paramDf
+res[["args"]]<- argg
+    return(res)
 }

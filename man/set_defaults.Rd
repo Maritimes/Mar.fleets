@@ -9,7 +9,6 @@ set_defaults(
   gearSpecs = "all",
   area = "all",
   marfSpp = "all",
-  vessLen = "all",
   useDate = "LANDED_DATE",
   returnFleet = T,
   returnMARFIS = T,
@@ -18,8 +17,8 @@ set_defaults(
   returnLocations = T,
   useReportedNAFO = TRUE,
   manual_fleet = F,
-  areas = "NAFOSubunits_sf",
-  areasField = "NAFO_1",
+  areaFile = "NAFOSubunits_sf",
+  areaFileField = "NAFO_1",
   dateStart = NULL,
   dateEnd = NULL,
   year = NULL,
@@ -30,12 +29,15 @@ set_defaults(
   data.dir = file.path(getwd(), "data"),
   oracle.username = "_none_",
   oracle.password = "_none_",
-  oracle.dsn = "_none_",
+  oracle.dsn = "PTRAN",
   usepkg = "rodbc",
   useLocal = FALSE,
   quietly = TRUE,
-  debugISDBTrips = "_none_",
   debugLics = NULL,
+  debugVRs = NULL,
+  debugMARFTripIDs = NULL,
+  debugISDBTripIDs = NULL,
+  debugISDBTripNames = NULL,
   HS = FALSE,
   debuggit = FALSE,
   ...
@@ -68,10 +70,10 @@ For example, certain fleets must use particular mesh sizes or shapes. This infor
 
 \item{manual_fleet}{default is \code{FALSE}.}
 
-\item{areas}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
+\item{areaFile}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
 Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
 
-\item{areasField}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
+\item{areaFileField}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 should be compared against.}
 
 \item{dateStart}{default is \code{NULL}.  This identifies the start date of the search window, in the format \code{YYYYMMDD} (e.g. \code{dateStart = "20190219"}).
@@ -108,10 +110,19 @@ be slightly easier to setup, but roracle will extract data faster.}
 
 \item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.}
 
-\item{debugISDBTrips}{default is \code{'_none_'}. If a vector of ISDB trip IDs is provided, the script will attempt to provide information about what aspects
-of the trips match the fleet (and which don't).}
-
 \item{debugLics}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
+consideration.}
+
+\item{debugVRs}{default is \code{NULL}.  If a vector of VR numbers is provided, the script will provide information about when the script drops them from
+consideration.}
+
+\item{debugMARFTripIDs}{default is \code{NULL}.  If a vector of MARFIS trip IDs is provided, the script will provide information about when the script drops them from
+consideration.}
+
+\item{debugISDBTripIDs}{default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the script will provide information about when the script drops them from
+consideration.  Trip "names" are typically in a format like "J18-1234" or "J18-1234A".s}
+
+\item{debugISDBTripNames}{default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
 consideration.}
 
 \item{HS}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
@@ -119,6 +130,9 @@ consideration.}
 \item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}
+
+\item{debugISDBTrips}{default is \code{'_none_'}. If a vector of ISDB trip IDs is provided, the script will attempt to provide information about what aspects
+of the trips match the fleet (and which don't).}
 }
 \description{
 This function provides all of the possible parameters understood by this package. Some can be overwritten by thefleet_ wrappers.

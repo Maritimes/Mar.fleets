@@ -37,10 +37,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
   tripsN = length(unique(isdbTrips$TRIP_ID_ISDB))
   CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- NA
-  clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
-    df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
-    return(df)
-  }
+
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
     if (!args$quietly)message(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))

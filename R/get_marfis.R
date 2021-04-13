@@ -25,11 +25,12 @@
 #' @export
 get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', nafoCode='all',  ...){
   args <-list(...)$args
-  if (args$debuggit){
-    Mar.utils::where_now()
-    T_get_marfis=Sys.time()
-  }
+  if (args$debuggit) Mar.utils::where_now()
 
+  dbEnv <- new.env()
+  dbEnv$debugLics <- args$debugLics
+  dbEnv$debugVRs <- args$debugVRs
+  dbEnv$debugMARFTripIDs <- args$debugMARFTripIDs
   HAIL_OUTS <-HAIL_IN_CALLS <-MON_DOC_ENTRD_DETS <-LOG_EFRT_STD_INFO<-PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- TRIPS <- NA
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
@@ -40,11 +41,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   getEff <- function(log_efrt = NULL, ...){
 
     args <- list(...)$args
-    if (args$debuggit){
-      Mar.utils::where_now()
-      T_getEff=Sys.time()
-    }
-    if(args$useLocal){
+    if (args$debuggit) Mar.utils::where_now()
+    if (args$useLocal){
 
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
@@ -75,14 +73,14 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
         LOG_EFRT_STD_INFO$LONGITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE),LOG_EFRT_STD_INFO$DET_LONGITUDE,LOG_EFRT_STD_INFO$ENT_LONGITUDE)
         save( LOG_EFRT_STD_INFO, file=file.path(args$data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
       }
-        LOG_EFRT_STD_INFO$LATITUDE_EFRT <- LOG_EFRT_STD_INFO$LONGITUDE_EFRT <- NULL
+      LOG_EFRT_STD_INFO$LATITUDE_EFRT <- LOG_EFRT_STD_INFO$LONGITUDE_EFRT <- NULL
       PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
       colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
       PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
       PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
 
 
-     }else{
+    }else{
       PSQry1 <-paste0("SELECT DISTINCT
                         EF.LOG_EFRT_STD_INFO_ID,
                         EF.FV_FISHED_DATETIME  EF_FISHED_DATETIME,
@@ -111,38 +109,48 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     }
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
-    if(exists("T_getEff")) message("\n","getEff() completed in",round( difftime(Sys.time(),T_getEff,units = "secs"),0),"secs\n")
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit){
-      Mar.utils::where_now()
-      T_getPS=Sys.time()
+    if (args$debuggit) Mar.utils::where_now()
+    theseGears = unique(thisFleet$GEAR_CODE)
+    all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
+    if (args$useReportedNAFO){
+      message("useReportedNAFO not implemented yet")
     }
     if(args$useLocal){
-      theseGears = unique(thisFleet$GEAR_CODE)
-      all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-
       if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
       PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc,
                             c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                               'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                               'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS','SPECIES_CODE')]
-      if (all(args$marfSpp != 'all')) PS_df <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
+      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSallProSpc")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSallProSpc")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSallProSpc")
 
-      if (all(args$nafoCode != 'all')){
-        if (args$useReportedNAFO){
-          message("useReportedNAFO not implemented yet - PS_df only as \n")
-        }
-        PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
-        nafoCodeSimp <- gsub(pattern = "%", x=args$nafoCode, replacement = "",ignore.case = T)
-        PS_df = PS_df[grep(paste(nafoCodeSimp, collapse = '|'),PS_df$NAFO_AREA),]
+      if (all(args$marfSpp != 'all')) PS_df <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
+      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSSp")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSSp")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSSp")
+
+
+      if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
+        # nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
+        NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(args$area$AREA, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
+        PS_df_new <- PS_df[PS_df$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
+        if (args$debuggit) Mar.utils::changeDetector(pre_ = PS_df, post_ = PS_df_new, fields = "LICENCE_ID", flagTxt = "marf_NAFO areas applied")
+        PS_df <- PS_df_new
+        dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFO")
+        dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFO")
+        dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFO")
 
       }
+      PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
+      #used VR_NUMBER_FISHING to join
       PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
       PS_df = merge(PS_df, TRIPS[,c("TRIP_ID", "EARLIEST_DATE_TIME", "LATEST_DATE_TIME")], by="TRIP_ID", all.x = T)
       colnames(PS_df)[colnames(PS_df)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
@@ -154,21 +162,14 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       }else{
         PS_df <- PS_df[which(PS_df$T_DATE1 <= as.Date(args$dateEnd) & PS_df$T_DATE2 >= as.Date(args$dateStart)), ]
       }
+      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSDates")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSDates")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSDates")
+
       PS_df$NAFO_UNIT_AREA_ID <- PS_df$SPECIES_CODE <- NULL
     }else{
-      theseGears = unique(thisFleet$GEAR_CODE)
-      all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
-
-      if (all(args$nafoCode != 'all')){
-        if (args$useReportedNAFO){
-          message("useReportedNAFO not implemented yet - PS_df only as \n")
-        }
-        chk <- grepl(pattern = "%", x = paste0(args$nafoCode,collapse = ''))
-        if (chk){
-          where_n = paste0("AND (", paste0("N.AREA LIKE ('",args$nafoCode,"')", collapse = " OR "),")")
-        }else {
-          where_n = paste0("AND N.AREA IN (",Mar.utils::SQL_in(args$nafoCode),")")
-        }
+      if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
+        where_n <- paste0("AND (",paste0("N.AREA LIKE ('",paste0(unique(args$area$AREA),"%"),"')", collapse = " OR "),")")
       }else{
         where_n = ""
       }
@@ -182,7 +183,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       }else{
         where_HS <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
       }
-
       PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID,
                     PS.PRO_SPC_INFO_ID,
                     PS.MON_DOC_ID,
@@ -206,28 +206,27 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                     WHERE PS.VR_NUMBER_FISHING = V.VR_NUMBER AND
                     PS.NAFO_UNIT_AREA_ID = N.AREA_ID AND
                     PS.TRIP_ID = T.TRIP_ID AND
-                    PS.PRO_SPC_INFO_ID BETWEEN ",min(allProSpc), " AND ", max(allProSpc),"
+                    ",Mar.utils::big_in(vec=unique(allProSpc), vec.field = "PS.PRO_SPC_INFO_ID"), "
                     ",where_HS,"
                     ",where_n, "
                     ",where_sp)
       PS_df <- args$cxn$thecmd(args$cxn$channel, PSQry0)
-      PS_df <- PS_df[PS_df$PRO_SPC_INFO_ID %in% allProSpc,]
+
+      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFOSppDates")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFOSppDates")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFOSppDates")
+
     }
 
     PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
     PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
     PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
     PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
-
-    if(exists("T_getPS")) message("\n","getPS() completed in",round( difftime(Sys.time(),T_getPS,units = "secs"),0),"secs\n")
     return(PS_df)
   }
   getED <- function(mondocs = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit){
-      Mar.utils::where_now()
-      T_getED=Sys.time()
-    }
+    if (args$debuggit) Mar.utils::where_now()
     if(args$useLocal){
 
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("MON_DOC_ENTRD_DETS"),
@@ -263,16 +262,11 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     }
     ED_df <- unique(ED_df)
 
-    if(exists("T_getED")) message("\n","getED() completed in",round( difftime(Sys.time(),T_getED,units = "secs"),0),"secs\n")
-    # if (args$debuggit) message("getED done:",nrow(ED_df),"\n")
     return(ED_df)
   }
   getHIC <- function(trips = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit){
-      Mar.utils::where_now()
-      T_getHIC=Sys.time()
-    }
+    if (args$debuggit)  Mar.utils::where_now()
     if(args$useLocal){
 
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"),
@@ -294,16 +288,12 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
     # colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
     # if (args$debuggit) message("getHIC done:",nrow(HIC_df),"\n")
-
-    if(exists("T_getHIC")) message("\n","getHIC() completed in",round( difftime(Sys.time(),T_getHIC,units = "secs"),0),"secs\n")
     return(HIC_df)
   }
   getHOC <- function(trips = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit){
-      Mar.utils::where_now()
-      T_getHOC=Sys.time()
-    }
+    if (args$debuggit) Mar.utils::where_now()
+
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
@@ -323,8 +313,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
     # colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
     # if (args$debuggit) message("getHOC done:",nrow(HOC_df),"\n")
-
-    if(exists("T_getHOC")) message("\n","getHOC() completed in",round( difftime(Sys.time(),T_getHOC,units = "secs"),0),"secs\n")
     return(HOC_df)
   }
 
@@ -392,34 +380,38 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
   trips <-
     stats::aggregate(
-    x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
-    by = list(TRIP_ID_MARF = trips$TRIP_ID_MARF,
-              MON_DOC_ID =trips$MON_DOC_ID,
-              VR_NUMBER_FISHING = trips$VR_NUMBER_FISHING,
-              #PRO_SPC_INFO_ID = trips$PRO_SPC_INFO_ID,
-              LICENCE_ID = trips$LICENCE_ID,
-              GEAR_CODE = trips$GEAR_CODE,
-              #DATE_FISHED = trips$DATE_FISHED,
-              #LANDED_DATE = trips$LANDED_DATE,
-              VR_NUMBER_LANDING = trips$VR_NUMBER_LANDING,
-              #LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
-              #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
-              #NAFO_AREA = trips$NAFO_AREA,
-              LOA = trips$LOA,
-              T_DATE1 = trips$T_DATE1,
-              T_DATE2 = trips$T_DATE2,
-              OBS_PRESENT = trips$OBS_PRESENT
-    ),
-    FUN = sum
-  )
+      x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
+      by = list(TRIP_ID_MARF = trips$TRIP_ID_MARF,
+                MON_DOC_ID =trips$MON_DOC_ID,
+                VR_NUMBER_FISHING = trips$VR_NUMBER_FISHING,
+                #PRO_SPC_INFO_ID = trips$PRO_SPC_INFO_ID,
+                LICENCE_ID = trips$LICENCE_ID,
+                GEAR_CODE = trips$GEAR_CODE,
+                #DATE_FISHED = trips$DATE_FISHED,
+                #LANDED_DATE = trips$LANDED_DATE,
+                VR_NUMBER_LANDING = trips$VR_NUMBER_LANDING,
+                #LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
+                #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
+                #NAFO_AREA = trips$NAFO_AREA,
+                LOA = trips$LOA,
+                T_DATE1 = trips$T_DATE1,
+                T_DATE2 = trips$T_DATE2,
+                OBS_PRESENT = trips$OBS_PRESENT
+      ),
+      FUN = sum
+    )
   trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
-   # ps <- merge(ps, spd, all.x = T)
+  # ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
 
   res<- list()
   res[["MARF_MATCH"]] <- ps
   res[["MARF_TRIPS"]]<-trips
   res[["MARF_SETS"]]<-eff
-  if(exists("T_get_marfis")) message("\n","get_marfis() completed in",round( difftime(Sys.time(),T_get_marfis,units = "secs"),0),"secs\n")
+
+  res[["debug"]] <- list()
+  if (!class(dbEnv$debugLics) == "NULL") res$debug[["debugLics"]] <- dbEnv$debugLics
+  if (!class(dbEnv$debugVRs) == "NULL") res$debug[["debugVRs"]] <- dbEnv$debugVRs
+  if (!class(dbEnv$debugMARFTripIDs) == "NULL") res$debug[["debugMARFTripIDs"]] <- dbEnv$debugMARFTripIDs
   return(res)
 }

@@ -44,9 +44,9 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
     \item{\code{returnLocations}}{default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?}
     \item{\code{useReportedNAFO}}{default is \code{TRUE} (NOT YET IMPLEMENTED)}
     \item{\code{manual_fleet}}{default is \code{FALSE}.}
-    \item{\code{areas}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
+    \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
 Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
-    \item{\code{areasField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
+    \item{\code{areaFileField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 should be compared against.}
     \item{\code{keepSurveyTrips}}{default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
 ensures these trips are retained.}
@@ -61,11 +61,17 @@ matches (on the basis of common Vessel, licence and date).  They may still match
     \item{\code{usepkg}}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
     \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.}
-    \item{\code{debugISDBTrips}}{default is \code{'_none_'}. If a vector of ISDB trip IDs is provided, the script will attempt to provide information about what aspects
-of the trips match the fleet (and which don't).}
     \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
     \item{\code{debuggit}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
+consideration.}
+    \item{\code{debugVRs}}{default is \code{NULL}.  If a vector of VR numbers is provided, the script will provide information about when the script drops them from
+consideration.}
+    \item{\code{debugMARFTripIDs}}{default is \code{NULL}.  If a vector of MARFIS trip IDs is provided, the script will provide information about when the script drops them from
+consideration.}
+    \item{\code{debugISDBTripIDs}}{default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the script will provide information about when the script drops them from
+consideration.  Trip "names" are typically in a format like "J18-1234" or "J18-1234A".s}
+    \item{\code{debugISDBTripNames}}{default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
 consideration.}
   }}
 }

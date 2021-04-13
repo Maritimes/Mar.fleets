@@ -67,7 +67,7 @@
 #' @export
 fleet_halibut <- function(vessLen = NULL, useLocal = NULL, ...){
   vessLen <- toupper(vessLen)
-  if (is.null(vessLen)){
+  if (length(vessLen)==0){ #NULL became a 0 length vector after toupper
     fleet <- "HALIBUT"
   }else if (vessLen == "45LESS"){
     fleet <- "HALIBUT_45_LESS"

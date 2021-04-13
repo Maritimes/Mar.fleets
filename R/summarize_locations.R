@@ -90,8 +90,8 @@ summarize_locations<-function(get_isdb = NULL,
   .I <- LOG_EFRT_STD_INFO_ID <- MON_DOC_ID<- cnt<- TRIP_ID <-NA
 
   if (is.null(agg.poly.shp)){
-    agg.poly.shp=getExportedValue("Mar.data", args$areas)
-    agg.poly.field = args$areasField
+    agg.poly.shp=getExportedValue("Mar.data", args$areaFile)
+    agg.poly.field = args$areaFileField
 
   }else{
     #use shapefile
