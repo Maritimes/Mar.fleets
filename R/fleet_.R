@@ -45,18 +45,16 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
   # grab user submitted and combine -------------------------------------------------------------------------------------------------------------------------
   argsUser <- list(...)
-  # {
-  if (argsUser$debuggit) Mar.utils::where_now()
-    # print(lics)
-    # print(area)
-    # print(gearSpecs)
-  # }
 
   # add remaining default args ------------------------------------------------------------------------------------------------------------------------------
   args <- do.call(set_defaults, list(argsFn=argsFn, argsUser=argsUser))
+
   params <- args$params
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
   args <- do.call(can_run, args$args)
+
+  if (args$debuggit) Mar.utils::where_now()
+
   #set up results list, and populate according to arguments
   data <- list()
   data[["params"]]<-list()
