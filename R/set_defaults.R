@@ -20,7 +20,6 @@
 #' @param returnISDB default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires returnFleet==T & returnMARFIS ==T)
 #' @param returnBycatch default is \code{TRUE}. Do you want a dataframe of all of the species caught during ISDB sets as part of your results?
 #' @param returnLocations default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?
-#' @param useReportedNAFO default is \code{TRUE} (NOT YET IMPLEMENTED)
 #' @param manual_fleet default is \code{FALSE}.
 #' @param areaFile default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
 #' Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.
@@ -85,7 +84,6 @@ set_defaults <- function(lics = 'all',
                          returnISDB = T,
                          returnBycatch = T,
                          returnLocations = T,
-                         useReportedNAFO = TRUE,
                          manual_fleet=F,
                          areaFile = "NAFOSubunits_sf",
                          areaFileField = "NAFO_1",

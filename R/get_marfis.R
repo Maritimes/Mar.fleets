@@ -116,9 +116,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     if (args$debuggit) Mar.utils::where_now()
     theseGears = unique(thisFleet$GEAR_CODE)
     all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
-    if (args$useReportedNAFO){
-      message("useReportedNAFO not implemented yet")
-    }
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
@@ -150,6 +147,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
       }
       PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
+      browser()
       #used VR_NUMBER_FISHING to join
       PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
       PS_df = merge(PS_df, TRIPS[,c("TRIP_ID", "EARLIEST_DATE_TIME", "LATEST_DATE_TIME")], by="TRIP_ID", all.x = T)
@@ -392,7 +390,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                 VR_NUMBER_LANDING = trips$VR_NUMBER_LANDING,
                 #LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
                 #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
-                #NAFO_AREA = trips$NAFO_AREA,
+                NAFO_AREA = trips$NAFO_AREA,
                 LOA = trips$LOA,
                 T_DATE1 = trips$T_DATE1,
                 T_DATE2 = trips$T_DATE2,
