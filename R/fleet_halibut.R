@@ -4,10 +4,7 @@
 #' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
 #' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
 #' different fleets are identified, and their data is extracted.
-#' @param vessLen default is \code{NULL}.  Valid selections are pending.  NULL returns all vessels, "45LESS" will return vessels which their MARFIS licences
-#' indicate they are less than 45 feet.  Licenced lengths in MARFIS can be different than what is stored in ISDB.
 #' @param useLocal default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}
-#'
 #' if \code{TRUE}, then the following parameter is necessary:
 #' ' \itemize{
 #'   \item \code{data.dir} - This is a path on your computer to where your .RData files are stored.
@@ -22,16 +19,14 @@
 #'   }
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
 #' @examples \dontrun{
-#' db <- fleet_halibut(vessLen = NULL,
-#'                     useLocal = F,
+#' db <- fleet_halibut(useLocal = F,
 #'                     year = 2018,
 #'                     oracle.username = "<name>",
 #'                     oracle.password="<password>",
 #'                     oracle.dsn="PTRAN",
 #'                     usepkg = "roracle"
 #'                     )
-#' local <- fleet_halibut(vessLen = "45LESS",
-#'                        year = 2018,
+#' local <- fleet_halibut(year = 2018,
 #'                        useLocal = T,
 #'                        data.dir = "c:/data_folder"
 #'                       )
@@ -65,14 +60,9 @@
 #'   \item \code{marfSpp} = 130
 #' }
 #' @export
-fleet_halibut <- function(vessLen = NULL, useLocal = NULL, ...){
-  vessLen <- toupper(vessLen)
-  if (length(vessLen)==0){ #NULL became a 0 length vector after toupper
-    fleet <- "HALIBUT"
-  }else if (vessLen == "45LESS"){
-    fleet <- "HALIBUT_45_LESS"
-  }
+fleet_halibut <- function(useLocal = NULL, ...){
 
-  data = fleet_(fleet = fleet, marfSpp = 130, area = "ALL", useLocal = useLocal,...)
+
+  data = fleet_(fleet = "HALIBUT", marfSpp = 130, area = "ALL", useLocal = useLocal,...)
   return(data)
 }
