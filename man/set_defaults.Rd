@@ -106,7 +106,7 @@ matches (on the basis of common Vessel, licence and date).  They may still match
 \item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
 
-\item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires VPN).}
+\item{useLocal}{default is \code{FALSE}. TThis specifies whether to run the script against local data or against Oracle (requires network or VPN).}
 
 \item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.}
 
@@ -159,6 +159,7 @@ The desired date range can be specified multiple ways - either using \code{year}
 }
 \seealso{
 Other coreFuncs: 
+\code{\link{fleet_}()},
 \code{\link{get_fleet}()},
 \code{\link{get_isdb}()},
 \code{\link{get_marfis}()}

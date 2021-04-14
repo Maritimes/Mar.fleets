@@ -16,3 +16,34 @@ clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CL
   df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
   return(df)
 }
+
+#' @title paramOK
+#' @description This function looks for issues with sent parameters.
+#' @param useLocal default is \code{NULL}. This specifies whether to run the script against local data or against Oracle (requires network or VPN).
+#' @param p default is \code{NULL}. This is a list of the parameters sent by the user
+#' @family utils
+#' @return returns TRUE or FALSe, and informative messages
+#' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+paramOK <-function(useLocal = NULL, p = NULL){
+  res <- TRUE
+  msgs <- NULL
+  if (useLocal) {
+    if (!("data.dir" %in% names(p))) {
+      msgs<- c(msgs, "'data.dir' must be provided if useLocal = TRUE")
+      res <- FALSE
+    }
+  }else{
+    if (!("oracle.username" %in% names(p))) msgs <- c(msgs, "If you provide 'oracle.username =<yourname>' in the function call, you will not be prompted for it")
+    if (!("oracle.password" %in% names(p))) msgs <- c(msgs, "If you provide 'oracle.password =<yourpassword>' in the function call, you will not be prompted for it")
+  }
+
+  if (!any(c("year","dateStart") %in% names(p))) {
+    msgs<- c(msgs, "Either 'year' (YYYY) or 'dateStart' (YYYYMMDD) must be passed to this function. \n\t('dateEnd' (YYYYMMDD) may also be passed in conjunction with 'dateStart')")
+    res <- FALSE
+  }
+
+  for (i in 1:length(msgs)){
+    message(msgs[i])
+  }
+  return(res)
+}

@@ -116,28 +116,23 @@ Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} =170
 }
-For component = "WESTERN"
+Licence Information for this fleet is accessible via the following calls. Fleet information for the MOBILE and FIXED fleets can be specified by using either
+\code{POLLOCK_MOBILE} or \code{POLLOCK_FIXED}, respectively:
 \itemize{
-\item \code{nafoCode} = c('4XO\%','4XP\%','4XQ\%','4XR\%','4XS\%','5\%') ("MOBILE")
-\item \code{nafoCode} = c('4XO\%','4XP\%','4XQ\%','4XR\%','4XS\%','5\%', '4XU\%') ("FIXED")
-\item \code{gearSpSize} = seq(90,115,1)
-}
-For component = "EASTERN"
-\itemize{
-\item \code{nafoCode} c('4XM\%','4XN\%','4V\%','4W\%')
-}
-For type = "MOBILE"
-\itemize{
-\item \code{mdCode} = c(2)
-\item \code{gearCode} = c(12)
-\item \code{gearSpSize} = seq(1,129,1) ("SMALL")
-\item \code{gearSpSize} = seq(130,999,1) ("LARGE")
-}
-For type = "FIXED"
-\itemize{
-\item \code{mdCode} = c(1, 29)
-\item \code{gearCode} = c(40,41)
-\item \code{gearSpSize} = 'all'
+  \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.bycatch::licCore[Mar.bycatch::licCore$FLEET=="POLLOCK_MOBILE  (or) POLLOCK_FIXED",]}
+  \item \code{Licence Areas (if applicable)} \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="POLLOCK_MOBILE  (or) POLLOCK_FIXED",]}
+
+  If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
+  For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
+  \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
+  \item \code{Licence Gear Specifications (if applicable)} \code{Mar.bycatch::licGearSpecs[Mar.bycatch::licGearSpecsreas$FLEET=="POLLOCK_MOBILE  (or) POLLOCK_FIXED",]}
+
+   If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
+   multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
+   fleet areas, but do not have to.  In this case, the gear associated with catching redfish in UNIT 2 is different than what's allowed in UNIT 3, so the
+   licGearSpecs table differentiates the gear by having different entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK fleet also has multiple
+   categories of gear sizes, but they are not related to different areas - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.
+   Differing values of Type have not been implemented, but the field exist such that gear can be filtered by Diamond vs Square mesh.
 }
 }
 \examples{
@@ -170,8 +165,7 @@ Other fleets:
 \code{\link{fleet_silverhake}()},
 \code{\link{fleet_snowcrab}()},
 \code{\link{fleet_surfclam}()},
-\code{\link{fleet_winterflounder}()},
-\code{\link{fleet_}()}
+\code{\link{fleet_winterflounder}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

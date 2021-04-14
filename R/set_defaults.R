@@ -32,7 +32,7 @@
 #' @param matchMaxDayDiff default is \code{15}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 #' matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.
 #' @param dropUnmatchedISDB default is \code{TRUE}.
-#' @param useLocal default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires VPN).
+#' @param useLocal default is \code{FALSE}. TThis specifies whether to run the script against local data or against Oracle (requires network or VPN).
 #' @details
 #' \itemize{
 #' \item{useLocal} Depending on your value for \code{useLocal}, different values become necessary.  \code{useLocal=TRUE}

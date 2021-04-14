@@ -45,6 +45,7 @@ particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 }
 \seealso{
 Other coreFuncs: 
+\code{\link{fleet_}()},
 \code{\link{get_fleet}()},
 \code{\link{get_isdb}()},
 \code{\link{set_defaults}()}

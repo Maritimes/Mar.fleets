@@ -4,14 +4,10 @@
 \alias{fleet_halibut}
 \title{fleet_halibut}
 \usage{
-fleet_halibut(vessLen = NULL, useLocal = NULL, ...)
+fleet_halibut(useLocal = NULL, ...)
 }
 \arguments{
-\item{vessLen}{default is \code{NULL}.  Valid selections are pending.  NULL returns all vessels, "45LESS" will return vessels which their MARFIS licences
-indicate they are less than 45 feet.  Licenced lengths in MARFIS can be different than what is stored in ISDB.}
-
 \item{useLocal}{default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}
-
 if \code{TRUE}, then the following parameter is necessary:
 ' \itemize{
   \item \code{data.dir} - This is a path on your computer to where your .RData files are stored.
@@ -108,21 +104,35 @@ Hardcoded parameters for this fleet are as follows:
   \item \code{marfSpp} = 130
   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
   \item \code{gearCode} = c(51)
-  \item \code{marfSpp} = 130
+}
+Licence Information for this fleet is accessible via the following calls:
+\itemize{
+  \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.bycatch::licCore[Mar.bycatch::licCore$FLEET=="HALIBUT",]}
+  \item \code{Licence Areas (if applicable)} \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="HALIBUT",]}
+
+  If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
+  For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
+  \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
+  \item \code{Licence Gear Specifications (if applicable)} \code{Mar.bycatch::licGearSpecs[Mar.bycatch::licGearSpecsreas$FLEET=="HALIBUT",]}
+
+   If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
+   multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
+   fleet areas, but do not have to.  In this case, the gear associated with catching redfish in UNIT 2 is different than what's allowed in UNIT 3, so the
+   licGearSpecs table differentiates the gear by having different entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK fleet also has multiple
+   categories of gear sizes, but they are not related to different areas - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.
+   Differing values of Type have not been implemented, but the field exist such that gear can be filtered by Diamond vs Square mesh.
 }
 }
 \examples{
 \dontrun{
-db <- fleet_halibut(vessLen = NULL,
-                    useLocal = F,
+db <- fleet_halibut(useLocal = F,
                     year = 2018,
                     oracle.username = "<name>",
                     oracle.password="<password>",
                     oracle.dsn="PTRAN",
                     usepkg = "roracle"
                     )
-local <- fleet_halibut(vessLen = "45LESS",
-                       year = 2018,
+local <- fleet_halibut(year = 2018,
                        useLocal = T,
                        data.dir = "c:/data_folder"
                       )
@@ -137,8 +147,7 @@ Other fleets:
 \code{\link{fleet_silverhake}()},
 \code{\link{fleet_snowcrab}()},
 \code{\link{fleet_surfclam}()},
-\code{\link{fleet_winterflounder}()},
-\code{\link{fleet_}()}
+\code{\link{fleet_winterflounder}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

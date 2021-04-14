@@ -103,8 +103,14 @@ can_run <- function(...){
   }else{
     cxnCheck <- do.call(connect_Oracle, list(args=args))
     if (!is.list(cxnCheck)) {
-      message("\n","Cannot proceed online (Can't create a DB connection).",
-          "\n","Please provide oracle.username, oracle.password, oracle.dsn (e.g. 'PTRAN') and usepkg (e.g.'roracle' or 'rodbc').","\n")
+      message("\n","Can't create a DB connection - see suggestions below: ",
+          "\n\t","1) Please ensure you've provided valid values for oracle.username and/or oracle.password.",
+          "\n\t","2) Note that if not provided, 'oracle.dsn' defaults to 'PTRAN' which might be different on your computer.",
+          "\n\t","3) Note that 'usepkg' defaults to the value 'rodbc', indicating the RODBC package should be used to created a connection.",
+          "\n\t","   If you use ROracle, include 'usepkg='roracle' as a parameter to your function.",
+          "\n\t","4) If you see an error message below that includes the text 'architecture mismatch', you likely need to switch your ",
+          "\n\t","   R from 32bit to 64bit (or vice versa), and try again."
+      )
       stop()
       # return(FALSE)
     }else{

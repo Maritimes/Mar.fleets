@@ -24,6 +24,10 @@ locations, dates, durations, gear amount, etc..
 \description{
 This function cleans ISDB trip names of spaces/odd characters to improve the potential for matching.
 }
+\seealso{
+Other utils: 
+\code{\link{paramOK}()}
+}
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
