@@ -44,9 +44,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     if (args$debuggit) Mar.utils::where_now()
     if (args$useLocal){
 
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO", "NAFO_UNIT_AREAS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
+      if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
       if ("CUSER" %in% names(LOG_EFRT_STD_INFO)){
         #do the appropriate tweaks if haven't been done
         LOG_EFRT_STD_INFO$CUSER <- NULL
@@ -74,12 +75,12 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
         save( LOG_EFRT_STD_INFO, file=file.path(args$data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
       }
       LOG_EFRT_STD_INFO$LATITUDE_EFRT <- LOG_EFRT_STD_INFO$LONGITUDE_EFRT <- NULL
-      PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','FV_GEAR_CODE','DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
+      PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','DET_NAFO_UNIT_AREA_ID', 'DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
       colnames(PS_sets)[colnames(PS_sets)=="FV_FISHED_DATETIME"] <- "EF_FISHED_DATETIME"
       PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
       PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
-
-
+      PS_sets = merge(PS_sets, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="DET_NAFO_UNIT_AREA_ID", all.x=T)
+      PS_sets$DET_NAFO_UNIT_AREA_ID <- NULL
     }else{
       PSQry1 <-paste0("SELECT DISTINCT
                         EF.LOG_EFRT_STD_INFO_ID,
@@ -88,15 +89,17 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                         EF.MON_DOC_ID,
                         EF.FV_NUM_OF_GEAR_UNITS,
                         EF.FV_DURATION_IN_HOURS,
+                        N.AREA NAFO_AREA,
                         EF.DET_LATITUDE,
                         EF.DET_LONGITUDE,
                         EF.ENT_LATITUDE,
                         EF.ENT_LONGITUDE
-                     FROM MARFISSCI.LOG_EFRT_STD_INFO EF
-                     WHERE
-                       EF.LOG_EFRT_STD_INFO_ID BETWEEN ",min(log_efrt), " AND ", max(log_efrt))
+                     FROM MARFISSCI.LOG_EFRT_STD_INFO EF,
+                          MARFISSCI.NAFO_UNIT_AREAS N
+                     WHERE EF.DET_NAFO_UNIT_AREA_ID = N.AREA_ID
+                      AND ",Mar.utils::big_in(vec=unique(log_efrt), vec.field = "EF.LOG_EFRT_STD_INFO_ID"))
       PS_sets<- args$cxn$thecmd(args$cxn$channel, PSQry1)
-      PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% log_efrt, ]
+      # PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% log_efrt, ]
       PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
       PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
       PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)] <- (as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 1, 2))
@@ -109,6 +112,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     }
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
+    colnames(PS_sets)[colnames(PS_sets)=="NAFO_AREA"] <- "NAFO_MARF_SETS"
+    PS_sets <- identify_area(PS_sets)
+    colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
@@ -147,7 +153,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
       }
       PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
-      browser()
       #used VR_NUMBER_FISHING to join
       PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
       PS_df = merge(PS_df, TRIPS[,c("TRIP_ID", "EARLIEST_DATE_TIME", "LATEST_DATE_TIME")], by="TRIP_ID", all.x = T)
@@ -215,7 +220,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFOSppDates")
 
     }
-
+    colnames(PS_df)[colnames(PS_df)=="NAFO_AREA"] <- "NAFO_MARF_TRIPS"
     PS_df$DATE_FISHED <- as.Date(PS_df$DATE_FISHED)
     PS_df$LANDED_DATE <- as.Date(PS_df$LANDED_DATE)
     PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
@@ -323,7 +328,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     return(invisible(NULL))
   }
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
-  eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
+  eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "NAFO_AREA_MARF")], sets, all.x=T))
   ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
 
   if (!is.null(ed) && nrow(ed)>0){
@@ -390,7 +395,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                 VR_NUMBER_LANDING = trips$VR_NUMBER_LANDING,
                 #LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
                 #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
-                NAFO_AREA = trips$NAFO_AREA,
+                NAFO_MARF_TRIPS = trips$NAFO_MARF_TRIPS,
                 LOA = trips$LOA,
                 T_DATE1 = trips$T_DATE1,
                 T_DATE2 = trips$T_DATE2,
@@ -401,7 +406,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
   # ps <- merge(ps, spd, all.x = T)
   ps$RND_WEIGHT_KGS<-NULL
-
+  names(eff) <- gsub('^FV_', '', names(eff))
   res<- list()
   res[["MARF_MATCH"]] <- ps
   res[["MARF_TRIPS"]]<-trips

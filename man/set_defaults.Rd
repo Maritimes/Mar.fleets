@@ -15,7 +15,6 @@ set_defaults(
   returnISDB = T,
   returnBycatch = T,
   returnLocations = T,
-  useReportedNAFO = TRUE,
   manual_fleet = F,
   areaFile = "NAFOSubunits_sf",
   areaFileField = "NAFO_1",
@@ -24,7 +23,7 @@ set_defaults(
   year = NULL,
   keepSurveyTrips = FALSE,
   matchMarfis = TRUE,
-  matchMaxDayDiff = 15,
+  matchMaxDayDiff = 2,
   dropUnmatchedISDB = TRUE,
   data.dir = file.path(getwd(), "data"),
   oracle.username = "_none_",
@@ -45,28 +44,26 @@ set_defaults(
 }
 \arguments{
 \item{lics}{default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying the licence types, subtypes, gear and licence species valid
-for a particular fleet.  This information comes from licCore.}
+for a particular fleet.  This information comes from  \code{Mar.bycatch::licCore}.}
 
 \item{gearSpecs}{default is \code{'all'}. Fleet wrappers may populate it with a dataframe specifying the particular specifications for a fleets' gear.
-For example, certain fleets must use particular mesh sizes or shapes. This information comes from licGearSpecs.}
+For example, certain fleets must use particular mesh sizes or shapes. This information comes from  \code{Mar.bycatch::licGearSpecs}.}
 
-\item{area}{default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from licAreas.}
+\item{area}{default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.bycatch::licAreas}.}
 
 \item{marfSpp}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
 
-\item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data? "DATE_FISHED", or "LANDED_DATE"?}
+\item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
 
 \item{returnFleet}{default is \code{TRUE}. Do you want a list object containing fleet information as part of your results?}
 
-\item{returnMARFIS}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires returnFleet==T)}
+\item{returnMARFIS}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
 
-\item{returnISDB}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires returnFleet==T & returnMARFIS ==T)}
+\item{returnISDB}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
 
 \item{returnBycatch}{default is \code{TRUE}. Do you want a dataframe of all of the species caught during ISDB sets as part of your results?}
 
 \item{returnLocations}{default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?}
-
-\item{useReportedNAFO}{default is \code{TRUE} (NOT YET IMPLEMENTED)}
 
 \item{manual_fleet}{default is \code{FALSE}.}
 
@@ -76,21 +73,21 @@ Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
 \item{areaFileField}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 should be compared against.}
 
-\item{dateStart}{default is \code{NULL}.  This identifies the start date of the search window, in the format \code{YYYYMMDD} (e.g. \code{dateStart = "20190219"}).
+\item{dateStart}{default is \code{NULL}.  This identifies the start date of the search window, in the format \code{YYYY-MM-DD} (e.g. \code{dateStart = "2019-02-19"}).
 If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).  ,}
 
-\item{dateEnd}{default is \code{NULL} format is \code{YYYYMMDD}, e.g. \code{dateEnd = "20190219"}. \code{dateEnd} must be associated with a valid entry of
+\item{dateEnd}{default is \code{NULL} format is \code{YYYY-MM-DD}, e.g. \code{dateEnd = "2019-02-19"}. \code{dateEnd} must be associated with a valid entry of
 \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
 
 \item{year}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
-\code{YYYY}, e.g. \code{year = 2018}}
+\code{YYYY}, e.g. \code{year = 2018}.  \code{dateStart} takes priority over \code{year} if both are provided.}
 
 \item{keepSurveyTrips}{default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
 ensures these trips are retained.}
 
 \item{matchMarfis}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
 
-\item{matchMaxDayDiff}{default is \code{15}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
+\item{matchMaxDayDiff}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.}
 
 \item{dropUnmatchedISDB}{default is \code{TRUE}.}
@@ -120,7 +117,7 @@ consideration.}
 consideration.}
 
 \item{debugISDBTripIDs}{default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the script will provide information about when the script drops them from
-consideration.  Trip "names" are typically in a format like "J18-1234" or "J18-1234A".s}
+consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1234A".}
 
 \item{debugISDBTripNames}{default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
 consideration.}
@@ -135,7 +132,7 @@ consideration.}
 of the trips match the fleet (and which don't).}
 }
 \description{
-This function provides all of the possible parameters understood by this package. Some can be overwritten by thefleet_ wrappers.
+This function provides all of the possible parameters understood by this package. Some can be overwritten by \code{fleet_*} wrappers.
 }
 \details{
 The desired date range can be specified multiple ways - either using \code{year} (alone), \code{dateStart} (alone) or \code{dateStart} with \code{dateEnd} (explained below).

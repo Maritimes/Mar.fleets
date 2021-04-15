@@ -147,7 +147,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-      ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID")]
+      ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID")]
+
+      colnames(ISFISHSETS)[colnames(ISFISHSETS)=="NAFAREA_ID"] <- "NAFO_ISDB_SETS"
 
       ISSETPROFILE_WIDE<-ISSETPROFILE_WIDE[ISSETPROFILE_WIDE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
       ISSETPROFILE_WIDE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE_WIDE$DATE_TIME1 > badDate,
@@ -159,7 +161,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
 
      }else{
 
-      FSSQL  <- paste0("SELECT distinct FS.TRIP_ID, FS.FISHSET_ID, FS.SOURCE, FS.SETCD_ID
+      FSSQL  <- paste0("SELECT distinct FS.TRIP_ID, FS.FISHSET_ID, FS.SOURCE, FS.SETCD_ID, NAFAREA_ID AS NAFO_ISDB_SETS
                 FROM OBSERVER.ISFISHSETS FS
                 WHERE ",Mar.utils::big_in(vec=unique(isdbTrips$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
@@ -199,7 +201,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     colnames(coords)[2]<-"LONGITUDE"
     ISSETPROFILE_WIDE = cbind(ISSETPROFILE_WIDE,coords)
 
-    ISFISHSETS <- unique(ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID")])
+    ISFISHSETS <- unique(ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFO_ISDB_SETS")])
     ISSETPROFILE_WIDE <- unique(ISSETPROFILE_WIDE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE")])
 
     ISSETPROFILE_WIDE[,c("LATITUDE","LONGITUDE")] <- as.numeric(as.character(unlist(ISSETPROFILE_WIDE[,c("LATITUDE","LONGITUDE")])))
@@ -208,8 +210,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       message(paste0("\n","No ISDB sets"))
       return(NULL)
     }
+    ISSETPROFILE_WIDE <- identify_area(ISSETPROFILE_WIDE)
+    colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO_BEST"] <- "NAFO_ISDB_SETS_CALC"
+
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
-    if (args$debuggit) message("DEBUG: Found", nrow(ISSETPROFILE_WIDE), "ISDB sets","\n")
     return(ISSETPROFILE_WIDE)
   }
 

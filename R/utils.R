@@ -38,12 +38,53 @@ paramOK <-function(useLocal = NULL, p = NULL){
   }
 
   if (!any(c("year","dateStart") %in% names(p))) {
-    msgs<- c(msgs, "Either 'year' (YYYY) or 'dateStart' (YYYYMMDD) must be passed to this function. \n\t('dateEnd' (YYYYMMDD) may also be passed in conjunction with 'dateStart')")
+    msgs<- c(msgs, "Either 'year' (YYYY) or 'dateStart' ('YYYY-MM-DD') must be passed to this function. \n\t('dateEnd' ('YYYY-MM-DD') may also be passed in conjunction with 'dateStart')")
     res <- FALSE
   }
 
   for (i in 1:length(msgs)){
     message(msgs[i])
   }
+  return(res)
+}
+
+
+determineArea<-function(df=NULL, setField = NULL,  agg.poly.field = NULL, newID = NULL){
+  browser()
+  clean_df_field <- function(df=df, agg.poly.field = NULL){
+    #this populates NA fields with a known (bad) value so we can track how many there were
+    df[[agg.poly.field]][is.na(df[[agg.poly.field]])] <- 99999
+    return(df)
+  }
+  df = clean_df_field(df, agg.poly.field)
+  df_new = stats::aggregate(
+    x = list(cnt =  df[,setField]),
+    by = list(TRIP_ID = df[,setField],
+              area =  df[,agg.poly.field]
+    ),
+    length
+  )
+  #The following assigns each trip to the area
+  #with the most sets.
+
+  df_new <- data.table::setDT(df_new)
+  df_new <- df_new[df_new[, .I[which.max(cnt)], by=TRIP_ID]$V1]
+  df_new <- as.data.frame(df_new)
+  df_new$cnt<-NULL
+  locValues = stats::aggregate(
+    x = list(tmp = df_new$TRIP_ID),
+    by = list(area = df_new$area),
+    length
+  )
+  df_new[df_new$area == 99999,"area"]<-"Other"
+  colnames(df_new)[colnames(df_new)=="area"] <- agg.poly.field
+  colnames(df_new)[colnames(df_new)=="TRIP_ID"] <- setField
+  locValues[locValues$area == 99999,"area"]<-"Other"
+  colnames(locValues)[colnames(locValues)=="area"] <- agg.poly.field
+  colnames(locValues)[colnames(locValues)=="tmp"] <- newID
+  colnames(locValues)[colnames(locValues)=="TRIP_ID"] <- setField
+  res = list()
+  res[["summary"]]<-locValues
+  res[["details"]]<-df_new
   return(res)
 }
