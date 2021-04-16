@@ -210,7 +210,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       message(paste0("\n","No ISDB sets"))
       return(NULL)
     }
-    ISSETPROFILE_WIDE <- identify_area(ISSETPROFILE_WIDE)
+    ISSETPROFILE_WIDE <- identify_area(ISSETPROFILE_WIDE, flag.land = T)
     colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO_BEST"] <- "NAFO_ISDB_SETS_CALC"
 
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
@@ -306,6 +306,8 @@ AND  ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS
     ISDB_UNMATCHABLES <- NA
     ISDB_MULTIMATCHES <- NA
   }
+  #use the set NAFO information to calculate a Trip-level NAFO
+
   res= list()
   res[["ISDB_TRIPS"]]<- isdb_TRIPS_all
   res[["ISDB_SETS"]] <- isdb_SETS_all

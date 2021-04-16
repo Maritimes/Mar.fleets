@@ -113,7 +113,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_AREA"] <- "NAFO_MARF_SETS"
-    PS_sets <- identify_area(PS_sets)
+    PS_sets <- identify_area(PS_sets, flag.land = TRUE)
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
     return(PS_sets)
   }
@@ -328,7 +328,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     return(invisible(NULL))
   }
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
-  eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "NAFO_AREA_MARF")], sets, all.x=T))
+  eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "NAFO_MARF_TRIPS")], sets, all.x=T))
   ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
 
   if (!is.null(ed) && nrow(ed)>0){
@@ -355,7 +355,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   }else{
     ps$CONF_NUMBER_HI <- ps$HAIL_OUT_ID_HI <- NA
   }
-
 
   hoc<- do.call(getHOC, list(trips = ps$TRIP_ID, args=args))
   #a single trip can have multiple hoc - this adds a comma-separated list of all
