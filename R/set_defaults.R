@@ -15,10 +15,8 @@
 #' @param area default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.bycatch::licAreas}.
 #' @param marfSpp default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper
 #' @param useDate default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?
-#' @param returnFleet default is \code{TRUE}. Do you want a list object containing fleet information as part of your results?
 #' @param returnMARFIS default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})
 #' @param returnISDB default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})
-#' @param returnBycatch default is \code{TRUE}. Do you want a dataframe of all of the species caught during ISDB sets as part of your results?
 #' @param returnLocations default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?
 #' @param manual_fleet default is \code{FALSE}.
 #' @param areaFile default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
@@ -79,10 +77,8 @@ set_defaults <- function(lics = 'all',
                          area = 'all',
                          marfSpp = "all",
                          useDate = "LANDED_DATE",
-                         returnFleet = T,
                          returnMARFIS = T,
                          returnISDB = T,
-                         returnBycatch = T,
                          returnLocations = T,
                          manual_fleet=F,
                          areaFile = "NAFOSubunits_sf",

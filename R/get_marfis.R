@@ -329,6 +329,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   }
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
   eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "NAFO_MARF_TRIPS")], sets, all.x=T))
+  eff[(is.na(eff$LATITUDE) | is.na(eff$LONGITUDE)) & is.na(eff$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "Missing coordinate"
   ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
 
   if (!is.null(ed) && nrow(ed)>0){

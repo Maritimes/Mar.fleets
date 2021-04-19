@@ -63,10 +63,9 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   data$params$fleet[["licencesCore"]] <- lics
   data$params$fleet[["licencesAreas"]] <- area
   data$params$fleet[["licencesGearSpecs"]] <- gearSpecs
-  if (args$returnFleet){
     fleet <- do.call(get_fleet, args)
     data[["fleet"]]<- fleet
-  }
+
   if (!class(fleet$debug$debugLics) == "NULL") args$debugLics <- fleet$debug$debugLics
   if (!class(fleet$debug$debugVRs) == "NULL") args$debugVRs <- fleet$debug$debugVRs
   if (!class(fleet$debug$debugMARFTripIDs) == "NULL") args$debugMARFTripIDs <- fleet$debug$debugMARFTripIDs
@@ -99,11 +98,6 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
         if (!class(isdb$debug$debugISDBTripIDs) == "NULL") args$debugISDBTripIDs <- isdb$debug$debugISDBTripIDs
         if (!class(isdb$debug$debugISDBTripNames) == "NULL") args$debugISDBTripNames <- isdb$debug$debugISDBTripNames
         data$isdb$debug <-NULL
-
-        if (args$returnBycatch){
-          bycatch <- do.call(get_bycatch, list(isTrips = unique(isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF), "TRIP_ID_ISDB"]), args=args))
-          data[["bycatch"]]<- bycatch
-        }
 
         if (args$returnLocations){
           loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))

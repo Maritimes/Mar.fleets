@@ -251,27 +251,34 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       }
     }
     if(args$useLocal){
-    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
+    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISSPECIESCODES","ISFISHSETS","ISCATCHES"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                env = environment(), quietly = args$quietly)
     ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
-    catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_COMBINED_WT")]
+    catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
     catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
+    catches <- merge(catches, ISSPECIESCODES[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
+
     }else{
       # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
       catchSQL = paste0("SELECT CA.SPECCD_ID,
-       CA.EST_COMBINED_WT,
+       CA.EST_NUM_CAUGHT, CA.EST_KEPT_WT, CA.EST_DISCARD_WT, CA.EST_COMBINED_WT,
        FS.TRIP_ID,
-       CA.FISHSET_ID
+       CA.FISHSET_ID,
+       SP.COMMON,
+       SP.SCIENTIFIC
 FROM
 ISDB.ISCATCHES CA,
-ISDB.ISFISHSETS FS
+ISDB.ISFISHSETS FS,
+ISDB.ISSPECIESCODES SP
 WHERE
-CA.FISHSET_ID = FS.FISHSET_ID
-AND  ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
+CA.FISHSET_ID = FS.FISHSET_ID AND
+CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
       catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
     }
+
+
     catches_trip_wide <- stats::aggregate(
       x = list(EST_COMBINED_WT_TRIP = catches$EST_COMBINED_WT),
       by = list(TRIP_ID = catches$TRIP_ID,
@@ -299,6 +306,26 @@ AND  ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS
     isdb_SETS_all <- merge(isdb_SETS_all, catches_set_wide, all.x = T, by.x="FISHSET_ID", by.y = "FISHSET_ID")
     isdb_SETS_all[,spColsS][is.na(isdb_SETS_all[,spColsS])] <- 0
 
+
+    isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% args$marfSpp),c("SPECCD_ID")]
+    catches[is.na(catches)] <- 0
+    SUMMARY<- catches
+    SUMMARY = stats::aggregate(
+      x = list(EST_NUM_CAUGHT = SUMMARY$EST_NUM_CAUGHT,
+               EST_KEPT_WT = SUMMARY$EST_KEPT_WT,
+               EST_DISCARD_WT = SUMMARY$EST_DISCARD_WT),
+      by = list(SPEC = SUMMARY$SPECCD_ID,
+                COMMON = SUMMARY$COMMON,
+                SCI = SUMMARY$SCIENTIFIC
+      ),
+      sum
+    )
+    SUMMARY <- SUMMARY[with(SUMMARY, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
+    dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% isdbSPP,]
+    SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% isdbSPP),]
+    SUMMARY <- rbind(dir_Spp_rows, SUMMARY)
+
+
   }else{
     isdb_TRIPS_all <- NA
     isdb_SETS_all <- NA
@@ -311,6 +338,9 @@ AND  ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS
   res= list()
   res[["ISDB_TRIPS"]]<- isdb_TRIPS_all
   res[["ISDB_SETS"]] <- isdb_SETS_all
+  res[["ISDB_CATCHES"]] <- list()
+  res$ISDB_CATCHES[["ALL"]] <- catches
+  res$ISDB_CATCHES[["SUMMARY"]] <- SUMMARY
   res[["MATCH_SUMMARY_TRIPS"]] <- msum
   res[["ISDB_UNMATCHABLES"]] <- ISDB_UNMATCHABLES
   res[["ISDB_MULTIMATCHES"]] <- ISDB_MULTIMATCHES
