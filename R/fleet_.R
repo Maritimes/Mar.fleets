@@ -99,7 +99,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
         if (!class(isdb$debug$debugISDBTripNames) == "NULL") args$debugISDBTripNames <- isdb$debug$debugISDBTripNames
         data$isdb$debug <-NULL
 
-        loc <- do.call(summarize_locations2, list(get_isdb = isdb, get_marfis = marf, args=args))
+        loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
         data[["location_summary"]]<- loc
       }
     }

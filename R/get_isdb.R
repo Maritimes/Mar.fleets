@@ -211,7 +211,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       message(paste0("\n","No ISDB sets"))
       return(NULL)
     }
-    ISSETPROFILE_WIDE <- identify_area(ISSETPROFILE_WIDE, flag.land = T)
+    ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, flag.land = T)
     colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO_BEST"] <- "NAFO_ISDB_SETS_CALC"
 
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)

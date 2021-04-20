@@ -119,6 +119,8 @@ consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1
 \item{debugISDBTripNames}{default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
 consideration.}
 
+\item{HS}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
+
 \item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}

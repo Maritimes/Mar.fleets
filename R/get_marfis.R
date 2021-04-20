@@ -115,7 +115,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_AREA"] <- "NAFO_MARF_SETS"
 
 
-    PS_sets <- identify_area(PS_sets, flag.land = TRUE)
+    PS_sets <- Mar.utils::identify_area(PS_sets, flag.land = TRUE)
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
     return(PS_sets)
   }

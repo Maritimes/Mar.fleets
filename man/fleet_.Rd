@@ -51,6 +51,7 @@ matches (on the basis of common Vessel, licence and date).  They may still match
     \item{\code{usepkg}}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
     \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
+    \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
     \item{\code{debuggit}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
 consideration.}
