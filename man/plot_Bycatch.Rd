@@ -46,7 +46,6 @@ plot_bycatch(isdbSp = swordfish2018$bycatch[1,1],
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{get_bycatch}()},
 \code{\link{get_vmstracks}()},
 \code{\link{summarize_locations}()}
 }

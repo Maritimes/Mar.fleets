@@ -4,14 +4,7 @@
 \alias{summarize_locations}
 \title{summarize_locations}
 \usage{
-summarize_locations(
-  get_isdb = NULL,
-  get_marfis = NULL,
-  marfMatchOnly = TRUE,
-  agg.poly.shp = NULL,
-  agg.poly.field = NULL,
-  ...
-)
+summarize_locations(get_isdb = NULL, get_marfis = NULL, ...)
 }
 \arguments{
 \item{get_isdb}{default is \code{NULL}. This is the list output by the
@@ -21,19 +14,6 @@ trip and set information from ISDB related to the specified fleet}
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
 \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
-
-\item{marfMatchOnly}{default is \code{TRUE}.  This determines whether the
-function should be run on all ISDB data, or just on those that have been
-matched to MARFIS data (the default).}
-
-\item{agg.poly.shp}{default is \code{NULL}.  This is either the path to the
-*.shp file of a shapefile, an sf spatial object; or an sp spatialpolygonsdataframe.
- If NULL, NAFO zones will be used.}
-
-\item{agg.poly.field}{default is \code{NULL}.  This identifies the field within
-\code{agg.poly.shp} that contains the values that should be appended to the
-input dataframe. If NULL, "NAFO_BEST", will be used, which is the finest
-resolution NAFO subdivision.}
 
 \item{...}{other arguments passed to methods}
 }
@@ -60,8 +40,7 @@ applied to that TRIP OR SET.
 \description{
 This function takes the results from get_marfis() and get_isdb()
 and produces a table showing the how the proportion of observed data varies
-across areas.  Different polygons can be provided, and the results will be
-tailored to those polygons.
+across areas.
 }
 \note{
 \itemize{
@@ -90,12 +69,10 @@ those trips/sets will be attributed to "Other".
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{get_bycatch}()},
 \code{\link{get_vmstracks}()},
 \code{\link{plot_bycatch}()}
 
 Other simpleproducts: 
-\code{\link{get_bycatch}()},
 \code{\link{get_vmstracks}()},
 \code{\link{plot_bycatch}()}
 }

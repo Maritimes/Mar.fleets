@@ -10,14 +10,12 @@ set_defaults(
   area = "all",
   marfSpp = "all",
   useDate = "LANDED_DATE",
-  returnFleet = T,
   returnMARFIS = T,
   returnISDB = T,
-  returnBycatch = T,
-  returnLocations = T,
   manual_fleet = F,
   areaFile = "NAFOSubunits_sf",
   areaFileField = "NAFO_1",
+  nafoDet = 2,
   dateStart = NULL,
   dateEnd = NULL,
   year = NULL,
@@ -55,15 +53,9 @@ For example, certain fleets must use particular mesh sizes or shapes. This infor
 
 \item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
 
-\item{returnFleet}{default is \code{TRUE}. Do you want a list object containing fleet information as part of your results?}
-
 \item{returnMARFIS}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
 
 \item{returnISDB}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
-
-\item{returnBycatch}{default is \code{TRUE}. Do you want a dataframe of all of the species caught during ISDB sets as part of your results?}
-
-\item{returnLocations}{default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?}
 
 \item{manual_fleet}{default is \code{FALSE}.}
 
@@ -72,6 +64,11 @@ Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
 
 \item{areaFileField}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 should be compared against.}
+
+\item{nafoDet}{default is \code{2}, but values between \code{1} and \code{4} are acceptable..  This specifies the level of detail that will be used in the
+summarized locations table.  Using the default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2 characters).  If
+set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) , while a value like 4 would summarize the trips and sets into very specific
+NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")}
 
 \item{dateStart}{default is \code{NULL}.  This identifies the start date of the search window, in the format \code{YYYY-MM-DD} (e.g. \code{dateStart = "2019-02-19"}).
 If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).  ,}
@@ -105,7 +102,7 @@ be slightly easier to setup, but roracle will extract data faster.}
 
 \item{useLocal}{default is \code{FALSE}. TThis specifies whether to run the script against local data or against Oracle (requires network or VPN).}
 
-\item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.}
+\item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
 
 \item{debugLics}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
 consideration.}
@@ -122,14 +119,9 @@ consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1
 \item{debugISDBTripNames}{default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
 consideration.}
 
-\item{HS}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
-
 \item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}
-
-\item{debugISDBTrips}{default is \code{'_none_'}. If a vector of ISDB trip IDs is provided, the script will attempt to provide information about what aspects
-of the trips match the fleet (and which don't).}
 }
 \description{
 This function provides all of the possible parameters understood by this package. Some can be overwritten by \code{fleet_*} wrappers.

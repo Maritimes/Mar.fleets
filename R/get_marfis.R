@@ -113,6 +113,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
     PS_sets<-unique(PS_sets)
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_AREA"] <- "NAFO_MARF_SETS"
+
+
     PS_sets <- identify_area(PS_sets, flag.land = TRUE)
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
     return(PS_sets)
@@ -329,7 +331,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   }
   sets<-  do.call(getEff, list(log_efrt = allLogEff, args=args))
   eff <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "NAFO_MARF_TRIPS")], sets, all.x=T))
-  eff[(is.na(eff$LATITUDE) | is.na(eff$LONGITUDE)) & is.na(eff$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "Missing coordinate"
+  eff[["NAFO_MARF_SETS"]][is.na(eff[["NAFO_MARF_SETS"]])] <- "<not recorded>"
+
+  eff[(is.na(eff$LATITUDE) | is.na(eff$LONGITUDE)) & is.na(eff$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "<missing coord>"
   ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
 
   if (!is.null(ed) && nrow(ed)>0){
@@ -374,12 +378,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   colnames(ps)[colnames(ps)=="TRIP_ID"] <- "TRIP_ID_MARF"
   colnames(eff)[colnames(eff)=="TRIP_ID"] <- "TRIP_ID_MARF"
 
-  ntrips = sort(unique(eff$TRIP_ID_MARF))
-
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID")]) #, "OBS_PRESENT")])
-
+  ps$RND_WEIGHT_KGS<-NULL
   trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
   trips <-
     stats::aggregate(
@@ -404,9 +406,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       FUN = sum
     )
   trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
-  # ps <- merge(ps, spd, all.x = T)
-  ps$RND_WEIGHT_KGS<-NULL
+
   names(eff) <- gsub('^FV_', '', names(eff))
+
   res<- list()
   res[["MARF_MATCH"]] <- ps
   res[["MARF_TRIPS"]]<-trips

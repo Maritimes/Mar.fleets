@@ -17,12 +17,15 @@
 #' @param useDate default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?
 #' @param returnMARFIS default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})
 #' @param returnISDB default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})
-#' @param returnLocations default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?
 #' @param manual_fleet default is \code{FALSE}.
 #' @param areaFile default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
 #' Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.
 #' @param areaFileField default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 #' should be compared against.
+#' @param nafoDet default is \code{2}, but values between \code{1} and \code{4} are acceptable..  This specifies the level of detail that will be used in the
+#' summarized locations table.  Using the default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2 characters).  If
+#' set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) , while a value like 4 would summarize the trips and sets into very specific
+#' NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")
 #' @param keepSurveyTrips default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
 #' ensures these trips are retained.
 #' @param matchMarfis default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.
@@ -53,10 +56,7 @@
 #' @param oracle.dsn default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"
 #' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 #' be slightly easier to setup, but roracle will extract data faster.
-#' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.
-#' @param debugISDBTrips default is \code{'_none_'}. If a vector of ISDB trip IDs is provided, the script will attempt to provide information about what aspects
-#' of the trips match the fleet (and which don't).
-#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.
+#' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.
 #' @param debuggit default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
 #' consideration.
@@ -79,10 +79,10 @@ set_defaults <- function(lics = 'all',
                          useDate = "LANDED_DATE",
                          returnMARFIS = T,
                          returnISDB = T,
-                         returnLocations = T,
                          manual_fleet=F,
                          areaFile = "NAFOSubunits_sf",
                          areaFileField = "NAFO_1",
+                         nafoDet = 2,
                          dateStart = NULL,
                          dateEnd = NULL,
                          year = NULL,
@@ -141,7 +141,7 @@ set_defaults <- function(lics = 'all',
   }
 
     paramDf <- argg
-    paramDf <- replace(paramDf, sapply(paramDf, is.data.frame), "<see results$params$fleet$...>")
+    paramDf <- replace(paramDf, sapply(paramDf, is.data.frame), "see <results>$params$fleet$...")
     paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
     paramDf <- replace(paramDf, sapply(paramDf, is.null), "<NULL>")
     paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)

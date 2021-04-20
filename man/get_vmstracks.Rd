@@ -36,7 +36,6 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{get_bycatch}()},
 \code{\link{plot_bycatch}()},
 \code{\link{summarize_locations}()}
 }

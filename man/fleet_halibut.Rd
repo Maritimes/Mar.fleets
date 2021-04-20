@@ -32,16 +32,17 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
 \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
     \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
-    \item{\code{returnFleet}}{default is \code{TRUE}. Do you want a list object containing fleet information as part of your results?}
     \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
     \item{\code{returnISDB}}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
-    \item{\code{returnBycatch}}{default is \code{TRUE}. Do you want a dataframe of all of the species caught during ISDB sets as part of your results?}
-    \item{\code{returnLocations}}{default is \code{TRUE}. Do you want a dataframe of the locations of the various sets as part of your results?}
     \item{\code{manual_fleet}}{default is \code{FALSE}.}
     \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
 Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
     \item{\code{areaFileField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
 should be compared against.}
+    \item{\code{nafoDet}}{default is \code{2}, but values between \code{1} and \code{4} are acceptable..  This specifies the level of detail that will be used in the
+summarized locations table.  Using the default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2 characters).  If
+set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) , while a value like 4 would summarize the trips and sets into very specific
+NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")}
     \item{\code{keepSurveyTrips}}{default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
 ensures these trips are retained.}
     \item{\code{matchMarfis}}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
@@ -54,8 +55,7 @@ matches (on the basis of common Vessel, licence and date).  They may still match
     \item{\code{oracle.dsn}}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
     \item{\code{usepkg}}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
-    \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.}
-    \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
+    \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
     \item{\code{debuggit}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
 consideration.}

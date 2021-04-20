@@ -39,7 +39,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     tmp <- clean_ISDB_Trip(df=tmp, field = "ISDB_TRIP", out_name = "ISDB_TRIP_CLN") #orig values stored in tmp
     dbEnv$debugISDBTripNames <- tmp$ISDB_TRIP_CLN
   }
-  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- NA
+  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- spLookups <- NA
+  utils::data("spLookups", envir = environment())
 
   if (is.null(get_marfis) & matchMarfis==TRUE){
     message(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
@@ -308,6 +309,7 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
 
 
     isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% args$marfSpp),c("SPECCD_ID")]
+    rm(spLookups)
     catches[is.na(catches)] <- 0
     SUMMARY<- catches
     SUMMARY = stats::aggregate(
