@@ -15,6 +15,7 @@
 #' @param area default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.bycatch::licAreas}.
 #' @param marfSpp default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper
 #' @param useDate default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?
+#' @param tripcd_id default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches
 #' @param returnMARFIS default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})
 #' @param returnISDB default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})
 #' @param manual_fleet default is \code{FALSE}.
@@ -78,6 +79,7 @@ set_defaults <- function(lics = 'all',
                          area = 'all',
                          marfSpp = "all",
                          useDate = "LANDED_DATE",
+                         tripcd_id = NULL,
                          returnMARFIS = T,
                          returnISDB = T,
                          manual_fleet=F,
