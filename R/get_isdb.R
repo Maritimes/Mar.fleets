@@ -268,17 +268,16 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (matchMarfis) {
       trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
       if (args$debuggit) message("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
-      matchFields = c("SRC", "match_TRIP", "match_CONF_HI", "match_CONF_HO",
+      matchFields = c("SRC", "match_TRIP", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
                       "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
                       "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
                       "match_LICDATE", "match_LICDATE_DETS", "T_DATE1_LIC", "T_DATE2_LIC",
                       "match_swappedDATE", "match_swappedDATE_DETS", "T_DATE1_swap", "T_DATE2_swap")
-
       isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED[, !names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields]
-      isdb_TRIPS_match_dets <- trips$ISDB_MARFIS_POST_MATCHED[, c("TRIP_ID_ISDB", "TRIP_ID_MARF", "TRIP_ID_MARFIS_OTHER",names(trips$ISDB_MARFIS_POST_MATCHED)[names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields])]
+      isdb_TRIPS_match_dets <- trips$ISDB_MARFIS_POST_MATCHED[, c("TRIP_ID_ISDB", "TRIP_ID_MARF",names(trips$ISDB_MARFIS_POST_MATCHED)[names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields])]
       msum <- trips$MATCH_SUMMARY_TRIPS
       ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
-      if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(BOARD_DATE, LANDING_DATE)), ]
+      if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(T_DATE1)), ]
       ISDB_MULTIMATCHES <- trips$ISDB_MULTIMATCHES
       if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
         sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, args = args))
@@ -326,33 +325,36 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
     }
 
 
-    catches_trip_wide <- stats::aggregate(
-      x = list(EST_COMBINED_WT_TRIP = catches$EST_COMBINED_WT),
-      by = list(TRIP_ID = catches$TRIP_ID,
-                SPECCD_ID = catches$SPECCD_ID
-      ),
-      sum
-    )
-    catches_trip_wide <- reshape2::dcast(catches_trip_wide, TRIP_ID ~ SPECCD_ID, value.var = "EST_COMBINED_WT_TRIP")
+    if (1==2){
+      catches_trip_wide <- stats::aggregate(
+        x = list(EST_COMBINED_WT_TRIP = catches$EST_COMBINED_WT),
+        by = list(TRIP_ID = catches$TRIP_ID,
+                  SPECCD_ID = catches$SPECCD_ID
+        ),
+        sum
+      )
+      catches_trip_wide <- reshape2::dcast(catches_trip_wide, TRIP_ID ~ SPECCD_ID, value.var = "EST_COMBINED_WT_TRIP")
 
-    spColsT <- paste0("sp_",colnames(catches_trip_wide)[-1])
-    names(catches_trip_wide)[-1] <- spColsT
-    isdb_TRIPS_all <- merge(isdb_TRIPS_all, catches_trip_wide, all.x = T, by.x="TRIP_ID_ISDB", by.y = "TRIP_ID")
-    isdb_TRIPS_all[,spColsT][is.na(isdb_TRIPS_all[,spColsT])] <- 0
+      spColsT <- paste0("sp_",colnames(catches_trip_wide)[-1])
+      names(catches_trip_wide)[-1] <- spColsT
 
-    catches_set_wide  <- stats::aggregate(
-      x = list(EST_COMBINED_WT_SET = catches$EST_COMBINED_WT),
-      by = list(FISHSET_ID = catches$FISHSET_ID,
-                SPECCD_ID = catches$SPECCD_ID
-      ),
-      sum
-    )
-    catches_set_wide <- reshape2::dcast(catches_set_wide, FISHSET_ID ~ SPECCD_ID, value.var = "EST_COMBINED_WT_SET")
-    spColsS <- paste0("sp_",colnames(catches_set_wide)[-1])
-    names(catches_set_wide)[-1] <- spColsS
-    isdb_SETS_all <- merge(isdb_SETS_all, catches_set_wide, all.x = T, by.x="FISHSET_ID", by.y = "FISHSET_ID")
-    isdb_SETS_all[,spColsS][is.na(isdb_SETS_all[,spColsS])] <- 0
+      isdb_TRIPS_catches <- merge(isdb_TRIPS_all[,"TRIP_ID_ISDB", drop=F], catches_trip_wide, all.x = T, by.x="TRIP_ID_ISDB", by.y = "TRIP_ID")
+      isdb_TRIPS_catches[,spColsT][is.na(isdb_TRIPS_catches[,spColsT])] <- 0
 
+      catches_set_wide  <- stats::aggregate(
+        x = list(EST_COMBINED_WT_SET = catches$EST_COMBINED_WT),
+        by = list(TRIP_ID = catches$TRIP_ID,
+                  FISHSET_ID = catches$FISHSET_ID,
+                  SPECCD_ID = catches$SPECCD_ID
+        ),
+        sum
+      )
+      catches_set_wide <- reshape2::dcast(catches_set_wide, TRIP_ID+FISHSET_ID~ SPECCD_ID, value.var = "EST_COMBINED_WT_SET")
+      spColsS <- paste0("sp_",colnames(catches_set_wide)[-c(1:2)])
+      names(catches_set_wide)[-c(1:2)] <- spColsS
+      isdb_SETS_catches <- merge(isdb_SETS_all[,c("TRIP_ID","FISHSET_ID"),  drop=F], catches_set_wide, all.x = T, by.x=c("TRIP_ID","FISHSET_ID"), by.y = c("TRIP_ID","FISHSET_ID"))
+      isdb_SETS_catches[,spColsS][is.na(isdb_SETS_catches[,spColsS])] <- 0
+    }
 
     isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% args$marfSpp),c("SPECCD_ID")]
     rm(spLookups)
@@ -361,7 +363,8 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
     SUMMARY = stats::aggregate(
       x = list(EST_NUM_CAUGHT = SUMMARY$EST_NUM_CAUGHT,
                EST_KEPT_WT = SUMMARY$EST_KEPT_WT,
-               EST_DISCARD_WT = SUMMARY$EST_DISCARD_WT),
+               EST_DISCARD_WT = SUMMARY$EST_DISCARD_WT,
+               EST_COMBINED_WT = SUMMARY$EST_COMBINED_WT),
       by = list(SPEC = SUMMARY$SPECCD_ID,
                 COMMON = SUMMARY$COMMON,
                 SCI = SUMMARY$SCIENTIFIC
@@ -389,6 +392,8 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
   res[["ISDB_SETS"]] <- isdb_SETS_all
   res[["ISDB_CATCHES"]] <- list()
   res$ISDB_CATCHES[["ALL"]] <- catches
+  # res$ISDB_CATCHES[["BY_TRIP"]] <- isdb_TRIPS_catches
+  # res$ISDB_CATCHES[["BY_SET"]] <- isdb_SETS_catches
   res$ISDB_CATCHES[["SUMMARY"]] <- SUMMARY
   res[["MATCH_SUMMARY_TRIPS"]] <- msum
   res[["MATCH_DETAILS"]] <- isdb_TRIPS_match_dets

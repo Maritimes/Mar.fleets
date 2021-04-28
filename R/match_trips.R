@@ -31,8 +31,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
   if (args$debuggit) Mar.utils::where_now()
-  tripsN = length(unique(isdbTrips$TRIP_ID_ISDB))
-  tripsLikelyN = length(unique(isdbTrips[isdbTrips$SRC %in% c("VR_LIC","TRIPCD_ID"), "TRIP_ID_ISDB"]))
   CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- NA
 
 
@@ -51,453 +49,352 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # 2 - tick the appropriate column in isdb trips (indicating if matched)
   # 3 - add matches to df called matches
 
-  matchTripsNames <- function(df = NULL){
+  matchTripNames <- function(df = NULL){
+    if (args$debuggit)    Mar.utils::where_now()
     # MARFIS TRIP NAME ----------------------------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$ISDB_TRIP_O),c("TRIP_ID_ISDB", "ISDB_TRIP_O")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("TRIP_ID_MARF","ISDB_TRIP_M")])
     match_TRIP <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
     colnames(match_TRIP)[colnames(match_TRIP)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_TRIP"
-    if (nrow(match_TRIP)>0) match_TRIP$match_TRIP <- TRUE
+    if (nrow(match_TRIP)>0) {
+      match_TRIP$match_TRIP <- TRUE
+    }else{
+      match_TRIP$match_TRIP <- logical()
+    }
     return(match_TRIP)
   }
   matchHI <- function(df = NULL){
+    if (args$debuggit)    Mar.utils::where_now()
     # MARFIS HAILIN CONFIRMATION NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HI),c("TRIP_ID_MARF","CONF_NUMBER_HI")])
     s <- strsplit(as.character(thisMarfMatch$CONF_NUMBER_HI), ',')
-    tmp2 <- data.frame(CONF_NUMBER_HI=unlist(s), TRIP_ID_MARF=rep(thisMarfMatch$TRIP_ID_MARF, sapply(s, FUN=length)))
-    match_CONF_HI <- unique(merge(thisIsdbTrips, tmp2, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HI"))
+    thisMarfMatch <- data.frame(CONF_NUMBER_HI=unlist(s), TRIP_ID_MARF=rep(thisMarfMatch$TRIP_ID_MARF, sapply(s, FUN=length)))
+    match_CONF_HI <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HI"))
     colnames(match_CONF_HI)[colnames(match_CONF_HI)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HI"
-    if (nrow(match_CONF_HI)>0)match_CONF_HI$match_CONF_HI <- TRUE
+    colnames(match_CONF_HI)[colnames(match_CONF_HI)=="MARFIS_CONF_NUMBER"] <- "MARFIS_CONF_NUMBER_HI"
+    if (nrow(match_CONF_HI)>0){
+      match_CONF_HI$match_CONF_HI <- TRUE
+    }else{
+      # match_CONF_HI <- thisMarfMatch
+      match_CONF_HI$match_CONF_HI <- logical()
+      #have match_CONF_HI col?
+    }
     return(match_CONF_HI)
   }
   matchHO <- function(df = NULL){
+    if (args$debuggit)    Mar.utils::where_now()
     # MARFIS HAILOUT CONFIRMATION NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")])
     p <- strsplit(as.character(thisMarfMatch$CONF_NUMBER_HO), ',')
-    tmp3 <- data.frame(CONF_NUMBER_HO=unlist(p), TRIP_ID_MARF=rep(thisMarfMatch$TRIP_ID_MARF, sapply(p, FUN=length)))
-    if (nrow(tmp3)>0){
-      match_CONF_HO <- unique(merge(thisIsdbTrips, tmp3, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
+    thisMarfMatch <- data.frame(CONF_NUMBER_HO=unlist(p), TRIP_ID_MARF=rep(thisMarfMatch$TRIP_ID_MARF, sapply(p, FUN=length)))
+    match_CONF_HO <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
+    colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
+    colnames(match_CONF_HO)[colnames(match_CONF_HO)=="MARFIS_CONF_NUMBER"] <- "MARFIS_CONF_NUMBER_HO"
+    if (nrow(match_CONF_HO)>0){
+      match_CONF_HO <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
       colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
       if (nrow(match_CONF_HO)>0) match_CONF_HO$match_CONF_HO <- TRUE
     }else{
-      match_CONF_HO<-tmp3 #need a table with no rows later
+      # match_CONF_HO<-thisMarfMatch #need a table with no rows later
+      match_CONF_HO$match_CONF_HO <- logical()
     }
     return(match_CONF_HO)
   }
-  matchVRLICDate <- function(df = NULL){
-  # VRN, LICENCE and DATE RANGE --------------------------------------------------------
-  # these are more complicated because: I'm matching on multiple fields (vrn/lic/date),
-  #                                     There are multiple vrn fields,
-  #                                     The date field is checked against a range (not just ==)
-    isdbTrips_dets <- unique(df[
-      # !is.na(isdbTrips$LIC ) &
-      #  !is.na(isdbTrips$VR)  &
-      !is.na(df$BOARD_DATE) &
-        !is.na(df$LANDING_DATE),
-      c("TRIP_ID_ISDB","LIC","VR","BOARD_DATE","LANDING_DATE","SRC")])
-    #ISDB combine vr and lic fields
-    colnames(isdbTrips_dets)[colnames(isdbTrips_dets)=="LIC"] <- "LIC_i"
-    colnames(isdbTrips_dets)[colnames(isdbTrips_dets)=="VR"] <- "VR_i"
-    isdbTrips_dets$VR_LIC_i <- paste0(isdbTrips_dets$VR_i,"_",isdbTrips_dets$LIC_i )
-    isdbTrips_dets$VR_LIC_i <- gsub(x=isdbTrips_dets$VR_LIC_i, pattern = "_NA$", replacement = "")
-    isdbTrips_dets$VR_LIC_i <- gsub(x=isdbTrips_dets$VR_LIC_i, pattern = "^NA_", replacement = "")
-
-    isdbTrips_dets$SRC_match <- NA
-    # isdbTrips_dets$VR_i <- isdbTrips_dets$LIC_i  <- NULL
-    #MARF - combine vr and lic fields - keep specified date field
-    #combine using both fishing and landing vessel, then combine and get unique list
-    marf_TRIPS_F <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID","VR_NUMBER_FISHING", args$useDate )])
+  matchVR <- function(df = NULL){
+    if (args$debuggit)    Mar.utils::where_now()
+    # MARFIS VR NUMBER -----------------------------------------------------------
+    thisIsdbTrips <- unique(df[!is.na(df$VR),c("TRIP_ID_ISDB", "VR", "LIC")])
+    #MARF - combine using both fishing and landing vessel vrs, then combine and get unique list
+    marf_TRIPS_F <- unique(marfMatch[, c("TRIP_ID_MARF","VR_NUMBER_FISHING")])
     colnames(marf_TRIPS_F)[colnames(marf_TRIPS_F)=="VR_NUMBER_FISHING"] <- "VR_m"
-    # marf_TRIPS_F$VR_LIC <- paste0(marf_TRIPS_F$VR_NUMBER_FISHING,"_",marf_TRIPS_F$LICENCE_ID)
-    # marf_TRIPS_F$LICENCE_ID <- marf_TRIPS_F$VR_NUMBER_FISHING <- NULL
-    marf_TRIPS_L <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID","VR_NUMBER_LANDING", args$useDate )])
+    marf_TRIPS_L <- unique(marfMatch[, c("TRIP_ID_MARF","VR_NUMBER_LANDING")])
     colnames(marf_TRIPS_L)[colnames(marf_TRIPS_L)=="VR_NUMBER_LANDING"] <- "VR_m"
-    # marf_TRIPS_L$VR_LIC <- paste0(marf_TRIPS_L$VR_NUMBER_LANDING,"_",marf_TRIPS_L$LICENCE_ID)
-    # marf_TRIPS_L$LICENCE_ID <- marf_TRIPS_L$VR_NUMBER_LANDING <- NULL
+    thisMarfMatch <- unique(rbind(marf_TRIPS_F,marf_TRIPS_L))
+    match_VR <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "VR", by.y = "VR_m"))
+    match_VR$swapVR <- F
+    match_VR_swap <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "LIC", by.y = "VR_m"))
+    if (nrow(match_VR_swap)>0){
+      match_VR_swap$swapVR <- T
+      match_VR <- rbind.data.frame(match_VR, match_VR_swap)
+    }
+    colnames(match_VR)[colnames(match_VR)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_VR"
+    if (nrow(match_VR)>0){
+      match_VR$match_VR <- TRUE
+    } else{
+      match_VR$match_VR <- logical()
+    }
+    return(match_VR)
+  }
+  matchLIC <- function(df = NULL){
+    if (args$debuggit)    Mar.utils::where_now()
+    # MARFIS VR NUMBER -----------------------------------------------------------
+    thisIsdbTrips <- unique(df[!is.na(df$LIC),c("TRIP_ID_ISDB", "LIC", "VR")])
+    thisMarfMatch <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID")])
+    match_LIC <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "LIC", by.y = "LICENCE_ID"))
+    match_LIC$swapLIC <- F
+    match_LIC_swap <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "VR", by.y = "LICENCE_ID"))
 
-
-    marf_TRIPS_dets <- unique(rbind(marf_TRIPS_F,marf_TRIPS_L))
-    colnames(marf_TRIPS_dets)[colnames(marf_TRIPS_dets)=="LICENCE_ID"] <- "LIC_m"
-    marf_TRIPS_dets$VR_LIC_m <- paste0(marf_TRIPS_dets$VR_m,"_",marf_TRIPS_dets$LIC_m )
-    marf_TRIPS_dets$LIC_VR_m <- paste0(marf_TRIPS_dets$LIC_m,"_",marf_TRIPS_dets$VR_m )
-    marf_TRIPS_dets <- merge(marf_TRIPS_dets, marfMatch[,c("TRIP_ID_MARF","T_DATE1","T_DATE2")], all.x=T)
-
-    #merge the isdb and marf data on VR_LIC
-    isdb_marf_dets_best <-  merge(isdbTrips_dets, marf_TRIPS_dets, by.x = "VR_LIC_i", by.y = "VR_LIC_m")
-    if (nrow(isdb_marf_dets_best)>0) {
-      isdb_marf_dets_best$VR_LIC_m <- isdb_marf_dets_best$VR_LIC_i
-      isdb_marf_dets_best$SRC_match <- "VR_LIC"
+    if (nrow(match_LIC_swap)>0){
+      match_LIC_swap$swapLIC <- T
+      match_LIC <- rbind.data.frame(match_LIC, match_LIC_swap)
     }
 
-    isdb_marf_dets_swapped <-  merge(isdbTrips_dets, marf_TRIPS_dets, by.x = "VR_LIC_i", by.y = "LIC_VR_m")
-    if (nrow(isdb_marf_dets_swapped)>0) {
-      isdb_marf_dets_swapped$LIC_VR_m <- isdb_marf_dets_swapped$VR_LIC_i
-      isdb_marf_dets_swapped$SRC_match <- "LIC_VR"
+    colnames(match_LIC)[colnames(match_LIC)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_LIC"
+    if (nrow(match_LIC)>0){
+      match_LIC$match_LIC <- TRUE
+    } else{
+      match_LIC$match_LIC <- logical()
     }
-
-    isdb_marf_dets_vr <-  merge(isdbTrips_dets, marf_TRIPS_dets, by.x = "VR_i", by.y = "VR_m")
-    isdb_marf_dets_vr <- isdb_marf_dets_vr[!(isdb_marf_dets_vr$TRIP_ID_ISDB %in% isdb_marf_dets_best$TRIP_ID_ISDB |
-                                               isdb_marf_dets_vr$TRIP_ID_ISDB %in% isdb_marf_dets_swapped$TRIP_ID_ISDB),]
-    if (nrow(isdb_marf_dets_vr)>0) {
-
-      isdb_marf_dets_vr$VR_m <- isdb_marf_dets_vr$VR_i
-      isdb_marf_dets_vr$SRC_match <- "VR"
-    }
-    isdb_marf_dets_lic <-  merge(isdbTrips_dets, marf_TRIPS_dets, by.x = "LIC_i", by.y = "LIC_m")
-    isdb_marf_dets_lic <- isdb_marf_dets_lic[!(isdb_marf_dets_lic$TRIP_ID_ISDB %in% isdb_marf_dets_best$TRIP_ID_ISDB |
-                                                 isdb_marf_dets_lic$TRIP_ID_ISDB %in% isdb_marf_dets_swapped$TRIP_ID_ISDB),]
-    if (nrow(isdb_marf_dets_lic)>0) {
-
-      isdb_marf_dets_lic$LIC_m <- isdb_marf_dets_lic$LIC_i
-      isdb_marf_dets_lic$SRC_match <- "LIC"
-    }
-    # if (nrow(isdb_marf_dets)>0) isdb_marf_dets$match_VRLICDATE <- TRUE
-    # rm(marf_TRIPS_F, marf_TRIPS_L, isdbTrips_dets, marf_TRIPS_dets)
-    #use dates to check for overlaps
-
-
-    isdb_marf_dets <- rbind.data.frame(isdb_marf_dets_best,isdb_marf_dets_swapped)
-    isdb_marf_dets <- rbind.data.frame(isdb_marf_dets,isdb_marf_dets_vr)
-    isdb_marf_dets <- rbind.data.frame(isdb_marf_dets,isdb_marf_dets_lic)
-    return(isdb_marf_dets)
+    return(match_LIC)
   }
 
-  match_TRIP <- matchTripsNames(df = isdbTrips)
-  match_HI <- matchHI(df = isdbTrips)
-  match_HO <- matchHO(df = isdbTrips)
-  match_VRLIC<- matchVRLICDate(df=isdbTrips)
+  matchDate <- function(df = NULL){
+    if (args$debuggit)    Mar.utils::where_now()
+    #DATE RANGE --------------------------------------------------------
+    thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
+    thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", args$useDate, "VR_NUMBER_FISHING", "LICENCE_ID")])
+    colnames(thisMarfMatch_F)[colnames(thisMarfMatch_F)=="VR_NUMBER_FISHING"] <- "VR_NUMBER"
+    thisMarfMatch_L <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", args$useDate, "VR_NUMBER_LANDING", "LICENCE_ID")])
+    colnames(thisMarfMatch_L)[colnames(thisMarfMatch_L)=="VR_NUMBER_LANDING"] <- "VR_NUMBER"
+    thisMarfMatch <- unique(rbind.data.frame(thisMarfMatch_F, thisMarfMatch_F))
 
-    if(nrow(match_VRLIC)>0){
-    match_VRLIC$match_VRLICDATE <- TRUE
-    match_VRLIC[,"match_VRLICDATE_DETS"] <- NA
-    colnames(match_VRLIC)[colnames(match_VRLIC)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_VRLICDATE"
+    #may regret this, but doing a cross join of isdb and marf trips
+    # xData <- merge(thisIsdbTrips, thisMarfMatch)
+
+    thisIsdbTripsDt<-data.table::setDT(thisIsdbTrips)
+    thisMarfMatchDt<-data.table::setDT(thisMarfMatch)
+
+    xData<-data.table::setkey(thisIsdbTripsDt[,c(k=1,.SD)],k)[thisMarfMatchDt[,c(k=1,.SD)],allow.cartesian=TRUE][,k:=NULL]
 
     if (args$HS){
-      match_VRLIC[,"T1"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC[,args$useDate], units="days")))
-      match_VRLIC[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC[,args$useDate], units="days")))
-      match_VRLIC$CLOSEST1<- with(match_VRLIC, pmin(T1, T2))
-      match_VRLIC$CLOSEST <- rowMeans(match_VRLIC[,c("T1", "T2")])
+      xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData[,args$useDate], units="days")))
+      xData[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,xData[,args$useDate], units="days")))
+      xData$CLOSEST1<- with(xData, pmin(T1, T2))
+      # xData$CLOSEST <- rowMeans(xData[,c("T1", "T2")])
     }else{
-      match_VRLIC[,"T1"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC$T_DATE1, units="days")))
-      match_VRLIC[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC$T_DATE1, units="days")))
-      match_VRLIC[,"T3"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,match_VRLIC$T_DATE2, units="days")))
-      match_VRLIC[,"T4"]<- as.numeric(abs(difftime(match_VRLIC$BOARD_DATE,match_VRLIC$T_DATE2, units="days")))
-      match_VRLIC$CLOSEST1 <- with(match_VRLIC, pmin(T1, T2, T3, T4))
-      match_VRLIC$CLOSEST <- rowMeans(match_VRLIC[,c("T1", "T2", "T3", "T4")])
+      xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE1, units="days")))
+      xData[,"T2"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE1, units="days")))
+      xData[,"T3"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE2, units="days")))
+      xData[,"T4"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE2, units="days")))
+      xData$CLOSEST1 <- with(xData, pmin(T1, T2, T3, T4))
+      # xData$CLOSEST <- rowMeans(xData[,c("T1", "T2", "T3", "T4")])
     }
     #below we first find the closest trips in time using the smallest difference of all calculated times
-    match_VRLIC<- data.frame(data.table::setDT(match_VRLIC)[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB])
+    match_DateMin<- xData[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
     #should their be a tie for smallest time (in matching trips), use the average time difference for all calculated times
-    match_VRLIC<- data.frame(data.table::setDT(match_VRLIC)[, {tmp <- CLOSEST; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB])
+    # match_DateMean<- match_Date[, {tmp <- CLOSEST; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
+
+    match_DateMin <- as.data.frame(match_DateMin)
+    # match_DateMean <- as.data.frame(match_DateMean)
 
     #hard cutoff - anything more than matchMaxDayDiff different is not a match, and is dropped here
-    match_VRLIC <- match_VRLIC[match_VRLIC$CLOSEST1 <=args$matchMaxDayDiff,]
 
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 8,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 8, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a week different"
+    match_DateMin <- match_DateMin[match_DateMin$CLOSEST1 <=args$matchMaxDayDiff,]
+    # match_DateMean <- match_DateMean[match_DateMean$CLOSEST1 <=args$matchMaxDayDiff,]
+
+    if (nrow(match_DateMin[match_DateMin$CLOSEST1 >= 8,])>0) match_DateMin[match_DateMin$CLOSEST1 >= 8, "match_DATE_DETS"] <- "ISDB/MARF activity more than a week different"
     # if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 30,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 30, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a month different"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 8,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 8, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within a week"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 3,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 3, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 2 days"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 2,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 2, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity within 1 day"
-    if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 < 1,])>0) match_VRLIC[match_VRLIC$CLOSEST1 < 1, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal A)"
+    if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 8,])>0) match_DateMin[match_DateMin$CLOSEST1 < 8, "match_DATE_DETS"] <- "ISDB/MARF activity within a week"
+    if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 3,])>0) match_DateMin[match_DateMin$CLOSEST1 < 3, "match_DATE_DETS"] <- "ISDB/MARF activity within 2 days"
+    if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 2,])>0) match_DateMin[match_DateMin$CLOSEST1 < 2, "match_DATE_DETS"] <- "ISDB/MARF activity within 1 day"
+    if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 1,])>0) match_DateMin[match_DateMin$CLOSEST1 < 1, "match_DATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal A)"
 
     if (args$HS){
-      withinners <- match_VRLIC[(match_VRLIC[,args$useDate] >= match_VRLIC$BOARD_DATE & match_VRLIC[,args$useDate] <= match_VRLIC$LANDING_DATE) , ]
+      withinners <- match_DateMin[(match_DateMin[,args$useDate] >= match_DateMin$BOARD_DATE & match_DateMin[,args$useDate] <= match_DateMin$LANDING_DATE) , ]
     }else{
-      withinners <-  match_VRLIC[(match_VRLIC$T_DATE1 >= match_VRLIC$BOARD_DATE & match_VRLIC$T_DATE1 <= match_VRLIC$LANDING_DATE) |
-                                   (match_VRLIC$T_DATE2 >= match_VRLIC$BOARD_DATE & match_VRLIC$T_DATE2 <= match_VRLIC$LANDING_DATE) , ]
+      withinners <-  match_DateMin[(match_DateMin$T_DATE1 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE1 <= match_DateMin$LANDING_DATE) |
+                                     (match_DateMin$T_DATE2 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE2 <= match_DateMin$LANDING_DATE) , ]
     }
 
     if (nrow(withinners)>0) {
-      match_VRLIC <- match_VRLIC[!(match_VRLIC$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB),]
-      withinners[,"match_VRLICDATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
+      match_DateMin <- match_DateMin[!(match_DateMin$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB),]
+      withinners[,"match_DATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
     }
-    if(nrow(match_VRLIC>0)){
+    if(nrow(match_DateMin>0)){
       #a single marfis trip can get matched against multiple ISDB recs based on vr/lic/date - only retain the closest in time
-      match_VRLIC <- data.table::as.data.table(match_VRLIC)
-      match_VRLIC <- as.data.frame(match_VRLIC[match_VRLIC[, .I[CLOSEST1 == min(CLOSEST1)], by=TRIP_ID_MARF_VRLICDATE]$V1])
+      match_DateMin <- data.table::as.data.table(match_DateMin)
+      match_DateMin <- as.data.frame(match_DateMin[match_DateMin[, .I[CLOSEST1 == min(CLOSEST1)], by=TRIP_ID_MARF]$V1])
     }
-    if (nrow(withinners)>0 & nrow(match_VRLIC)>0) {
-      match_VRLIC <- rbind(withinners, match_VRLIC)
+
+    if (nrow(withinners)>0 & nrow(match_DateMin)>0) {
+      match_DateMin <- rbind(withinners, match_DateMin)
     }else if (nrow(withinners)>0){
-      match_VRLIC <- withinners
+      match_DateMin <- withinners
     }
-    match_VRLIC$T1 <- match_VRLIC$T2 <- match_VRLIC$T3 <- match_VRLIC$T4 <- match_VRLIC$CLOSEST1 <- match_VRLIC$CLOSEST <-NULL
-    match_VRLIC1 <- match_VRLIC[match_VRLIC$SRC_match=="VR_LIC" & match_VRLIC$SRC=="VR_LIC",]
-    match_LICVR1 <- match_VRLIC[match_VRLIC$SRC_match=="LIC_VR" & match_VRLIC$SRC=="VR_LIC",]
-    match_VR1 <- match_VRLIC[match_VRLIC$SRC_match=="VR" & match_VRLIC$SRC=="random",]
-    match_LIC1 <- match_VRLIC[match_VRLIC$SRC_match=="LIC" & match_VRLIC$SRC=="random",]
-    rm(match_VRLIC)
-  }
-  possRows <- nrow(isdbTrips)
+    match_DateMin$T1 <- match_DateMin$T2 <- match_DateMin$T3 <- match_DateMin$T4 <- NULL
+    #not enough to only match time span.  Must also match on VR or licence
+    match_DateMin$mVR <- match_DateMin$mLIC <- match_DateMin$mMix1 <- match_DateMin$mMix2 <- match_DateMin$mTripcd_id <- F
 
-  isdbTrips$VR_LIC  <- gsub(x=isdbTrips$VR_LIC, pattern = "_NA$", replacement = "")
-  isdbTrips$VR_LIC  <- gsub(x=isdbTrips$VR_LIC, pattern = "^NA_", replacement = "")
-
-  if (nrow(match_TRIP)>0){
-    if(nrow(match_TRIP)>possRows) warning("duplicating trips due to non-unique match_TRIP match")
-    isdbTrips <- merge(isdbTrips, match_TRIP, all.x = T, by.x = c("ISDB_TRIP_O", "TRIP_ID_ISDB"), by.y=c("ISDB_TRIP_O", "TRIP_ID_ISDB"))
-  }else{
-    isdbTrips$TRIP_ID_MARF_TRIP <- NA
-    isdbTrips$match_TRIP <- FALSE
-  }
-  if (nrow(match_CONF_HI)>0){
-    if(nrow(match_CONF_HI)>possRows) warning("duplicating trips due to non-unique match_CONF_HI  match")
-    isdbTrips <- merge(isdbTrips, match_CONF_HI, all.x = T, by.x = c("MARFIS_CONF_NUMBER", "TRIP_ID_ISDB"), by.y=c("MARFIS_CONF_NUMBER", "TRIP_ID_ISDB"))
-  }else{
-    isdbTrips$TRIP_ID_MARF_HI <- NA
-    isdbTrips$match_CONF_HI <- FALSE
-  }
-  if (nrow(match_CONF_HO)>0){
-    if(nrow(match_CONF_HO)>possRows) warning("duplicating trips due to non-unique match_CONF_HO match")
-    isdbTrips <- merge(isdbTrips, match_CONF_HO, all.x = T, by.x = c("MARFIS_CONF_NUMBER", "TRIP_ID_ISDB"), by.y=c("MARFIS_CONF_NUMBER", "TRIP_ID_ISDB"))
-  }else{
-    isdbTrips$TRIP_ID_MARF_HO <- NA
-    isdbTrips$match_CONF_HO <- FALSE
-  }
-
-  if (nrow(match_VRLIC1)>0){
-    #these are matched on VR, lic and date
-    if(nrow(match_VRLIC1)>possRows) warning("duplicating trips due to non-unique match_VRLIC match")
-    isdbTrips$join <- paste0(isdbTrips$VR_LIC, "_", isdbTrips$TRIP_ID_ISDB)
-    match_VRLIC1$join <- paste0(match_VRLIC1$VR_LIC_i, "_", match_VRLIC1$TRIP_ID_ISDB)
-    if (args$HS) {
-      isdbTrips <- merge(isdbTrips, match_VRLIC1[,c("TRIP_ID_MARF_VRLICDATE","match_VRLICDATE","match_VRLICDATE_DETS",args$useDate, "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }else{
-      isdbTrips <- merge(isdbTrips, match_VRLIC1[,c("TRIP_ID_MARF_VRLICDATE","match_VRLICDATE","match_VRLICDATE_DETS","T_DATE1", "T_DATE2", "join")], all.x = T, by.x = c("join"), by.y=c("join"))
+    if (nrow(match_DateMin[which(match_DateMin$VR == match_DateMin$VR_NUMBER),])>1){
+      match_DateMin[which(match_DateMin$VR == match_DateMin$VR_NUMBER),"mVR"] <- T
     }
-    isdbTrips$join <- NULL
+    if (nrow(match_DateMin[which(match_DateMin$LIC == match_DateMin$LICENCE_ID),])>1){
+      match_DateMin[which(match_DateMin$LIC == match_DateMin$LICENCE_ID),"mLIC"] <- T
+    }
+    if (nrow(match_DateMin[which(match_DateMin$VR == match_DateMin$LICENCE_ID),])>1){
+      match_DateMin[which(match_DateMin$VR == match_DateMin$LICENCE_ID),"mMix1"] <- T
+    }
+    if (nrow(match_DateMin[which(match_DateMin$VR_NUMBER == match_DateMin$LIC),])>1){
+      match_DateMin[which(match_DateMin$VR_NUMBER == match_DateMin$LIC),"mMix2"] <- T
+    }
+
+    if (!is.null(args$tripcd_id)){
+      if (nrow(match_DateMin[which(match_DateMin$TRIPCD_ID %in% args$tripcd_id),])>1){
+        match_DateMin[which(match_DateMin$TRIPCD_ID %in% args$tripcd_id),"mTripcd_id"] <- T
+      }
+    }
+
+    match_DateMin$match_Date <- F
+    match_DateMin[which(match_DateMin$mVR|match_DateMin$mLIC|match_DateMin$mMix1|match_DateMin$mMix2|match_DateMin$mTripcd_id),"match_Date"] <- TRUE
+    match_DateMin <- match_DateMin[match_DateMin$match_Date == TRUE,]
+    # match_DateMin$VR <-  match_DateMin$VR_NUMBER <-  match_DateMin$LIC <-  match_DateMin$LICENCE_ID  <-
+    match_DateMin$CLOSEST1 <- NULL
+
+    colnames(match_DateMin)[colnames(match_DateMin)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_DATE"
+    return(match_DateMin)
+  }
+
+
+  match_TRIP <- matchTripNames(df = isdbTrips)
+  match_HI <- matchHI(df = isdbTrips)
+  match_HO <- matchHO(df = isdbTrips)
+  match_VR <- matchVR(df = isdbTrips)
+  match_LIC <- matchLIC(df = isdbTrips)
+  match_Date <- matchDate(df = isdbTrips)
+
+  knowncombos_all <- as.data.frame(rbind(as.matrix(match_TRIP[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_TRIP")]),
+                                         as.matrix(match_HI[,c("TRIP_ID_ISDB","TRIP_ID_MARF_HI")]),
+                                         as.matrix(match_HO[,c("TRIP_ID_ISDB","TRIP_ID_MARF_HO")]),
+                                         as.matrix(match_VR[,c("TRIP_ID_ISDB","TRIP_ID_MARF_VR")]),
+                                         as.matrix(match_LIC[,c("TRIP_ID_ISDB","TRIP_ID_MARF_LIC")]),
+                                         as.matrix(unique(match_Date[,c("TRIP_ID_ISDB","TRIP_ID_MARF_DATE")]))))
+  colnames(knowncombos_all) <- c("TRIP_ID_ISDB", "TRIP_ID_MARF")
+  knowncombos_cnt  <- stats::aggregate(
+    x = list(cnt = knowncombos_all$TRIP_ID_MARF),
+    by = list(TRIP_ID_ISDB = knowncombos_all$TRIP_ID_ISDB,
+              TRIP_ID_MARF = knowncombos_all$TRIP_ID_MARF
+    ),
+    length
+  )
+  knowncombos_cnt <- merge(knowncombos_cnt, isdbTrips[, c("TRIP_ID_ISDB", "TRIP", "TRIPCD_ID", "SRC")], all.x=T)
+  matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) |!is.na(marfMatch$OBS_PRESENT) ,]
+
+
+  # these guys are matched on trip-specific values (ie trip name, confirmation codes).  Likelihood of  duplicates is low
+  match_CONF1 <-  merge(knowncombos_cnt, match_TRIP, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB", "TRIP_ID_MARF_TRIP"), all.x=T)
+  match_CONF1 <-  merge(match_CONF1, match_HI, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_HI"), all.x=T)
+  match_CONF1 <-  merge(match_CONF1, match_HO, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_HO"), all.x=T)
+  #these guys are generic - vrs, lics and dates.  some combination must occur together to match
+  #match_tmp grabs all of the records that got matched by lic or vr
+  #match_CONF2B than attempts to merge these lic/vr records with any lic/vr records that occurred within an acceptable window of time
+  #the date matches will also work for cases where the licence and vr were reversed (nMix1 or nMix2 = T).
+
+  match_tmp <- merge(knowncombos_cnt[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")], match_VR[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_VR", "swapVR", "match_VR" )], by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"),  by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_VR"), all.x=T)
+  match_tmp <- merge(match_tmp, match_LIC[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_LIC", "swapLIC", "match_LIC" )], by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_LIC"), all.x=T)
+  match_tmp <- merge(match_tmp,
+                     match_Date[which(match_Date$mVR|match_Date$mLIC|match_Date$mMix1|match_Date$mMix2),
+                                c("TRIP_ID_ISDB", "TRIP_ID_MARF_DATE", "VR", "LIC","mTripcd_id", "mMix2", "mMix1",  "mLIC", "mVR", "match_Date", "match_DATE_DETS" )],
+                     by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y = c("TRIP_ID_ISDB","TRIP_ID_MARF_DATE"), all.x=T)
+  # replace NAs for unmatched with false so can do math
+  match_tmp[c("match_Date", "match_VR", "match_LIC", "mTripcd_id", "swapVR", "swapLIC", "mMix1", "mMix2", "mLIC", "mVR")][is.na(match_tmp[c("match_Date", "match_VR", "match_LIC", "mTripcd_id", "swapVR", "swapLIC", "mMix1", "mMix2", "mLIC", "mVR")])] <- FALSE
+ #mTripcd_id not used for matching, just for math to help break ties
+  match_tmp <- match_tmp[which(match_tmp$match_Date & (match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id) >0),]
+  match_tmp$cnt_dateMatch <- match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id
+  match_tmp$swappedLIC_VR <- FALSE
+  match_tmp[which(match_tmp$swapLIC|match_tmp$swapVR|match_tmp$mMix1|match_tmp$mMix2),"swappedLIC_VR"]<-T
+  match_tmp$swapLIC <- match_tmp$swapVR <- match_tmp$mMix1 <- match_tmp$mMix2 <- NULL
+
+  matches =  merge(match_CONF1, match_tmp, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF"), all.x=T)
+  matches[c("match_TRIP", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date","mTripcd_id","swappedLIC_VR")][is.na(matches[c("match_TRIP", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date", "mTripcd_id","swappedLIC_VR")])] <- FALSE
+
+  matches <- matches[which((matches$match_TRIP|matches$match_CONF_HI|matches$match_CONF_HO) |
+                             (matches$match_Date & (matches$match_LIC + matches$match_VR + matches$mTripcd_id) >0)),]
+  matches$cnt <- NULL
+  matches$cnt_dateMatch <- NULL
+  #PRIOR1 counts matches by trip name, Hail in code and hail out confirmation codes - these are very isdb specific - most likely matches
+  matches$PRIOR1 <- matches$match_TRIP+matches$match_CONF_HI+matches$match_CONF_HO
+  #PRIOR2 counts matches within acceptable date range with correct licence, vr and tripcd_id (if provided) - less specific
+  matches$PRIOR2 <- (matches$match_Date & matches$match_LIC) + (matches$match_Date & matches$match_VR) + (matches$match_Date & matches$mTripcd_id)
+
+  matches <- data.table::setDT(matches)
+  #Should multiple matches occur for a single ISDB trip, the following can break ties - favouring  :
+  # 1) those matched on  trip name, Hail in code and hail out confirmation codes; followed by
+  # 2) those within acceptable date range with correct licence, vr and tripcd_id (if provided)
+  matches <- matches[, .SD[PRIOR1 %in% max(PRIOR1)], by=TRIP_ID_ISDB]
+  matches <-matches[, .SD[PRIOR2 %in% max(PRIOR2)], by=TRIP_ID_ISDB]
+  matches <- as.data.frame(matches)
+  matches$PRIOR1 <- matches$PRIOR2 <- matches$ISDB_TRIP_O <- matches$mLIC <- matches$mVR <- NULL
+
+  if (!is.null(args$tripcd_id)) {
+    colnames(matches)[colnames(matches)=="mTripcd_id"] <- "match_TRIPCD_ID"
   }else{
-    isdbTrips$TRIP_ID_MARF_VRLICDATE <- NA
-    isdbTrips$match_VRLICDATE <- FALSE
+    matches$mTripcd_id <- NULL
   }
 
-  if (nrow(match_VR1)>0){
-    colnames(match_VR1)[colnames(match_VR1)=="TRIP_ID_MARF_VRLICDATE"] <- "TRIP_ID_MARF_VRDATE"
-    colnames(match_VR1)[colnames(match_VR1)=="match_VRLICDATE"] <- "match_VRDATE"
-    colnames(match_VR1)[colnames(match_VR1)=="match_VRLICDATE_DETS"] <- "match_VRDATE_DETS"
-    colnames(match_VR1)[colnames(match_VR1)=="T_DATE1"] <- "T_DATE1_VR"
-    colnames(match_VR1)[colnames(match_VR1)=="T_DATE2"] <- "T_DATE2_VR"
-    match_VR1 <- match_VR1[,c("TRIP_ID_ISDB", "VR_i", "TRIP_ID_MARF_VRDATE", "match_VRDATE", "match_VRDATE_DETS","T_DATE1_VR","T_DATE2_VR")]
+  matchNone <- matchNone[!(matchNone$TRIP_ID_MARF %in% matches$TRIP_ID_MARF),]
+  matchNone$ISDB_TRIP_M <- NULL
+  dups <- unique(matches[duplicated(matches[,"TRIP_ID_ISDB"]),"TRIP_ID_ISDB"])
+  if (length(dups)>0){
+    dupRows <- matches[matches$TRIP_ID_ISDB %in% dups,]
+    dupRows[is.na(dupRows)] <- 0
+    dupRows <- stats::aggregate(TRIP_ID_MARF ~ ., dupRows, function(x) paste0(unique(x), collapse = ", "))
+    colnames(dupRows)[colnames(dupRows)=="TRIP_ID_MARF"] <- "POTENTIAL_TRIP_ID_MARF"
+    matches <- matches[!(matches$TRIP_ID_ISDB %in% dups),]
 
-    if(nrow(match_VR1)>possRows) warning("duplicating trips due to non-unique match_VRLIC match")
-    isdbTrips$join <- paste0(isdbTrips$VR, "_", isdbTrips$TRIP_ID_ISDB)
-    match_VR1$join <- paste0(match_VR1$VR_i, "_", match_VR1$TRIP_ID_ISDB)
-    if (args$HS) {
-      isdbTrips <- merge(isdbTrips, match_VR1[,c("TRIP_ID_MARF_VRDATE","match_VRDATE","match_VRDATE_DETS",args$useDate, "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }else{
-      isdbTrips <- merge(isdbTrips, match_VR1[,c("TRIP_ID_MARF_VRDATE","match_VRDATE","match_VRDATE_DETS","T_DATE1_VR", "T_DATE2_VR", "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }
-    isdbTrips$join <- NULL
-  }else{
-    isdbTrips$TRIP_ID_MARF_VRDATE <- NA
-    isdbTrips$match_VRDATE <- FALSE
-    isdbTrips$match_VRDATE_DETS <-NA
-    isdbTrips$T_DATE1_VR <- NA
-    isdbTrips$T_DATE2_VR <- NA
   }
 
-  if (nrow(match_LIC1)>0){
-    colnames(match_LIC1)[colnames(match_LIC1)=="TRIP_ID_MARF_VRLICDATE"] <- "TRIP_ID_MARF_LICDATE"
-    colnames(match_LIC1)[colnames(match_LIC1)=="match_VRLICDATE"] <- "match_LICDATE"
-    colnames(match_LIC1)[colnames(match_LIC1)=="match_VRLICDATE_DETS"] <- "match_LICDATE_DETS"
-    colnames(match_LIC1)[colnames(match_LIC1)=="T_DATE1"] <- "T_DATE1_LIC"
-    colnames(match_LIC1)[colnames(match_LIC1)=="T_DATE2"] <- "T_DATE2_LIC"
-    match_LIC1 <- match_LIC1[,c("TRIP_ID_ISDB", "LIC_i", "TRIP_ID_MARF_LICDATE", "match_LICDATE", "match_LICDATE_DETS","T_DATE1_LIC","T_DATE2_LIC")]
-
-    if(nrow(match_LIC1)>possRows) warning("duplicating trips due to non-unique match_VRLIC match")
-    isdbTrips$join <- paste0(isdbTrips$LIC, "_", isdbTrips$TRIP_ID_ISDB)
-    match_LIC1$join <- paste0(match_LIC1$LIC_i, "_", match_LIC1$TRIP_ID_ISDB)
-    if (args$HS) {
-      isdbTrips <- merge(isdbTrips, match_LIC1[,c("TRIP_ID_MARF_LICDATE","match_LICDATE","match_LICDATE_DETS",args$useDate, "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }else{
-      isdbTrips <- merge(isdbTrips, match_LIC1[,c("TRIP_ID_MARF_LICDATE","match_LICDATE","match_LICDATE_DETS","T_DATE1_LIC", "T_DATE2_LIC", "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }
-    isdbTrips$join <- NULL
-  }else{
-    isdbTrips$TRIP_ID_MARF_LICDATE <- NA
-    isdbTrips$match_LICDATE <- FALSE
-    isdbTrips$match_LICDATE_DETS <- NA
-    isdbTrips$T_DATE1_LIC <- NA
-    isdbTrips$T_DATE2_LIC <- NA
-  }
-  #
-
-  if (nrow(match_LICVR1)>0){
-    #these are matched on VR, lic and date, but lic and vr were swapped
-    #TDATE1 and TDATE2 will be duplicated
-    beepr::beep(sound= 2)
-    browser()
-    colnames(match_LICVR1)[colnames(match_LICVR1)=="match_VRLICDATE"] <- "match_swappedDATE"
-    colnames(match_LICVR1)[colnames(match_LICVR1)=="TRIP_ID_MARF_VRLICDATE"] <- "TRIP_ID_MARF_swappedDATE"
-    colnames(match_LIC1)[colnames(match_LIC1)=="match_VRLICDATE_DETS"] <- "match_swappedDATE_DETS"
-    colnames(match_LIC1)[colnames(match_LIC1)=="T_DATE1"] <- "T_DATE1_swap"
-    colnames(match_LIC1)[colnames(match_LIC1)=="T_DATE2"] <- "T_DATE2_swap"
-    match_LICVR1 <- match_LICVR1[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_swappedDATE", "match_swappedDATE", "match_swappedDATE_DETS","T_DATE1_swap","T_DATE2_swap")]
-
-
-    if(nrow(match_LICVR1)>possRows) warning("duplicating trips due to non-unique match_VRLIC match")
-    isdbTrips$join <- paste0(isdbTrips$VR_LIC, "_", isdbTrips$TRIP_ID_ISDB)
-    match_LICVR1$join <- paste0(match_LICVR1$LIC_VR_m, "_", match_LICVR1$TRIP_ID_ISDB)
-    if (args$HS) {
-      isdbTrips <- merge(isdbTrips, match_LICVR1[,c("TRIP_ID_MARF_swappedDATE","match_swappedDATE","match_VRLICDATE_DETS",args$useDate, "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }else{
-      isdbTrips <- merge(isdbTrips, match_LICVR1[,c("TRIP_ID_MARF_swappedDATE","match_swappedDATE","match_VRLICDATE_DETS","T_DATE1_swap", "T_DATE2_swap", "join")], all.x = T, by.x = c("join"), by.y=c("join"))
-    }
-    isdbTrips$join <- NULL
-  }else{
-    isdbTrips$TRIP_ID_MARF_swappedDATE <- NA
-    isdbTrips$match_swappedDATE <- FALSE
-    isdbTrips$match_swappedDATE_DETS <- NA
-    isdbTrips$T_DATE1_swap <- NA
-    isdbTrips$T_DATE2_swap <- NA
-  }
-
-  # isdbTrips <- isdbTrips[!is.na(isdbTrips$TRIP_ID_MARF) |!is.na(isdbTrips$TRIP_ID_MARFIS_OTHER),]
-  #populate all of the NAs for the match fields with F that weren't matched
-  isdbTrips[c("match_TRIP", "match_CONF_HI","match_CONF_HO","match_VRLICDATE","match_VRDATE","match_LICDATE","match_swappedDATE")][is.na(isdbTrips[c("match_TRIP", "match_CONF_HI","match_CONF_HO","match_VRLICDATE","match_VRDATE","match_LICDATE","match_swappedDATE")])] <- FALSE
-  getMode <- function(x, na.rm = TRUE) {
-    x <- unlist(x)
-    if (na.rm) {
-      x <- x[!is.na(x)]
-    }
-    # Get unique values
-    ux <- unique(x)
-    n <- length(ux)
-
-    # Get frequencies of all unique values
-    frequencies <- tabulate(match(x, ux))
-    modes <- frequencies == max(frequencies)
-
-    # Determine number of modes
-    nmodes <- sum(modes)
-    nmodes <- ifelse(nmodes==n, 0L, nmodes)
-    if (length(ux) == 1) {
-      res <- c(ux, NA)
-    }else if (nmodes ==1){
-      alt <- paste0(ux[-which(modes)], collapse=",")
-      if (alt=="") alt <- NA
-      res <- c(ux[which(modes)],alt)
-    } else {
-      res <- c(NA, paste0(ux, collapse=","))
-    }
-    return(res)
-  }
-  # isdbTrips[isdbTrips$TRIP_ID_ISDB == 100049330,]
-
-  idFields <- c("TRIP_ID_MARF_TRIP", "TRIP_ID_MARF_HI", "TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE","TRIP_ID_MARF_VRDATE","TRIP_ID_MARF_LICDATE","TRIP_ID_MARF_swappedDATE")
-  mTripIDs <- apply(isdbTrips[idFields], 1, getMode)
-  isdbTrips <- cbind(isdbTrips,t(mTripIDs))
-  colnames(isdbTrips)[colnames(isdbTrips)=="1"] <- "TRIP_ID_MARF"
-  colnames(isdbTrips)[colnames(isdbTrips)=="2"] <- "TRIP_ID_MARFIS_OTHER"
-  ###
-  selectTrip <- which(isdbTrips$TRIP_ID_MARF_TRIP != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectTrip))) isdbTrips[selectTrip,"match_TRIP"] <-FALSE
-  selectHI <- which(isdbTrips$TRIP_ID_MARF_HI  != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectHI))) isdbTrips[selectHI,"match_CONF_HI"] <-FALSE
-  selectHO <- which(isdbTrips$TRIP_ID_MARF_HO  != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectHO))) isdbTrips[selectHO,"match_CONF_HO"] <-FALSE
-  selectVRLICDATE <- which(isdbTrips$TRIP_ID_MARF_VRLICDATE  != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectVRLICDATE))) {
-    isdbTrips[selectVRLICDATE,"match_VRLICDATE"] <-FALSE
-    isdbTrips[selectVRLICDATE,"match_VRLICDATE_DETS"] <-NA
-  }
-
-
-  selectVRDATE <- which(isdbTrips$TRIP_ID_MARF_VRDATE  != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectVRDATE))) {
-    isdbTrips[selectVRDATE,"match_VRDATE"] <-FALSE
-    isdbTrips[selectVRDATE,"match_VRDATE_DETS"] <-NA
-  }
-
-  selectLICDATE <- which(isdbTrips$TRIP_ID_MARF_LICDATE  != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectLICDATE))) {
-    isdbTrips[selectLICDATE,"match_LICDATE"] <-FALSE
-    isdbTrips[selectLICDATE,"match_LICDATE_DETS"] <-NA
-  }
-
-  selectSwappedDATE <- which(isdbTrips$TRIP_ID_MARF_swappedDATE  != isdbTrips$TRIP_ID_MARF)
-  if (all(!is.na(selectSwappedDATE))) {
-    isdbTrips[selectSwappedDATE,"match_swappedDATE"] <-FALSE
-    isdbTrips[selectSwappedDATE,"match_swappedDATE_DETS"] <-NA
-  }
-
-  isdbTrips[,c("ISDB_TRIP_O","VR_LIC","TRIP_ID_MARF_TRIP","TRIP_ID_MARF_HI","TRIP_ID_MARF_HO","TRIP_ID_MARF_VRLICDATE","TRIP_ID_MARF_VRDATE","TRIP_ID_MARF_LICDATE","TRIP_ID_MARF_swappedDATE")]<- NULL
-  isdbTrips <- isdbTrips[isdbTrips$SRC != "timeOverlap" | (!is.na(isdbTrips$TRIP_ID_MARF) | !is.na(isdbTrips$TRIP_ID_MARFIS_OTHER)),]
-
-  matchGood <- isdbTrips[!is.na(isdbTrips$TRIP_ID_MARF),]
-  matchNone <- isdbTrips[is.na(isdbTrips$TRIP_ID_MARF) & is.na(isdbTrips$TRIP_ID_MARFIS_OTHER),]
+  matchGood <- matches[!is.na(matches$TRIP_ID_MARF),]
   #not counting timeOverlap results as "matchNone" because there was really nothing to cause suspicion of a match.
-  matchMulti <-  isdbTrips[is.na(isdbTrips$TRIP_ID_MARF) & !is.na(isdbTrips$TRIP_ID_MARFIS_OTHER),]
   if (nrow(matchGood)>0){
-    Obs_Trip_Name = nrow(matchGood[matchGood$match_TRIP==TRUE,])
-    Hail_In_Confirmation_Code = nrow(matchGood[matchGood$match_CONF_HI==TRUE,])
-    Hail_Out_Confirmation_Code = nrow(matchGood[matchGood$match_CONF_HO==TRUE,])
-    License_Vessel_Date_Combo = nrow(matchGood[matchGood$match_VRLICDATE==TRUE,])
-    License_Date_Combo = nrow(matchGood[matchGood$match_LICDATE==TRUE,])
-    Vessel_Date_Combo = nrow(matchGood[matchGood$match_VRDATE==TRUE,])
-    swapped_License_Vessel_Date_Combo = nrow(matchGood[matchGood$match_swappedDATE==TRUE,])
-    Total_Matches = nrow(matchGood[(matchGood$match_VRLICDATE==TRUE | matchGood$match_LICDATE==TRUE | matchGood$match_VRDATE==TRUE | matchGood$match_swappedDATE== TRUE |matchGood$match_CONF_HO==TRUE | matchGood$match_CONF_HI==TRUE | matchGood$match_TRIP==TRUE),])
-
+    Obs_Trip_Name = nrow(matchGood[matchGood$match_TRIP,])
+    Hail_In_Conf_Code = nrow(matchGood[matchGood$match_CONF_HI,])
+    Hail_Out_Conf_Code = nrow(matchGood[matchGood$match_CONF_HO,])
+    Date_Lic_VR_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_LIC,])
+    Date_Lic_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_LIC,])
+    Date_VR_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_VR,])
+    Likely_Swapped_VR_LIC = nrow(matchGood[matchGood$swappedLIC_VR,])
+    Total_Matches = nrow(matchGood)
   }else{
-    matchGood <- NA
     Obs_Trip_Name = 0
-    Hail_In_Confirmation_Code = 0
-    Hail_Out_Confirmation_Code = 0
-    License_Vessel_Date_Combo = 0
-    License_Date_Combo = 0
-    Vessel_Date_Combo = 0
-    swapped_License_Vessel_Date_Combo = 0
+    Hail_In_Conf_Code = 0
+    Hail_Out_Conf_Code = 0
+    Date_Lic_VR_Combo =0
+    Date_Lic_Combo = 0
+    Date_VR_Combo = 0
+    Likely_Swapped_VR_LIC = 0
     Total_Matches = 0
+    matchGood <- NA
   }
-  Total_ISDB_Trips_Tested = tripsN
-  Total_ISDB_Trips_likely = tripsLikelyN
-
-  summ_df = as.data.frame(rbind(Obs_Trip_Name,
-                                Hail_In_Confirmation_Code,
-                                Hail_Out_Confirmation_Code,
-                                License_Vessel_Date_Combo,
-                                License_Date_Combo,
-                                Vessel_Date_Combo,
-                                swapped_License_Vessel_Date_Combo,
-                                Total_Matches,
-                                Total_ISDB_Trips_Tested,
-                                Total_ISDB_Trips_likely))
-  names(summ_df)<-"MATCHES_N"
-
-
-  if(nrow(matchNone)>0){
-    matchNone[,c("match_TRIP","match_CONF_HI","match_CONF_HO",
-                 "match_VRLICDATE","match_VRLICDATE_DETS",
-                 "match_VRDATE","match_VRDATE_DETS",
-                 "match_LICDATE","match_LICDATE_DETS",
-                 "match_swappedDATE","swappedDATE_DETS",
-                 "TRIP_ID_MARFIS_OTHER","TRIP_ID_MARF")] <- NULL
+  if(nrow(matchNone)>0) {
+    Unmatchable = nrow(matchNone)
   }else{
+    Unmatchable = 0
     matchNone <- NA
-  }
+   }
 
-  if(nrow(matchMulti)>0){
-    if (!args$quietly)message("\n","Multimatch(es) detected")
-    matchMulti[,c("match_TRIP","match_CONF_HI","match_CONF_HO","match_VRLICDATE","match_VRLICDATE_DETS",
-                  "match_LICDATE","match_LICDATE_DETS",
-                  "match_LICDATE","match_LICDATE_DETS",
-                  "match_swappedDATE","match_swappedDATE_DETS",
-                  "TRIP_ID_MARF")] <- NULL
-
-    colnames(matchMulti)[colnames(matchMulti)=="TRIP_ID_MARFIS_OTHER"] <- "POTENTIAL_TRIP_ID_MARF"
+  if(nrow(dupRows)>0){
+   MultiMatches = nrow(dupRows)
   }else{
-    matchMulti <- NA
+    MultiMatches = 0
+    dupRows <- NA
   }
-
-
-
-
+  summ_df = as.data.frame(rbind(Obs_Trip_Name,
+                                Hail_In_Conf_Code,
+                                Hail_Out_Conf_Code,
+                                Date_Lic_VR_Combo,
+                                Date_Lic_Combo,
+                                Date_VR_Combo,
+                                Likely_Swapped_VR_LIC,
+                                Total_Matches,
+                                MultiMatches,
+                                Unmatchable))
+  names(summ_df)<-"MATCHES_N"
   res <- list()
-  res[["ISDB_MARFIS_POST_MATCHED"]] <- isdbTrips
+  res[["ISDB_MARFIS_POST_MATCHED"]] <- matchGood
   res[["MATCH_SUMMARY_TRIPS"]] <- summ_df
   res[["ISDB_UNMATCHABLES"]] <- matchNone
-  res[["ISDB_MULTIMATCHES"]] <- matchMulti
+  res[["ISDB_MULTIMATCHES"]] <- dupRows
   return(res)
 }

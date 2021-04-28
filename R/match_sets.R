@@ -30,8 +30,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   `:=`<- function (x, value) value
   isdb_sets_o <- isdb_sets
   marf_sets_o <- marf_sets
-
-  matchdf = matched_trips[!is.na(matched_trips$TRIP_ID_ISDB) & !is.na(matched_trips$TRIP_ID_MARF),c("TRIP_ID_ISDB","TRIP_ID_MARF","TRIP")]
+  matchdf = matched_trips[!is.na(matched_trips$TRIP_ID_ISDB) & !is.na(matched_trips$TRIP_ID_MARF),c("TRIP_ID_ISDB","TRIP_ID_MARF")]
 
   #only retain the sets from trips that we've matched
   #add marf trip id to isdb and isdb trip id to marf
