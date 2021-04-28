@@ -110,6 +110,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Dates")
     dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Dates")
 
+
+
     ISTRIPS = ISTRIPS[,c("TRIP_ISDB", "TRIP", "TRIPCD_ID", "BOARD_DATE", "LANDING_DATE", "VR", "LIC", "MARFIS_CONF_NUMBER")]
     if(nrow(ISTRIPS)>0) ISTRIPS$SRC<-NA
 
@@ -144,6 +146,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       ISTRIPS <- ISTRIPS[!(ISTRIPS$TRIP_ISDB %in% ISTRIPS_vrs$TRIP_ISDB),]
       ISTRIPS_found = rbind.data.frame(ISTRIPS_found, ISTRIPS_vrs)
     }
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "intial_ISDB_Filter")
+    dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "intial_ISDB_Filter")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = ISTRIPS$VR, stepDesc = "intial_ISDB_Filter")
+    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = ISTRIPS$LIC, stepDesc = "intial_ISDB_Filter")
 
     if(nrow(ISTRIPS)>0) {
       #these are just tagging along on the chance that they are matched
@@ -267,7 +273,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     unmatchables <- NA
     if (matchMarfis) {
       trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
-      if (args$debuggit) message("DEBUG: Matched", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), "trips","\n")
+      if (args$debuggit) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
       matchFields = c("SRC", "match_TRIP", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
                       "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
                       "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
@@ -286,7 +292,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
       }
 
       if (!all(is.na(sets))) {
-        if (args$debuggit) message("DEBUG: Matched", nrow(sets$MAP_ISDB_MARFIS_SETS), "ISDB sets","\n")
+        if (args$debuggit) message("DEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
         isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
         isdb_SETS_all$TRIP_ID_ISDB<- isdb_SETS_all$TRIP_ID_MARF <- NULL
         isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")

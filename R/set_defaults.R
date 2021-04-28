@@ -27,8 +27,8 @@
 #' summarized locations table.  Using the default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2 characters).  If
 #' set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) , while a value like 4 would summarize the trips and sets into very specific
 #' NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")
-#' @param keepSurveyTrips default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
-#' ensures these trips are retained.
+#' @param keepSurveyTrips default is \code{TRUE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{FALSE}
+#' ensures these trips are dropped
 #' @param matchMarfis default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.
 #' @param matchMaxDayDiff default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 #' matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.
@@ -89,7 +89,7 @@ set_defaults <- function(lics = 'all',
                          dateStart = NULL,
                          dateEnd = NULL,
                          year = NULL,
-                         keepSurveyTrips = FALSE,
+                         keepSurveyTrips = TRUE,
                          matchMarfis = TRUE,
                          matchMaxDayDiff = 2,
                          dropUnmatchedISDB = TRUE,

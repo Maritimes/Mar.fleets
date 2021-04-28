@@ -31,6 +31,17 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
   if (args$debuggit) Mar.utils::where_now()
+  dbEnv <- new.env()
+  dbEnv$debugLics <- args$debugLics
+  dbEnv$debugVRs <- args$debugVRs
+  dbEnv$debugMARFTripIDs <- args$debugMARFTripIDs
+  dbEnv$debugISDBTripIDs <- args$debugISDBTripIDs
+  if (!is.null(args$debugISDBTripNames)){
+    tmp = data.frame(ISDB_TRIP = args$debugISDBTripNames)
+    tmp <- clean_ISDB_Trip(df=tmp, field = "ISDB_TRIP", out_name = "ISDB_TRIP_CLN") #orig values stored in tmp
+    dbEnv$debugISDBTripNames <- tmp$ISDB_TRIP_CLN
+  }
+
   CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- NA
 
 
@@ -258,6 +269,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
 
   match_TRIP <- matchTripNames(df = isdbTrips)
+  dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = match_TRIP$ISDB_TRIP_O, stepDesc = "post_Matching")
+
+
   match_HI <- matchHI(df = isdbTrips)
   match_HO <- matchHO(df = isdbTrips)
   match_VR <- matchVR(df = isdbTrips)
@@ -308,6 +322,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
   matches =  merge(match_CONF1, match_tmp, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF"), all.x=T)
   matches[c("match_TRIP", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date","mTripcd_id","swappedLIC_VR")][is.na(matches[c("match_TRIP", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date", "mTripcd_id","swappedLIC_VR")])] <- FALSE
+
+  dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = matches$TRIP_ID_ISDB, stepDesc = "post_Matching")
+  dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = matches$ISDB_TRIP_O, stepDesc = "post_Matching")
+  dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = matches$VR, stepDesc = "post_Matching")
+  dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = matches$LIC, stepDesc = "post_Matching")
 
   matches <- matches[which((matches$match_TRIP|matches$match_CONF_HI|matches$match_CONF_HO) |
                              (matches$match_Date & (matches$match_LIC + matches$match_VR + matches$mTripcd_id) >0)),]
@@ -396,5 +415,13 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   res[["MATCH_SUMMARY_TRIPS"]] <- summ_df
   res[["ISDB_UNMATCHABLES"]] <- matchNone
   res[["ISDB_MULTIMATCHES"]] <- dupRows
+  if (!class(dbEnv$debugLics) == "NULL") res$debug[["debugLics"]] <- dbEnv$debugLics
+  if (!class(dbEnv$debugVRs) == "NULL") res$debug[["debugVRs"]] <- dbEnv$debugVRs
+  if (!class(dbEnv$debugMARFTripIDs) == "NULL") res$debug[["debugMARFTripIDs"]] <- dbEnv$debugMARFTripIDs
+  if (!class(dbEnv$debugISDBTripNames) == "NULL") {
+    dbEnv$debugISDBTripNames <- merge(tmp,dbEnv$debugISDBTripNames, by.x="ISDB_TRIP_CLN", by.y="expected")
+    dbEnv$debugISDBTripNames$ISDB_TRIP_CLN <- NULL
+    res$debug[["debugISDBTripNames"]] <- dbEnv$debugISDBTripNames
+  }
   return(res)
 }
