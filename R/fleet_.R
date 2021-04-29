@@ -65,22 +65,12 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   data$params$fleet[["licencesGearSpecs"]] <- gearSpecs
     fleet <- do.call(get_fleet, args)
     data[["fleet"]]<- fleet
-
-  if (!class(fleet$debug$debugLics) == "NULL") args$debugLics <- fleet$debug$debugLics
-  if (!class(fleet$debug$debugVRs) == "NULL") args$debugVRs <- fleet$debug$debugVRs
-  if (!class(fleet$debug$debugMARFTripIDs) == "NULL") args$debugMARFTripIDs <- fleet$debug$debugMARFTripIDs
-  if (!class(fleet$debug$debugISDBTripIDs) == "NULL") args$debugISDBTripIDs <- fleet$debug$debugISDBTripIDs
-  if (!class(fleet$debug$debugISDBTripNames) == "NULL") args$debugISDBTripNames <- fleet$debug$debugISDBTripNames
   data$fleet$debug <-NULL
 
   if (args$returnMARFIS){
     marf <- do.call(get_marfis, list(thisFleet=fleet$FLEET_ACTIVITY,args=args))
     data[["marf"]]<- marf
-    if (!class(marf$debug$debugLics) == "NULL") args$debugLics <- marf$debug$debugLics
-    if (!class(marf$debug$debugVRs) == "NULL") args$debugVRs <- marf$debug$debugVRs
-    if (!class(marf$debug$debugMARFTripIDs) == "NULL") args$debugMARFTripIDs <- marf$debug$debugMARFTripIDs
-    if (!class(marf$debug$debugISDBTripIDs) == "NULL") args$debugISDBTripIDs <- marf$debug$debugISDBTripIDs
-    if (!class(marf$debug$debugISDBTripNames) == "NULL") args$debugISDBTripNames <- marf$debug$debugISDBTripNames
+
     data$marf$debug <-NULL
     if (args$returnISDB){
       isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, matchMarfis = T, args=args))
@@ -92,29 +82,27 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
       if (length(isdb)>1 && class(isdb$ISDB_TRIPS)=="data.frame"){
         data[["isdb"]]<- isdb
-        if (!class(isdb$debug$debugLics) == "NULL") args$debugLics <- isdb$debug$debugLics
-        if (!class(isdb$debug$debugVRs) == "NULL") args$debugVRs <- isdb$debug$debugVRs
-        if (!class(isdb$debug$debugMARFTripIDs) == "NULL") args$debugMARFTripIDs <- isdb$debug$debugMARFTripIDs
-        if (!class(isdb$debug$debugISDBTripIDs) == "NULL") args$debugISDBTripIDs <- isdb$debug$debugISDBTripIDs
-        if (!class(isdb$debug$debugISDBTripNames) == "NULL") args$debugISDBTripNames <- isdb$debug$debugISDBTripNames
         data$isdb$debug <-NULL
-
         loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
         data[["location_summary"]]<- loc
       }
     }
   }
-  if (!(class(args$debugLics) == "NULL" &&
-        class(args$debugVRs) == "NULL" &&
-        class(args$debugMARFTripIDs) == "NULL" &&
-        class(args$debugISDBTripIDs) == "NULL"  &&
-        class(args$debugISDBTripNames) == "NULL")){
+  if (!(class(dbEnv$debugLics) == "NULL" &&
+        class(dbEnv$debugVRs) == "NULL" &&
+        class(dbEnv$debugMARFTripIDs) == "NULL" &&
+        class(dbEnv$debugISDBTripIDs) == "NULL"  &&
+        class(dbEnv$debugISDBTripNames) == "NULL")){
     data[["debug"]]<- list()
-    if (!class(args$debugLics) == "NULL") data$debug$debugLics <- args$debugLics
-    if (!class(args$debugVRs) == "NULL") data$debug$debugVRs <- args$debugVRs
-    if (!class(args$debugMARFTripIDs) == "NULL") data$debug$debugMARFTripIDs <- args$debugMARFTripIDs
-    if (!class(args$debugISDBTripIDs) == "NULL") data$debug$debugISDBTripIDs <- args$debugISDBTripIDs
-    if (!class(args$debugISDBTripNames) == "NULL") data$debug$debugISDBTripNames <- args$debugISDBTripNames
+    if (!class(dbEnv$debugLics) == "NULL") data$debug$debugLics <- dbEnv$debugLics
+    if (!class(dbEnv$debugVRs) == "NULL") data$debug$debugVRs <- dbEnv$debugVRs
+    if (!class(dbEnv$debugMARFTripIDs) == "NULL") data$debug$debugMARFTripIDs <- dbEnv$debugMARFTripIDs
+    if (!class(dbEnv$debugISDBTripIDs) == "NULL") data$debug$debugISDBTripIDs <- dbEnv$debugISDBTripIDs
+    if (!class(dbEnv$debugISDBTripNames) == "NULL") {
+      tmp <- merge(dbEnv$debugISDBTripNamesLookup, dbEnv$debugISDBTripNames, by.x = "ISDB_TRIP_CLN", by.y = "expected")
+      tmp = tmp[,2:ncol(tmp)]
+      data$debug$debugISDBTripNames <- tmp
+    }
   }
   return(data)
 }

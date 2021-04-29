@@ -22,12 +22,7 @@ get_fleet<-function(...){
 
   args <-list(...)
 
-
   if (args$debuggit)  Mar.utils::where_now()
-  dbEnv <- new.env()
-  dbEnv$debugLics <- args$debugLics
-  dbEnv$debugVRs <- args$debugVRs
-  dbEnv$debugMARFTripIDs <- args$debugMARFTripIDs
 
   MARBYCATCH_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
 
@@ -71,8 +66,8 @@ get_fleet<-function(...){
       log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
       df_new<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
 
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearSize")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearSize")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearSize")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearSize")
       if (args$debuggit) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
       df<- df_new
       log_eff <- NA
@@ -87,8 +82,8 @@ get_fleet<-function(...){
       gearSpecRelevant_types <- gearSpecRelevant[toupper(gearSpecRelevant$DATA_VALUE) %in% args$gearSpecs$TYPE,"LOG_EFRT_STD_INFO_ID"]
       log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"MON_DOC_ID"])
       df_new<-df[df$MON_DOC_ID %in% log_eff,]
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearTypeFilt")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearTypeFilt")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearTypeFilt")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearTypeFilt")
 
       if (args$debuggit) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "gearTypeFilt")
       df<- df_new
@@ -187,7 +182,7 @@ get_fleet<-function(...){
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
                                tables = c("MARBYCATCH_LIC"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC$LICENCE_ID, stepDesc = "flt_initial")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC$LICENCE_ID, stepDesc = "flt_initial")
 
     if (args$debuggit){
       #here, I successively use the licence info to compare against the records in MARBYCATCH_LIC. This will facilitate understanding when certain records that
@@ -197,32 +192,32 @@ get_fleet<-function(...){
       } else{
         MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_L$LICENCE_ID, stepDesc = "flt_licType")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_L$LICENCE_ID, stepDesc = "flt_licType")
 
       if (all(is.na(args$lics$LIC_SUBTYPE))){
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC_L
       } else{
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC_L[MARBYCATCH_LIC_L$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtype")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtype")
 
       if (all(is.na(args$lics$LIC_GEAR))){
         MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S
       } else{
         MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$GEAR_CODE %in% args$lics$LIC_GEAR,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_G$LICENCE_ID, stepDesc = "flt_licGear")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_G$LICENCE_ID, stepDesc = "flt_licGear")
 
       if (all(is.na(args$lics$LIC_SP))){
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC_G
       } else{
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC_G[MARBYCATCH_LIC_G$SPECIES_CODE %in% args$lics$LIC_SP,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSpp")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSpp")
 
           }
     MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeSp")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeSp")
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
     MARBYCATCH_LIC <- MARBYCATCH_LIC_new
@@ -230,7 +225,7 @@ get_fleet<-function(...){
     # Filter licences by desired date range -------------------------------------------------------------------------------------------------------------------
     dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
     MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=dateFilt))),]
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licDates")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licDates")
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
     licDf <- unique(MARBYCATCH_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
@@ -255,35 +250,35 @@ get_fleet<-function(...){
       } else{
         MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_L$LICENCE_ID, stepDesc = "flt_licTypeOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_L$LICENCE_ID, stepDesc = "flt_licTypeOra")
 
       if (all(is.na(args$lics$LIC_SUBTYPE))){
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC
       } else{
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtypeOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtypeOra")
 
       # if (all(is.na(args$lics$LIC_GEAR))){
       #   MARBYCATCH_LIC_G <- MARBYCATCH_LIC
       # } else{
       #   MARBYCATCH_LIC_G <- MARBYCATCH_LIC[MARBYCATCH_LIC$GEAR_CODE %in% args$lics$LIC_GEAR,]
       # }
-      # dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_G$LICENCE_ID, stepDesc = "flt_licGearOra")
+      # dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_G$LICENCE_ID, stepDesc = "flt_licGearOra")
 
       if (all(is.na(args$lics$LIC_SP))){
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC
       } else{
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$lics$LIC_SP,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSppOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSppOra")
 
       MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeGearSpOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeGearSpOra")
 
       dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
       MARBYCATCH_LIC_new_date <- MARBYCATCH_LIC_new[which(eval(parse(text=dateFilt))),]
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new_date$LICENCE_ID, stepDesc = "flt_licDatesOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new_date$LICENCE_ID, stepDesc = "flt_licDatesOra")
 
       if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC_new, post_ = MARBYCATCH_LIC_new_date, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
       MARBYCATCH_LIC_new <- MARBYCATCH_LIC_new_date
@@ -322,8 +317,8 @@ get_fleet<-function(...){
     NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[,c("AREA_ID", "NAFO_AREA")]
 
     PRO_SPC_INFO_new <-PRO_SPC_INFO[PRO_SPC_INFO$LICENCE_ID %in% licDf$LICENCE_ID,]
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSLics")
-    dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSLics")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSLics")
+    dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSLics")
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
 # Grab fishing activity of those with valid combos of licence and gear code  -------------------------------------------------------------------------------
@@ -333,8 +328,8 @@ get_fleet<-function(...){
     }else{
       PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
     }
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSGrs")
-    dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSGrs")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSGrs")
+    dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSGrs")
 
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
@@ -348,9 +343,9 @@ get_fleet<-function(...){
     }
 
     PRO_SPC_INFO_new <- merge(PRO_SPC_INFO_new, TRIPS)
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSDates")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSDates")
-    dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSDates")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSDates")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSDates")
+    dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSDates")
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by dates")
     PRO_SPC_INFO <- PRO_SPC_INFO_new
@@ -361,9 +356,9 @@ get_fleet<-function(...){
       nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
       NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(nafoCode, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
       PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
-      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSNAFOAreas")
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSNAFOAreas")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSNAFOAreas")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSNAFOAreas")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSNAFOAreas")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSNAFOAreas")
 
       if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by licenced NAFO")
       PRO_SPC_INFO <- PRO_SPC_INFO_new
@@ -414,12 +409,12 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
 )
 
     theFleet = args$cxn$thecmd(args$cxn$channel, fleetAct_qry)
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSDates")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSDates")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSDates")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSDates")
 
     theFleet2 <- theFleet[paste0(theFleet$LICENCE_ID,"_", theFleet$GEAR_CODE) %in% all_LicGr,]
-    dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSLicGears")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSLicGears")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSLicGears")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSLicGears")
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = theFleet, post_ = theFleet2, fields = "LICENCE_ID", flagTxt = "PS filtered by licence/gear combo")
     theFleet <- theFleet2
@@ -540,10 +535,6 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
   res$FLEET_PARAMS$gear <- args$gear
   res[["FLEET"]] <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),c("VR_NUMBER", "LICENCE_ID", "GEAR_CODE")])
   res[["FLEET_ACTIVITY"]]<- df
-  res[["debug"]] <- list()
-  if (!class(dbEnv$debugLics) == "NULL") res$debug[["debugLics"]] <- dbEnv$debugLics
-  if (!class(dbEnv$debugVRs) == "NULL") res$debug[["debugVRs"]] <- dbEnv$debugVRs
-  if (!class(dbEnv$debugMARFTripIDs) == "NULL") res$debug[["debugMARFTripIDs"]] <- dbEnv$debugMARFTripIDs
 
   return(res)
 }

@@ -27,10 +27,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   args <-list(...)$args
   if (args$debuggit) Mar.utils::where_now()
 
-  dbEnv <- new.env()
-  dbEnv$debugLics <- args$debugLics
-  dbEnv$debugVRs <- args$debugVRs
-  dbEnv$debugMARFTripIDs <- args$debugMARFTripIDs
   HAIL_OUTS <-HAIL_IN_CALLS <-MON_DOC_ENTRD_DETS <-LOG_EFRT_STD_INFO<-PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- TRIPS <- NA
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
@@ -133,14 +129,14 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                             c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
                               'DATE_FISHED','LANDED_DATE','VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID',
                               'NAFO_UNIT_AREA_ID', 'RND_WEIGHT_KGS','SPECIES_CODE')]
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSallProSpc")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSallProSpc")
-      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSallProSpc")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSallProSpc")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSallProSpc")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSallProSpc")
 
       if (all(args$marfSpp != 'all')) PS_df <- PS_df[PS_df$SPECIES_CODE %in% args$marfSpp,]
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSSp")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSSp")
-      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSSp")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSSp")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSSp")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSSp")
 
 
       if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
@@ -149,9 +145,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
         PS_df_new <- PS_df[PS_df$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
         if (args$debuggit) Mar.utils::changeDetector(pre_ = PS_df, post_ = PS_df_new, fields = "LICENCE_ID", flagTxt = "marf_NAFO areas applied")
         PS_df <- PS_df_new
-        dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFO")
-        dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFO")
-        dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFO")
+        dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFO")
+        dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFO")
+        dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFO")
 
       }
       PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
@@ -167,9 +163,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       }else{
         PS_df <- PS_df[which(PS_df$T_DATE1 <= as.Date(args$dateEnd) & PS_df$T_DATE2 >= as.Date(args$dateStart)), ]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSDates")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSDates")
-      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSDates")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSDates")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSDates")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSDates")
 
       PS_df$NAFO_UNIT_AREA_ID <- PS_df$SPECIES_CODE <- NULL
     }else{
@@ -217,9 +213,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                     ",where_sp)
       PS_df <- args$cxn$thecmd(args$cxn$channel, PSQry0)
 
-      dbEnv$debugLics <- Mar.utils::updateExpected(df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFOSppDates")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFOSppDates")
-      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFOSppDates")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFOSppDates")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFOSppDates")
+      dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSNAFOSppDates")
 
     }
     colnames(PS_df)[colnames(PS_df)=="NAFO_AREA"] <- "NAFO_MARF_TRIPS"
@@ -413,10 +409,5 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   res[["MARF_MATCH"]] <- ps
   res[["MARF_TRIPS"]]<-trips
   res[["MARF_SETS"]]<-eff
-
-  res[["debug"]] <- list()
-  if (!class(dbEnv$debugLics) == "NULL") res$debug[["debugLics"]] <- dbEnv$debugLics
-  if (!class(dbEnv$debugVRs) == "NULL") res$debug[["debugVRs"]] <- dbEnv$debugVRs
-  if (!class(dbEnv$debugMARFTripIDs) == "NULL") res$debug[["debugMARFTripIDs"]] <- dbEnv$debugMARFTripIDs
   return(res)
 }

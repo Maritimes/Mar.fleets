@@ -10,6 +10,7 @@ set_defaults(
   area = "all",
   marfSpp = "all",
   useDate = "LANDED_DATE",
+  tripcd_id = NULL,
   returnMARFIS = T,
   returnISDB = T,
   manual_fleet = F,
@@ -19,7 +20,7 @@ set_defaults(
   dateStart = NULL,
   dateEnd = NULL,
   year = NULL,
-  keepSurveyTrips = FALSE,
+  keepSurveyTrips = TRUE,
   matchMarfis = TRUE,
   matchMaxDayDiff = 2,
   dropUnmatchedISDB = TRUE,
@@ -53,6 +54,8 @@ For example, certain fleets must use particular mesh sizes or shapes. This infor
 
 \item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
 
+\item{tripcd_id}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches}
+
 \item{returnMARFIS}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
 
 \item{returnISDB}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
@@ -79,8 +82,8 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
 \item{year}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
 \code{YYYY}, e.g. \code{year = 2018}.  \code{dateStart} takes priority over \code{year} if both are provided.}
 
-\item{keepSurveyTrips}{default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
-ensures these trips are retained.}
+\item{keepSurveyTrips}{default is \code{TRUE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{FALSE}
+ensures these trips are dropped}
 
 \item{matchMarfis}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
 

@@ -70,11 +70,11 @@ those trips/sets will be attributed to "Other".
 \seealso{
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
-\code{\link{plot_bycatch}()}
+\code{\link{quickMap}()}
 
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
-\code{\link{plot_bycatch}()}
+\code{\link{quickMap}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

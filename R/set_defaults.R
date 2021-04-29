@@ -167,6 +167,15 @@ set_defaults <- function(lics = 'all',
     paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
     paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
     paramDf <- rbind(paramDf, c("metadata","Mar.bycatch version", utils::packageDescription("Mar.bycatch")$Version))
+
+    dbEnv$debugLics <- argg$debugLics
+    dbEnv$debugVRs <- argg$debugVRs
+    dbEnv$debugMARFTripIDs <- argg$debugMARFTripIDs
+    dbEnv$debugISDBTripIDs <- argg$debugISDBTripIDs
+    if (!is.null(argg$debugISDBTripNames)) {
+      dbEnv$debugISDBTripNamesLookup <- clean_ISDB_Trip(df=data.frame(ISDB_TRIP = argg$debugISDBTripNames), field = "ISDB_TRIP", out_name = "ISDB_TRIP_CLN")
+      dbEnv$debugISDBTripNames <- dbEnv$debugISDBTripNamesLookup$ISDB_TRIP_CLN
+    }
 res <- list()
 res[["params"]]<- paramDf
 res[["args"]]<- argg

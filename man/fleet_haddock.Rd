@@ -37,6 +37,7 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
 \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
     \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
+    \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches}
     \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
     \item{\code{returnISDB}}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
     \item{\code{manual_fleet}}{default is \code{FALSE}.}
@@ -48,8 +49,8 @@ should be compared against.}
 summarized locations table.  Using the default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2 characters).  If
 set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) , while a value like 4 would summarize the trips and sets into very specific
 NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")}
-    \item{\code{keepSurveyTrips}}{default is \code{FALSE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{TRUE}
-ensures these trips are retained.}
+    \item{\code{keepSurveyTrips}}{default is \code{TRUE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{FALSE}
+ensures these trips are dropped}
     \item{\code{matchMarfis}}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
     \item{\code{matchMaxDayDiff}}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.}

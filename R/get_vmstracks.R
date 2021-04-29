@@ -23,15 +23,13 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
-  # argsUser <- list(...)
-  args<-set_defaults(argsUser = list(...))
-  argsSent<-  list(...)
-  args[names(argsSent)] <- argsSent
+  argsUser <- list(...)
+  args <- do.call(set_defaults, list(argsUser=argsUser))$args
   if (args$useLocal==TRUE){
     message("\n", "VMS data requires a connection to the network.  It cannot be run locally")
     return(NULL)
   }
-  if (args$debuggit) Mar.utils::where_now()
+  if(args$debuggit) Mar.utils::where_now()
 
  vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
                                                                 mDate=as.Date(character()),
@@ -104,5 +102,10 @@ get_vmstracks<-function(get_marfis = NULL, get_isdb = NULL, ...){
   all_VMS_cln_segs$OBS <- NULL
   all_VMS_cln_segs<- unique(all_VMS_cln_segs)
   all_VMS_cln_segs<-merge(all_VMS_cln_segs, agg, by="trek")
+  all_VMS_cln_segs$DIST_KM <- round(as.numeric(sf::st_length(all_VMS_cln_segs)/1000),2)
+  all_VMS_cln_segs$DUR_HRS <- round(as.numeric(difftime(all_VMS_cln_segs$trekMax, all_VMS_cln_segs$trekMin, units = "hours")),2)
+  all_VMS_cln_segs$SPEED_KMHR <- round(all_VMS_cln_segs$DIST_KM/all_VMS_cln_segs$DUR_HRS,2)
+  #bunch of values below only relevant to single points - don't make sense for lines
+  all_VMS_cln_segs$SPEED_KNOTS  <- all_VMS_cln_segs$LATITUDE  <- all_VMS_cln_segs$LONGITUDE <- all_VMS_cln_segs$elapsedDist_m <- all_VMS_cln_segs$elapsedTime_min <- all_VMS_cln_segs$UPDATE_DATE <- NULL
   return(all_VMS_cln_segs)
 }
