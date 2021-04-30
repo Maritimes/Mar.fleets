@@ -56,6 +56,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 143
+#'   \item \code{tripcd_id} = 49
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
@@ -77,6 +78,6 @@
 #' @export
 fleet_winterflounder <- function(useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-   data <- fleet_(fleet = "WINTERFLOUNDER", marfSpp = 143, area = "ALL", gearSpecs = "ALL", useLocal = useLocal,...)
+   data <- fleet_(fleet = "WINTERFLOUNDER", marfSpp = 143, area = "ALL", gearSpecs = "ALL", tripcd_id = c(49), useLocal = useLocal,...)
   return(data)
 }

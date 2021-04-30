@@ -60,6 +60,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 172
+#'   \item \code{tripcd_id} = c(14,7002)
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
@@ -85,7 +86,7 @@ fleet_silverhake <- function(mesh='ALL', useLocal=NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   mesh <- toupper(mesh)
   gearSpecs <- ifelse(mesh == "ALL", "ALL","SMALL")
-  data <- fleet_(fleet = "SHAKE", marfSpp = 172, area = "ALL", gearSpecs = gearSpecs, useLocal = useLocal,...)
+  data <- fleet_(fleet = "SHAKE", marfSpp = 172, area = "ALL", gearSpecs = gearSpecs, tripcd_id = c(14,7002), useLocal = useLocal,...)
   return(data)
   }
 

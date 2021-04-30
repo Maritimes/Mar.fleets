@@ -105,6 +105,7 @@ Hardcoded parameters for this fleet are as follows:
   \item \code{marfSpp} = 130
   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
   \item \code{gearCode} = c(51)
+  \item \code{tripcd_id} = c(30,7057,7058)
 }
 Licence Information for this fleet is accessible via the following calls:
 \itemize{

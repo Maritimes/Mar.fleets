@@ -46,6 +46,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 120
+#'   \item \code{tripcd_id} = 23
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
@@ -79,6 +80,6 @@ fleet_redfish <- function(unit = NULL, useLocal = NULL, ...){
 
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
 
-  data = fleet_(fleet = "REDFISH", marfSpp = 120, area = area, gearSpecs = gearSpecs, useLocal = useLocal,...)
+  data = fleet_(fleet = "REDFISH", marfSpp = 120, area = area, gearSpecs = gearSpecs, tripcd_id = c(23), useLocal = useLocal,...)
   return(data)
 }

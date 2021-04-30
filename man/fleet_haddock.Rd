@@ -108,6 +108,7 @@ different fleets are identified, and their data is extracted.
 Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 110
+  \item \code{tripcd_id} = 7001
 }
 Licence Information for this fleet is accessible via the following calls. Fleet information for the FIXED and MOBILE fleets can be specified by using either
 \code{HADDOCK_FIXED} or \code{HADDOCK_MOB}, respectively:

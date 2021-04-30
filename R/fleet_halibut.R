@@ -57,6 +57,7 @@
 #'   \item \code{marfSpp} = 130
 #'   \item \code{nafoCode} = c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
 #'   \item \code{gearCode} = c(51)
+#'   \item \code{tripcd_id} = c(30,7057,7058)
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
@@ -79,6 +80,6 @@
 fleet_halibut <- function(useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
 
-  data = fleet_(fleet = "HALIBUT", marfSpp = 130, area = "ALL", useLocal = useLocal,...)
+  data = fleet_(fleet = "HALIBUT", marfSpp = 130, area = "ALL", tripcd_id = c(30,7057,7058), useLocal = useLocal,...)
   return(data)
 }

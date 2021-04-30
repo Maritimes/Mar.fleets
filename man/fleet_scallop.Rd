@@ -106,6 +106,7 @@ different fleets are identified, and their data is extracted.
 Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 612
+  \item \code{tripcd_id} = c(4320,7062)
 }
 Licence Information for the inshore fleet is accessible via the following calls. Fleet information for the OFFSHORE and INSHORE fleets can be specified by using either
 \code{SCALLOP_OFF} or \code{SCALLOP_INSH}, respectively:

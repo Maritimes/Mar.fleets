@@ -62,6 +62,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 110
+#'   \item \code{tripcd_id} = 7001
 #' }
 #' Licence Information for this fleet is accessible via the following calls. Fleet information for the FIXED and MOBILE fleets can be specified by using either
 #' \code{HADDOCK_FIXED} or \code{HADDOCK_MOB}, respectively:
@@ -90,6 +91,6 @@ fleet_haddock <- function(type = NULL, area= NULL, useLocal = NULL, ...){
   fleet <- ifelse(type == "MOBILE", "HADDOCK_MOB", "HADDOCK_FIXED")
   gearSpecs <- ifelse(type == "MOBILE", "4X5Y", "ALL")
   area <- ifelse(type == "MOBILE", ifelse(area == "4X5Y", "4X5Y", "5ZJM"), "ALL")
-  data <- fleet_(fleet = fleet, marfSpp = 110, area = area, gearSpecs = gearSpecs, useLocal = useLocal,...)
+  data <- fleet_(fleet = fleet, marfSpp = 110, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
   return(data)
 }

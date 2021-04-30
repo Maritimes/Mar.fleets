@@ -59,6 +59,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 705
+#'   \item \code{tripcd_id} = c(2509, 7061,7064)
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
@@ -83,6 +84,6 @@ fleet_snowcrab<- function(area = "ALL", useLocal = NULL, ...){
 
   message("This wrapper has never been QC'd")
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  data <- fleet_(fleet = "SNOWCRAB", marfSpp = 705, area = area, gearSpecs = "ALL", useLocal = useLocal,...)
+  data <- fleet_(fleet = "SNOWCRAB", marfSpp = 705, area = area, gearSpecs = "ALL", tripcd_id = c(2509, 7061,7064), useLocal = useLocal,...)
   return(data)
 }

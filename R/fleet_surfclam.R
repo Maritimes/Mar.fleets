@@ -56,6 +56,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 608
+#'   \item \code{tripcd_id} = 4355
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
@@ -78,6 +79,6 @@
 fleet_surfclam <- function(useLocal = NULL, ...){
   message("This wrapper has never been QC'd")
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  data <- fleet_(fleet = "SURFCLAM", marfSpp = 608, area = "ALL", gearSpecs = "ALL", useLocal = useLocal,...)
+  data <- fleet_(fleet = "SURFCLAM", marfSpp = 608, area = "ALL", gearSpecs = "ALL", tripcd_id = c(4355), useLocal = useLocal,...)
   return(data)
 }

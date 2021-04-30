@@ -106,6 +106,7 @@ different fleets are identified, and their data is extracted.
 Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 705
+  \item \code{tripcd_id} = c(2509, 7061,7064)
 }
 Licence Information for this fleet is accessible via the following calls:
 \itemize{

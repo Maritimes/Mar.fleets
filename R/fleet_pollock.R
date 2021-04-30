@@ -65,6 +65,7 @@
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} =170
+#'   \item \code{tripcd_id} = 7001
 #' }
 #' Licence Information for this fleet is accessible via the following calls. Fleet information for the MOBILE and FIXED fleets can be specified by using either
 #' \code{POLLOCK_MOBILE} or \code{POLLOCK_FIXED}, respectively:
@@ -94,6 +95,6 @@ fleet_pollock <- function(type = NULL, mesh='ALL', component = NULL, useLocal = 
   fleet <- ifelse(type == "MOBILE", "POLLOCK_MOBILE", "POLLOCK_FIXED")
   gearSpecs <- ifelse(mesh == "ALL", "ALL",ifelse(mesh == "SMALL", "SMALL", "LARGE"))
   area <- ifelse(component == "WESTERN", "WESTERN", "EASTERN")
-  data <- fleet_(fleet = fleet, marfSpp = 170, area = area, gearSpecs = gearSpecs, useLocal = useLocal,...)
+  data <- fleet_(fleet = fleet, marfSpp = 170, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
   return(data)
 }
