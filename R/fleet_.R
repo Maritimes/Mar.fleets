@@ -13,7 +13,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
-  dbEnv <- NA
   if (is.null(fleet)){
     stop("Please provide a fleet")
   }

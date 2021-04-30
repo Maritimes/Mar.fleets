@@ -19,8 +19,9 @@ quickMap <- function(data=NULL, vms= NULL, nafo=TRUE){
   bbLat <- NA
   bbLon <- NA
   overlayGroups <- NA
-  ship = leaflet::makeIcon("http://globetrotterlife.org/blog/wp-content/uploads/leaflet-maps-marker-icons/ferry-18.png", 18, 18)
-  obs =  leaflet::makeIcon("https://globetrotterlife.org/blog/wp-content/uploads/leaflet-maps-marker-icons/zoom.png", 18, 18)
+
+  ship =        leaflet::makeIcon("https://raw.githubusercontent.com/Rush/Font-Awesome-SVG-PNG/master/black/svg/ship.svg", 18, 18)
+  obsOpen =     leaflet::makeIcon("https://raw.githubusercontent.com/Rush/Font-Awesome-SVG-PNG/master/black/svg/eye.svg", 18, 18)
 
   m <- leaflet::leaflet()
   m <- leaflet::addTiles(m)
@@ -58,7 +59,7 @@ quickMap <- function(data=NULL, vms= NULL, nafo=TRUE){
                              popup = paste0("ISDB TRIP_ID:",isdbSets$TRIP_ID,
                                             "<br>FISHSET_ID", isdbSets$FISHSET_ID,
                                             "<br>LOG_EFRT_STD_INFO_ID",isdbSets$LOG_EFRT_STD_INFO_ID),
-                             icon = obs)
+                             icon = obsOpen)
     overlayGroups <- c(overlayGroups, "ISDB")
     bbLat <- c(bbLat, min(isdbSets$LATITUDE), max(isdbSets$LATITUDE))
     bbLon <- c(bbLon, min(isdbSets$LONGITUDE), max(isdbSets$LONGITUDE))
@@ -76,7 +77,6 @@ quickMap <- function(data=NULL, vms= NULL, nafo=TRUE){
                                weight = 2, popup = ifelse(vms$OBS == 0,"UNOBSERVED","OBSERVED"))
     overlayGroups <- c(overlayGroups, "VMS")
   }
-
 
   bbLat <- bbLat[!is.na(bbLat)]
   bbLon <- bbLon[!is.na(bbLon)]
