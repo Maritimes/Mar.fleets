@@ -6,7 +6,9 @@
 #' @param nafo  default is \code{TRUE}. This indicates whether or not the NAFO areas should be plotted.
 #' @examples \dontrun{
 #' redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/data/")
-#' redfishVMS<-get_vmstracks(get_marfis = redfishresults$marf, get_isdb = redfishresults$isdb, useLocal=F, oracle.username = "me", oracle.password = "mypassword", oracle.dsn="PTRAN", usepkg='roracle')
+#' redfishVMS<-get_vmstracks(get_marfis = redfishresults$marf, get_isdb = redfishresults$isdb,
+#'          useLocal=F, oracle.username = "me", oracle.password = "mypassword",
+#'          oracle.dsn="PTRAN", usepkg='roracle')
 #' quickMap(data=redfishresults, vms= redfishVMS, nafo=TRUE)
 #'                                 }
 #' @family simpleproducts

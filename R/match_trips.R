@@ -31,7 +31,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
   if (args$debuggit) Mar.utils::where_now()
-  CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- NA
+  k <- TRIP_ID_MARF <- CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- PRIOR1 <- PRIOR2 <- NA
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
     if (!args$quietly)message(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
@@ -169,7 +169,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
     if (args$HS){
       xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData[,args$useDate], units="days")))
-      xData[,"T2"]<- as.numeric(abs(difftime(match_VRLIC$LANDING_DATE,xData[,args$useDate], units="days")))
+      xData[,"T2"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData[,args$useDate], units="days")))
       xData$CLOSEST1<- with(xData, pmin(T1, T2))
       # xData$CLOSEST <- rowMeans(xData[,c("T1", "T2")])
     }else{
@@ -194,7 +194,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     # match_DateMean <- match_DateMean[match_DateMean$CLOSEST1 <=args$matchMaxDayDiff,]
 
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 >= 8,])>0) match_DateMin[match_DateMin$CLOSEST1 >= 8, "match_DATE_DETS"] <- "ISDB/MARF activity more than a week different"
-    # if (nrow(match_VRLIC[match_VRLIC$CLOSEST1 >= 30,])>0) match_VRLIC[match_VRLIC$CLOSEST1 >= 30, "match_VRLICDATE_DETS"] <- "ISDB/MARF activity more than a month different"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 8,])>0) match_DateMin[match_DateMin$CLOSEST1 < 8, "match_DATE_DETS"] <- "ISDB/MARF activity within a week"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 3,])>0) match_DateMin[match_DateMin$CLOSEST1 < 3, "match_DATE_DETS"] <- "ISDB/MARF activity within 2 days"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 2,])>0) match_DateMin[match_DateMin$CLOSEST1 < 2, "match_DATE_DETS"] <- "ISDB/MARF activity within 1 day"
