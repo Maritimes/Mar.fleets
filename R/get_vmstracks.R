@@ -32,7 +32,6 @@ get_vmstracks<-function(data = NULL, ...){
                                                                 OBS=numeric(),
                                                                 stringsAsFactors=FALSE)
 
-
   marDat<-merge(data$marf$MARF_SETS, data$marf$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
 
   vr_dates1 <- cbind(marDat[,c("VR_NUMBER_FISHING", "EF_FISHED_DATETIME")],0)
@@ -71,6 +70,7 @@ get_vmstracks<-function(data = NULL, ...){
     message("\n", "No VMS data could be found matching your parameters")
     return(NULL)
   }
+  if(nrow(allVMS)==1000000)message("Your extraction was truncated - you got the maximum number of records allowed.")
   all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)
   all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek",
                                                seqField = "POSITION_UTC_DATE", createShp = F, plot=F)
