@@ -4,16 +4,10 @@
 \alias{get_vmstracks}
 \title{title get_vmstracks}
 \usage{
-get_vmstracks(get_marfis = NULL, get_isdb = NULL, ...)
+get_vmstracks(data = NULL, ...)
 }
 \arguments{
-\item{get_marfis}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
-trip and set information from MARFIS}
-
-\item{get_isdb}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
-trip and set information from the ISDB database.}
+\item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
 
 \item{...}{other arguments passed to methods
 It is likely that you will need to provide values for the following 4
