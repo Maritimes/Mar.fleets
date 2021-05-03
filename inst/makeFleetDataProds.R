@@ -1,5 +1,5 @@
-# devtools::install_github("Maritimes/Mar.bycatch")
-# library(Mar.bycatch)
+# devtools::install_github("Maritimes/Mar.fleets")
+# library(Mar.fleets)
 library(Mar.datawrangling)
 library(Mar.utils)
 makeFleetDataProds <- function(binYears = 5, startYr = 2002, data.dir ="C:/git/wrangledData/", saveDir =NULL, fleet = NULL){

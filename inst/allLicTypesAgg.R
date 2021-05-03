@@ -1,4 +1,4 @@
-library(Mar.bycatch)
+library(Mar.fleets)
 Hal <- fleet_halibut(dateStart = "2019-01-01", dateEnd = "2019-12-31", useLocal=T, data.dir = "C:/git/wrangledData/")
 HalLics2019 <- unique(Hal$fleet$LICENCE_ID)
 HalLics2019 <- data[data$LICENCE_ID %in% HalLics2019,]

@@ -9,10 +9,10 @@
 #' * - only the alphanumeric characters of the trip names are used (e.g.
 #' "J18-0000B" becomes "J180000B").
 #' @param isdbTrips default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' \code{Mar.fleets::get_isdb()} function - it contains dataframes of both the
 #' trip and set information from the ISDB database.
 #' @param marfMatch default is \code{NULL}. This is the MARF_MATCH output of the
-#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+#' \code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
 #' @param ... other arguments passed to methods
 #' @family fleets

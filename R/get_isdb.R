@@ -3,10 +3,10 @@
 #' within a particular date range, and if a fleet is provided, it will also limit the results to
 #' those vessels with particular combinations of VR and licence.
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
-#' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Mar.bycatch::get_fleet()}
+#' the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Mar.fleets::get_fleet()}
 #' @param ... other arguments passed to methods
 #' @param get_marfis default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+#' \code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet
 #' @param matchMarfis default is \code{FALSE}.  This indicates whether or not an attempt should be made
 #' to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
@@ -29,8 +29,7 @@
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
   if (args$debuggit)    Mar.utils::where_now()
-  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- spLookups <- NA
-  utils::data("spLookups", envir = environment())
+  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- NA
 
   if (is.null(get_marfis) & matchMarfis==TRUE){
     message(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
@@ -352,8 +351,6 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
       isdb_SETS_catches[,spColsS][is.na(isdb_SETS_catches[,spColsS])] <- 0
     }
 
-    isdbSPP = spLookups[which(spLookups$MARFIS_CODE %in% args$marfSpp),c("SPECCD_ID")]
-    rm(spLookups)
     catches[is.na(catches)] <- 0
     SUMMARY<- catches
     SUMMARY = stats::aggregate(
@@ -368,11 +365,9 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
       sum
     )
     SUMMARY <- SUMMARY[with(SUMMARY, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
-    dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% isdbSPP,]
-    SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% isdbSPP),]
+    dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% args$isdbSpp,]
+    SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% args$isdbSpp),]
     SUMMARY <- rbind(dir_Spp_rows, SUMMARY)
-
-
   }else{
     isdb_TRIPS_all <- NA
     isdb_SETS_all <- NA

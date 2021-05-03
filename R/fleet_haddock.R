@@ -54,26 +54,24 @@
 #'   \item \code{isdb} - This is a list of 4 data objects - 2 of which are all of the discovered ISDB data
 #'   TRIPS and SETS for the fleet, as well as the TRIPS and SETS from the observer data that were
 #'   sucessfully matched with the MARFIS data
-#'   \item \code{bycatch} - This is a dataframe with the various species that were observed during observed
-#'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
-#'   estimated discarded wt(kg) are all captured
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 110
+#'   \item \code{isdbSpp} = 11
 #'   \item \code{tripcd_id} = 7001
 #' }
 #' Licence Information for this fleet is accessible via the following calls. Fleet information for the FIXED and MOBILE fleets can be specified by using either
 #' \code{HADDOCK_FIXED} or \code{HADDOCK_MOB}, respectively:
 #' \itemize{
-#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.bycatch::licCore[Mar.bycatch::licCore$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
-#'   \item \code{Licence Areas (if applicable)} \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
+#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
+#'   \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
 #'
 #'   If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
 #'   For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
-#'   \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
-#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.bycatch::licGearSpecs[Mar.bycatch::licGearSpecsreas$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
+#'   \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
+#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
 #'
 #'    If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
 #'    multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
@@ -91,6 +89,6 @@ fleet_haddock <- function(type = NULL, area= NULL, useLocal = NULL, ...){
   fleet <- ifelse(type == "MOBILE", "HADDOCK_MOB", "HADDOCK_FIXED")
   gearSpecs <- ifelse(type == "MOBILE", "4X5Y", "ALL")
   area <- ifelse(type == "MOBILE", ifelse(area == "4X5Y", "4X5Y", "5ZJM"), "ALL")
-  data <- fleet_(fleet = fleet, marfSpp = 110, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
+  data <- fleet_(fleet = fleet, marfSpp = 110, isdbSpp = 11, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
   return(data)
 }

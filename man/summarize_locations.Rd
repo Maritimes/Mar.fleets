@@ -8,11 +8,11 @@ summarize_locations(get_isdb = NULL, get_marfis = NULL, ...)
 }
 \arguments{
 \item{get_isdb}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+\code{Mar.fleets::get_isdb()} function - it contains dataframes of both the
 trip and set information from ISDB related to the specified fleet}
 
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+\code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
 
 \item{...}{other arguments passed to methods}

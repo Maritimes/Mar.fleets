@@ -3,9 +3,8 @@
 #' particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 #' @param thisFleet default is \code{NULL}. This is a dataframe that must include
 #' the columns "LICENCE_ID","VR_NUMBER" and GEAR_CODE.  It can take the results from
-#' \code{Mar.bycatch::get_fleet()}
-#' @param marfSpp default is \code{NULL}. This is a MARFIS species code.  Some of these can be found
-#' in spLookups
+#' \code{Mar.fleets::get_fleet()}
+#' @param marfSpp default is \code{NULL}. This is a MARFIS species code.
 #' @param useDate default is \code{'LANDED_DATE'}. Can also be \code{'DATE_FISHED'}.
 #' @param nafoCode default is \code{'all'}. This is a vector of NAFO AREAS (MARFIS) that will be
 #' used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select

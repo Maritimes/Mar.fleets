@@ -12,7 +12,7 @@ redunit3_2018v2 = fleet_redfish(unit=3, useLocal=T, year = "2018", data.dir="c:/
 ####
 
 # Load required files and functions -----------------------------------------------------------------------------------------------------------------------
-R.utils::sourceDirectory("c:/git/Maritimes/Mar.bycatch/R/", modifiedOnly=F)
+R.utils::sourceDirectory("c:/git/Maritimes/Mar.fleets/R/", modifiedOnly=F)
 load("C:/DFO-MPO/BycatchCourse/SessionFiles/SESSION_redfish_2002_2019.RData")
 rm(list=(setdiff(ls(), "redunit3_2017")))
 
@@ -35,7 +35,7 @@ quietly=T, debuggit=T, returnMARFIS = F, returnISDB = F, debugLics = quick)
 
 load("C:/DFO-MPO/BycatchCourse/SessionFiles/SESSION_halibut_2002_2020.RData")
 rm(list=(setdiff(ls(), "halibut2018")))
-R.utils::sourceDirectory("c:/git/Maritimes/Mar.bycatch/R/", modifiedOnly=F)
+R.utils::sourceDirectory("c:/git/Maritimes/Mar.fleets/R/", modifiedOnly=F)
 halibut2018_new = fleet_halibut(useLocal=T, year = "2018", data.dir="c:/DFO-MPO/BycatchCourse/wrangledData/",
                           quietly=T, debuggit=T, returnMARFIS = F, returnISDB = F)
 

@@ -23,7 +23,7 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
     \item{\code{dateEnd}}{default is \code{NULL} format is \code{YYYY-MM-DD}, e.g. \code{dateEnd = "2019-02-19"}. \code{dateEnd} must be associated with a valid entry of
 \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
     \item{\code{lics}}{default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying the licence types, subtypes, gear and licence species valid
-for a particular fleet.  This information comes from  \code{Mar.bycatch::licCore}.}
+for a particular fleet.  This information comes from  \code{Mar.fleets::licCore}.}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
     \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
     \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches}
@@ -67,8 +67,8 @@ consideration.}
   }}
 }
 \value{
-list of objects, including marfis data, isdb data, information for matching isdb
-and marfis data, and a summary of bycatch
+list of objects, including marfis data, isdb data (including all catches), and
+information for matching isdb and marfis data
 }
 \description{
 This function is a generic wrapper that facilitates extracting fleet specific information using the data provided by fleet-specific wrappers.

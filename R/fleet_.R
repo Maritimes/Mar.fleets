@@ -8,8 +8,8 @@
 #' test <- fleet_(fleet="POLLOCK_MOBILE", area="WESTERN", gearSpecs="SMALL" )
 #'  }
 #' @family coreFuncs
-#' @return list of objects, including marfis data, isdb data, information for matching isdb
-#' and marfis data, and a summary of bycatch
+#' @return list of objects, including marfis data, isdb data (including all catches), and
+#' information for matching isdb and marfis data
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){

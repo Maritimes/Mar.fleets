@@ -48,25 +48,23 @@
 #'   \item \code{isdb} - This is a list of 4 data objects - 2 of which are all of the discovered ISDB data
 #'   TRIPS and SETS for the fleet, as well as the TRIPS and SETS from the observer data that were
 #'   sucessfully matched with the MARFIS data
-#'   \item \code{bycatch} - This is a dataframe with the various species that were observed during observed
-#'   trips.  For each species, the estimated number caught, the estimated kept wt (kgs) and the
-#'   estimated discarded wt(kg) are all captured
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
 #'   \item \code{marfSpp} = 143
+#'   \item \code{isdbSpp} = 43
 #'   \item \code{tripcd_id} = 49
 #' }
 #' Licence Information for this fleet is accessible via the following calls:
 #' \itemize{
-#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.bycatch::licCore[Mar.bycatch::licCore$FLEET=="WINTERFLOUNDER",]}
-#'   \item \code{Licence Areas (if applicable)} \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="WINTERFLOUNDER",]}
+#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="WINTERFLOUNDER",]}
+#'   \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="WINTERFLOUNDER",]}
 #'
 #'   If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
 #'   For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
-#'   \code{Mar.bycatch::licAreas[Mar.bycatch::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
-#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.bycatch::licGearSpecs[Mar.bycatch::licGearSpecsreas$FLEET=="WINTERFLOUNDER",]}
+#'   \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
+#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="WINTERFLOUNDER",]}
 #'
 #'    If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
 #'    multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
@@ -78,6 +76,6 @@
 #' @export
 fleet_winterflounder <- function(useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-   data <- fleet_(fleet = "WINTERFLOUNDER", marfSpp = 143, area = "ALL", gearSpecs = "ALL", tripcd_id = c(49), useLocal = useLocal,...)
+   data <- fleet_(fleet = "WINTERFLOUNDER", marfSpp = 143, isdbSpp = 43, area = "ALL", gearSpecs = "ALL", tripcd_id = c(49), useLocal = useLocal,...)
   return(data)
 }

@@ -1,4 +1,4 @@
-setwd("C:/git/Maritimes/Mar.bycatch")
+setwd("C:/git/Maritimes/Mar.fleets")
 licCore =  data.frame(readxl::read_xlsx( path = "inst/fleetDefnsCore.xlsx",sheet = "Sheet1"))
 licGearSpecs =  data.frame(readxl::read_xlsx( path = "inst/fleetDefnsSpecs.xlsx",sheet = "Sheet1"))
 licAreas =  data.frame(readxl::read_xlsx( path = "inst/fleetDefnsAreas.xlsx",sheet = "Sheet1"))

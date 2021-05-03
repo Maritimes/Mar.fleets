@@ -9,11 +9,12 @@
 #' @param dateEnd default is \code{NULL} format is \code{YYYY-MM-DD}, e.g. \code{dateEnd = "2019-02-19"}. \code{dateEnd} must be associated with a valid entry of
 #' \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).
 #' @param lics default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying the licence types, subtypes, gear and licence species valid
-#' for a particular fleet.  This information comes from  \code{Mar.bycatch::licCore}.
+#' for a particular fleet.  This information comes from  \code{Mar.fleets::licCore}.
 #' @param gearSpecs default is \code{'all'}. Fleet wrappers may populate it with a dataframe specifying the particular specifications for a fleets' gear.
-#' For example, certain fleets must use particular mesh sizes or shapes. This information comes from  \code{Mar.bycatch::licGearSpecs}.
-#' @param area default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.bycatch::licAreas}.
+#' For example, certain fleets must use particular mesh sizes or shapes. This information comes from  \code{Mar.fleets::licGearSpecs}.
+#' @param area default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.fleets::licAreas}.
 #' @param marfSpp default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper
+#' @param isdbSpp default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper
 #' @param useDate default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?
 #' @param tripcd_id default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches
 #' @param returnMARFIS default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})
@@ -166,7 +167,7 @@ set_defaults <- function(lics = 'all',
     paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
     paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
     paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
-    paramDf <- rbind(paramDf, c("metadata","Mar.bycatch version", utils::packageDescription("Mar.bycatch")$Version))
+    paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
 
     dbEnv$debugLics <- argg$debugLics
     dbEnv$debugVRs <- argg$debugVRs

@@ -15,10 +15,9 @@ get_marfis(
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
 the columns "LICENCE_ID","VR_NUMBER" and GEAR_CODE.  It can take the results from
-\code{Mar.bycatch::get_fleet()}}
+\code{Mar.fleets::get_fleet()}}
 
-\item{marfSpp}{default is \code{NULL}. This is a MARFIS species code.  Some of these can be found
-in spLookups}
+\item{marfSpp}{default is \code{NULL}. This is a MARFIS species code.}
 
 \item{useDate}{default is \code{'LANDED_DATE'}. Can also be \code{'DATE_FISHED'}.}
 

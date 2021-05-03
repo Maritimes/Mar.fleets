@@ -43,12 +43,12 @@ set_defaults(
 }
 \arguments{
 \item{lics}{default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying the licence types, subtypes, gear and licence species valid
-for a particular fleet.  This information comes from  \code{Mar.bycatch::licCore}.}
+for a particular fleet.  This information comes from  \code{Mar.fleets::licCore}.}
 
 \item{gearSpecs}{default is \code{'all'}. Fleet wrappers may populate it with a dataframe specifying the particular specifications for a fleets' gear.
-For example, certain fleets must use particular mesh sizes or shapes. This information comes from  \code{Mar.bycatch::licGearSpecs}.}
+For example, certain fleets must use particular mesh sizes or shapes. This information comes from  \code{Mar.fleets::licGearSpecs}.}
 
-\item{area}{default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.bycatch::licAreas}.}
+\item{area}{default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.fleets::licAreas}.}
 
 \item{marfSpp}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
 
@@ -127,6 +127,8 @@ consideration.}
 \item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}
+
+\item{isdbSpp}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
 }
 \description{
 This function provides all of the possible parameters understood by this package. Some can be overwritten by \code{fleet_*} wrappers.

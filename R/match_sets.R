@@ -2,13 +2,13 @@
 #' @description This function takes the results from get_marfis(), get_isdb()
 #' and match_trips(), and attempts to match the sets for each trip.
 #' @param isdb_sets default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' \code{Mar.fleets::get_isdb()} function - it contains dataframes of both the
 #' trip and set information from the ISDB database.
 #' @param matched_trips default is \code{NULL}. This is the updated df output by the
-#' \code{Mar.bycatch::match_trips()} function - it information related to how trips from
+#' \code{Mar.fleets::match_trips()} function - it information related to how trips from
 #' the two databases are matched.
 #' @param marf_sets default is \code{NULL}. This is the MARF_SETS output of the
-#' \code{Mar.bycatch::get_marfis()} function - it contains information about the MARFIS sets.
+#' \code{Mar.fleets::get_marfis()} function - it contains information about the MARFIS sets.
 #' @param maxSetDiff_hr default is \code{24}.  This is how many hours are allowed between
 #' reported ISDB and MARFIS sets before.  Sets differing by more than this time span
 #' will never be matched.

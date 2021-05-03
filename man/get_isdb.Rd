@@ -16,10 +16,10 @@ get_isdb(
 }
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
-the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Mar.bycatch::get_fleet()}}
+the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Mar.fleets::get_fleet()}}
 
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
-\code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+\code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
 
 \item{matchMarfis}{default is \code{FALSE}.  This indicates whether or not an attempt should be made

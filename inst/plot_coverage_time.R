@@ -2,10 +2,10 @@
 #' @description This function takes the results from get_marfis() and get_isdb()
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param get_marfis default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_marfis()} function - it contains dataframes of both the
+#' \code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS
 #' @param get_isdb default is \code{NULL}. This is the list output by the
-#' \code{Mar.bycatch::get_isdb()} function - it contains dataframes of both the
+#' \code{Mar.fleets::get_isdb()} function - it contains dataframes of both the
 #' trip and set information from the ISDB database.
 #' @param dateStart default is \code{NULL}. This is the start of the date range for which marfis and
 #' ISDB was searched for (e.g. "YYYY-MM-DD"). If missing, it will use the earliest date from the
