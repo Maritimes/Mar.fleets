@@ -34,10 +34,8 @@
 #' @param matchMaxDayDiff default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 #' matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.
 #' @param dropUnmatchedISDB default is \code{TRUE}.
-#' @param useLocal default is \code{FALSE}. TThis specifies whether to run the script against local data or against Oracle (requires network or VPN).
-#' @details
-#' \itemize{
-#' \item{useLocal} Depending on your value for \code{useLocal}, different values become necessary.  \code{useLocal=TRUE}
+#' @param useLocal default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires network or VPN).
+#' Depending on your value for \code{useLocal}, different values become necessary.
 #' \itemize{
 #'  \item{useLocal=TRUE} This implies that you have local data you want to use.
 #'     \itemize{
@@ -50,7 +48,6 @@
 #'       \item param \code{oracle.dsn} required
 #'       \item param \code{usepkg} required
 #'     }
-#' }
 #' }
 #' @param data.dir default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.  This is the path to a folder where your *.rdata files are stored.
 #' @param oracle.username default is \code{'_none_'}. This is your username for accessing oracle objects.

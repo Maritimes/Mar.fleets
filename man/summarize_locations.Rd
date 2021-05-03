@@ -18,59 +18,53 @@ trip and set information from MARFIS related to the specified fleet}
 \item{...}{other arguments passed to methods}
 }
 \value{
-returns a list with 2 items - \code{summary} and \code{details}.
-
-\code{summary} is a dataframe with 5 columns, as described below:
+returns a list with 1 or 2 dataframes. These dataframes indicate how much of
+the fishing activity took place in various areas.  Values are categorized as both
+"*_reported" and "*_calculated".  "Reported" values are based on the NAFO information
+stored in MARFIS and ISDB.  These are available for MARFIS trips, MARFIS sets, and ISDB sets.
+"Calculated" values are based on the coordinates associated with the data, and are only
+available for the MARFIS and ISDB sets (not trips).
 \itemize{
-\item {..name dependent on input..} =  named the same as \code{agg.poly.field} and
-contains all of the values of \code{agg.poly.field}
-\item \code{MARFIS_TRIPS} {This is how many Commercial trips had their majority of
-their sets within this polygon}
-\item \code{ISDB_TRIPS} {This is how many opbserved trips had their majority of
-their sets within this polygon}
-\item \code{MARFIS_SETS} {This is how many Commercial sets occurred in this polygon}
-\item \code{ISDB_TRIPS} {This is how many Observed sets occurred in this polygon}
+\item \code{NAFO} =  This is always provided.
+\item \code{<Mar.data::object_name>} = This is only provided when a specific "areaFile" is
+provided as a paramater.
 }
-
-\code{details} is a list containing 4 dataframes - MARFIS_TRIPS, ISDB_TRIPS,
-MARFIS_SETS and ISDB_SETS.  Each of these dataframes has 2 columns - the first
-identifying the TRIP or SET, and the second identifying which area was
-applied to that TRIP OR SET.
 }
 \description{
 This function takes the results from get_marfis() and get_isdb()
 and produces a table showing the how the proportion of observed data varies
-across areas.
+across areas.  Results for NAFO areas are always provided, as these areas are
+stored in both MARFIS and ISDB databases.  If a custom area is specified (via the
+\code{areaFile} parameter), the sets from both the MARFIS and ISDB data are analyzed
+for that area too (as a separate dataframe).
 }
 \note{
 \itemize{
-\item \code{_SETS} A given "TRIP_ID" in MARFIS or ISDB
-typically has multiple sets, and each set has its own coordinates.  For this
-analysis, every set is analyzed to see which polygon it occurred in, and
-this information is provided via as the values for \code{MARFIS_SETS} and
-\code{ISDB_SETS} in the results.
-
-Coordinates for MARFIS_* data comes from the db table "PRO_SPC_INFO", and
-coordinates for ISDB_*
- data come from "ISSETPROFILE" - using the first non-null
-pair found while checking from P1-P4 in order.
-
-\item \code{_TRIPS} = Since a single trip can have sets across
-multiple polygons, this script determines which polygon had the most sets for
-a given trip, and defines that polygon as the value for a given trip.  These
-are provided as the values for \code{MARFIS_TRIPS} and \code{ISDB_TRIPS}.
-
-\item Bad\code{Weird} Coordinates = If the latitude or longitude of the input data
-for any set has a NULL value, an entry of "Bad coordinate" will be added to
-the results.
-Additionally, if fishing can occur outside of the extent of the provided polygon,
-those trips/sets will be attributed to "Other".
+\item \code{_SETS} Coordinates for MARFIS_* data comes from the db table "LOG_EFRT_STD_INFO"
+(preferring *_ENT coordinates over *_DET ), and coordinates for ISDB_* data come from
+"ISSETPROFILE" - using the first non-null pair found while checking from P1-P4 in order.
+\item \code{Weird Coordinates} In addition to falling within a known area, data can also be
+categorized any of the following:
+\itemize{
+\item \code{<missing coord>}  These are missing values for with LAT or LONG (or both)
+\item \code{<impossible coord>}  These have latitudes or longitudes outside of the acceptable
+ranges of 90 - -90  and 180 - -180, respectively
+\item \code{<on boundary line>}  These coordinates fall exactly on a boundary line dividing 2
+areas
+\item \code{<LAND>} For NAFO areas, points that fall on land (according to
+Mar.data::NAFOSubunitsLnd_sf) are indicated as such
+\item \code{<outside known areas>} These are points that fall outside any of the known polygons
+for the specified area. For non_NAFO areas, this can include land.
+}
 }
 }
 \seealso{
-Other simpleproducts: 
-\code{\link{get_vmstracks}()},
-\code{\link{quickMap}()}
+Other coreFuncs: 
+\code{\link{fleet_}()},
+\code{\link{get_fleet}()},
+\code{\link{get_isdb}()},
+\code{\link{get_marfis}()},
+\code{\link{set_defaults}()}
 
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
@@ -79,4 +73,5 @@ Other simpleproducts:
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
 }
+\concept{coreFuncs}
 \concept{simpleproducts}

@@ -47,7 +47,8 @@ Other coreFuncs:
 \code{\link{fleet_}()},
 \code{\link{get_fleet}()},
 \code{\link{get_isdb}()},
-\code{\link{set_defaults}()}
+\code{\link{set_defaults}()},
+\code{\link{summarize_locations}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

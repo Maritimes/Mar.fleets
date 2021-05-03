@@ -11,20 +11,21 @@ fleet_haddock(type = NULL, area = NULL, useLocal = NULL, ...)
 
 \item{area}{default is \code{NULL}. This is either "4X5Y" or "5ZJM".}
 
-\item{useLocal}{default is \code{NULL}.  Valid selections are  \code{TRUE} and \code{FALSE}
-
-if \code{TRUE}, then the following parameter is necessary:
-' \itemize{
-  \item \code{data.dir} - This is a path on your computer to where your .RData files are stored.
-  }
-
-if \code{FALSE}, then the following parameters are necessary:
-' \itemize{
-  \item \code{oracle.username} - your existing oracle login name
-  \item \code{oracle.password} - your existing oracle password
-  \item \code{oracle.dsn} - usually "PTRAN" - the name of the database you're connecting to
-  \item \code{usepkg} - default is \code{"rodbc"}, but \code{"roracle"} is also valid
-  }}
+\item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires network or VPN).
+Depending on your value for \code{useLocal}, different values become necessary.
+\itemize{
+ \item{useLocal=TRUE} This implies that you have local data you want to use.
+    \itemize{
+      \item param \code{data.dir} required.  This is the path to your local data
+    }
+ \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data. Include all of the following:
+  \itemize{
+      \item param \code{oracle.username} required
+      \item param \code{oracle.password} required
+      \item param \code{oracle.dsn} required
+      \item param \code{usepkg} required
+    }
+}}
 
 \item{...}{
   Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
@@ -36,6 +37,7 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
     \item{\code{dateEnd}}{default is \code{NULL} format is \code{YYYY-MM-DD}, e.g. \code{dateEnd = "2019-02-19"}. \code{dateEnd} must be associated with a valid entry of
 \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
+    \item{\code{isdbSpp}}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
     \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
     \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches}
     \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
@@ -59,7 +61,7 @@ matches (on the basis of common Vessel, licence and date).  They may still match
     \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle objects.}
     \item{\code{oracle.password}}{default is \code{'_none_'}. This is your password for accessing oracle objects.}
     \item{\code{oracle.dsn}}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
-    \item{\code{usepkg}}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+    \item{\code{usepkg}}{default is \code{'roracle'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
     \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
     \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
@@ -77,21 +79,57 @@ consideration.}
   }}
 }
 \value{
-specific returned objects can be specified by the user, but the default result is a list of objects, including marfis data, isdb data, information for matching isdb
-and marfis data, and a summary of bycatch, specifically:
-a list item containing:
+specific returned objects can be specified by the user, but the default result is a list of objects.  The list includes marfis data, isdb data,
+information related to the matching, and a breakdown of where the various trips and sets occurred, specifically:
 \itemize{
-  \item \code{FLEET} - This is a dataframe of the unique combinations of (MARFIS) LICENCE_ID, VR_NUMBER and GEAR_CODE that
+ \item \code{params} -  this is a list containing information about the extraction
+ \itemize{
+ \item \code{user} - this contain all of the parameters sent to the function (including defaults, user-provided and hardcoded)
+ \item \code{fleet} - this is a list object containing 3 dataframes that contain the information used to identify the fleet.
+ These will include licencesCore, licecesAreas, and licencesGearSpecs.  Depending on how the fleet is defined, one or more of
+ these may be empty.
+ }
+  \item \code{fleet} - This is a dataframe of the unique combinations of (MARFIS) LICENCE_ID, VR_NUMBER and GEAR_CODE that
   was found for this fleet during the specified period
   \item \code{FLEET_ACTIVITY} - This is a dataframe of identifiers for all of the (MARFIS) fishing activity undertaken
   by vessels of this fleet during the specified period (i.e. LICENCE_ID, PRO_SPC_INFO_ID, LOG_EFRT_STD_INFO_ID, GEAR_CODE,
   MON_DOC_ID, VR_NUMBER, and several dates associated with the trip)
-  \item \code{marf} - This is a list of 3 sets of information for the commercial catch data (i.e. marfis)-
-  the trips, the sets, and a special dataframe containing information that can be used to link
+  \item \code{marf} - This is a list of 3 sets of information for the commercial catch data (i.e. marfis):
+  \itemize{
+  \item \code{MARF_TRIPS}
+  \item \code{MARF_SETS}
+  \item \code{MARF_MATCH} This is a special dataframe containing information that can be used to link
   the commercial data to the ISDB data
-  \item \code{isdb} - This is a list of 4 data objects - 2 of which are all of the discovered ISDB data
-  TRIPS and SETS for the fleet, as well as the TRIPS and SETS from the observer data that were
-  sucessfully matched with the MARFIS data
+  }
+  \item \code{isdb} - This is a list of data objects from the ISDB db:
+  \itemize{
+  \item \code{ISDB_TRIPS} These are ISDB trips that are associated with MARFIS trips from the \code{marf$MARF_TRIPS} object above
+  \item \code{ISDB_SETS} These are all of the ISDB sets associated with the ISDB_TRIPS (matched and unmatched)
+  \item \code{ISDB_CATCHES} This is the data associated with the records in ISDB_TRIPS
+  \itemize{
+  \item \code{ALL} This is the raw data from ISCATCHES for the trips found in ISDB_TRIPS
+  \item \code{SUMMARY} This is the data from ISCATCHES for all of the trips found in ISDB_TRIPS, summarized by species. Each species
+  has calculated aggregate values for "EST_NUM_CAUGHT", EST_KEPT_WT", "EST_DISCARD_WT" and "EST_COMBINED_WT"
+  }
+  }
+  \item \code{matches} This is a list item that contains all of the information used to assigne matches between MARFIS and ISDB
+  \itemize{
+  \item \code{MATCH_SUMMARY_TRIPS} This is a simple breakdown of the various approaches used for matching, and the relative success of each.
+  Matches can occur using multiple approaches, so these can not be added up.  This list also includes "\code{Likely_Swapped_VR_Lic}" which
+  indicates how may matches seem to have the values for LICENCE_ID and VR_NUMBER reversed, and includes the count of how many rows are present
+  in both \code{Multimatches} and \code{Umatchables}
+  \item \code{MATCH_DETAILS} This is a dataframe of all of the MARFIS and ISDB trips that have been associated with each other, and whether
+  or not they were matched on each of the possible approaches
+  \item \code{ISDB_UNMATCHABLES} These are the trips from MARFIS that included ISDB-type information (e.g. Observer ID, ISDB Trip name, etc), but
+  for which no ISDB match could be found.
+  \item \code{ISDB_MULTIMATCHES} These are ISDB trips that were found to be match multiple MARFIS trips equally well.
+  }
+  \item \code{location_summary} - This is a list of 1 or more dataframes that breaks down the various trips
+  and sets by the areas in which they occurred.  NAFO locations are reported for MARFIS trips, MARFIS sets and ISDB sets
+  (not ISDB trips).  These reported locations are shown, as are the "calculated" locations, which are based on the
+  reported latitudes and longitudes. No "calculated" locations are shown for MARFIS trips, as there are no coordinates for
+  the trip level.  If a custom value for \code{areaFile} was sent (i.e. not "NAFOSubunits_sf"), a second dataframe breaking
+  down the sets by the custom area will also be provided.
   }
 }
 \description{

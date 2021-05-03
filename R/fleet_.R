@@ -8,8 +8,58 @@
 #' test <- fleet_(fleet="POLLOCK_MOBILE", area="WESTERN", gearSpecs="SMALL" )
 #'  }
 #' @family coreFuncs
-#' @return list of objects, including marfis data, isdb data (including all catches), and
-#' information for matching isdb and marfis data
+#' @return specific returned objects can be specified by the user, but the default result is a list of objects.  The list includes marfis data, isdb data,
+#' information related to the matching, and a breakdown of where the various trips and sets occurred, specifically:
+#' \itemize{
+#'  \item \code{params} -  this is a list containing information about the extraction
+#'  \itemize{
+#'  \item \code{user} - this contain all of the parameters sent to the function (including defaults, user-provided and hardcoded)
+#'  \item \code{fleet} - this is a list object containing 3 dataframes that contain the information used to identify the fleet.
+#'  These will include licencesCore, licecesAreas, and licencesGearSpecs.  Depending on how the fleet is defined, one or more of
+#'  these may be empty.
+#'  }
+#'   \item \code{fleet} - This is a dataframe of the unique combinations of (MARFIS) LICENCE_ID, VR_NUMBER and GEAR_CODE that
+#'   was found for this fleet during the specified period
+#'   \item \code{FLEET_ACTIVITY} - This is a dataframe of identifiers for all of the (MARFIS) fishing activity undertaken
+#'   by vessels of this fleet during the specified period (i.e. LICENCE_ID, PRO_SPC_INFO_ID, LOG_EFRT_STD_INFO_ID, GEAR_CODE,
+#'   MON_DOC_ID, VR_NUMBER, and several dates associated with the trip)
+#'   \item \code{marf} - This is a list of 3 sets of information for the commercial catch data (i.e. marfis):
+#'   \itemize{
+#'   \item \code{MARF_TRIPS}
+#'   \item \code{MARF_SETS}
+#'   \item \code{MARF_MATCH} This is a special dataframe containing information that can be used to link
+#'   the commercial data to the ISDB data
+#'   }
+#'   \item \code{isdb} - This is a list of data objects from the ISDB db:
+#'   \itemize{
+#'   \item \code{ISDB_TRIPS} These are ISDB trips that are associated with MARFIS trips from the \code{marf$MARF_TRIPS} object above
+#'   \item \code{ISDB_SETS} These are all of the ISDB sets associated with the ISDB_TRIPS (matched and unmatched)
+#'   \item \code{ISDB_CATCHES} This is the data associated with the records in ISDB_TRIPS
+#'   \itemize{
+#'   \item \code{ALL} This is the raw data from ISCATCHES for the trips found in ISDB_TRIPS
+#'   \item \code{SUMMARY} This is the data from ISCATCHES for all of the trips found in ISDB_TRIPS, summarized by species. Each species
+#'   has calculated aggregate values for "EST_NUM_CAUGHT", EST_KEPT_WT", "EST_DISCARD_WT" and "EST_COMBINED_WT"
+#'   }
+#'   }
+#'   \item \code{matches} This is a list item that contains all of the information used to assigne matches between MARFIS and ISDB
+#'   \itemize{
+#'   \item \code{MATCH_SUMMARY_TRIPS} This is a simple breakdown of the various approaches used for matching, and the relative success of each.
+#'   Matches can occur using multiple approaches, so these can not be added up.  This list also includes "\code{Likely_Swapped_VR_Lic}" which
+#'   indicates how may matches seem to have the values for LICENCE_ID and VR_NUMBER reversed, and includes the count of how many rows are present
+#'   in both \code{Multimatches} and \code{Umatchables}
+#'   \item \code{MATCH_DETAILS} This is a dataframe of all of the MARFIS and ISDB trips that have been associated with each other, and whether
+#'   or not they were matched on each of the possible approaches
+#'   \item \code{ISDB_UNMATCHABLES} These are the trips from MARFIS that included ISDB-type information (e.g. Observer ID, ISDB Trip name, etc), but
+#'   for which no ISDB match could be found.
+#'   \item \code{ISDB_MULTIMATCHES} These are ISDB trips that were found to be match multiple MARFIS trips equally well.
+#'   }
+#'   \item \code{location_summary} - This is a list of 1 or more dataframes that breaks down the various trips
+#'   and sets by the areas in which they occurred.  NAFO locations are reported for MARFIS trips, MARFIS sets and ISDB sets
+#'   (not ISDB trips).  These reported locations are shown, as are the "calculated" locations, which are based on the
+#'   reported latitudes and longitudes. No "calculated" locations are shown for MARFIS trips, as there are no coordinates for
+#'   the trip level.  If a custom value for \code{areaFile} was sent (i.e. not "NAFOSubunits_sf"), a second dataframe breaking
+#'   down the sets by the custom area will also be provided.
+#'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
@@ -84,6 +134,16 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
         data$isdb$debug <-NULL
         loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
         data[["location_summary"]]<- loc
+
+        data[["matches"]]<-list()
+        data$matches[["MATCH_SUMMARY_TRIPS"]] <- data$isdb$MATCH_SUMMARY_TRIPS
+        data$isdb$MATCH_SUMMARY_TRIPS <- NULL
+        data$matches[["MATCH_DETAILS"]] <- data$isdb$MATCH_DETAILS
+        data$isdb$MATCH_DETAILS <- NULL
+        data$matches[["ISDB_UNMATCHABLES"]] <- data$isdb$ISDB_UNMATCHABLES
+        data$isdb$ISDB_UNMATCHABLES <- NULL
+        data$matches[["ISDB_UMULTIMATCHES"]] <- data$isdb$ISDB_MULTIMATCHES
+        data$isdb$ISDB_MULTIMATCHES <- NULL
       }
     }
   }

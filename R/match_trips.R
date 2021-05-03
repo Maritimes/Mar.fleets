@@ -339,10 +339,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
   matchNone <- matchNone[!(matchNone$TRIP_ID_MARF %in% matches$TRIP_ID_MARF),]
   if(nrow(matchNone)>0) {
-    Unmatchable = nrow(matchNone)
+    Unmatchables = nrow(matchNone)
     matchNone$ISDB_TRIP_M <- NULL
   }else{
-    Unmatchable = 0
+    Unmatchables = 0
     matchNone <- NA
   }
 
@@ -393,7 +393,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
                                 Likely_Swapped_VR_LIC,
                                 Total_Matches,
                                 MultiMatches,
-                                Unmatchable))
+                                Unmatchables))
   names(summ_df)<-"MATCHES_N"
   res <- list()
   res[["ISDB_MARFIS_POST_MATCHED"]] <- matchGood

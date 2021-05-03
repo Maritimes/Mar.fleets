@@ -9,6 +9,7 @@ set_defaults(
   gearSpecs = "all",
   area = "all",
   marfSpp = "all",
+  isdbSpp = "all",
   useDate = "LANDED_DATE",
   tripcd_id = NULL,
   returnMARFIS = T,
@@ -28,7 +29,7 @@ set_defaults(
   oracle.username = "_none_",
   oracle.password = "_none_",
   oracle.dsn = "PTRAN",
-  usepkg = "rodbc",
+  usepkg = "roracle",
   useLocal = FALSE,
   quietly = TRUE,
   debugLics = NULL,
@@ -51,6 +52,8 @@ For example, certain fleets must use particular mesh sizes or shapes. This infor
 \item{area}{default is \code{'all'}.  Certain fleets are only licenced to fish in certain areas.  This information comes from \code{Mar.fleets::licAreas}.}
 
 \item{marfSpp}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
+
+\item{isdbSpp}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
 
 \item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
 
@@ -100,10 +103,24 @@ matches (on the basis of common Vessel, licence and date).  They may still match
 
 \item{oracle.dsn}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
 
-\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+\item{usepkg}{default is \code{'roracle'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
 
-\item{useLocal}{default is \code{FALSE}. TThis specifies whether to run the script against local data or against Oracle (requires network or VPN).}
+\item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires network or VPN).
+Depending on your value for \code{useLocal}, different values become necessary.
+\itemize{
+ \item{useLocal=TRUE} This implies that you have local data you want to use.
+    \itemize{
+      \item param \code{data.dir} required.  This is the path to your local data
+    }
+ \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data. Include all of the following:
+  \itemize{
+      \item param \code{oracle.username} required
+      \item param \code{oracle.password} required
+      \item param \code{oracle.dsn} required
+      \item param \code{usepkg} required
+    }
+}}
 
 \item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
 
@@ -127,38 +144,20 @@ consideration.}
 \item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}
-
-\item{isdbSpp}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
 }
 \description{
 This function provides all of the possible parameters understood by this package. Some can be overwritten by \code{fleet_*} wrappers.
 }
 \details{
 The desired date range can be specified multiple ways - either using \code{year} (alone), \code{dateStart} (alone) or \code{dateStart} with \code{dateEnd} (explained below).
-
-\itemize{
-\item{useLocal} Depending on your value for \code{useLocal}, different values become necessary.  \code{useLocal=TRUE}
-\itemize{
- \item{useLocal=TRUE} This implies that you have local data you want to use.
-    \itemize{
-      \item param \code{data.dir} required.  This is the path to your local data
-    }
- \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data. Include all of the following:
-  \itemize{
-      \item param \code{oracle.username} required
-      \item param \code{oracle.password} required
-      \item param \code{oracle.dsn} required
-      \item param \code{usepkg} required
-    }
-}
-}
 }
 \seealso{
 Other coreFuncs: 
 \code{\link{fleet_}()},
 \code{\link{get_fleet}()},
 \code{\link{get_isdb}()},
-\code{\link{get_marfis}()}
+\code{\link{get_marfis}()},
+\code{\link{summarize_locations}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

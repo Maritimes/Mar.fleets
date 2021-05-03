@@ -112,6 +112,9 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
     PS_sets <- Mar.utils::identify_area(PS_sets, flag.land = TRUE)
     colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
+    if (args$areaFile != "NAFOSubunits_sf"){
+      PS_sets <- Mar.utils::identify_area(PS_sets, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
+    }
     return(PS_sets)
   }
   getPS <- function(allProSpc = NULL, ...){
