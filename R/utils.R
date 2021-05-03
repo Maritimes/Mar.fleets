@@ -48,3 +48,14 @@ paramOK <-function(useLocal = NULL, p = NULL){
   return(res)
 }
 
+#' @title go
+#' @description This function prevents people from running the package until it's ready
+#' @family utils
+#' @return returns TRUE or FALSe, and informative messages
+#' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+go <- function(){
+  res <- FALSE
+  inf <- as.list(Sys.info())
+  if (inf$login %in% c("mcmahonm","bowlbyh"))res <- TRUE
+  return(res)
+}

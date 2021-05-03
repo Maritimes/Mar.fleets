@@ -63,6 +63,11 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
+  if (!go()){
+    message("Sorry - this package is draft.  Please contact Mike.McMahon@dfo-mpo.gc.ca if you want to try it out it")
+    stop()
+  }
+
   if (is.null(fleet)){
     stop("Please provide a fleet")
   }
