@@ -56,7 +56,7 @@
 #' @param oracle.username default is \code{'_none_'}. This is your username for accessing oracle objects.
 #' @param oracle.password default is \code{'_none_'}. This is your password for accessing oracle objects.
 #' @param oracle.dsn default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"
-#' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+#' @param usepkg default is \code{'roracle'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 #' be slightly easier to setup, but roracle will extract data faster.
 #' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.
 #' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.
@@ -78,14 +78,15 @@
 set_defaults <- function(lics = 'all',
                          gearSpecs = 'all',
                          area = 'all',
-                         marfSpp = "all",
-                         useDate = "LANDED_DATE",
+                         marfSpp = 'all',
+                         isdbSpp = 'all',
+                         useDate = 'LANDED_DATE',
                          tripcd_id = NULL,
                          returnMARFIS = T,
                          returnISDB = T,
                          manual_fleet=F,
-                         areaFile = "NAFOSubunits_sf",
-                         areaFileField = "NAFO_1",
+                         areaFile = 'NAFOSubunits_sf',
+                         areaFileField = 'NAFO_1',
                          nafoDet = 2,
                          dateStart = NULL,
                          dateEnd = NULL,
@@ -94,11 +95,11 @@ set_defaults <- function(lics = 'all',
                          matchMarfis = TRUE,
                          matchMaxDayDiff = 2,
                          dropUnmatchedISDB = TRUE,
-                         data.dir = file.path(getwd(), "data"),
-                         oracle.username = "_none_",
-                         oracle.password = "_none_",
-                         oracle.dsn = "PTRAN",
-                         usepkg = "rodbc",
+                         data.dir = file.path(getwd(), 'data'),
+                         oracle.username = '_none_',
+                         oracle.password = '_none_',
+                         oracle.dsn = 'PTRAN',
+                         usepkg = 'roracle',
                          useLocal = FALSE,
                          quietly=TRUE,
                          debugLics = NULL,
@@ -125,17 +126,17 @@ set_defaults <- function(lics = 'all',
   argg$year <- NULL
 
   #set the field to use for non-NAFO
-  if (argg$areaFile !=  "NAFOSubunits_sf" && argg$areaFileField == "NAFO_1"){
-    if (argg$areaFile == "Strata_Mar_sf") argg$areaFileField = "StrataID"
-    if (argg$areaFile == "Strata_Mar_4VSW_sf") argg$areaFileField = "StrataID"
-    if (argg$areaFile == "LFAs_sf") argg$areaFileField = "LFA"
-    if (argg$areaFile == "Grids_Lobster_sf") argg$areaFileField = "GRID"
-    if (argg$areaFile == "Areas_Snowcrab_sf") argg$areaFileField = "AREA3"
-    if (argg$areaFile == "Areas_Snowcrab_Slope_sf") argg$areaFileField = "AREA2"
-    if (argg$areaFile == "Areas_Shrimp_sf") argg$areaFileField = "BOX_NAME"
-    if (argg$areaFile == "Areas_Surfclam_sf") argg$areaFileField = "AREA"
-    if (argg$areaFile == "Areas_Halibut_sf") argg$areaFileField = "Strata"
-    if (argg$areaFile == "Areas_Scallop_sf") argg$areaFileField = "StrataID"
+  if (argg$areaFile !=  'NAFOSubunits_sf' && argg$areaFileField == 'NAFO_1'){
+    if (argg$areaFile == 'Strata_Mar_sf') argg$areaFileField = 'StrataID'
+    if (argg$areaFile == 'Strata_Mar_4VSW_sf') argg$areaFileField = 'StrataID'
+    if (argg$areaFile == 'LFAs_sf') argg$areaFileField = 'LFA'
+    if (argg$areaFile == 'Grids_Lobster_sf') argg$areaFileField = 'GRID'
+    if (argg$areaFile == 'Areas_Snowcrab_sf') argg$areaFileField = 'AREA3'
+    if (argg$areaFile == 'Areas_Snowcrab_Slope_sf') argg$areaFileField = 'AREA2'
+    if (argg$areaFile == 'Areas_Shrimp_sf') argg$areaFileField = 'BOX_NAME'
+    if (argg$areaFile == 'Areas_Surfclam_sf') argg$areaFileField = 'AREA'
+    if (argg$areaFile == 'Areas_Halibut_sf') argg$areaFileField = 'Strata'
+    if (argg$areaFile == 'Areas_Scallop_sf') argg$areaFileField = 'StrataID'
   }
 
   # notify user on unknown sent parameters
