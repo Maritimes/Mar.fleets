@@ -56,6 +56,6 @@ paramOK <-function(useLocal = NULL, p = NULL){
 go <- function(){
   res <- FALSE
   inf <- as.list(Sys.info())
-  if (inf$login %in% c("mcmahonm","bowlbyh"))res <- TRUE
+  if (tolower(inf$login) %in% c("mcmahonm","bowlbyh"))res <- TRUE
   return(res)
 }
