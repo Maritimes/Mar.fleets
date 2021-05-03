@@ -19,7 +19,8 @@ This function looks for issues with sent parameters.
 }
 \seealso{
 Other utils: 
-\code{\link{clean_ISDB_Trip}()}
+\code{\link{clean_ISDB_Trip}()},
+\code{\link{go}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
