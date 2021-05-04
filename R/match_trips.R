@@ -123,10 +123,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_CONF_HO <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
     colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
     colnames(match_CONF_HO)[colnames(match_CONF_HO)=="MARFIS_CONF_NUMBER"] <- "MARFIS_CONF_NUMBER_HO"
-
-    match_CONF_HO <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
-    colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
-
     if(nrow(match_CONF_HO)>0){
       match_CONF_HO$match_CONF_HO <- TRUE
     }else{
