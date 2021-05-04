@@ -265,7 +265,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     if (matchMarfis) {
       trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
       if (args$debuggit) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
-      matchFields = c("SRC", "match_TRIP", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
+      matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
                       "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
                       "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
                       "match_LICDATE", "match_LICDATE_DETS", "T_DATE1_LIC", "T_DATE2_LIC",
@@ -367,8 +367,10 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
       sum
     )
     SUMMARY <- SUMMARY[with(SUMMARY, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
-    dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% args$isdbSpp,]
-    SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% args$isdbSpp),]
+    if (args$isdbSpp != "all"){
+      dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% args$isdbSpp,]
+      SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% args$isdbSpp),]
+    }
     SUMMARY <- rbind(dir_Spp_rows, SUMMARY)
   }else{
     isdb_TRIPS_all <- NA
