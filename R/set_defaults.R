@@ -165,7 +165,12 @@ set_defaults <- function(lics = 'all',
     paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
     paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
     paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
-    paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
+    if(is.na(utils::packageDescription("Mar.fleets"))){
+      paramDf <- rbind(paramDf, c("metadata","Mar.fleets not installed"))
+    }else{
+      paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
+    }
+    # paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
 
     dbEnv$debugLics <- argg$debugLics
     dbEnv$debugVRs <- argg$debugVRs

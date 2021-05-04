@@ -76,7 +76,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }
     match_TRIP <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
     colnames(match_TRIP)[colnames(match_TRIP)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_TRIP"
-    match_TRIP$match_TripName <- TRUE
+    if(nrow(match_TRIP)>0){
+      match_TRIP$match_TripName <- TRUE
+    }else{
+      match_TRIP$match_TripName <- logical()
+    }
     return(match_TRIP)
   }
   matchHI <- function(df = NULL){
@@ -95,7 +99,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_CONF_HI <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HI"))
     colnames(match_CONF_HI)[colnames(match_CONF_HI)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HI"
     colnames(match_CONF_HI)[colnames(match_CONF_HI)=="MARFIS_CONF_NUMBER"] <- "MARFIS_CONF_NUMBER_HI"
-    match_CONF_HI$match_CONF_HI <- TRUE
+    if(nrow(match_CONF_HI)>0){
+      match_CONF_HI$match_CONF_HI <- TRUE
+    }else{
+      match_CONF_HI$match_CONF_HI <- logical()
+    }
+
     return(match_CONF_HI)
   }
   matchHO <- function(df = NULL){
@@ -117,7 +126,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
     match_CONF_HO <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "MARFIS_CONF_NUMBER", by.y = "CONF_NUMBER_HO"))
     colnames(match_CONF_HO)[colnames(match_CONF_HO)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
-    match_CONF_HO$match_CONF_HO <- TRUE
+
+    if(nrow(match_CONF_HO)>0){
+      match_CONF_HO$match_CONF_HO <- TRUE
+    }else{
+      match_CONF_HO$match_CONF_HO <- logical()
+    }
     return(match_CONF_HO)
   }
   matchVR <- function(df = NULL){
@@ -159,7 +173,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       return(thisMarfMatch)
     }
     match_LIC <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "LIC", by.y = "LICENCE_ID"))
-    match_LIC$swapLIC <- F
+
+    if(nrow(match_LIC)>0){
+      match_LIC$swapLIC <- F
+    }else{
+      match_LIC$swapLIC <- logical()
+    }
     match_LIC_swap <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "VR", by.y = "LICENCE_ID"))
 
     if (nrow(match_LIC_swap)>0){
@@ -167,7 +186,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_LIC <- rbind.data.frame(match_LIC, match_LIC_swap)
     }
     colnames(match_LIC)[colnames(match_LIC)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_LIC"
-    match_LIC$match_LIC <- TRUE
+    if(nrow(match_LIC)>0){
+      match_LIC$match_LIC <- TRUE
+    }else{
+      match_LIC$match_LIC <- logical()
+    }
     return(match_LIC)
   }
   matchDate <- function(df = NULL){
