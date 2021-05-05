@@ -128,7 +128,6 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
     data$marf$debug <-NULL
     if (args$returnISDB){
       isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, matchMarfis = T, args=args))
-
       if(args$dropUnmatchedISDB){
         isdb$ISDB_TRIPS <- isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF),]
         isdb$ISDB_SETS <- isdb$ISDB_SETS[!is.na(isdb$ISDB_SETS$TRIP_ID_MARF),]

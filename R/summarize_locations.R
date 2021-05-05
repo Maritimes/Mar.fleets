@@ -51,7 +51,7 @@ summarize_locations<-function(get_isdb = NULL,
                               get_marfis = NULL,
                               ...){
   args <- list(...)$args
-
+  if (args$debuggit) Mar.utils::where_now()
   trimNAFONames<- function(nafoString = NULL, det = det){
     toTrim <- nafoString[nchar(nafoString)<=4]
     noTrim <- nafoString[!(nafoString %in% toTrim)]
@@ -90,8 +90,10 @@ summarize_locations<-function(get_isdb = NULL,
   mSetsSummCalc$SRC <- "mSetsSummCalc"
 
   oSets <- get_isdb$ISDB_SETS[,c("FISHSET_ID","NAFO_ISDB_SETS", "NAFO_ISDB_SETS_CALC")]
-  oSets$NAFO_ISDB_SETS <- trimNAFONames(oSets$NAFO_ISDB_SETS, args$nafoDet)
-  oSets$NAFO_ISDB_SETS_CALC <- trimNAFONames(oSets$NAFO_ISDB_SETS_CALC, args$nafoDet)
+
+
+  oSets[!is.na(oSets$NAFO_ISDB_SETS),"NAFO_ISDB_SETS"] <- trimNAFONames(oSets[!is.na(oSets$NAFO_ISDB_SETS),"NAFO_ISDB_SETS"], args$nafoDet)
+  oSets[!is.na(oSets$NAFO_ISDB_SETS_CALC),"NAFO_ISDB_SETS_CALC"] <- trimNAFONames(oSets[!is.na(oSets$NAFO_ISDB_SETS_CALC),"NAFO_ISDB_SETS_CALC"] , args$nafoDet)
 
   oSetsSummRpt <- stats::aggregate(
     x = list(cnt = oSets$FISHSET_ID ),

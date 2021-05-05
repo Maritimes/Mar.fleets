@@ -529,10 +529,6 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
   df$NAFO <-NULL
   df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),])
   res <- list()
-  res[["FLEET_PARAMS"]]<- list()
-  res$FLEET_PARAMS$core <- args$lics
-  res$FLEET_PARAMS$area <- args$area
-  res$FLEET_PARAMS$gear <- args$gear
   res[["FLEET"]] <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),c("VR_NUMBER", "LICENCE_ID", "GEAR_CODE")])
   res[["FLEET_ACTIVITY"]]<- df
 
