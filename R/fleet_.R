@@ -117,8 +117,14 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   data$params$fleet[["licencesCore"]] <- lics
   data$params$fleet[["licencesAreas"]] <- area
   data$params$fleet[["licencesGearSpecs"]] <- gearSpecs
-    fleet <- do.call(get_fleet, args)
-    data[["fleet"]]<- fleet
+  fleet <- do.call(get_fleet, args)
+
+  data$params$fleet$licencesCore <- merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("LICENCE_TYPE_ID", "LICENCE_TYPE")], by.x="LIC_TYPE", by.y="LICENCE_TYPE_ID", all.x=T)
+  data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE")], by.x="LIC_SUBTYPE", by.y="LICENCE_SUBTYPE_ID", all.x=T)
+  data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("GEAR_CODE", "GEAR")], by.x="LIC_GEAR", by.y="GEAR_CODE", all.x=T)
+  data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("SPECIES_CODE", "SPECIES")], by.x="LIC_SP", by.y="SPECIES_CODE", all.x=T)
+  fleet$LICDETS <- NULL
+  data[["fleet"]]<- fleet
   data$fleet$debug <-NULL
 
   if (args$returnMARFIS){
@@ -146,7 +152,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
         data$isdb$MATCH_DETAILS <- NULL
         data$matches[["ISDB_UNMATCHABLES"]] <- data$isdb$ISDB_UNMATCHABLES
         data$isdb$ISDB_UNMATCHABLES <- NULL
-        data$matches[["ISDB_UMULTIMATCHES"]] <- data$isdb$ISDB_MULTIMATCHES
+        data$matches[["ISDB_MULTIMATCHES"]] <- data$isdb$ISDB_MULTIMATCHES
         data$isdb$ISDB_MULTIMATCHES <- NULL
       }
     }

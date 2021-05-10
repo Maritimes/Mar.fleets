@@ -366,9 +366,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     # 2) those within acceptable date range with correct licence, vr and tripcd_id (if provided)
     matches <- matches[, .SD[PRIOR1 %in% max(PRIOR1)], by=TRIP_ID_ISDB]
     matches <-matches[, .SD[PRIOR2 %in% max(PRIOR2)], by=TRIP_ID_ISDB]
-    matches <- as.data.frame(matches)
-    matches$PRIOR1 <- matches$PRIOR2 <- matches$ISDB_TRIP_O <- matches$mLIC <- matches$mVR <- NULL
-
+    matches$PRIOR1 <- matches$PRIOR2 <- matches$mLIC <- matches$mVR <- NULL
+    matches <- unique(as.data.frame(matches))
     if (!is.null(args$tripcd_id)) {
       colnames(matches)[colnames(matches)=="mTripcd_id"] <- "match_TRIPCD_ID"
     }else{
@@ -386,7 +385,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
     dups <- unique(matches[duplicated(matches[,"TRIP_ID_ISDB"]),"TRIP_ID_ISDB"])
     if (length(dups)>0){
-      dupRows <- matches[matches$TRIP_ID_ISDB %in% dups,]
+      dupRows <- unique(matches[matches$TRIP_ID_ISDB %in% dups,])
       dupRows[is.na(dupRows)] <- 0
       dupRows <- stats::aggregate(TRIP_ID_MARF ~ ., dupRows, function(x) paste0(unique(x), collapse = ", "))
       colnames(dupRows)[colnames(dupRows)=="TRIP_ID_MARF"] <- "POTENTIAL_TRIP_ID_MARF"

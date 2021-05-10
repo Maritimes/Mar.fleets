@@ -1,7 +1,7 @@
 Package: Mar.fleets
 Type: Package
 Title: Facilitates Extraction and Linking of Commercial and Observed Fisheries Data for the Maritimes
-Version: 2021.05.04
+Version: 2021.05.10
 Author: Mike McMahon <mike.mcmahon@dfo-mpo.gc.ca>
 Maintainer: Mike McMahon <mike.mcmahon@dfo-mpo.gc.ca>
 Description: This package facilitates the identification and extraction of relevant commercial catch data for a given commercial fleet (Maritimes), and the identification and extraction of the available observer data associated with it.
@@ -13,21 +13,22 @@ Imports:
     ggplot2,
     Mar.utils,
     Mar.data,
-    randomcoloR,
     reshape2,
-    scales,
-    sf,
     stats,
-    utils, 
-    leaflet
+    utils
 Remotes:
     Maritimes/Mar.utils,
     Maritimes/Mar.data
 Enhances:
-    sp,
     graphics,
-    ROracle,
+Suggests:
     DBI,
+    gstat,
+    leaflet,
+    raster,
+    ROracle,
+    sf,
+    sp,
     RODBC
 License: MIT + file LICENSE
 Encoding: UTF-8

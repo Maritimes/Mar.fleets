@@ -4,14 +4,55 @@
 \alias{quickMap}
 \title{quickMap}
 \usage{
-quickMap(data = NULL, vms = NULL, nafo = TRUE)
+quickMap(
+  data = NULL,
+  plotMARF = TRUE,
+  plotISDB = TRUE,
+  cluster = TRUE,
+  plotMARFSurf = FALSE,
+  plotISDBSurf = FALSE,
+  isdbSurfField = "EST_COMBINED_WT",
+  isdbSurfSpp = NULL,
+  vms = NULL,
+  bathy = TRUE,
+  nafo = TRUE,
+  surfRes = "low"
+)
 }
 \arguments{
 \item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
 
-\item{vms}{default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.}
+\item{plotMARF}{default is \code{TRUE}. Should MARFIS data be plotted?}
+
+\item{plotISDB}{default is \code{TRUE}. Should ISDB data be plotted?}
+
+\item{cluster}{default is \code{TRUE}. If \code{TRUE}, MARF and ISDB data will be grouped until
+the map is zoomed in sufficiently  If \code{FALSE}, every MARF and/or ISDB data point will be shown.}
+
+\item{plotMARFSurf}{default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be generated
+for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS" field.}
+
+\item{plotISDBSurf}{default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be generated
+for the ISDB data. ISDB data contains several fields data for many species.  By default, the
+ interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
+ options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
+ respectively.}
+
+\item{isdbSurfField}{default is \code{"EST_COMBINED_WT"}.  Other valid values are "EST_NUM_CAUGHT" and "EST_DISCARD_WT".}
+
+\item{isdbSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
+will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
+(i.e. "30" will be used.))  Any  isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can be used.}
+
+\item{vms}{default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.
+If provided, VMS data will be plotted.}
+
+\item{bathy}{default is \code{TRUE}. If \code{TRUE}, a bathymetry layer will be available.}
 
 \item{nafo}{default is \code{TRUE}. This indicates whether or not the NAFO areas should be plotted.}
+
+\item{surfRes}{default is \code{'low'}. This determines the resolution of any output surfaces.  Valid
+values are 'low', 'med' or 'high'.  Higher values increase the time it takes to generate the surface.}
 }
 \value{
 a leaflet map.
@@ -24,10 +65,10 @@ functions.
 \dontrun{
 redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/data/")
 redfishVMS<-get_vmstracks(get_marfis = redfishresults$marf, get_isdb = redfishresults$isdb,
-         useLocal=F, oracle.username = "me", oracle.password = "mypassword",
-         oracle.dsn="PTRAN", usepkg='roracle')
+    useLocal=F, oracle.username = "me", oracle.password = "mypassword",
+    oracle.dsn="PTRAN", usepkg='roracle')
 quickMap(data=redfishresults, vms= redfishVMS, nafo=TRUE)
-                                }
+       }
 }
 \seealso{
 Other simpleproducts: 

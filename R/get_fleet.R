@@ -178,6 +178,7 @@ get_fleet<-function(...){
 
   get_fleetLicences_loc<-function(...){
     args <- list(...)
+    res=list()
     if (args$debuggit) Mar.utils::where_now()
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
                                tables = c("MARBYCATCH_LIC"),
@@ -221,15 +222,18 @@ get_fleet<-function(...){
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
     MARBYCATCH_LIC <- MARBYCATCH_LIC_new
+    # browser()
+    LICDETS<- unique(MARBYCATCH_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
 
     # Filter licences by desired date range -------------------------------------------------------------------------------------------------------------------
     dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
     MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=dateFilt))),]
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licDates")
-
     if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
     licDf <- unique(MARBYCATCH_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
-    return(licDf)
+    res[["LICDETS"]]<- LICDETS
+    res[["licDf"]]<- licDf
+    return(res)
   }
   get_fleetLicences_ora<-function(...){
     args <- list(...)
@@ -242,6 +246,7 @@ get_fleet<-function(...){
 
       # AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field = "LOG_EFRT_STD_INFO.MON_DOC_ID"))
       MARBYCATCH_LIC <- args$cxn$thecmd(args$cxn$channel, MARBYCATCH_LIC_Qry)
+      LICDETS<- unique(MARBYCATCH_LIC[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
 
       # message("Completed big extraction.  To avoid this in the future, don't use debuggit, don't send debugLics or change to useLocal = T.")
 
@@ -291,7 +296,11 @@ get_fleet<-function(...){
       MARBYCATCH_LIC_new <- args$cxn$thecmd(args$cxn$channel, MARBYCATCH_LIC_new_Qry)
     }
     licDf <- unique(MARBYCATCH_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
-    return(licDf)
+    # return(licDf)
+
+    res[["LICDETS"]]<- LICDETS
+    res[["licDf"]]<- licDf
+    return(res)
   }
 
   get_fleetActivity_loc<- function(licDf = NULL, ...){
@@ -518,17 +527,22 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
   }
 
   if (args$useLocal){
-    licDf <- do.call(get_fleetLicences_loc, args)
+    licDf_tmp <- do.call(get_fleetLicences_loc, args)
+    licDets <- licDf_tmp$LICDETS
+    licDf <- licDf_tmp$licDf
     actDf <- do.call(get_fleetActivity_loc, list(licDf=licDf, args=args))
     df <- do.call(get_fleetGear_loc, list(df=actDf,args=args))
   }else{
     licDf <- do.call(get_fleetLicences_ora, args)
+    licDets <- licDf_tmp$LICDETS
+    licDf <- licDf_tmp$licDf
     actDf <- do.call(get_fleetActivity_ora, list(licDf=licDf, args=args))
     df <- do.call(get_fleetGear_ora, list(df=actDf,args=args))
   }
   df$NAFO <-NULL
   df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),])
   res <- list()
+  res[["LICDETS"]]<-licDets
   res[["FLEET"]] <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),c("VR_NUMBER", "LICENCE_ID", "GEAR_CODE")])
   res[["FLEET_ACTIVITY"]]<- df
 
