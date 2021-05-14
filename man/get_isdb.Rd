@@ -7,7 +7,6 @@
 get_isdb(
   thisFleet = NULL,
   get_marfis = NULL,
-  matchMarfis = FALSE,
   keepSurveyTrips = NULL,
   dateStart = NULL,
   dateEnd = NULL,
@@ -21,10 +20,6 @@ the columns "LICENCE_ID" and "VR_NUMBER".  It can take the results from \code{Ma
 \item{get_marfis}{default is \code{NULL}. This is the list output by the
 \code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 trip and set information from MARFIS related to the specified fleet}
-
-\item{matchMarfis}{default is \code{FALSE}.  This indicates whether or not an attempt should be made
-to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
-\code{get_marfis} must be provided.}
 
 \item{keepSurveyTrips}{default is \code{FALSE}.  This indicates whether you
 want to retain trips that were part of a survey.  These are not typical

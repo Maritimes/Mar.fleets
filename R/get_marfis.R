@@ -169,7 +169,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSDates")
       dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSDates")
 
-      PS_df$NAFO_UNIT_AREA_ID <- PS_df$SPECIES_CODE <- NULL
+      PS_df$NAFO_UNIT_AREA_ID <-  NULL
     }else{
       if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
         where_n <- paste0("AND (",paste0("N.AREA LIKE ('",paste0(unique(args$area$AREA),"%"),"')", collapse = " OR "),")")
@@ -192,6 +192,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
                     PS.LICENCE_ID,
                     PS.GEAR_CODE,
                     PS.VR_NUMBER_FISHING,
+                    PS.SPECIES_CODE,
                     PS.DATE_FISHED,
                     PS.LANDED_DATE,
                     T.EARLIEST_DATE_TIME T_DATE1,
@@ -379,15 +380,16 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
   #trips below gets a bunch of fields dropped so that impacts of multiple species
   #don't result in duplicate records
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID")]) #, "OBS_PRESENT")])
-  ps$RND_WEIGHT_KGS<-NULL
+  # ps$RND_WEIGHT_KGS<-NULL
   trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
+
   trips <-
     stats::aggregate(
       x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
       by = list(TRIP_ID_MARF = trips$TRIP_ID_MARF,
                 MON_DOC_ID =trips$MON_DOC_ID,
                 VR_NUMBER_FISHING = trips$VR_NUMBER_FISHING,
-                #PRO_SPC_INFO_ID = trips$PRO_SPC_INFO_ID,
+                SPECIES_CODE = trips$SPECIES_CODE,
                 LICENCE_ID = trips$LICENCE_ID,
                 GEAR_CODE = trips$GEAR_CODE,
                 #DATE_FISHED = trips$DATE_FISHED,

@@ -71,6 +71,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   if (is.null(fleet)){
     stop("Please provide a fleet")
   }
+  if (!exists("dbEbv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
   # get the fleet's parameters
   utils::data("licCore", envir = environment())
   utils::data("licAreas", envir = environment())
@@ -123,6 +124,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE")], by.x="LIC_SUBTYPE", by.y="LICENCE_SUBTYPE_ID", all.x=T)
   data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("GEAR_CODE", "GEAR")], by.x="LIC_GEAR", by.y="GEAR_CODE", all.x=T)
   data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("SPECIES_CODE", "SPECIES")], by.x="LIC_SP", by.y="SPECIES_CODE", all.x=T)
+  data$params$fleet$licencesCore <- unique(data$params$fleet$licencesCore)
   fleet$LICDETS <- NULL
   data[["fleet"]]<- fleet
   data$fleet$debug <-NULL
@@ -133,13 +135,16 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
     data$marf$debug <-NULL
     if (args$returnISDB){
-      isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, matchMarfis = T, args=args))
-      if(args$dropUnmatchedISDB){
-        isdb$ISDB_TRIPS <- isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF),]
-        isdb$ISDB_SETS <- isdb$ISDB_SETS[!is.na(isdb$ISDB_SETS$TRIP_ID_MARF),]
-      }
+      isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, args=args))
+
 
       if (length(isdb)>1 && class(isdb$ISDB_TRIPS)=="data.frame"){
+        if(args$dropUnmatchedISDB){
+          if (nrow(isdb$ISDB_TRIPS)>0) isdb$ISDB_TRIPS <- isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF),]
+
+          if(any(!is.na(isdb$ISDB_SETS))) isdb$ISDB_SETS <- isdb$ISDB_SETS[!is.na(isdb$ISDB_SETS$TRIP_ID_MARF),]
+        }
+
         data[["isdb"]]<- isdb
         data$isdb$debug <-NULL
         loc <- do.call(summarize_locations, list(get_isdb = isdb, get_marfis = marf, args=args))
@@ -173,5 +178,6 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
       data$debug$debugISDBTripNames <- tmp
     }
   }
+  rm(dbEnv, envir = .GlobalEnv)
   return(data)
 }

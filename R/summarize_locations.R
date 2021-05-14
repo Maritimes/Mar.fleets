@@ -89,35 +89,44 @@ summarize_locations<-function(get_isdb = NULL,
   )
   mSetsSummCalc$SRC <- "mSetsSummCalc"
 
-  oSets <- get_isdb$ISDB_SETS[,c("FISHSET_ID","NAFO_ISDB_SETS", "NAFO_ISDB_SETS_CALC")]
+  if (any(!is.na(get_isdb$ISDB_SETS))){
+    oSets <- get_isdb$ISDB_SETS[,c("FISHSET_ID","NAFO_ISDB_SETS", "NAFO_ISDB_SETS_CALC")]
+    oSets[!is.na(oSets$NAFO_ISDB_SETS),"NAFO_ISDB_SETS"] <- trimNAFONames(oSets[!is.na(oSets$NAFO_ISDB_SETS),"NAFO_ISDB_SETS"], args$nafoDet)
+    oSets[!is.na(oSets$NAFO_ISDB_SETS_CALC),"NAFO_ISDB_SETS_CALC"] <- trimNAFONames(oSets[!is.na(oSets$NAFO_ISDB_SETS_CALC),"NAFO_ISDB_SETS_CALC"] , args$nafoDet)
+  }else{
+    #making a zero row df
+    oSets <-data.frame("nothing" = logical())
+  }
+  if (nrow(oSets)>0){
+    oSetsSummRpt <- stats::aggregate(
+      x = list(cnt = oSets$FISHSET_ID ),
+      by = list(NAFO = oSets$NAFO_ISDB_SETS
+      ),
+      length
+    )
+    oSetsSummRpt$SRC <- "oSetsSummRpt"
 
-
-  oSets[!is.na(oSets$NAFO_ISDB_SETS),"NAFO_ISDB_SETS"] <- trimNAFONames(oSets[!is.na(oSets$NAFO_ISDB_SETS),"NAFO_ISDB_SETS"], args$nafoDet)
-  oSets[!is.na(oSets$NAFO_ISDB_SETS_CALC),"NAFO_ISDB_SETS_CALC"] <- trimNAFONames(oSets[!is.na(oSets$NAFO_ISDB_SETS_CALC),"NAFO_ISDB_SETS_CALC"] , args$nafoDet)
-
-  oSetsSummRpt <- stats::aggregate(
-    x = list(cnt = oSets$FISHSET_ID ),
-    by = list(NAFO = oSets$NAFO_ISDB_SETS
-    ),
-    length
-  )
-  oSetsSummRpt$SRC <- "oSetsSummRpt"
-
-  oSetsSummCalc <- stats::aggregate(
-    x = list(cnt = oSets$FISHSET_ID ),
-    by = list(NAFO = oSets$NAFO_ISDB_SETS_CALC
-    ),
-    length
-  )
-  oSetsSummCalc$SRC <- "oSetsSummCalc"
+    oSetsSummCalc <- stats::aggregate(
+      x = list(cnt = oSets$FISHSET_ID ),
+      by = list(NAFO = oSets$NAFO_ISDB_SETS_CALC
+      ),
+      length
+    )
+    oSetsSummCalc$SRC <- "oSetsSummCalc"
+  }else{
+    oSetsSummRpt <- oSetsSummCalc <- data.frame("cnt" = integer(), "NAFO" = character(), "SRC" = character())
+  }
 
   all <- rbind.data.frame(mTripsSummRpt, mSetsSummRpt)
   all <- rbind.data.frame(all, mSetsSummCalc)
   all <- rbind.data.frame(all, oSetsSummRpt)
   all <- rbind.data.frame(all, oSetsSummCalc)
 
+
   summary <- reshape2::dcast(all, NAFO ~ SRC, value.var = "cnt")
   summary[is.na(summary)] <- 0
+  if (!"oSetsSummRpt" %in% colnames(summary)) summary$oSetsSummRpt <- 0
+  if (!"oSetsSummCalc" %in% colnames(summary)) summary$oSetsSummCalc <- 0
   summary = summary[with(summary, order(NAFO)), c("NAFO", "mTripsSummRpt" , "mSetsSummRpt" , "mSetsSummCalc" , "oSetsSummRpt", "oSetsSummCalc")]
 
   rowsNAFO <- summary[!grepl("^<", summary$NAFO),]

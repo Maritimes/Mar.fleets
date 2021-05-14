@@ -46,7 +46,9 @@ quickMap <- function(data=NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE
   } else{
     det = 1000
   }
-  isdbSppComm <- paste0(data$isdb$ISDB_CATCHES$SUMMARY[data$isdb$ISDB_CATCHES$SUMMARY$SPEC %in% isdbSurfSpp,"COMMON"], collapse = "_")
+  if ((plotISDB | plotISDBSurf)) {
+    isdbSppComm <- paste0(data$isdb$ISDB_CATCHES$SUMMARY[data$isdb$ISDB_CATCHES$SUMMARY$SPEC %in% isdbSurfSpp,"COMMON"], collapse = "_")
+  }
   bbLat <- NA
   bbLon <- NA
   overlayGroups <- NA

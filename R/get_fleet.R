@@ -222,9 +222,7 @@ get_fleet<-function(...){
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
     MARBYCATCH_LIC <- MARBYCATCH_LIC_new
-    # browser()
     LICDETS<- unique(MARBYCATCH_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
-
     # Filter licences by desired date range -------------------------------------------------------------------------------------------------------------------
     dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
     MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=dateFilt))),]
@@ -332,6 +330,9 @@ get_fleet<-function(...){
 
 # Grab fishing activity of those with valid combos of licence and gear code  -------------------------------------------------------------------------------
     uGears <- unique(args$lics$LIC_GEAR)
+    # if gearPSOveride is provided, overwrite the gear_code provided by the licence
+    if("gearPSOveride" %in% names(args)) uGears <- args$gearPSOveride
+
     if (length(uGears)==1){
       PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",uGears),]
     }else{
@@ -348,9 +349,9 @@ get_fleet<-function(...){
       TRIPS <- TRIPS[TRIPS$TRIP_ID %in% PRO_SPC_INFO_new$TRIP_ID,]
     }else{
       TRIPS <- TRIPS[which(TRIPS$T_DATE1 <= as.Date(args$dateEnd) &  TRIPS$T_DATE2 >= as.Date(args$dateStart)),]
+
       PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% TRIPS$TRIP_ID,]
     }
-
     PRO_SPC_INFO_new <- merge(PRO_SPC_INFO_new, TRIPS)
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSDates")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSDates")
@@ -375,9 +376,8 @@ get_fleet<-function(...){
 
 # Clean results -------------------------------------------------------------------------------------------------------------------------------------------
     PRO_SPC_INFO$NAFO_UNIT_AREA_ID<-PRO_SPC_INFO$TRIP_ID <- NULL
-    if (nrow(PRO_SPC_INFO)<1){
-      message("\n","No fleet activity found")
-    }
+    if (nrow(PRO_SPC_INFO)<1) stop("No fleet activity found")
+
     return(PRO_SPC_INFO)
   }
   get_fleetActivity_ora<- function(licDf = NULL, ...){
@@ -427,9 +427,7 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
 
     if (args$debuggit) Mar.utils::changeDetector(pre_ = theFleet, post_ = theFleet2, fields = "LICENCE_ID", flagTxt = "PS filtered by licence/gear combo")
     theFleet <- theFleet2
-    if (nrow(theFleet)<1){
-      message("\n","No fleet activity found")
-    }
+    if (nrow(theFleet)<1) stop("No fleet activity found")
     return(theFleet)
   }
 

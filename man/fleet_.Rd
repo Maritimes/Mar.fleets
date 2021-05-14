@@ -41,7 +41,6 @@ set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) 
 NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")}
     \item{\code{keepSurveyTrips}}{default is \code{TRUE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{FALSE}
 ensures these trips are dropped}
-    \item{\code{matchMarfis}}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
     \item{\code{matchMaxDayDiff}}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}

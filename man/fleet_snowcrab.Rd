@@ -51,7 +51,6 @@ set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) 
 NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")}
     \item{\code{keepSurveyTrips}}{default is \code{TRUE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{FALSE}
 ensures these trips are dropped}
-    \item{\code{matchMarfis}}{default is \code{TRUE}. This indicates whether or not calls to get_ISDB should attempt to match MARFIS data.}
     \item{\code{matchMaxDayDiff}}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
 matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
@@ -181,13 +180,25 @@ local <- fleet_snowcrab(area = "UNIT2",
 }
 \seealso{
 Other fleets: 
+\code{\link{fleet_bluefin}()},
+\code{\link{fleet_cucumber}()},
 \code{\link{fleet_haddock}()},
+\code{\link{fleet_hagfish}()},
 \code{\link{fleet_halibut}()},
+\code{\link{fleet_jonah}()},
+\code{\link{fleet_northernShrimp}()},
 \code{\link{fleet_pollock}()},
+\code{\link{fleet_redCrab}()},
 \code{\link{fleet_redfish}()},
+\code{\link{fleet_rockCrab}()},
 \code{\link{fleet_scallop}()},
+\code{\link{fleet_sculpin}()},
 \code{\link{fleet_silverhake}()},
 \code{\link{fleet_surfclam}()},
+\code{\link{fleet_swordfishTunasHarp}()},
+\code{\link{fleet_swordfishTunasLL}()},
+\code{\link{fleet_urchin}()},
+\code{\link{fleet_whelk}()},
 \code{\link{fleet_winterflounder}()}
 }
 \author{

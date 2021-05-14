@@ -8,9 +8,6 @@
 #' @param get_marfis default is \code{NULL}. This is the list output by the
 #' \code{Mar.fleets::get_marfis()} function - it contains dataframes of both the
 #' trip and set information from MARFIS related to the specified fleet
-#' @param matchMarfis default is \code{FALSE}.  This indicates whether or not an attempt should be made
-#' to try to match the returned trips and sets with information from MARFIS.  If TRUE, a value for
-#' \code{get_marfis} must be provided.
 #' @param keepSurveyTrips default is \code{FALSE}.  This indicates whether you
 #' want to retain trips that were part of a survey.  These are not typical
 #' commercial trips and their distribution will not reflect normal
@@ -26,13 +23,13 @@
 #' about the ISDB sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
+get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
   if (args$debuggit)    Mar.utils::where_now()
   ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- NA
 
-  if (is.null(get_marfis) & matchMarfis==TRUE){
-    message(paste0("\n","matchMarfis is TRUE, but no MARFIS data was provided. Please fix your parameters.","\n"))
+  if (is.null(get_marfis)){
+    message(paste0("\n","No MARFIS data was provided. Please fix your parameters.","\n"))
     stop()
   }
   if (is.null(thisFleet)){
@@ -49,7 +46,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   #!!MMM - may need to assign args differently in case called directly?
   # if params are sent, we should overwrite the defaults
   if (!is.null(keepSurveyTrips)) args$keepSurveyTrips <- keepSurveyTrips
-  if (!is.null(matchMarfis)) args$matchMarfis <- matchMarfis
   get_isdb_trips<-function(mVR_LIC = NULL,...){
     args <- list(...)$args
     if (args$debuggit) Mar.utils::where_now()
@@ -107,10 +103,13 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
     ISTRIPS_found <- ISTRIPS[F,]
     if (!is.null(args$tripcd_id)) {
       ISTRIPS_tripcd_id <- ISTRIPS[ISTRIPS$TRIPCD_ID %in% args$tripcd_id,]
-      ISTRIPS_tripcd_id$SRC <- "TRIPCD_ID"
-      ISTRIPS <- ISTRIPS[!(ISTRIPS$TRIP_ISDB %in% ISTRIPS_tripcd_id$TRIP_ISDB),]
-      ISTRIPS_found = rbind.data.frame(ISTRIPS_found, ISTRIPS_tripcd_id)
+      if (nrow(ISTRIPS_tripcd_id)>0){
+        ISTRIPS_tripcd_id$SRC <- "TRIPCD_ID"
+        ISTRIPS <- ISTRIPS[!(ISTRIPS$TRIP_ISDB %in% ISTRIPS_tripcd_id$TRIP_ISDB),]
+        ISTRIPS_found = rbind.data.frame(ISTRIPS_found, ISTRIPS_tripcd_id)
+      }
     }
+
     ISTRIPS_best <- ISTRIPS[paste0(ISTRIPS$VR,"_",ISTRIPS$LIC) %in% mVR_LIC,]
     if(nrow(ISTRIPS_best)>0) {
       ISTRIPS_best$SRC <- "VR_LIC"
@@ -255,54 +254,62 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, matchMarfis = FALSE,  
   }
 
   isdb_TRIPS_all <- do.call(get_isdb_trips, list(mVR_LIC = VR_LIC_fleet, args = args))
+  #these are all, potential isdb trips based on dates, licences, vrs, tripcd_ids, etc
+
   if (!is.null(isdb_TRIPS_all)){
     isdb_TRIPIDs_all <- unique(isdb_TRIPS_all$ISTRIPS)
-    isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
+
     trips <- NA
     sets <- NA
     msum <- NA
     unmatchables <- NA
-    if (matchMarfis) {
-      trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
-      if (args$debuggit) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
-      matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
-                      "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
-                      "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
-                      "match_LICDATE", "match_LICDATE_DETS", "T_DATE1_LIC", "T_DATE2_LIC",
-                      "match_swappedDATE", "match_swappedDATE_DETS", "T_DATE1_swap", "T_DATE2_swap")
-      isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED[, !names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields]
-      isdb_TRIPS_match_dets <- trips$ISDB_MARFIS_POST_MATCHED[, c("TRIP_ID_ISDB", "TRIP_ID_MARF",names(trips$ISDB_MARFIS_POST_MATCHED)[names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields])]
-      msum <- trips$MATCH_SUMMARY_TRIPS
-      ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
-      if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(T_DATE1)), ]
-      ISDB_MULTIMATCHES <- trips$ISDB_MULTIMATCHES
-      if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
-        sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, args = args))
-        }else{
-        sets <- NA
-      }
+
+    trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
+
+    if (all(is.na(trips$ISDB_MARFIS_POST_MATCHED))){
+      isdb_TRIPS_all <- NA
+      isdb_SETS_all <- NA
+      isdb_TRIPS_match_dets <-NA
+      msum <- NA
+      SUMMARY <- NA
+      ISDB_UNMATCHABLES <- NA
+      ISDB_MULTIMATCHES <- NA
+      catches <- NA
+    }else{
+
+    if (args$debuggit) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
+    matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
+                    "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
+                    "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
+                    "match_LICDATE", "match_LICDATE_DETS", "T_DATE1_LIC", "T_DATE2_LIC",
+                    "match_swappedDATE", "match_swappedDATE_DETS", "T_DATE1_swap", "T_DATE2_swap")
+    isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED[, !names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields]
+    isdb_TRIPS_match_dets <- trips$ISDB_MARFIS_POST_MATCHED[, c("TRIP_ID_ISDB", "TRIP_ID_MARF",names(trips$ISDB_MARFIS_POST_MATCHED)[names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields])]
+    msum <- trips$MATCH_SUMMARY_TRIPS
+    ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
+    if (is.data.frame(ISDB_UNMATCHABLES) && nrow(ISDB_UNMATCHABLES)>0) ISDB_UNMATCHABLES = ISDB_UNMATCHABLES[with(ISDB_UNMATCHABLES, order(T_DATE1)), ]
+    ISDB_MULTIMATCHES <- trips$ISDB_MULTIMATCHES
+    if (length(unique(isdb_TRIPS_all[!is.na(isdb_TRIPS_all$TRIP_ID_MARF),"TRIP_ID_MARF"]))>0){
+      isdb_TRIPIDs_all <- isdb_TRIPIDs_all[isdb_TRIPIDs_all$TRIP_ISDB %in% isdb_TRIPS_all$TRIP_ID_ISDB,]
+      isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
+      sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, args = args))
       if (!all(is.na(sets))) {
         if (args$debuggit) message("DEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
         isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
-        isdb_SETS_all$TRIP_ID_ISDB<- isdb_SETS_all$TRIP_ID_MARF <- NULL
+        isdb_SETS_all$TRIP_ID_ISDB <- isdb_SETS_all$TRIP_ID_MARF <- NULL
         isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
-      }else{
-        if (args$debuggit) message("DEBUG: Matched 0 ISDB sets","\n")
-        isdb_SETS_all$TRIP_ID_MARF <- isdb_SETS_all$LOG_EFRT_STD_INFO_ID <- isdb_SETS_all$SET_MATCH <- NA
-      }
-    }
-    if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISSPECIESCODES","ISFISHSETS","ISCATCHES"),
-                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                 env = environment(), quietly = args$quietly)
-      ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
-      catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
-      catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
-      catches <- merge(catches, ISSPECIESCODES[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
+        if(args$useLocal){
+          Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISSPECIESCODES","ISFISHSETS","ISCATCHES"),
+                                     usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                     env = environment(), quietly = args$quietly)
+          ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
+          catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
+          catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
+          catches <- merge(catches, ISSPECIESCODES[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
 
-    }else{
-      # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
-      catchSQL = paste0("SELECT CA.SPECCD_ID,
+        }else{
+          # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
+          catchSQL = paste0("SELECT CA.SPECCD_ID,
        CA.EST_NUM_CAUGHT, CA.EST_KEPT_WT, CA.EST_DISCARD_WT, CA.EST_COMBINED_WT,
        FS.TRIP_ID,
        CA.FISHSET_ID,
@@ -316,67 +323,49 @@ WHERE
 CA.FISHSET_ID = FS.FISHSET_ID AND
 CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
-      catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
+          catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
+        }
+
+        if(any(!is.na(catches))){
+          catches[is.na(catches)] <- 0
+          SUMMARY<- catches
+          SUMMARY = stats::aggregate(
+            x = list(EST_NUM_CAUGHT = SUMMARY$EST_NUM_CAUGHT,
+                     EST_KEPT_WT = SUMMARY$EST_KEPT_WT,
+                     EST_DISCARD_WT = SUMMARY$EST_DISCARD_WT,
+                     EST_COMBINED_WT = SUMMARY$EST_COMBINED_WT),
+            by = list(SPEC = SUMMARY$SPECCD_ID,
+                      COMMON = SUMMARY$COMMON,
+                      SCI = SUMMARY$SCIENTIFIC
+            ),
+            sum
+          )
+          SUMMARY <- SUMMARY[with(SUMMARY, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
+          if (all(args$isdbSpp != "all")){
+            dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% args$isdbSpp,]
+            SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% args$isdbSpp),]
+          }
+          SUMMARY <- rbind(dir_Spp_rows, SUMMARY)
+        }
+
+      }else{
+        catches <- NA
+        SUMMARY <- NA
+      }
+    }else{
+      isdb_SETS_all <- SUMMARY <- catches <- sets <- NA
     }
 
-
-    if (1==2){
-      catches_trip_wide <- stats::aggregate(
-        x = list(EST_COMBINED_WT_TRIP = catches$EST_COMBINED_WT),
-        by = list(TRIP_ID = catches$TRIP_ID,
-                  SPECCD_ID = catches$SPECCD_ID
-        ),
-        sum
-      )
-      catches_trip_wide <- reshape2::dcast(catches_trip_wide, TRIP_ID ~ SPECCD_ID, value.var = "EST_COMBINED_WT_TRIP")
-
-      spColsT <- paste0("sp_",colnames(catches_trip_wide)[-1])
-      names(catches_trip_wide)[-1] <- spColsT
-
-      isdb_TRIPS_catches <- merge(isdb_TRIPS_all[,"TRIP_ID_ISDB", drop=F], catches_trip_wide, all.x = T, by.x="TRIP_ID_ISDB", by.y = "TRIP_ID")
-      isdb_TRIPS_catches[,spColsT][is.na(isdb_TRIPS_catches[,spColsT])] <- 0
-
-      catches_set_wide  <- stats::aggregate(
-        x = list(EST_COMBINED_WT_SET = catches$EST_COMBINED_WT),
-        by = list(TRIP_ID = catches$TRIP_ID,
-                  FISHSET_ID = catches$FISHSET_ID,
-                  SPECCD_ID = catches$SPECCD_ID
-        ),
-        sum
-      )
-      catches_set_wide <- reshape2::dcast(catches_set_wide, TRIP_ID+FISHSET_ID~ SPECCD_ID, value.var = "EST_COMBINED_WT_SET")
-      spColsS <- paste0("sp_",colnames(catches_set_wide)[-c(1:2)])
-      names(catches_set_wide)[-c(1:2)] <- spColsS
-      isdb_SETS_catches <- merge(isdb_SETS_all[,c("TRIP_ID","FISHSET_ID"),  drop=F], catches_set_wide, all.x = T, by.x=c("TRIP_ID","FISHSET_ID"), by.y = c("TRIP_ID","FISHSET_ID"))
-      isdb_SETS_catches[,spColsS][is.na(isdb_SETS_catches[,spColsS])] <- 0
-    }
-
-    catches[is.na(catches)] <- 0
-    SUMMARY<- catches
-    SUMMARY = stats::aggregate(
-      x = list(EST_NUM_CAUGHT = SUMMARY$EST_NUM_CAUGHT,
-               EST_KEPT_WT = SUMMARY$EST_KEPT_WT,
-               EST_DISCARD_WT = SUMMARY$EST_DISCARD_WT,
-               EST_COMBINED_WT = SUMMARY$EST_COMBINED_WT),
-      by = list(SPEC = SUMMARY$SPECCD_ID,
-                COMMON = SUMMARY$COMMON,
-                SCI = SUMMARY$SCIENTIFIC
-      ),
-      sum
-    )
-    SUMMARY <- SUMMARY[with(SUMMARY, order(-EST_DISCARD_WT, EST_KEPT_WT,EST_NUM_CAUGHT)), ]
-    if (args$isdbSpp != "all"){
-      dir_Spp_rows <- SUMMARY[SUMMARY$SPEC %in% args$isdbSpp,]
-      SUMMARY <- SUMMARY[!(SUMMARY$SPEC %in% args$isdbSpp),]
-    }
-    SUMMARY <- rbind(dir_Spp_rows, SUMMARY)
+}
   }else{
     isdb_TRIPS_all <- NA
     isdb_SETS_all <- NA
-    MATCH_DETAILS <-NA
+    isdb_TRIPS_match_dets <-NA
     msum <- NA
+    SUMMARY <- NA
     ISDB_UNMATCHABLES <- NA
     ISDB_MULTIMATCHES <- NA
+    catches <- NA
   }
   #use the set NAFO information to calculate a Trip-level NAFO
 
