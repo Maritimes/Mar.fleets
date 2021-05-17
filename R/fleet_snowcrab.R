@@ -30,30 +30,16 @@
 #'   \item \code{marfSpp} = 705
 #'   \item \code{isdbSpp} = 2526
 #'   \item \code{tripcd_id} = c(2509, 7061,7064)
+#'   \item \code{fleet} = "SNOWCRAB"
+#'   \item \code{areaFile} = "Areas_Snowcrab_sf"
 #' }
-#' Licence Information for this fleet is accessible via the following calls:
-#' \itemize{
-#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="SNOWCRAB",]}
-#'   \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="SNOWCRAB",]}
-#'
-#'   If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
-#'   For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
-#'   \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
-#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="SNOWCRAB",]}
-#'
-#'    If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
-#'    multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
-#'    fleet areas, but do not have to.  In this case, the gear associated with catching redfish in UNIT 2 is different than what's allowed in UNIT 3, so the
-#'    licGearSpecs table differentiates the gear by having different entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK fleet also has multiple
-#'    categories of gear sizes, but they are not related to different areas - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.
-#'    Differing values of Type have not been implemented, but the field exist such that gear can be filtered by Diamond vs Square mesh.
-#' }
+#' @inherit fleet_ details
 #' @export
-fleet_snowcrab<- function(area = "ALL", useLocal = NULL, ...){
+fleet_snowcrab<- function(useLocal = NULL, ...){
   area <- toupper(area)
 
   message("This wrapper has never been QC'd")
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  data <- fleet_(fleet = "SNOWCRAB", marfSpp = 705, isdbSpp = 2526, area = area, gearSpecs = "ALL", tripcd_id = c(2509, 7061,7064), useLocal = useLocal,...)
+  data <- fleet_(fleet = "SNOWCRAB", marfSpp = 705, isdbSpp = 2526, tripcd_id = c(2509, 7061,7064), areaFile = "Areas_Snowcrab_sf", useLocal = useLocal,...)
   return(data)
 }

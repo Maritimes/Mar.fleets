@@ -10,4 +10,4 @@ licAreas =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "flee
 save(licCore, file = "../data/licCore.rda")
 save(licGearSpecs, file = "../data/licGearSpecs.rda")
 save(licAreas, file = "../data/licAreas.rda")
-rm(list=c("licCore", "licGearSpecs", "licAreas"))
+# rm(list=c("licCore", "licGearSpecs", "licAreas"))

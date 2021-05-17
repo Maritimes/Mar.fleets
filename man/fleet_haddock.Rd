@@ -138,23 +138,16 @@ and licGearSpecs.  The various wrappers can have different options (e.g. mobile 
 vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
 different fleets are identified, and their data is extracted.
 }
-\note{
-Hardcoded parameters for this fleet are as follows:
+\details{
+Licence Information for any fleet is accessible via the following calls.  Please replace "<fleet>", with this fleet's actual fleet value identified in the NOTE, below:
 \itemize{
-  \item \code{marfSpp} = 110
-  \item \code{isdbSpp} = 11
-  \item \code{tripcd_id} = 7001
-}
-Licence Information for this fleet is accessible via the following calls. Fleet information for the FIXED and MOBILE fleets can be specified by using either
-\code{HADDOCK_FIXED} or \code{HADDOCK_MOB}, respectively:
-\itemize{
-  \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
-  \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
+  \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="<fleet>",]}
+  \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="<fleet>",]}
 
   If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
   For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
   \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
-  \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="HADDOCK_FIXED (or) HADDOCK_MOB",]}
+  \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="<fleet>",]}
 
    If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
    multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
@@ -162,6 +155,18 @@ Licence Information for this fleet is accessible via the following calls. Fleet 
    licGearSpecs table differentiates the gear by having different entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK fleet also has multiple
    categories of gear sizes, but they are not related to different areas - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.
    Differing values of Type have not been implemented, but the field exist such that gear can be filtered by Diamond vs Square mesh.
+}
+}
+\note{
+Hardcoded parameters for this fleet are as follows:
+\itemize{
+  \item \code{marfSpp} = 110
+  \item \code{isdbSpp} = 11
+  \item \code{tripcd_id} = 7001
+  \item \code{fleet} = HADDOCK_MOB or HADDOCK_FIXED, depending on selections
+  \item \code{area} = 4X5Y, 5ZJM, or all depending on selections
+  \item \code{gearSpecs} = 4X5Y or ALL, depending on selections
+
 }
 }
 \examples{
@@ -200,8 +205,7 @@ Other fleets:
 \code{\link{fleet_silverhake}()},
 \code{\link{fleet_snowcrab}()},
 \code{\link{fleet_surfclam}()},
-\code{\link{fleet_swordfishTunasHarp}()},
-\code{\link{fleet_swordfishTunasLL}()},
+\code{\link{fleet_swordfishTunas}()},
 \code{\link{fleet_urchin}()},
 \code{\link{fleet_whelk}()},
 \code{\link{fleet_winterflounder}()}

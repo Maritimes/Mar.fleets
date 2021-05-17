@@ -184,7 +184,6 @@ get_fleet<-function(...){
                                tables = c("MARBYCATCH_LIC"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC$LICENCE_ID, stepDesc = "flt_initial")
-
     if (args$debuggit){
       #here, I successively use the licence info to compare against the records in MARBYCATCH_LIC. This will facilitate understanding when certain records that
       # might be expected are dropped

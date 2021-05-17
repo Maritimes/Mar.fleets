@@ -1,5 +1,5 @@
-#' @title fleet_whelk
-#' @description This is a wrapper function that facilitates extracting information for the whelk fleet.
+#' @title fleet_bluefin
+#' @description This is a wrapper function that facilitates extracting information for the Bluefin tuna fleet.
 #' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
 #' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
 #' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
@@ -7,14 +7,14 @@
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @examples \dontrun{
-#' db <- fleet_whelk(useLocal = F,
+#' db <- fleet_bluefin(useLocal = F,
 #'                     year = 2018,
 #'                     oracle.username = "<name>",
 #'                     oracle.password="<password>",
 #'                     oracle.dsn="PTRAN",
 #'                     usepkg = "roracle"
 #'                     )
-#' local <- fleet_whelk(year = 2018,
+#' local <- fleet_bluefin(year = 2018,
 #'                        useLocal = T,
 #'                        data.dir = "c:/data_folder"
 #'                       )
@@ -24,16 +24,16 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = c(615)
-#'   \item \code{isdbSpp} = c(4210,4211)
-#'   \item \code{tripcd_id} = c(4211)
-#'   \item \code{fleet} = "WHELK"
+#'   \item \code{marfSpp} = c(254)
+#'   \item \code{isdbSpp} = c(71)
+#'   \item \code{tripcd_id} = c(73,7059)
+#'   \item \code{fleet} = "BLUEFIN"
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_whelk <- function(useLocal = NULL, ...){
+fleet_bluefin <- function(useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-
-    data = fleet_(fleet = "WHELK", marfSpp = c(615), isdbSpp = c(4210,4211), tripcd_id = c(4211), useLocal = useLocal,...)
+  # stop("wrapper in progress")
+    data = fleet_(fleet = "BLUEFIN", marfSpp = c(254), isdbSpp = c(71), tripcd_id = c(73,7059), useLocal = useLocal,...)
   return(data)
 }
