@@ -18,24 +18,25 @@ aggNAFO <- function(this=NULL, NAFODet = 2){
 }
 
 aggLandingsTrips<-function(this=NULL, byGr = F){
-  res = list()
   thisyr <- this$params$user[this$params$user$PARAMETER == "dateStart","VALUE"]
   thisyr <- substr(thisyr, start = 2,stop = 5)
   this <- this$marf$MARF_TRIPS
-
   if (byGr){
   thisAgg <- aggregate(
-    x = list(wgt = this$RND_WEIGHT_KGS),
+    x = list(RND_WEIGHT_KGS = this$RND_WEIGHT_KGS),
     by = list(GEAR_CODE = this$GEAR_CODE),
     sum
   )
-  res[["byGr"]]<-thisAgg
+  thisAgg$RND_WEIGHT_T <- thisAgg$RND_WEIGHT_KGS/1000
+  thisAgg$YEAR <- thisyr
+  thisAgg$RND_WEIGHT_KGS <- NULL
+  thisAgg <- reshape2::dcast(thisAgg, YEAR ~ GEAR_CODE , value.var="RND_WEIGHT_T")
+  return(thisAgg)
   }
   thisLicsN <- length(unique(this$LICENCE_ID))
-  thisTripsN <- length(this$TRIP_ID_MARF)
+  thisTripsN <- length(unique(this$TRIP_ID_MARF))
   thisLandings <- round(sum(this$RND_WEIGHT_KGS)/1000,2)
-  res[["landings"]] <- c(thisyr, thisLicsN, thisTripsN, thisLandings)
-  if (!byGr)res = unlist(res)
+  res <- c(thisyr, thisLicsN, thisTripsN, thisLandings)
   return(res)
 }
 

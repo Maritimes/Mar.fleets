@@ -136,6 +136,7 @@ set_defaults <- function(lics = 'all',
 
   # notify user on unknown sent parameters
   jakes <- setdiff(names(argg),names(defaults))
+  jakes <- jakes[!jakes %in% "gearPSOveride"]
   if (length(jakes)>0){
     warning(paste0("This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }

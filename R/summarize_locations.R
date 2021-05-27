@@ -60,16 +60,16 @@ summarize_locations<-function(get_isdb = NULL,
     return(res)
   }
 
-  mTrips <- get_marfis$MARF_TRIPS[,c("TRIP_ID_MARF","NAFO_MARF_TRIPS")]
-  mTrips$NAFO_MARF_TRIPS <- trimNAFONames(mTrips$NAFO_MARF_TRIPS, args$nafoDet)
-
-  mTripsSummRpt <- stats::aggregate(
-    x = list(cnt = mTrips$TRIP_ID_MARF ),
-    by = list(NAFO = mTrips$NAFO_MARF_TRIPS
-    ),
-    length
-  )
-  mTripsSummRpt$SRC <- "mTripsSummRpt"
+  # mTrips <- get_marfis$MARF_TRIPS[,c("TRIP_ID_MARF","NAFO_MARF_TRIPS")]
+  # mTrips$NAFO_MARF_TRIPS <- trimNAFONames(mTrips$NAFO_MARF_TRIPS, args$nafoDet)
+  #
+  # mTripsSummRpt <- stats::aggregate(
+  #   x = list(cnt = mTrips$TRIP_ID_MARF ),
+  #   by = list(NAFO = mTrips$NAFO_MARF_TRIPS
+  #   ),
+  #   length
+  # )
+  # mTripsSummRpt$SRC <- "mTripsSummRpt"
 
   mSets <- get_marfis$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID","NAFO_MARF_SETS","NAFO_MARF_SETS_CALC")]
   mSets$NAFO_MARF_SETS <- trimNAFONames(mSets$NAFO_MARF_SETS, args$nafoDet)
@@ -117,8 +117,8 @@ summarize_locations<-function(get_isdb = NULL,
     oSetsSummRpt <- oSetsSummCalc <- data.frame("cnt" = integer(), "NAFO" = character(), "SRC" = character())
   }
 
-  all <- rbind.data.frame(mTripsSummRpt, mSetsSummRpt)
-  all <- rbind.data.frame(all, mSetsSummCalc)
+  # all <- rbind.data.frame(mTripsSummRpt, )
+  all <- rbind.data.frame(mSetsSummRpt, mSetsSummCalc)
   all <- rbind.data.frame(all, oSetsSummRpt)
   all <- rbind.data.frame(all, oSetsSummCalc)
 
@@ -127,7 +127,7 @@ summarize_locations<-function(get_isdb = NULL,
   summary[is.na(summary)] <- 0
   if (!"oSetsSummRpt" %in% colnames(summary)) summary$oSetsSummRpt <- 0
   if (!"oSetsSummCalc" %in% colnames(summary)) summary$oSetsSummCalc <- 0
-  summary = summary[with(summary, order(NAFO)), c("NAFO", "mTripsSummRpt" , "mSetsSummRpt" , "mSetsSummCalc" , "oSetsSummRpt", "oSetsSummCalc")]
+  summary = summary[with(summary, order(NAFO)), c("NAFO", "mSetsSummRpt" , "mSetsSummCalc" , "oSetsSummRpt", "oSetsSummCalc")]
 
   rowsNAFO <- summary[!grepl("^<", summary$NAFO),]
   rowsOther <- summary[!(summary$NAFO %in% rowsNAFO$NAFO),]
@@ -136,7 +136,7 @@ summarize_locations<-function(get_isdb = NULL,
     summary <- rbind.data.frame(rowsNAFO, rowsOther)
   }
 
-  colnames(summary)[colnames(summary)=="mTripsSummRpt"] <- "TRIPS_MARF_reported"
+  # colnames(summary)[colnames(summary)=="mTripsSummRpt"] <- "TRIPS_MARF_reported"
   colnames(summary)[colnames(summary)=="mSetsSummRpt"] <- "SETS_MARF_reported"
   colnames(summary)[colnames(summary)=="mSetsSummCalc"] <- "SETS_MARF_calculated"
   colnames(summary)[colnames(summary)=="oSetsSummRpt"] <- "SETS_ISDB_reported"

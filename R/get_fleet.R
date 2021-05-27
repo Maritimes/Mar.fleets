@@ -41,9 +41,9 @@ get_fleet<-function(...){
     }
   }
   theseLicsOra <- gsub("==", "=", gsub("\\$", "\\.", gsub("&", "AND", gsub("\\|", "OR", theseLics))))
-# end -----------------------------------------------------------------------------------------------------------------------------------------------------
+  # end -----------------------------------------------------------------------------------------------------------------------------------------------------
 
-# sizeFilt, typeFilt and chk_Gears are used by both the Ora and loc versions of get_fleetGear ------------------------------------------------------------------------
+  # sizeFilt, typeFilt and chk_Gears are used by both the Ora and loc versions of get_fleetGear ------------------------------------------------------------------------
 
   sizeFilt <- function(df=NULL, gearSpecRelevant = NULL, gearSpecDF = NULL, ...){
     args <- list(...)$args
@@ -104,75 +104,75 @@ get_fleet<-function(...){
                             WHERE
                             GEAR_CODE IN (",Mar.utils::SQL_in(grs),")")
       GEARS <- args$cxn$thecmd(args$cxn$channel, gearQry)
-      }else{
-        Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("GEARS"),
-                                   usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                   env = environment(), quietly = args$quietly)
-        if ("GEAR_DESC" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR_DESC"] <- "DESC_ENG"
-        if ("GEAR" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
-        GEARS = GEARS[,c("GEAR_CODE","DESC_ENG")]
-        GEARS = GEARS[GEARS$GEAR_CODE %in% df$GEAR_CODE,]
-      }
-
-      allGears = tolower(unique(GEARS$DESC_ENG))
-      allGears = allGears[!allGears %in% c("trap net")]
-      matchTrap=c('trap','pot')
-      matchMesh=c('trawl','seine','net','midwtr', 'drag')
-      matchLine=c('line','jig','angli')
-      theseGears<-NA
-      if (any(grepl(pattern = paste(matchTrap, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"trap")
-      if (any(grepl(pattern = paste(matchMesh, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"mesh")
-      if (any(grepl(pattern = paste(matchLine, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"line")
-      theseGears <- theseGears[!is.na(theseGears)]
-      if (length(theseGears)>=1){
-        gearType <-theseGears
-      }else{
-        gearType <- NA
-      }
-      grSpType <- NA
-      grSpSize <- NA
-      if('mesh' %in% gearType){
-        grSpType <- c(grSpType,31)
-        grSpSize <- c(grSpSize, 8,32,62,120,806)
-      }
-      if("trap" %in% gearType){
-        grSpType <- c(grSpType,114)
-        grSpSize <- c(grSpSize, 152,423,431,701)
-      }
-      if("hook" %in% gearType || "line" %in% gearType){
-        grSpType <- c(grSpType,5)
-        grSpSize <- c(grSpSize, 4,66,67)
-      }
-      if (all(is.na(gearType))){
-        if(!args$quietly)message(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
-        return(df)
-      }
-      #check if types exist at all for selection
-      grSpType <- grSpType[!is.na(grSpType)]
-      #check if sizes exist at all for selection
-      grSpSize <- grSpSize[!is.na(grSpSize)]
-      grSpCols <- c(grSpType, grSpSize)
-
-      if(!args$useLocal){
-        # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-        where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
-        gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
-                                  WHERE ",Mar.utils::big_in(vec=unique(gearSpecDF$LOG_EFRT_STD_INFO_ID), vec.field = "LOG_EFRT_STD_INFO_ID"), " ",
-                                      where2)
-        gearSpecRelevant<- args$cxn$thecmd(args$cxn$channel, gearSpecRelevantQry)
-      }else{
-        # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-        Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS"),
-                                   usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                   env = environment(), quietly = args$quietly)
-        #MMM failed here - need to modify gearSpecDf reference
-        LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
-        gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
-        gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
-      }
-
-      return(gearSpecRelevant)
+    }else{
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("GEARS"),
+                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                 env = environment(), quietly = args$quietly)
+      if ("GEAR_DESC" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR_DESC"] <- "DESC_ENG"
+      if ("GEAR" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
+      GEARS = GEARS[,c("GEAR_CODE","DESC_ENG")]
+      GEARS = GEARS[GEARS$GEAR_CODE %in% df$GEAR_CODE,]
     }
+
+    allGears = tolower(unique(GEARS$DESC_ENG))
+    allGears = allGears[!allGears %in% c("trap net")]
+    matchTrap=c('trap','pot')
+    matchMesh=c('trawl','seine','net','midwtr', 'drag')
+    matchLine=c('line','jig','angli')
+    theseGears<-NA
+    if (any(grepl(pattern = paste(matchTrap, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"trap")
+    if (any(grepl(pattern = paste(matchMesh, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"mesh")
+    if (any(grepl(pattern = paste(matchLine, collapse = '|'), x= allGears))) theseGears <- c(theseGears,"line")
+    theseGears <- theseGears[!is.na(theseGears)]
+    if (length(theseGears)>=1){
+      gearType <-theseGears
+    }else{
+      gearType <- NA
+    }
+    grSpType <- NA
+    grSpSize <- NA
+    if('mesh' %in% gearType){
+      grSpType <- c(grSpType,31)
+      grSpSize <- c(grSpSize, 8,32,62,120,806)
+    }
+    if("trap" %in% gearType){
+      grSpType <- c(grSpType,114)
+      grSpSize <- c(grSpSize, 152,423,431,701)
+    }
+    if("hook" %in% gearType || "line" %in% gearType){
+      grSpType <- c(grSpType,5)
+      grSpSize <- c(grSpSize, 4,66,67)
+    }
+    if (all(is.na(gearType))){
+      if(!args$quietly)message(paste0("\n","None of these records have gear specification information - aborting filter (3)"))
+      return(df)
+    }
+    #check if types exist at all for selection
+    grSpType <- grSpType[!is.na(grSpType)]
+    #check if sizes exist at all for selection
+    grSpSize <- grSpSize[!is.na(grSpSize)]
+    grSpCols <- c(grSpType, grSpSize)
+
+    if(!args$useLocal){
+      # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
+      where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
+      gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
+                                  WHERE ",Mar.utils::big_in(vec=unique(gearSpecDF$LOG_EFRT_STD_INFO_ID), vec.field = "LOG_EFRT_STD_INFO_ID"), " ",
+                                    where2)
+      gearSpecRelevant<- args$cxn$thecmd(args$cxn$channel, gearSpecRelevantQry)
+    }else{
+      # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS"),
+                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                 env = environment(), quietly = args$quietly)
+      #MMM failed here - need to modify gearSpecDf reference
+      LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
+      gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
+      gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
+    }
+
+    return(gearSpecRelevant)
+  }
   # end -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -215,7 +215,7 @@ get_fleet<-function(...){
       }
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSpp")
 
-          }
+    }
     MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeSp")
 
@@ -236,7 +236,7 @@ get_fleet<-function(...){
     args <- list(...)
     if (args$debuggit) Mar.utils::where_now()
 
-      if (args$debuggit | !any(is.null(dbEnv$debugLics))){
+    if (args$debuggit | !any(is.null(dbEnv$debugLics))){
       # message("To handle debugging, a lot of data must first be extracted, so that each step can be checked.  This step will take ~1 minute")
       MARBYCATCH_LIC_Qry <- paste0("SELECT *
                             FROM MARFISSCI.MARBYCATCH_LIC WHERE ",theseLicsOra)
@@ -260,14 +260,6 @@ get_fleet<-function(...){
         MARBYCATCH_LIC_S <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
       }
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtypeOra")
-
-      # if (all(is.na(args$lics$LIC_GEAR))){
-      #   MARBYCATCH_LIC_G <- MARBYCATCH_LIC
-      # } else{
-      #   MARBYCATCH_LIC_G <- MARBYCATCH_LIC[MARBYCATCH_LIC$GEAR_CODE %in% args$lics$LIC_GEAR,]
-      # }
-      # dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_G$LICENCE_ID, stepDesc = "flt_licGearOra")
-
       if (all(is.na(args$lics$LIC_SP))){
         MARBYCATCH_LIC_SP <- MARBYCATCH_LIC
       } else{
@@ -308,7 +300,7 @@ get_fleet<-function(...){
                                tables = c("PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
 
-# Handle the various data we just pulled ------------------------------------------------------------------------------------------------------------------
+    # Handle the various data we just pulled ------------------------------------------------------------------------------------------------------------------
     #PRO_SPC_INFO
     PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", args$useDate)]
     PRO_SPC_INFO[,args$useDate]<- as.Date(PRO_SPC_INFO[,args$useDate])
@@ -327,22 +319,27 @@ get_fleet<-function(...){
     dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSLics")
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
-# Grab fishing activity of those with valid combos of licence and gear code  -------------------------------------------------------------------------------
+    # Grab fishing activity of those with valid combos of licence and gear code  -------------------------------------------------------------------------------
     uGears <- unique(args$lics$LIC_GEAR)
     # if gearPSOveride is provided, overwrite the gear_code provided by the licence
-    if("gearPSOveride" %in% names(args)) uGears <- args$gearPSOveride
+    if("gearPSOveride" %in% names(args)) {
+      allLics = data.table::CJ(licDf$LICENCE_ID, args$gearPSOveride)[, paste(licDf$LICENCE_ID, args$gearPSOveride, sep ="_")]
+      PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% allLics,]
 
-    if (length(uGears)==1){
-      PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",uGears),]
     }else{
-      PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
+
+      if (length(uGears)==1){
+        PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",uGears),]
+      }else{
+        PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
+      }
     }
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSGrs")
     dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSGrs")
 
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
-# Limit fishing activity to desired date range ------------------------------------------------------------------------------------------------------------
+    # Limit fishing activity to desired date range ------------------------------------------------------------------------------------------------------------
     if (args$HS) {
       PRO_SPC_INFO_new <- PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= args$dateStart & PRO_SPC_INFO[,args$useDate] <= args$dateEnd),]
       TRIPS <- TRIPS[TRIPS$TRIP_ID %in% PRO_SPC_INFO_new$TRIP_ID,]
@@ -359,7 +356,7 @@ get_fleet<-function(...){
     if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by dates")
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
-# limit fishing activity to fleet-specified areas ---------------------------------------------------------------------------------------------------------
+    # limit fishing activity to fleet-specified areas ---------------------------------------------------------------------------------------------------------
     PRO_SPC_INFO = merge(PRO_SPC_INFO, NAFO_UNIT_AREAS, by.x="NAFO_UNIT_AREA_ID", by.y = "AREA_ID", all.x=T )
     if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
       nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
@@ -373,7 +370,7 @@ get_fleet<-function(...){
       PRO_SPC_INFO <- PRO_SPC_INFO_new
     }
 
-# Clean results -------------------------------------------------------------------------------------------------------------------------------------------
+    # Clean results -------------------------------------------------------------------------------------------------------------------------------------------
     PRO_SPC_INFO$NAFO_UNIT_AREA_ID<-PRO_SPC_INFO$TRIP_ID <- NULL
     if (nrow(PRO_SPC_INFO)<1) stop("No fleet activity found")
 
@@ -411,10 +408,10 @@ WHERE
 MD.MON_DOC_ID = PS.MON_DOC_ID
 AND PS.TRIP_ID = T.TRIP_ID
 AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
-,where_date, " "
-,where_Gr, " "
-,where_Area
-)
+                          ,where_date, " "
+                          ,where_Gr, " "
+                          ,where_Area
+    )
 
     theFleet = args$cxn$thecmd(args$cxn$channel, fleetAct_qry)
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSDates")
@@ -443,7 +440,7 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
 
     if(args$HS){
       gearSpecDF <- gearSpecDF[which(as.Date(gearSpecDF$FV_FISHED_DATETIME) >= args$dateStart
-                                            & as.Date(gearSpecDF$FV_FISHED_DATETIME) <= args$dateEnd),]
+                                     & as.Date(gearSpecDF$FV_FISHED_DATETIME) <= args$dateEnd),]
     }else{
       tmp <- merge(gearSpecDF, df[,c("LOG_EFRT_STD_INFO_ID", "T_DATE1", "T_DATE2")])
       gearSpecDF <- tmp[which(as.Date(tmp$FV_FISHED_DATETIME) >= tmp$T_DATE1 & as.Date(tmp$FV_FISHED_DATETIME) <= tmp$T_DATE2),]

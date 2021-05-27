@@ -11,7 +11,11 @@
 *.prj
 *.xml
 *.csv
+*.rds
 /temp
 /crap
 /inst/fleet*.R
 .Rprofile
+/inst/wrapperDrafts
+/inst/shared
+/inst/runners

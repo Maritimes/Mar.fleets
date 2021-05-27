@@ -2,6 +2,7 @@
 #' @description This function generates a simple leaflet plot for the output from Mar.bycatch
 #' functions.
 #' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
+#' @param title default is \code{NULL}. This will be shown as the title of the map.
 #' @param plotMARF default is \code{TRUE}. Should MARFIS data be plotted?
 #' @param plotISDB default is \code{TRUE}. Should ISDB data be plotted?
 #' @param cluster default is \code{TRUE}. If \code{TRUE}, MARF and ISDB data will be grouped until
@@ -14,6 +15,9 @@
 #'  options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
 #'  respectively.
 #' @param isdbSurfField default is \code{"EST_COMBINED_WT"}.  Other valid values are "EST_NUM_CAUGHT" and "EST_DISCARD_WT".
+#' @param marfSurfSpp default is \code{NULL}.  If nothing is provided, the default directed species
+#' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
+#' (i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$ISDB_CATCHES can be used.
 #' @param isdbSurfSpp default is \code{NULL}.  If nothing is provided, the default directed species
 #' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 #' (i.e. "30" will be used.))  Any  isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can be used.
@@ -34,11 +38,13 @@
 #' @return a leaflet map.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-quickMap <- function(data=NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE, plotMARFSurf = FALSE, plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
+quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE, plotMARFSurf = FALSE, plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL, marfSurfSpp = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
+  if (is.null(marfSurfSpp)){
+   marfSurfSpp <- data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]
+  }
   if (is.null(isdbSurfSpp)){
     isdbSurfSpp <- data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]
   }
-
   if (tolower(surfRes)=="med"){
     det = 10000
   }else if (tolower(surfRes)=="high"){
@@ -54,7 +60,7 @@ quickMap <- function(data=NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE
   overlayGroups <- NA
   clustMARF <- NULL
   clustISDB <- NULL
-surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
+  surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
   m <- leaflet::leaflet()
   m <- leaflet::addTiles(m)
   baseGroups <- "None"
@@ -73,7 +79,17 @@ surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
                               labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE) )
     overlayGroups <- c(overlayGroups, "NAFO")
   }
-
+  titleHTML <- paste0("<div style='
+  .leaflet-control.map-title {
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 50%;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    background: rgba(255,255,255,0.75);
+    font-weight: bold;
+    font-size: 28px;'>",title,"</div>")
   makeSurface <- function(data=NULL, det= det){
     #just set data to LAT, LONG and <interpfield>, in that order
     data_sp <- Mar.utils::df_to_sp(data)
@@ -128,6 +144,16 @@ surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
     message(nrow(data$marf$MARF_SETS)-nrow(commSets), " MARF positions had bad coordinates and couldn't be used")
 
     if (plotMARFSurf){
+      theseCat <- data$marf$MARF_CATCHES[data$marf$MARF_CATCHES$SPECIES_CODE %in% marfSurfSpp,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "RND_WEIGHT_KGS")]
+      marfSurfDat <- merge(commSets[,c("LATITUDE","LONGITUDE","LOG_EFRT_STD_INFO_ID")], theseCat)
+      marfSurfDat <- stats::aggregate(
+        x = list(RND_WEIGHT_KGS = marfSurfDat$RND_WEIGHT_KGS),
+        by = list(LATITUDE = marfSurfDat$LATITUDE,
+                  LONGITUDE = marfSurfDat$LONGITUDE
+        ),
+        sum
+      )
+
       marfSurf = makeSurface(data = commSets[,c("LATITUDE","LONGITUDE","RND_WEIGHT_KGS")])
       palSurf <- leaflet::colorNumeric(surfCols, raster::values(marfSurf), na.color = "transparent")
       m = leaflet::addRasterImage(map=m, group="MARFIS_surf", marfSurf, colors = palSurf, opacity = 1)
@@ -158,7 +184,7 @@ surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
                                                      "<br>PRO_SPC_INFO_ID: ", commSets$PRO_SPC_INFO_ID,
                                                      "<br>LOG_EFRT_STD_INFO_ID: ", commSets$LOG_EFRT_STD_INFO_ID,
                                                      "<br><br>RND_WEIGHT_KGS: ", commSets$RND_WEIGHT_KGS)
-                                      )
+      )
       overlayGroups <- c(overlayGroups, "MARFIS")
       bbLat <- c(bbLat, min(commSets$LATITUDE, na.rm = T),max(commSets$LATITUDE, na.rm = T))
       bbLon <- c(bbLon, min(commSets$LONGITUDE, na.rm = T),max(commSets$LONGITUDE, na.rm = T))
@@ -215,7 +241,7 @@ surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
                                                      "<br>FISHSET_ID: ", isdbSets$FISHSET_ID,
                                                      "<br>LOG_EFRT_STD_INFO_ID: ",isdbSets$LOG_EFRT_STD_INFO_ID,
                                                      "<br>SOURCE: ",isdbSets$SOURCE)
-                                      )
+      )
 
       overlayGroups <- c(overlayGroups, "ISDB")
       bbLat <- c(bbLat, min(isdbSets$LATITUDE, na.rm = T), max(isdbSets$LATITUDE, na.rm = T))
@@ -244,7 +270,7 @@ surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
   }
   overlayGroups <- overlayGroups[!is.na(overlayGroups)]
   m <- leaflet::addLayersControl(map=m, baseGroups = baseGroups, overlayGroups = overlayGroups, options = leaflet::layersControlOptions(collapsed = TRUE))
-  # m <- leaflet::addControl(map=m, html = markerLegendHTML(IconSet = iconSet), position = "topright")
+  m <- leaflet::addControl(map=m, html = titleHTML, position = "bottomleft")
   m <- leaflet::hideGroup(map=m, group = "MARFIS")
   m <- leaflet::hideGroup(map=m, group = "ISDB")
   return(m)
