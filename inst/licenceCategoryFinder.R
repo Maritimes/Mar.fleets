@@ -1,4 +1,4 @@
-licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedGr= F, byYear = F, NAFOS = "ALL", startYear = 2000){
+licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedGr= F, byYear = F, NAFOS = "ALL", startYear = 2000, simp =T){
   if (inc199) {
     marfSppLIC <- c(marfSpp, 199)
   }else{
@@ -7,8 +7,8 @@ licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedG
   if (!is.null(marfGr)){
     if (fixedGr) marfGr <- c(marfGr,98)
   }
-  Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = "C:/DFO-MPO/BycatchCourse/wrangledData/", tables = c("PRO_SPC_INFO","MARBYCATCH_LIC"))
-  LICS <- unique(MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% marfSppLIC,c("LICENCE_ID", "LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE")])
+  Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = "C:/DFO-MPO/BycatchCourse/wrangledData/", tables = c("PRO_SPC_INFO","MARFLEETS_LIC"))
+  LICS <- unique(MARFLEETS_LIC[MARFLEETS_LIC$SPECIES_CODE %in% marfSppLIC,c("LICENCE_ID", "LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE")])
   colnames(LICS)[colnames(LICS)=="SPECIES_CODE"] <- "SPECIES_CODE_LIC"
   colnames(LICS)[colnames(LICS)=="GEAR_CODE"] <- "GEAR_CODE_LIC"
   if (any(NAFOS != "ALL")){
@@ -19,6 +19,7 @@ licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedG
   CATCH <- PRO_SPC_INFO[PRO_SPC_INFO$YEAR >= startYear &
                           PRO_SPC_INFO$LICENCE_ID %in% LICS$LICENCE_ID &
                           PRO_SPC_INFO$SPECIES_CODE %in% marfSpp , c("PRO_SPC_INFO_ID","GEAR_CODE", "LICENCE_ID", "SPECIES_CODE", "RND_WEIGHT_KGS", "DATE_FISHED")]
+  browser()
   if(all(marfSpp == 197)){
     #hagfish have a special circumstance of all catch records having a different gear reported than the licence allows (61vs62 )
     CATCH[CATCH$GEAR_CODE %in% 61, "GEAR_CODE"] <- 62
@@ -90,7 +91,7 @@ licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedG
   )
   CATCH_AGG$RND_WEIGHT_T <-  CATCH_AGG$RND_WEIGHT_KGS/1000
   CATCH_AGG$RND_WEIGHT_KGS <- NULL
-  CATCH_AGG = CATCH_AGG[with(CATCH_AGG, order(YEAR, SPECIES_CODE_LIC, LICENCE_TYPE_ID, LICENCE_SUBTYPE_ID, GEAR_CODE_PS, GEAR_CODE_LIC)), ]
+
   if(!byYear){
     CATCH_AGG <- aggregate(
       x = list(RND_WEIGHT_KGS = ALL$RND_WEIGHT_KGS,
@@ -104,7 +105,11 @@ licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedG
       sum, na.rm = TRUE
     )
     CATCH_AGG = CATCH_AGG[with(CATCH_AGG, order(SPECIES_CODE_LIC, LICENCE_TYPE_ID, LICENCE_SUBTYPE_ID, GEAR_CODE_PS, GEAR_CODE_LIC )), ]
+  }else{
+    CATCH_AGG = CATCH_AGG[with(CATCH_AGG, order(YEAR, SPECIES_CODE_LIC, LICENCE_TYPE_ID, LICENCE_SUBTYPE_ID, GEAR_CODE_PS, GEAR_CODE_LIC )), ]
   }
+  if (simp) CATCH_AGG <-  unique(CATCH_AGG[,!colnames(CATCH_AGG) %in% c("GEAR_CODE_PS","GEAR_CODE_LIC", "RND_WEIGHT_KGS", "NRECS")])
+
   res <- CATCH_AGG
   return(res)
 }

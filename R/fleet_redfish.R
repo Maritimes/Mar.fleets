@@ -1,9 +1,13 @@
 #' @title fleet_redfish
 #' @description This is a wrapper function that facilitates extracting information for the redfish fleet.
-#' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
-#' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
-#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
-#' different fleets are identified, and their data is extracted.
+#' All of the information used to identify fleets is stored in the package's associated data files -
+#' LIC_CORE, LIC_AREAS, and LIC_GEAR_SPEC.  The various wrappers can have different options (e.g.
+#' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
+#' mesh, etc), and depending on which options are selected, different fleets are identified, and
+#' their data is extracted.
+#' @param marfGear default is \code{c(12,21,41,51,59)}. This is a vector of MARFIS gear codes known to have caught
+#' this species. The default values can be replaced with a smaller selection to only return information
+#' for a gear-specific subset of fishing activity.
 #' @param unit default is \code{NULL}.  Valid selections include \code{"UNIT2"} and \code{"UNIT3"}
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
@@ -36,7 +40,7 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_redfish <- function(unit = NULL, useLocal = NULL, ...){
+fleet_redfish <- function(marfGear = c(12,21,41,51,59), unit = NULL, useLocal = NULL, ...){
   unit = toupper(unit)
   if (unit == "UNIT2" | unit == "2" | unit == 2){
     area <- "UNIT2"
@@ -50,6 +54,6 @@ fleet_redfish <- function(unit = NULL, useLocal = NULL, ...){
 
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
 
-  data = fleet_(fleet = "REDFISH", marfSpp = 120, isdbSpp = 23, area = area, gearSpecs = gearSpecs, tripcd_id = c(23), useLocal = useLocal,...)
+  data = fleet_(fleet = "REDFISH", marfSpp = 120, marfGear = marfGear, isdbSpp = 23, area = area, gearSpecs = gearSpecs, tripcd_id = c(23), useLocal = useLocal,...)
   return(data)
 }

@@ -1,33 +1,47 @@
 #' @title fleet_
-#' @description This function is a generic wrapper that facilitates extracting fleet specific information using the data provided by fleet-specific wrappers.
-#' @param fleet This is an identifier that will be used to interrogate the licCore object to select the correct type(s), subtype(s), gear(s), and licence_species for the selected fleet
-#' @param area This is an identifier that will be used to interrogate the licAreas object to select any NAFO areas associated with the selected fleet
-#' @param gearSpecs This is an identifier that will be used to interrogate the licGearSpecs object to select any gear parameters associated with the selected fleet
+#' @description This function is a generic wrapper that facilitates extracting fleet specific
+#' information using the data provided by fleet-specific wrappers.
+#' @param fleet This is an identifier that will be used to interrogate the LIC_CORE object to select
+#' the correct type(s), subtype(s), gear(s), and licence_species for the selected fleet
+#' @param area This is an identifier that will be used to interrogate the LIC_AREAS object to select
+#' any NAFO areas associated with the selected fleet
+#' @param gearSpecs This is an identifier that will be used to interrogate the LIC_GEAR_SPEC object
+#' to select any gear parameters associated with the selected fleet
 #' @inheritDotParams set_defaults
 #' @examples \dontrun{
 #' test <- fleet_(fleet="POLLOCK_MOBILE", area="WESTERN", gearSpecs="SMALL" )
 #'  }
 #' @details
-#'  Licence Information for any fleet is accessible via the following calls.  Please replace "<fleet>", with this fleet's actual fleet value identified in the NOTE, below:
+#'  Licence Information for any fleet is accessible via the following calls.  Please replace
+#'  "<fleet>", with this fleet's actual fleet value identified in the NOTE, below:
 #' \itemize{
-#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="<fleet>",]}
-#'   \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="<fleet>",]}
+#'   \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)}
+#'   \code{Mar.fleets::LIC_CORE[Mar.fleets::LIC_CORE$FLEET=="<fleet>",]}
+#'   \item \code{Licence Areas (if applicable)} \code{Mar.fleets::LIC_AREAS[Mar.fleets::LIC_AREAS$FLEET=="<fleet>",]}
 #'
-#'   If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
-#'   For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
-#'   \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
-#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="<fleet>",]}
+#'   If different areas/components/units are available for this fleet, the areas associated with
+#'   each can be differentiated by the differing values of \code{FLEET_AREA_ID }. For example, the
+#'   Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of
+#'   these units these can be found in via \code{Mar.fleets::LIC_AREAS[Mar.fleets::LIC_AREAS$FLEET=="REDFISH",]},
+#'   but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
+#'   \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::LIC_GEAR_SPEC[Mar.fleets::LIC_GEAR_SPEC$FLEET=="<fleet>",]}
 #'
-#'    If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
-#'    multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
-#'    fleet areas, but do not have to.  In this case, the gear associated with catching redfish in UNIT 2 is different than what's allowed in UNIT 3, so the
-#'    licGearSpecs table differentiates the gear by having different entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK fleet also has multiple
-#'    categories of gear sizes, but they are not related to different areas - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.
-#'    Differing values of Type have not been implemented, but the field exist such that gear can be filtered by Diamond vs Square mesh.
+#'    If particular gear size/types are allowed, the range of sizes for each are specified by the
+#'    MIN and MAX fields.  If aspects of the fleet are defined by the gear size, multiple records
+#'    may be present.  For example, the SMALL mesh fleet will have different max and min values than
+#'    the LARGE MESH fleet.  These records can correspond with fleet areas, but do not have to.  In
+#'    this case, the gear associated with catching redfish in UNIT 2 is different than what's
+#'    allowed in UNIT 3, so the LIC_GEAR_SPEC table differentiates the gear by having different
+#'    entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK
+#'    fleet also has multiple categories of gear sizes, but they are not related to different areas
+#'    - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.  Differing
+#'    values of Type have not been implemented, but the field exist such that gear can be filtered
+#'    by Diamond vs Square mesh.
 #' }
 #' @family coreFuncs
-#' @return specific returned objects can be specified by the user, but the default result is a list of objects.  The list includes marfis data, isdb data,
-#' information related to the matching, and a breakdown of where the various trips and sets occurred, specifically:
+#' @return specific returned objects can be specified by the user, but the default result is a list
+#' of objects.  The list includes marfis data, isdb data, information related to the matching, and a
+#' breakdown of where the various trips and sets occurred, specifically:
 #' \itemize{
 #'  \item \code{params} -  this is a list containing information about the extraction
 #'  \itemize{
@@ -89,17 +103,18 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   if (is.null(fleet)){
     stop("Please provide a fleet")
   }
-  if (!exists("dbEbv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
+  dbEnv<-NA
+  if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
   # get the fleet's parameters
-  utils::data("licCore", envir = environment())
-  utils::data("licAreas", envir = environment())
-  utils::data("licGearSpecs", envir = environment())
+  utils::data("LIC_CORE", envir = environment())
+  utils::data("LIC_AREAS", envir = environment())
+  utils::data("LIC_GEAR_SPEC", envir = environment())
 
-  licCoreTbl <- get("licCore", envir  = environment())
-  areaTbl <- get("licAreas", envir  = environment())
-  gearSpecsTbl <- get("licGearSpecs", envir  = environment())
-
+  licCoreTbl <- get("LIC_CORE", envir  = environment())
+  areaTbl <- get("LIC_AREAS", envir  = environment())
+  gearSpecsTbl <- get("LIC_GEAR_SPEC", envir  = environment())
   lics <- licCoreTbl[licCoreTbl$FLEET==fleet,]
+  if (nrow(lics)==0)stop("No licences found - stopping")
   if(is.null(area)){
     area <-  areaTbl[FALSE,]
   } else {
@@ -111,7 +126,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
     gearSpecs <- gearSpecsTbl[gearSpecsTbl$FLEET == fleet & gearSpecsTbl$FLEET_GEARSPECS_ID == gearSpecs, ]
   }
 
-  rm(list = c("licCore", "licCoreTbl", "licAreas", "areaTbl", "licGearSpecs", "gearSpecsTbl", "fleet"))
+  rm(list = c("LIC_CORE", "licCoreTbl", "LIC_AREAS", "areaTbl", "LIC_GEAR_SPEC", "gearSpecsTbl", "fleet"))
 
   argsFn <- as.list(environment())
 
@@ -136,10 +151,9 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   data$params$fleet[["licencesAreas"]] <- area
   data$params$fleet[["licencesGearSpecs"]] <- gearSpecs
   fleet <- do.call(get_fleet, args)
-
   data$params$fleet$licencesCore <- merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("LICENCE_TYPE_ID", "LICENCE_TYPE")], by.x="LIC_TYPE", by.y="LICENCE_TYPE_ID", all.x=T)
   data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE")], by.x="LIC_SUBTYPE", by.y="LICENCE_SUBTYPE_ID", all.x=T)
-  data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("GEAR_CODE", "GEAR")], by.x="LIC_GEAR", by.y="GEAR_CODE", all.x=T)
+  # data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("GEAR_CODE", "GEAR")], by.x="LIC_GEAR", by.y="GEAR_CODE", all.x=T)
   data$params$fleet$licencesCore <-merge(data$params$fleet$licencesCore, fleet$LICDETS[,c("SPECIES_CODE", "SPECIES")], by.x="LIC_SP", by.y="SPECIES_CODE", all.x=T)
   data$params$fleet$licencesCore <- unique(data$params$fleet$licencesCore)
   fleet$LICDETS <- NULL

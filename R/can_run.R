@@ -71,7 +71,7 @@ can_run <- function(...){
                "HAIL_OUTS",
                "LOG_EFRT_ENTRD_DETS",
                "LOG_EFRT_STD_INFO",
-               "MARBYCATCH_LIC",
+               "MARFLEETS_LIC",
                "MON_DOC_ENTRD_DETS",
                "NAFO_UNIT_AREAS",
                "PRO_SPC_INFO",

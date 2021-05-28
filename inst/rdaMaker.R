@@ -1,13 +1,22 @@
 setwd("C:/git/Maritimes/Mar.fleets/inst")
-# licCore =  data.frame(readxl::read_xlsx( path = "inst/fleetDefnsCore.xlsx",sheet = "Sheet1"))
-# licGearSpecs =  data.frame(readxl::read_xlsx( path = "inst/fleetDefnsSpecs.xlsx",sheet = "Sheet1"))
-# licAreas =  data.frame(readxl::read_xlsx( path = "inst/fleetDefnsAreas.xlsx",sheet = "Sheet1"))
 
-licCore =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "fleetDefnsCore"))
-licGearSpecs =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "fleetDefnsSpecs"))
-licAreas =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "fleetDefnsAreas"))
+LIC_CORE =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "fleetDefnsCore"))
+LIC_CORE$UPDATE_DATE <- LIC_CORE$COMMENTS <- NULL
+LIC_GEAR_SPEC =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "fleetDefnsSpecs"))
+LIC_AREAS =  data.frame(readxl::read_xlsx( path = "fleetDefns.xlsx",sheet = "fleetDefnsAreas"))
 
-save(licCore, file = "../data/licCore.rda")
-save(licGearSpecs, file = "../data/licGearSpecs.rda")
-save(licAreas, file = "../data/licAreas.rda")
-# rm(list=c("licCore", "licGearSpecs", "licAreas"))
+save(LIC_CORE, file = "../data/LIC_CORE.rda")
+save(LIC_GEAR_SPEC, file = "../data/LIC_GEAR_SPEC.rda")
+save(LIC_AREAS, file = "../data/LIC_AREAS.rda")
+
+
+Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("GEARS", "SPECIES"))
+GEARS <- GEARS[with(GEARS,order(GEAR_CODE)),c("GEAR_CODE", "GEAR")]
+SPECIES_MARFIS <- SPECIES[with(SPECIES,order(SPECIES_CODE)),c("SPECIES_CODE", "SPECIES_NAME")]
+
+Mar.utils::get_data_tables(schema = "ISDB", data.dir = data.dir, tables = c("ISSPECIESCODES"))
+SPECIES_ISDB <- ISSPECIESCODES[with(ISSPECIESCODES,order(SPECCD_ID)),c("SPECCD_ID", "COMMON", "SCIENTIFIC")]
+
+save(GEARS, file = "../data/GEARS.rda")
+save(SPECIES_MARFIS, file = "../data/SPECIES_MARFIS.rda")
+save(SPECIES_ISDB, file = "../data/SPECIES_ISDB.rda")

@@ -6,6 +6,7 @@
 \usage{
 quickMap(
   data = NULL,
+  title = NULL,
   plotMARF = TRUE,
   plotISDB = TRUE,
   cluster = TRUE,
@@ -13,6 +14,7 @@ quickMap(
   plotISDBSurf = FALSE,
   isdbSurfField = "EST_COMBINED_WT",
   isdbSurfSpp = NULL,
+  marfSurfSpp = NULL,
   vms = NULL,
   bathy = TRUE,
   nafo = TRUE,
@@ -21,6 +23,8 @@ quickMap(
 }
 \arguments{
 \item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
+
+\item{title}{default is \code{NULL}. This will be shown as the title of the map.}
 
 \item{plotMARF}{default is \code{TRUE}. Should MARFIS data be plotted?}
 
@@ -43,6 +47,10 @@ for the ISDB data. ISDB data contains several fields data for many species.  By 
 \item{isdbSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
 will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 (i.e. "30" will be used.))  Any  isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can be used.}
+
+\item{marfSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
+will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
+(i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$ISDB_CATCHES can be used.}
 
 \item{vms}{default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.
 If provided, VMS data will be plotted.}

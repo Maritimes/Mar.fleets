@@ -4,17 +4,23 @@
 \alias{fleet_sculpin}
 \title{fleet_sculpin}
 \usage{
-fleet_sculpin(useLocal = NULL, ...)
+fleet_sculpin(marfGear = c(12, 41, 51, 59), useLocal = NULL, ...)
 }
 \arguments{
-\item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local data or against Oracle (requires network or VPN).
+\item{marfGear}{default is \code{c(12,41,51,59)}. This is a vector of MARFIS gear codes known to have caught
+this species. The default values can be replaced with a smaller selection to only return information
+for a gear-specific subset of fishing activity.}
+
+\item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
+data or against Oracle (requires network or VPN).
 Depending on your value for \code{useLocal}, different values become necessary.
 \itemize{
  \item{useLocal=TRUE} This implies that you have local data you want to use.
     \itemize{
       \item param \code{data.dir} required.  This is the path to your local data
     }
- \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data. Include all of the following:
+ \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data.
+ Include all of the following:
   \itemize{
       \item param \code{oracle.username} required
       \item param \code{oracle.password} required
@@ -26,56 +32,86 @@ Depending on your value for \code{useLocal}, different values become necessary.
 \item{...}{
   Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
   \describe{
-    \item{\code{year}}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
-\code{YYYY}, e.g. \code{year = 2018}.  \code{dateStart} takes priority over \code{year} if both are provided.}
-    \item{\code{dateStart}}{default is \code{NULL}.  This identifies the start date of the search window, in the format \code{YYYY-MM-DD} (e.g. \code{dateStart = "2019-02-19"}).
+    \item{\code{year}}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an
+entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
+\code{YYYY}, e.g. \code{year = 2018}.  \code{dateStart} takes priority over \code{year} if both
+are provided.}
+    \item{\code{dateStart}}{default is \code{NULL}.  This identifies the start date of the search window, in
+the format \code{YYYY-MM-DD} (e.g. \code{dateStart = "2019-02-19"}).
 If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).  ,}
-    \item{\code{dateEnd}}{default is \code{NULL} format is \code{YYYY-MM-DD}, e.g. \code{dateEnd = "2019-02-19"}. \code{dateEnd} must be associated with a valid entry of
-\code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 --> August 27, 2019).}
-    \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet wrapper}
+    \item{\code{dateEnd}}{default is \code{NULL} format is \code{YYYY-MM-DD}, e.g. \code{dateEnd = "2019-02-19"}.
+\code{dateEnd} must be associated with a valid entry of
+\code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 -->
+August 27, 2019).}
+    \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet
+wrapper.}
     \item{\code{isdbSpp}}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
-    \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
-    \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting records will be examined for matches}
-    \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and set information as part of your results? (requires \code{returnFleet = T})}
-    \item{\code{returnISDB}}{default is \code{TRUE}. Do you want a list object containing isdb trip and set information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
+    \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering
+ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
+    \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting
+records will be examined for matches}
+    \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and
+set information as part of your results? (requires \code{returnFleet = T})}
+    \item{\code{returnISDB}}{default is \code{TRUE}. Do you want a list object containing isdb trip and set
+information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
     \item{\code{manual_fleet}}{default is \code{FALSE}.}
-    \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to check the trips and sets against. By default,
+    \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to
+check the trips and sets against. By default,
 Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
-    \item{\code{areaFileField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object which specifies exactly which field of the areas object data
+    \item{\code{areaFileField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object
+which specifies exactly which field of the areas object data
 should be compared against.}
-    \item{\code{nafoDet}}{default is \code{2}, but values between \code{1} and \code{4} are acceptable..  This specifies the level of detail that will be used in the
-summarized locations table.  Using the default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2 characters).  If
-set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character) , while a value like 4 would summarize the trips and sets into very specific
-NAFO subunits (e.g. "3PSA","4VSB" and "5ZEM")}
-    \item{\code{keepSurveyTrips}}{default is \code{TRUE}. Within the ISDB database are non-commercial, survey trips.  Setting this to \code{FALSE}
-ensures these trips are dropped}
-    \item{\code{matchMaxDayDiff}}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the # of days specified here will NOT be considered
-matches (on the basis of common Vessel, licence and date).  They may still match on confirmation codes and/or trip names.}
+    \item{\code{nafoDet}}{default is \code{2}, but values between \code{1} and \code{4} are acceptable. This
+specifies the level of detail that will be used in the summarized locations table.  Using the
+default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2
+characters).  If set to "1", areas would be more general  (e.g. "3", "4", "5"; i.e. 1 character),
+while a value like 4 would summarize the trips and sets into very specific NAFO subunits (e.g.
+"3PSA","4VSB" and "5ZEM")}
+    \item{\code{keepSurveyTrips}}{default is \code{TRUE}. Within the ISDB database are non-commercial,
+survey trips.  Setting this to \code{FALSE} ensures these trips are dropped.}
+    \item{\code{matchMaxDayDiff}}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the
+# of days specified here will NOT be considered matches (on the basis of common Vessel, licence
+and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
-    \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.  This is the path to a folder where your *.rdata files are stored.}
-    \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle objects.}
-    \item{\code{oracle.password}}{default is \code{'_none_'}. This is your password for accessing oracle objects.}
-    \item{\code{oracle.dsn}}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing oracle objects.  Normally, the value should be "PTRAN"}
-    \item{\code{usepkg}}{default is \code{'roracle'}. This indicates whether the connection to Oracle should use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
+    \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
+This is the path to a folder where your *.rdata files are stored.}
+    \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
+objects.}
+    \item{\code{oracle.password}}{default is \code{'_none_'}. This is your password for accessing oracle
+objects.}
+    \item{\code{oracle.dsn}}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing
+oracle objects.  Normally, the value should be "PTRAN"}
+    \item{\code{usepkg}}{default is \code{'roracle'}. This indicates whether the connection to Oracle should
+use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 be slightly easier to setup, but roracle will extract data faster.}
-    \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
-    \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to imitate historic matching techniques.}
-    \item{\code{debuggit}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in debug mode, providing much extraneous information.}
-    \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will provide information about when the script drops them from
+    \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be
+output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this
+parameter to TRUE causes the package to try to imitate historic matching techniques.}
+    \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to
+imitate historic matching techniques.}
+    \item{\code{debuggit}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
+debug mode, providing much extraneous information.}
+    \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
+provide information about when the script drops them from
 consideration.}
-    \item{\code{debugVRs}}{default is \code{NULL}.  If a vector of VR numbers is provided, the script will provide information about when the script drops them from
+    \item{\code{debugVRs}}{default is \code{NULL}.  If a vector of VR numbers is provided, the script will
+provide information about when the script drops them from
 consideration.}
-    \item{\code{debugMARFTripIDs}}{default is \code{NULL}.  If a vector of MARFIS trip IDs is provided, the script will provide information about when the script drops them from
+    \item{\code{debugMARFTripIDs}}{default is \code{NULL}.  If a vector of MARFIS trip IDs is provided, the
+script will provide information about when the script drops them from
 consideration.}
-    \item{\code{debugISDBTripIDs}}{default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the script will provide information about when the script drops them from
+    \item{\code{debugISDBTripIDs}}{default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the
+script will provide information about when the script drops them from
 consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1234A".}
-    \item{\code{debugISDBTripNames}}{default is \code{NULL}.  If a vector of ISDB trip names is provided, the script will provide information about when the script drops them from
+    \item{\code{debugISDBTripNames}}{default is \code{NULL}.  If a vector of ISDB trip names is provided,
+the script will provide information about when the script drops them from
 consideration.}
   }}
 }
 \value{
-specific returned objects can be specified by the user, but the default result is a list of objects.  The list includes marfis data, isdb data,
-information related to the matching, and a breakdown of where the various trips and sets occurred, specifically:
+specific returned objects can be specified by the user, but the default result is a list
+of objects.  The list includes marfis data, isdb data, information related to the matching, and a
+breakdown of where the various trips and sets occurred, specifically:
 \itemize{
  \item \code{params} -  this is a list containing information about the extraction
  \itemize{
@@ -129,28 +165,38 @@ information related to the matching, and a breakdown of where the various trips 
 }
 \description{
 This is a wrapper function that facilitates extracting information for the sculpin fleet.
-All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
-and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
-vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
-different fleets are identified, and their data is extracted.
+All of the information used to identify fleets is stored in the package's associated data files -
+LIC_CORE, LIC_AREAS, and LIC_GEAR_SPEC.  The various wrappers can have different options (e.g.
+MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
+mesh, etc), and depending on which options are selected, different fleets are identified, and
+their data is extracted.
 }
 \details{
-Licence Information for any fleet is accessible via the following calls.  Please replace "<fleet>", with this fleet's actual fleet value identified in the NOTE, below:
+Licence Information for any fleet is accessible via the following calls.  Please replace
+ "<fleet>", with this fleet's actual fleet value identified in the NOTE, below:
 \itemize{
-  \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)} \code{Mar.fleets::licCore[Mar.fleets::licCore$FLEET=="<fleet>",]}
-  \item \code{Licence Areas (if applicable)} \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="<fleet>",]}
+  \item \code{Licence Type, Subtype, Gear and Species Information (if applicable)}
+  \code{Mar.fleets::LIC_CORE[Mar.fleets::LIC_CORE$FLEET=="<fleet>",]}
+  \item \code{Licence Areas (if applicable)} \code{Mar.fleets::LIC_AREAS[Mar.fleets::LIC_AREAS$FLEET=="<fleet>",]}
 
-  If different areas/components/units are available for this fleet, the areas associated with each can be differentiated by the differing values of \code{FLEET_AREA_ID }..
-  For example, the Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of these units these can be found in via
-  \code{Mar.fleets::licAreas[Mar.fleets::licAreas$FLEET=="REDFISH",]}, but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
-  \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::licGearSpecs[Mar.fleets::licGearSpecs$FLEET=="<fleet>",]}
+  If different areas/components/units are available for this fleet, the areas associated with
+  each can be differentiated by the differing values of \code{FLEET_AREA_ID }. For example, the
+  Redfish fleet is divided into Units 2 and 3.  All of the NAFO areas associated with either of
+  these units these can be found in via \code{Mar.fleets::LIC_AREAS[Mar.fleets::LIC_AREAS$FLEET=="REDFISH",]},
+  but the NAFO areas associated with the Unit 2 fleet are those with \code{FLEET_AREA_ID} == \code{UNIT2}.
+  \item \code{Licence Gear Specifications (if applicable)} \code{Mar.fleets::LIC_GEAR_SPEC[Mar.fleets::LIC_GEAR_SPEC$FLEET=="<fleet>",]}
 
-   If particular gear size/types are allowed, the range of sizes for each are specified by the MIN and MAX fields.  If aspects of the fleet are defined by the gear size,
-   multiple records may be present.  For example, the SMALL mesh fleet will have different max and min values than the LARGE MESH fleet.  These records can correspond with
-   fleet areas, but do not have to.  In this case, the gear associated with catching redfish in UNIT 2 is different than what's allowed in UNIT 3, so the
-   licGearSpecs table differentiates the gear by having different entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK fleet also has multiple
-   categories of gear sizes, but they are not related to different areas - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.
-   Differing values of Type have not been implemented, but the field exist such that gear can be filtered by Diamond vs Square mesh.
+   If particular gear size/types are allowed, the range of sizes for each are specified by the
+   MIN and MAX fields.  If aspects of the fleet are defined by the gear size, multiple records
+   may be present.  For example, the SMALL mesh fleet will have different max and min values than
+   the LARGE MESH fleet.  These records can correspond with fleet areas, but do not have to.  In
+   this case, the gear associated with catching redfish in UNIT 2 is different than what's
+   allowed in UNIT 3, so the LIC_GEAR_SPEC table differentiates the gear by having different
+   entries in \code{FLEET_GEARSPECS_ID} (i.e. \code{UNIT2} vs \code{UNIT3}).  The mobile POLLOCK
+   fleet also has multiple categories of gear sizes, but they are not related to different areas
+   - the entries in \code{FLEET_GEARSPECS_ID} are just \code{SMALL} and \code{LARGE}.  Differing
+   values of Type have not been implemented, but the field exist such that gear can be filtered
+   by Diamond vs Square mesh.
 }
 }
 \note{
@@ -178,22 +224,23 @@ local <- fleet_sculpin(year = 2018,
 }
 \seealso{
 Other fleets: 
+\code{\link{fishin_CHPs}()},
 \code{\link{fleet_bluefin}()},
 \code{\link{fleet_cucumber}()},
 \code{\link{fleet_haddock}()},
 \code{\link{fleet_hagfish}()},
 \code{\link{fleet_halibut}()},
 \code{\link{fleet_jonah}()},
-\code{\link{fleet_northernShrimp}()},
 \code{\link{fleet_pollock}()},
 \code{\link{fleet_redCrab}()},
 \code{\link{fleet_redfish}()},
 \code{\link{fleet_rockCrab}()},
 \code{\link{fleet_scallop}()},
+\code{\link{fleet_shrimp}()},
 \code{\link{fleet_silverhake}()},
 \code{\link{fleet_snowcrab}()},
 \code{\link{fleet_surfclam}()},
-\code{\link{fleet_swordfishTunas}()},
+\code{\link{fleet_swordfishTunaShark}()},
 \code{\link{fleet_urchin}()},
 \code{\link{fleet_whelk}()},
 \code{\link{fleet_winterflounder}()}

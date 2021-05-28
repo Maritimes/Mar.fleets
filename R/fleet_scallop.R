@@ -1,9 +1,13 @@
 #' @title fleet_scallop
 #' @description This is a wrapper function that facilitates extracting information for the scallop fleet.
-#' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
-#' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
-#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
-#' different fleets are identified, and their data is extracted.
+#' All of the information used to identify fleets is stored in the package's associated data files -
+#' LIC_CORE, LIC_AREAS, and LIC_GEAR_SPEC.  The various wrappers can have different options (e.g.
+#' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
+#' mesh, etc), and depending on which options are selected, different fleets are identified, and
+#' their data is extracted.
+#' @param marfGear default is \code{c(71)}. This is a vector of MARFIS gear codes known to have caught
+#' this species. The default values can be replaced with a smaller selection to only return information
+#' for a gear-specific subset of fishing activity.
 #' @param fleet default is NULL.  Valid values are "INSHORE" or "OFFSHORE"
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
@@ -35,10 +39,20 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_scallop <- function(fleet = NULL, useLocal = NULL, ...){
+fleet_scallop <- function(marfGear = c(71), fleet = NULL, useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
+
   fleet <- toupper(fleet)
-  fleet <- ifelse(fleet == "OFFSHORE", "SCALLOP_OFF", "SCALLOP_INSH")
-  data <- fleet_(fleet = fleet, marfSpp = 612, isdbSpp = 4321, tripcd_id = c(4320,7062), areaFile = "Areas_Scallop_sf", useLocal = useLocal,...)
+  if (fleet == "OFFSHORE"){
+    fleet <- "SCALLOP_OFF"
+  }else if (fleet == "INSHORE"){
+    fleet <- "SCALLOP_INSH"
+  }else if (fleet == "UNKNOWN"){
+    fleet <- "SCALLOP_UNK"
+  }else{
+    stop("Value for 'fleet' is unrecognized")
+  }
+
+  data <- fleet_(fleet = fleet, marfSpp = 612, marfGear = marfGear, isdbSpp = 4321, tripcd_id = c(4320,7062), areaFile = "Areas_Scallop_sf", useLocal = useLocal,...)
   return(data)
 }

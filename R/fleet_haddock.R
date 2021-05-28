@@ -1,9 +1,13 @@
 #' @title fleet_haddock
 #' @description This is a wrapper function that facilitates extracting information for the haddock fleets.
-#' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
-#' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
-#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
-#' different fleets are identified, and their data is extracted.
+#' All of the information used to identify fleets is stored in the package's associated data files -
+#' LIC_CORE, LIC_AREAS, and LIC_GEAR_SPEC.  The various wrappers can have different options (e.g.
+#' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
+#' mesh, etc), and depending on which options are selected, different fleets are identified, and
+#' their data is extracted.
+#' @param marfGear default is \code{''}. This is a vector of MARFIS gear codes known to have caught
+#' this species. The default values can be replaced with a smaller selection to only return information
+#' for a gear-specific subset of fishing activity.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
 #' @inherit set_defaults params
@@ -40,14 +44,19 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_haddock <- function(type = NULL, area= NULL, useLocal = NULL, ...){
+fleet_haddock <- function(marfGear = c(12, 41, 51, 59), type = NULL, area= NULL, useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   area <- toupper(area)
 
-  fleet <- ifelse(type == "MOBILE", "HADDOCK_MOB", "HADDOCK_FIXED")
+  if (!is.null(type) && type =="MOBILE"){
+    marfGear = c(12)
+  }else if (!is.null(type) && type =="FIXED"){
+    marfGear = c(41,51,59)
+  }
+
   gearSpecs <- ifelse(type == "MOBILE", "4X5Y", "ALL")
   area <- ifelse(type == "MOBILE", ifelse(area == "4X5Y", "4X5Y", "5ZJM"), "ALL")
-  data <- fleet_(fleet = fleet, marfSpp = 110, isdbSpp = 11, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
+  data <- fleet_(fleet = "HADDOCK", marfSpp = 110, marfGear = marfGear, isdbSpp = 11, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
   return(data)
 }

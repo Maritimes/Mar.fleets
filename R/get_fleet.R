@@ -24,15 +24,13 @@ get_fleet<-function(...){
 
   if (args$debuggit)  Mar.utils::where_now()
 
-  MARBYCATCH_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
+  MARFLEETS_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
 
   theseLics <- NA
   for (i in 1:nrow(args$lics)){
-    thisL <- ifelse(is.na(args$lics$LIC_TYPE[i]),"1==1", paste0("MARBYCATCH_LIC$LICENCE_TYPE_ID == ",args$lics$LIC_TYPE[i]))
-    thisS <- ifelse(is.na(args$lics$LIC_SUBTYPE[i]),"1==1",  paste0("MARBYCATCH_LIC$LICENCE_SUBTYPE_ID == ",args$lics$LIC_SUBTYPE[i]))
-    #thisG <- ifelse(is.na(args$lics$LIC_GEAR[i]),"1==1", paste0("MARBYCATCH_LIC$GEAR_CODE == ",args$lics$LIC_GEAR[i]))
-    #thisG," & ",
-    thisSpp <- ifelse(is.na(args$lics$LIC_SP[i]),"1==1", paste0("MARBYCATCH_LIC$SPECIES_CODE == ",args$lics$LIC_SP[i]))
+    thisL <- ifelse(is.na(args$lics$LIC_TYPE[i]),"1==1", paste0("MARFLEETS_LIC$LICENCE_TYPE_ID == ",args$lics$LIC_TYPE[i]))
+    thisS <- ifelse(is.na(args$lics$LIC_SUBTYPE[i]),"1==1",  paste0("MARFLEETS_LIC$LICENCE_SUBTYPE_ID == ",args$lics$LIC_SUBTYPE[i]))
+    thisSpp <- ifelse(is.na(args$lics$LIC_SP[i]),"1==1", paste0("MARFLEETS_LIC$SPECIES_CODE == ",args$lics$LIC_SP[i]))
     thisLicRow <- paste0("(",thisL, " & ",thisS," & ",thisSpp,")")
     if (i==1){
       theseLics <- thisLicRow
@@ -178,56 +176,55 @@ get_fleet<-function(...){
 
   get_fleetLicences_loc<-function(...){
     args <- list(...)
-    res=list()
     if (args$debuggit) Mar.utils::where_now()
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
-                               tables = c("MARBYCATCH_LIC"),
+                               tables = c("MARFLEETS_LIC"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC$LICENCE_ID, stepDesc = "flt_initial")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC$LICENCE_ID, stepDesc = "flt_initial")
     if (args$debuggit){
-      #here, I successively use the licence info to compare against the records in MARBYCATCH_LIC. This will facilitate understanding when certain records that
+      #here, I successively use the licence info to compare against the records in MARFLEETS_LIC. This will facilitate understanding when certain records that
       # might be expected are dropped
       if (all(is.na(args$lics$LIC_TYPE))){
-        MARBYCATCH_LIC_L <- MARBYCATCH_LIC
+        MARFLEETS_LIC_L <- MARFLEETS_LIC
       } else{
-        MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
+        MARFLEETS_LIC_L <- MARFLEETS_LIC[MARFLEETS_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_L$LICENCE_ID, stepDesc = "flt_licType")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_L$LICENCE_ID, stepDesc = "flt_licType")
 
       if (all(is.na(args$lics$LIC_SUBTYPE))){
-        MARBYCATCH_LIC_S <- MARBYCATCH_LIC_L
+        MARFLEETS_LIC_S <- MARFLEETS_LIC_L
       } else{
-        MARBYCATCH_LIC_S <- MARBYCATCH_LIC_L[MARBYCATCH_LIC_L$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
+        MARFLEETS_LIC_S <- MARFLEETS_LIC_L[MARFLEETS_LIC_L$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtype")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtype")
 
-      if (all(is.na(args$lics$LIC_GEAR))){
-        MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S
-      } else{
-        MARBYCATCH_LIC_G <- MARBYCATCH_LIC_S[MARBYCATCH_LIC_S$GEAR_CODE %in% args$lics$LIC_GEAR,]
-      }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_G$LICENCE_ID, stepDesc = "flt_licGear")
+      MARFLEETS_LIC_G <- MARFLEETS_LIC_S[MARFLEETS_LIC_S$GEAR_CODE %in% unique(c(-99, args$marfGear)),]
+
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_G$LICENCE_ID, stepDesc = "flt_licGear")
 
       if (all(is.na(args$lics$LIC_SP))){
-        MARBYCATCH_LIC_SP <- MARBYCATCH_LIC_G
+        MARFLEETS_LIC_SP <- MARFLEETS_LIC_G
       } else{
-        MARBYCATCH_LIC_SP <- MARBYCATCH_LIC_G[MARBYCATCH_LIC_G$SPECIES_CODE %in% args$lics$LIC_SP,]
+        MARFLEETS_LIC_SP <- MARFLEETS_LIC_G[MARFLEETS_LIC_G$SPECIES_CODE %in% args$lics$LIC_SP,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSpp")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_SP$LICENCE_ID, stepDesc = "flt_licSpp")
 
     }
-    MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeSp")
+    MARFLEETS_LIC_new <- MARFLEETS_LIC[which(eval(parse(text=theseLics))),]
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeSp")
+    MARFLEETS_LIC_new <- MARFLEETS_LIC_new[MARFLEETS_LIC_new$GEAR_CODE %in% unique(c(-99, args$marfGear)),]
 
-    if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
-    MARBYCATCH_LIC <- MARBYCATCH_LIC_new
-    LICDETS<- unique(MARBYCATCH_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
+
+    if (args$debuggit) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC, post_ = MARFLEETS_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/gear/sp filter")
+    MARFLEETS_LIC <- MARFLEETS_LIC_new
     # Filter licences by desired date range -------------------------------------------------------------------------------------------------------------------
-    dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
-    MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=dateFilt))),]
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licDates")
-    if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC, post_ = MARBYCATCH_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
-    licDf <- unique(MARBYCATCH_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
+    dateFilt <- paste0("MARFLEETS_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARFLEETS_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
+    MARFLEETS_LIC_new <- MARFLEETS_LIC[which(eval(parse(text=dateFilt))),]
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new$LICENCE_ID, stepDesc = "flt_licDates")
+    if (args$debuggit) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC, post_ = MARFLEETS_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+    LICDETS<- unique(MARFLEETS_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
+    licDf <- unique(MARFLEETS_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
+    res=list()
     res[["LICDETS"]]<- LICDETS
     res[["licDf"]]<- licDf
     return(res)
@@ -238,55 +235,70 @@ get_fleet<-function(...){
 
     if (args$debuggit | !any(is.null(dbEnv$debugLics))){
       # message("To handle debugging, a lot of data must first be extracted, so that each step can be checked.  This step will take ~1 minute")
-      MARBYCATCH_LIC_Qry <- paste0("SELECT *
-                            FROM MARFISSCI.MARBYCATCH_LIC WHERE ",theseLicsOra)
+      MARFLEETS_LIC_Qry <- paste0("SELECT *
+                            FROM MARFISSCI.MARFLEETS_LIC WHERE ",theseLicsOra)
 
       # AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field = "LOG_EFRT_STD_INFO.MON_DOC_ID"))
-      MARBYCATCH_LIC <- args$cxn$thecmd(args$cxn$channel, MARBYCATCH_LIC_Qry)
-      LICDETS<- unique(MARBYCATCH_LIC[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
+      MARFLEETS_LIC <- args$cxn$thecmd(args$cxn$channel, MARFLEETS_LIC_Qry)
+      LICDETS<- unique(MARFLEETS_LIC[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
 
       # message("Completed big extraction.  To avoid this in the future, don't use debuggit, don't send debugLics or change to useLocal = T.")
 
       if (all(is.na(args$lics$LIC_TYPE))){
-        MARBYCATCH_LIC_L <- MARBYCATCH_LIC
+        MARFLEETS_LIC_L <- MARFLEETS_LIC
       } else{
-        MARBYCATCH_LIC_L <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
+        MARFLEETS_LIC_L <- MARFLEETS_LIC[MARFLEETS_LIC$LICENCE_TYPE_ID %in% args$lics$LIC_TYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_L$LICENCE_ID, stepDesc = "flt_licTypeOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_L$LICENCE_ID, stepDesc = "flt_licTypeOra")
 
       if (all(is.na(args$lics$LIC_SUBTYPE))){
-        MARBYCATCH_LIC_S <- MARBYCATCH_LIC
+        MARFLEETS_LIC_S <- MARFLEETS_LIC
       } else{
-        MARBYCATCH_LIC_S <- MARBYCATCH_LIC[MARBYCATCH_LIC$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
+        MARFLEETS_LIC_S <- MARFLEETS_LIC[MARFLEETS_LIC$LICENCE_SUBTYPE_ID %in% args$lics$LIC_SUBTYPE,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtypeOra")
-      if (all(is.na(args$lics$LIC_SP))){
-        MARBYCATCH_LIC_SP <- MARBYCATCH_LIC
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtypeOra")
+
+       if (all(is.na(args$lics$LIC_SP))){
+        MARFLEETS_LIC_SP <- MARFLEETS_LIC
       } else{
-        MARBYCATCH_LIC_SP <- MARBYCATCH_LIC[MARBYCATCH_LIC$SPECIES_CODE %in% args$lics$LIC_SP,]
+        MARFLEETS_LIC_SP <- MARFLEETS_LIC[MARFLEETS_LIC$SPECIES_CODE %in% args$lics$LIC_SP,]
       }
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_SP$LICENCE_ID, stepDesc = "flt_licSppOra")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_SP$LICENCE_ID, stepDesc = "flt_licSppOra")
 
-      MARBYCATCH_LIC_new <- MARBYCATCH_LIC[which(eval(parse(text=theseLics))),]
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeGearSpOra")
 
-      dateFilt <- paste0("MARBYCATCH_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARBYCATCH_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
-      MARBYCATCH_LIC_new_date <- MARBYCATCH_LIC_new[which(eval(parse(text=dateFilt))),]
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARBYCATCH_LIC_new_date$LICENCE_ID, stepDesc = "flt_licDatesOra")
 
-      if (args$debuggit) Mar.utils::changeDetector(pre_ = MARBYCATCH_LIC_new, post_ = MARBYCATCH_LIC_new_date, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
-      MARBYCATCH_LIC_new <- MARBYCATCH_LIC_new_date
+
+      MARFLEETS_LIC_new <- MARFLEETS_LIC[which(eval(parse(text=theseLics))),]
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeGearSpOra")
+
+      dateFilt <- paste0("MARFLEETS_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARFLEETS_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
+      MARFLEETS_LIC_new_date <- MARFLEETS_LIC_new[which(eval(parse(text=dateFilt))),]
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new_date$LICENCE_ID, stepDesc = "flt_licDatesOra")
+
+      if (args$debuggit) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC_new, post_ = MARFLEETS_LIC_new_date, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+      MARFLEETS_LIC_new <- MARFLEETS_LIC_new_date
+
+      if (all(is.na(args$marfGear))){
+        MARFLEETS_LIC_GR <- MARFLEETS_LIC_new
+      } else{
+        MARFLEETS_LIC_GR <- MARFLEETS_LIC_new[MARFLEETS_LIC_new$GEAR_CODE %in% unique(c(-99,args$marfGear)),]
+      }
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_GR$LICENCE_ID, stepDesc = "flt_licGearOra")
+      MARFLEETS_LIC_new <- MARFLEETS_LIC_GR
+
     }else{
-      where_dateFilt <- paste0("AND (MARBYCATCH_LIC.L_ORIGIN_DATE <= to_date('", args$dateEnd, "','YYYY-MM-DD') AND
-                               MARBYCATCH_LIC.L_EXPIRY_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
-      MARBYCATCH_LIC_new_Qry <- paste0("SELECT *
-                            FROM MARFISSCI.MARBYCATCH_LIC
-                                       WHERE (", theseLicsOra, ") ",where_dateFilt)
-      MARBYCATCH_LIC_new <- args$cxn$thecmd(args$cxn$channel, MARBYCATCH_LIC_new_Qry)
-    }
-    licDf <- unique(MARBYCATCH_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
-    # return(licDf)
+      where_dateFilt <- paste0(" AND (MARFLEETS_LIC.L_ORIGIN_DATE <= to_date('", args$dateEnd, "','YYYY-MM-DD') AND
+                               MARFLEETS_LIC.L_EXPIRY_DATE >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
 
+      where_gearFilt <- paste0(" AND MARFLEETS_LIC.GEAR_CODE IN (-99, ", Mar.utils::SQL_in(args$marfGear, apos = F),")")
+      MARFLEETS_LIC_new_Qry <- paste0("SELECT *
+                            FROM MARFISSCI.MARFLEETS_LIC
+                                       WHERE (", theseLicsOra, ") ",where_dateFilt, where_gearFilt)
+      MARFLEETS_LIC_new <- args$cxn$thecmd(args$cxn$channel, MARFLEETS_LIC_new_Qry)
+    }
+    LICDETS<- unique(MARFLEETS_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
+    licDf <- unique(MARFLEETS_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
+    res=list()
     res[["LICDETS"]]<- LICDETS
     res[["licDf"]]<- licDf
     return(res)
@@ -320,20 +332,9 @@ get_fleet<-function(...){
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
     # Grab fishing activity of those with valid combos of licence and gear code  -------------------------------------------------------------------------------
-    uGears <- unique(args$lics$LIC_GEAR)
-    # if gearPSOveride is provided, overwrite the gear_code provided by the licence
-    if("gearPSOveride" %in% names(args)) {
-      allLics = data.table::CJ(licDf$LICENCE_ID, args$gearPSOveride)[, paste(licDf$LICENCE_ID, args$gearPSOveride, sep ="_")]
-      PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% allLics,]
 
-    }else{
+    PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
 
-      if (length(uGears)==1){
-        PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",uGears),]
-      }else{
-        PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
-      }
-    }
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSGrs")
     dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSGrs")
 
@@ -379,12 +380,13 @@ get_fleet<-function(...){
   get_fleetActivity_ora<- function(licDf = NULL, ...){
     args <- list(...)$args
     if (args$debuggit) Mar.utils::where_now()
-    uGears <- unique(args$lics$LIC_GEAR)
-    if (length(uGears)==1){
-      all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",uGears))
-    }else{
+    # uGears <- unique(args$lics$LIC_GEAR)
+    # if (length(uGears)==1){
+    #   all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",uGears))
+    # }else{
+    #MMM
       all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE))
-    }
+    # }
 
     if (args$HS){
       where_date <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
@@ -527,7 +529,7 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
     actDf <- do.call(get_fleetActivity_loc, list(licDf=licDf, args=args))
     df <- do.call(get_fleetGear_loc, list(df=actDf,args=args))
   }else{
-    licDf <- do.call(get_fleetLicences_ora, args)
+    licDf_tmp <- do.call(get_fleetLicences_ora, args)
     licDets <- licDf_tmp$LICDETS
     licDf <- licDf_tmp$licDf
     actDf <- do.call(get_fleetActivity_ora, list(licDf=licDf, args=args))

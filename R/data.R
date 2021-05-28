@@ -1,8 +1,8 @@
-#' licCore Metadata
+#' LIC_CORE Metadata
 #'
 #' This is an rda file with codes for identifying participants in different fleets.  It includes the fields identified below:
 #' @docType data
-#' @usage data(licCore)
+#' @usage data(LIC_CORE)
 #' @format  rda
 #' \describe{
 #' \item{FLEET}{name of fleet}
@@ -11,13 +11,13 @@
 #' \item{LIC_SP}{Licence species ID}
 #' \item{LIC_GEAR}{Licence gear ID}
 #' }
-"licCore"
+"LIC_CORE"
 
-#' licAreas Metadata
+#' LIC_AREAS Metadata
 #'
 #' This is an rda file with codes for identifying participants in different fleets.  It includes the fields identified below:
 #' @docType data
-#' @usage data(licAreas)
+#' @usage data(LIC_AREAS)
 #' @format  rda
 #' \describe{
 #' \item{FLEET}{name of fleet}
@@ -25,13 +25,13 @@
 #' \item{AREA_TYPE}{category of area}
 #' \item{AREA}{specific area}
 #' }
-"licAreas"
+"LIC_AREAS"
 
-#' licGearSpecs Metadata
+#' LIC_GEAR_SPEC Metadata
 #'
 #' This is an rda file with codes for identifying participants in different fleets.  It includes the fields identified below:
 #' @docType data
-#' @usage data(licGearSpecs)
+#' @usage data(LIC_GEAR_SPEC)
 #' @format  rda
 #' \describe{
 #' \item{FLEET}{name of fleet}
@@ -40,4 +40,41 @@
 #' \item{MAX}{largest size cutoff}
 #' \item{TYPE}{this describes the allowable gear - e.g. "S" (square); "D" (diamond)}
 #' }
-"licGearSpecs"
+"LIC_GEAR_SPEC"
+
+#' GEARS Metadata
+#'
+#' This is an rda file of a lookup table used to associate different MARFIS gear codes with name of the gear:
+#' @docType data
+#' @usage data(GEARS)
+#' @format  rda
+#' \describe{
+#' \item{GEAR_CODE}{code identifying the type of gear}
+#' \item{GEAR}{name of the gear}
+#' }
+"GEARS"
+
+#' SPECIES_MARFIS Metadata
+#'
+#' This is an rda file of a lookup table used to associate different MARFIS species codes with the name of the species:
+#' @docType data
+#' @usage data(SPECIES_MARFIS)
+#' @format  rda
+#' \describe{
+#' \item{SPECIES_CODE}{code identifying the species}
+#' \item{SPECIES_NAME}{name of the species/species group}
+#' }
+"SPECIES_MARFIS"
+
+#' SPECIES_ISDB Metadata
+#'
+#' This is an rda file of a lookup table used to associate different ISDB species codes with the name of the species:
+#' @docType data
+#' @usage data(SPECIES_ISDB)
+#' @format  rda
+#' \describe{
+#' \item{SPECCCD_ID}{code identifying the species}
+#' \item{COMMON}{common name of the species}
+#' \item{SCIENTIFIC}{scientific name of the species}
+#' }
+"SPECIES_ISDB"

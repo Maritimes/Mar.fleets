@@ -1,9 +1,13 @@
 #' @title fleet_halibut
 #' @description This is a wrapper function that facilitates extracting information for the halibut fleet.
-#' All of the information used to identify fleets is stored in the package's associated data files - licCore, licAreas,
-#' and licGearSpecs.  The various wrappers can have different options (e.g. mobile vs fixed, western
-#' vs eastern, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square mesh, etc), and depending on which options are selected,
-#' different fleets are identified, and their data is extracted.
+#' All of the information used to identify fleets is stored in the package's associated data files -
+#' LIC_CORE, LIC_AREAS, and LIC_GEAR_SPEC.  The various wrappers can have different options (e.g.
+#' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
+#' mesh, etc), and depending on which options are selected, different fleets are identified, and
+#' their data is extracted.
+#' @param marfGear default is \code{c(12, 41, 51, 59)}. This is a vector of MARFIS gear codes known to have caught
+#' this species. The default values can be replaced with a smaller selection to only return information
+#' for a gear-specific subset of fishing activity.
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @examples \dontrun{
@@ -33,9 +37,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_halibut <- function(useLocal = NULL, ...){
+fleet_halibut <- function(marfGear = c(12, 41, 51, 59), useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-
-  data = fleet_(fleet = "HALIBUT", marfSpp = 130, isdbSpp = 30, area = "ALL", tripcd_id = c(30,7057,7058), areaFile = 'Areas_Halibut_sf', useLocal = useLocal,...)
+  data = fleet_(fleet = "HALIBUT", marfSpp = 130, marfGear = marfGear, isdbSpp = 30, area = "ALL", tripcd_id = c(30,7057,7058), areaFile = 'Areas_Halibut_sf', useLocal = useLocal,...)
   return(data)
 }
