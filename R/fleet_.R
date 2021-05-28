@@ -105,28 +105,19 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   }
   dbEnv<-NA
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
-  # get the fleet's parameters
-  utils::data("LIC_CORE", envir = environment())
-  utils::data("LIC_AREAS", envir = environment())
-  utils::data("LIC_GEAR_SPEC", envir = environment())
-
-  licCoreTbl <- get("LIC_CORE", envir  = environment())
-  areaTbl <- get("LIC_AREAS", envir  = environment())
-  gearSpecsTbl <- get("LIC_GEAR_SPEC", envir  = environment())
-  lics <- licCoreTbl[licCoreTbl$FLEET==fleet,]
+  lics <- LIC_CORE[LIC_CORE$FLEET==fleet,]
   if (nrow(lics)==0)stop("No licences found - stopping")
   if(is.null(area)){
-    area <-  areaTbl[FALSE,]
+    area <-  LIC_AREAS[FALSE,]
   } else {
-    area <-  areaTbl[areaTbl$FLEET == fleet & areaTbl$FLEET_AREA_ID == area,]
+    area <-  LIC_AREAS[LIC_AREAS$FLEET == fleet & LIC_AREAS$FLEET_AREA_ID == area,]
   }
   if (is.null(gearSpecs)){
-    gearSpecs <- gearSpecsTbl[FALSE,]
+    gearSpecs <- LIC_GEAR_SPEC[FALSE,]
   }else{
-    gearSpecs <- gearSpecsTbl[gearSpecsTbl$FLEET == fleet & gearSpecsTbl$FLEET_GEARSPECS_ID == gearSpecs, ]
+    gearSpecs <- LIC_GEAR_SPEC[LIC_GEAR_SPEC$FLEET == fleet & LIC_GEAR_SPEC$FLEET_GEARSPECS_ID == gearSpecs, ]
   }
-
-  rm(list = c("LIC_CORE", "licCoreTbl", "LIC_AREAS", "areaTbl", "LIC_GEAR_SPEC", "gearSpecsTbl", "fleet"))
+  rm(list = c("fleet","dbEnv"))
 
   argsFn <- as.list(environment())
 

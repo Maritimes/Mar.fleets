@@ -19,3 +19,5 @@
 /inst/wrapperDrafts
 /inst/shared
 /inst/runners
+/inst/*.RData
+/inst/*.sql

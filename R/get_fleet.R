@@ -24,7 +24,6 @@ get_fleet<-function(...){
   if (args$debuggit)  Mar.utils::where_now()
 
   MARFLEETS_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
-
   theseLics <- NA
   for (i in 1:nrow(args$lics)){
     thisL <- ifelse(is.na(args$lics$LIC_TYPE[i]),"1==1", paste0("MARFLEETS_LIC$LICENCE_TYPE_ID == ",args$lics$LIC_TYPE[i]))

@@ -20,3 +20,17 @@ SPECIES_ISDB <- ISSPECIESCODES[with(ISSPECIESCODES,order(SPECCD_ID)),c("SPECCD_I
 save(GEARS, file = "../data/GEARS.rda")
 save(SPECIES_MARFIS, file = "../data/SPECIES_MARFIS.rda")
 save(SPECIES_ISDB, file = "../data/SPECIES_ISDB.rda")
+# usethis::use_data(GEARS, GEARS, overwrite = T)
+# usethis::use_data(LIC_AREAS, LIC_AREAS, overwrite = T)
+# usethis::use_data(LIC_CORE, LIC_CORE, overwrite = T)
+# usethis::use_data(LIC_GEAR_SPEC, LIC_GEAR_SPEC, overwrite = T)
+# usethis::use_data(SPECIES_ISDB, SPECIES_ISDB, overwrite = T)
+# usethis::use_data(SPECIES_MARFIS, SPECIES_MARFIS, overwrite = T)
+
+years<-c(2015:2019)
+for (i in 1:length(years)){
+  thisName <- paste0("Hal_51_",years[i])
+  this <- fleet_halibut(marfGear = 51,year=years[i], useLocal = T, data.dir=data.dir)
+  assign(thisName, value = this)
+  rm(list=c("thisName", "this"))
+}
