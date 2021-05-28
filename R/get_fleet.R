@@ -10,7 +10,6 @@
 #'   \item \code{LICENCE_ID}
 #'   \item \code{PRO_SPC_INFO_ID}
 #'   \item \code{LOG_EFRT_STD_INFO_ID         }
-#'   \item \code{LANDED_DATE/DATE_FISHED} - one of these, depending on parameter \code{useDate}
 #'   \item \code{T_DATE1}
 #'   \item \code{T_DATE2}
 #'   \item \code{MD_CODE}
@@ -50,17 +49,8 @@ get_fleet<-function(...){
       gearSpecRelevant <- gearSpecRelevant[grep("[[:digit:]]", gearSpecRelevant$DATA_VALUE), ]
       gearSpecRelevant$DATA_VALUE <- as.numeric(gearSpecRelevant$DATA_VALUE)
       #apply the requested filter
-      if (args$gearSpecs$MIN == 130 & args$gearSpecs$MAX == 999 & args$HS){
-        # HS used to find the large gear indirectly, getting the small gear, and subtracting from the remainder
-        # this leaves the large gear (and some NAs)
-        if(!args$quietly)message("\n","Large mesh is found indirectly, by getting all data, and subtracting small mesh","\n")
-        gearSpSizeSm <- c(1:129)
-        smGear <- gearSpecRelevant[gearSpecRelevant$DATA_VALUE %in% gearSpSizeSm,"LOG_EFRT_STD_INFO_ID"]
-        gearSpecRelevant_size <- gearSpecRelevant[!(gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% smGear),"LOG_EFRT_STD_INFO_ID"]
-      }else{
-        gearSpecRelevant_size <- gearSpecRelevant[which(gearSpecRelevant$DATA_VALUE >=  args$gearSpecs$MIN &
-                                                          gearSpecRelevant$DATA_VALUE <=  args$gearSpecs$MAX),"LOG_EFRT_STD_INFO_ID"]
-      }
+      gearSpecRelevant_size <- gearSpecRelevant[which(gearSpecRelevant$DATA_VALUE >=  args$gearSpecs$MIN &
+                                                        gearSpecRelevant$DATA_VALUE <=  args$gearSpecs$MAX),"LOG_EFRT_STD_INFO_ID"]
       log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
       df_new<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
 
@@ -258,7 +248,7 @@ get_fleet<-function(...){
       }
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_S$LICENCE_ID, stepDesc = "flt_licSubtypeOra")
 
-       if (all(is.na(args$lics$LIC_SP))){
+      if (all(is.na(args$lics$LIC_SP))){
         MARFLEETS_LIC_SP <- MARFLEETS_LIC
       } else{
         MARFLEETS_LIC_SP <- MARFLEETS_LIC[MARFLEETS_LIC$SPECIES_CODE %in% args$lics$LIC_SP,]
@@ -314,8 +304,7 @@ get_fleet<-function(...){
 
     # Handle the various data we just pulled ------------------------------------------------------------------------------------------------------------------
     #PRO_SPC_INFO
-    PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", args$useDate)]
-    PRO_SPC_INFO[,args$useDate]<- as.Date(PRO_SPC_INFO[,args$useDate])
+    PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID")]
     #TRIPS
     TRIPS <- TRIPS[,c("TRIP_ID","VR_NUMBER", "EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
     colnames(TRIPS)[colnames(TRIPS)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
@@ -341,14 +330,9 @@ get_fleet<-function(...){
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
     # Limit fishing activity to desired date range ------------------------------------------------------------------------------------------------------------
-    if (args$HS) {
-      PRO_SPC_INFO_new <- PRO_SPC_INFO[which(PRO_SPC_INFO[,args$useDate] >= args$dateStart & PRO_SPC_INFO[,args$useDate] <= args$dateEnd),]
-      TRIPS <- TRIPS[TRIPS$TRIP_ID %in% PRO_SPC_INFO_new$TRIP_ID,]
-    }else{
-      TRIPS <- TRIPS[which(TRIPS$T_DATE1 <= as.Date(args$dateEnd) &  TRIPS$T_DATE2 >= as.Date(args$dateStart)),]
 
-      PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% TRIPS$TRIP_ID,]
-    }
+    TRIPS <- TRIPS[which(TRIPS$T_DATE1 <= as.Date(args$dateEnd) &  TRIPS$T_DATE2 >= as.Date(args$dateStart)),]
+    PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% TRIPS$TRIP_ID,]
     PRO_SPC_INFO_new <- merge(PRO_SPC_INFO_new, TRIPS)
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSDates")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSDates")
@@ -385,14 +369,10 @@ get_fleet<-function(...){
     #   all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",uGears))
     # }else{
     #MMM
-      all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE))
+    all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE))
     # }
 
-    if (args$HS){
-      where_date <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
-    }else{
-      where_date <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
-    }
+    where_date <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
 
     where_Gr <- paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(unique(licDf$GEAR_CODE[!licDf$GEAR_CODE %in% -99]),apos = F),")")
 
@@ -402,7 +382,7 @@ get_fleet<-function(...){
       where_Area = ""
     }
 
-    fleetAct_qry = paste0("SELECT PS.LICENCE_ID, PS.PRO_SPC_INFO_ID, PS.LOG_EFRT_STD_INFO_ID, PS.GEAR_CODE, PS.MON_DOC_ID, PS.", args$useDate, ",
+    fleetAct_qry = paste0("SELECT PS.LICENCE_ID, PS.PRO_SPC_INFO_ID, PS.LOG_EFRT_STD_INFO_ID, PS.GEAR_CODE, PS.MON_DOC_ID,
 MD.VR_NUMBER, T.EARLIEST_DATE_TIME T_DATE1,T.LATEST_DATE_TIME T_DATE2,
 N.AREA NAFO
 FROM MARFISSCI.PRO_SPC_INFO PS, MARFISSCI.TRIPS T, MARFISSCI.NAFO_UNIT_AREAS N, MARFISSCI.MON_DOCS MD
@@ -440,13 +420,8 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
 
     gearSpecDF <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% df$LOG_EFRT_STD_INFO_ID,]
 
-    if(args$HS){
-      gearSpecDF <- gearSpecDF[which(as.Date(gearSpecDF$FV_FISHED_DATETIME) >= args$dateStart
-                                     & as.Date(gearSpecDF$FV_FISHED_DATETIME) <= args$dateEnd),]
-    }else{
-      tmp <- merge(gearSpecDF, df[,c("LOG_EFRT_STD_INFO_ID", "T_DATE1", "T_DATE2")])
-      gearSpecDF <- tmp[which(as.Date(tmp$FV_FISHED_DATETIME) >= tmp$T_DATE1 & as.Date(tmp$FV_FISHED_DATETIME) <= tmp$T_DATE2),]
-    }
+    tmp <- merge(gearSpecDF, df[,c("LOG_EFRT_STD_INFO_ID", "T_DATE1", "T_DATE2")])
+    gearSpecDF <- tmp[which(as.Date(tmp$FV_FISHED_DATETIME) >= tmp$T_DATE1 & as.Date(tmp$FV_FISHED_DATETIME) <= tmp$T_DATE2),]
 
     gearSpecDF<- unique(gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,])
 
@@ -478,16 +453,8 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
     if (args$debuggit) Mar.utils::where_now()
 
     # Get all of the records for our df that might link to gear info ----------------------------------------
-    if (args$HS){
-      gearSpecDFQry <- paste0("SELECT DISTINCT
-                          LOG_EFRT_STD_INFO.MON_DOC_ID,
-                          LOG_EFRT_STD_INFO.LOG_EFRT_STD_INFO_ID
-                          FROM MARFISSCI.LOG_EFRT_STD_INFO
-                          WHERE
-                          LOG_EFRT_STD_INFO.FV_FISHED_DATETIME BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')
-                              AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field = "LOG_EFRT_STD_INFO.MON_DOC_ID"))
-    }else{
-      gearSpecDFQry <- paste0("SELECT DISTINCT
+
+    gearSpecDFQry <- paste0("SELECT DISTINCT
         I.MON_DOC_ID,
         I.LOG_EFRT_STD_INFO_ID
         FROM MARFISSCI.LOG_EFRT_STD_INFO I, MARFISSCI.PRO_SPC_INFO P, MARFISSCI.TRIPS T
@@ -496,7 +463,6 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
         AND P.TRIP_ID = T.TRIP_ID
         AND I.FV_FISHED_DATETIME BETWEEN T.EARLIEST_DATE_TIME AND T.LATEST_DATE_TIME
         AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field = "I.MON_DOC_ID"))
-    }
     gearSpecDF <- args$cxn$thecmd(args$cxn$channel, gearSpecDFQry)
 
 

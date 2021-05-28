@@ -11,7 +11,6 @@ set_defaults(
   marfGear = "all",
   marfSpp = "all",
   isdbSpp = "all",
-  useDate = "LANDED_DATE",
   tripcd_id = NULL,
   returnMARFIS = T,
   returnISDB = T,
@@ -37,7 +36,6 @@ set_defaults(
   debugMARFTripIDs = NULL,
   debugISDBTripIDs = NULL,
   debugISDBTripNames = NULL,
-  HS = FALSE,
   debuggit = FALSE,
   ...
 )
@@ -62,9 +60,6 @@ values.  This is a vector of MARFIS gear codes known to have caught this species
 wrapper.}
 
 \item{isdbSpp}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
-
-\item{useDate}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering
-ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
 
 \item{tripcd_id}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting
 records will be examined for matches}
@@ -172,9 +167,6 @@ consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1
 \item{debugISDBTripNames}{default is \code{NULL}.  If a vector of ISDB trip names is provided,
 the script will provide information about when the script drops them from
 consideration.}
-
-\item{HS}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to
-imitate historic matching techniques.}
 
 \item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}

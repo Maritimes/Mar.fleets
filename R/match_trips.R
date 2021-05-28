@@ -52,7 +52,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (!args$quietly)message(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
     return(NULL)
   }
-  marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "LOA","ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2",args$useDate)])
+  marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "LOA","ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2")])
   marfMatch <- clean_ISDB_Trip(df = marfMatch, field = "ISDB_TRIP", out_name = "ISDB_TRIP_M")
   isdbTrips <- clean_ISDB_Trip(df = isdbTrips, field = "TRIP", out_name = "ISDB_TRIP_O")
   isdbTrips$VR_LIC = paste0(isdbTrips$VR,"_",isdbTrips$LIC )
@@ -201,9 +201,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (args$debuggit)    Mar.utils::where_now()
     #DATE RANGE --------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
-    thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", args$useDate, "VR_NUMBER_FISHING", "LICENCE_ID")])
+    thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", "VR_NUMBER_FISHING", "LICENCE_ID")])
     colnames(thisMarfMatch_F)[colnames(thisMarfMatch_F)=="VR_NUMBER_FISHING"] <- "VR_NUMBER"
-    thisMarfMatch_L <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", args$useDate, "VR_NUMBER_LANDING", "LICENCE_ID")])
+    thisMarfMatch_L <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2","VR_NUMBER_LANDING", "LICENCE_ID")])
     colnames(thisMarfMatch_L)[colnames(thisMarfMatch_L)=="VR_NUMBER_LANDING"] <- "VR_NUMBER"
     thisMarfMatch <- unique(rbind.data.frame(thisMarfMatch_F, thisMarfMatch_F))
     if (nrow(thisMarfMatch)==0){
@@ -220,19 +220,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
     xData<-data.table::setkey(thisIsdbTripsDt[,c(k=1,.SD)],k)[thisMarfMatchDt[,c(k=1,.SD)],allow.cartesian=TRUE][,k:=NULL]
 
-    if (args$HS){
-      xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData[,args$useDate], units="days")))
-      xData[,"T2"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData[,args$useDate], units="days")))
-      xData$CLOSEST1<- with(xData, pmin(T1, T2))
-      # xData$CLOSEST <- rowMeans(xData[,c("T1", "T2")])
-    }else{
-      xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE1, units="days")))
-      xData[,"T2"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE1, units="days")))
-      xData[,"T3"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE2, units="days")))
-      xData[,"T4"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE2, units="days")))
-      xData$CLOSEST1 <- with(xData, pmin(T1, T2, T3, T4))
-      # xData$CLOSEST <- rowMeans(xData[,c("T1", "T2", "T3", "T4")])
-    }
+    xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE1, units="days")))
+    xData[,"T2"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE1, units="days")))
+    xData[,"T3"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE2, units="days")))
+    xData[,"T4"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE2, units="days")))
+    xData$CLOSEST1 <- with(xData, pmin(T1, T2, T3, T4))
+
     #below we first find the closest trips in time using the smallest difference of all calculated times
     match_DateMin<- xData[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
     #should their be a tie for smallest time (in matching trips), use the average time difference for all calculated times
@@ -251,12 +244,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 3,])>0) match_DateMin[match_DateMin$CLOSEST1 < 3, "match_DATE_DETS"] <- "ISDB/MARF activity within 2 days"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 2,])>0) match_DateMin[match_DateMin$CLOSEST1 < 2, "match_DATE_DETS"] <- "ISDB/MARF activity within 1 day"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 1,])>0) match_DateMin[match_DateMin$CLOSEST1 < 1, "match_DATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal A)"
-    if (args$HS){
-      withinners <- match_DateMin[(match_DateMin[,args$useDate] >= match_DateMin$BOARD_DATE & match_DateMin[,args$useDate] <= match_DateMin$LANDING_DATE) , ]
-    }else{
-      withinners <-  match_DateMin[(match_DateMin$T_DATE1 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE1 <= match_DateMin$LANDING_DATE) |
-                                     (match_DateMin$T_DATE2 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE2 <= match_DateMin$LANDING_DATE) , ]
-    }
+    withinners <-  match_DateMin[(match_DateMin$T_DATE1 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE1 <= match_DateMin$LANDING_DATE) |
+                                   (match_DateMin$T_DATE2 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE2 <= match_DateMin$LANDING_DATE) , ]
 
     if (nrow(withinners)>0) {
       match_DateMin <- match_DateMin[!(match_DateMin$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB),]

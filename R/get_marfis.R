@@ -5,7 +5,6 @@
 #' the columns "LICENCE_ID","VR_NUMBER" and GEAR_CODE.  It can take the results from
 #' \code{Mar.fleets::get_fleet()}
 #' @param marfSpp default is \code{NULL}. This is a MARFIS species code.
-#' @param useDate default is \code{'LANDED_DATE'}. Can also be \code{'DATE_FISHED'}.
 #' @param nafoCode default is \code{'all'}. This is a vector of NAFO AREAS (MARFIS) that will be
 #' used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
 #' valid values from a list. Codes can use '%' as a wildcard to ensure that all nafo areas that start
@@ -22,7 +21,7 @@
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', nafoCode='all',  ...){
+get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   args <-list(...)$args
   if (args$debuggit) Mar.utils::where_now()
 
@@ -30,7 +29,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
 
   if (is.null(thisFleet))stop("Please provide 'thisFleet'")
   if (marfSpp !='all')args$marfSpp <- marfSpp
-  if (useDate != 'LANDED_DATE') args$useDate <- useDate
   if (nafoCode != 'all') args$nafoCode <- nafoCode
 
   getSets <- function(log_efrt = NULL, ...){
@@ -160,11 +158,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       colnames(PS_df)[colnames(PS_df)=="LATEST_DATE_TIME"] <- "T_DATE2"
       PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
       PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
-      if (args$HS){
-        PS_df <- PS_df[which(as.Date(PS_df[,args$useDate]) >= as.Date(args$dateStart) & as.Date(PS_df[,args$useDate]) <= as.Date(args$dateEnd)), ]
-      }else{
         PS_df <- PS_df[which(PS_df$T_DATE1 <= as.Date(args$dateEnd) & PS_df$T_DATE2 >= as.Date(args$dateStart)), ]
-      }
+
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSDates")
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSDates")
       dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSDates")
@@ -181,11 +176,8 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
       }else{
         where_sp =  ""
       }
-      if (args$HS){
-        where_HS <- paste0("AND PS.",args$useDate," BETWEEN to_date('",args$dateStart,"','YYYY-MM-DD') AND to_date('",args$dateEnd,"','YYYY-MM-DD')")
-      }else{
         where_HS <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
-      }
+
       PSQry0 <-paste0("SELECT DISTINCT PS.TRIP_ID,
                     PS.PRO_SPC_INFO_ID,
                     PS.MON_DOC_ID,
@@ -330,7 +322,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  useDate = 'LANDED_DATE', 
     return(invisible(NULL))
   }
   sets<-  do.call(getSets, list(log_efrt = allLogEff, args=args))
-  sets <- unique(merge(ps[,!names(ps) %in% c(args$useDate,"VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
+  sets <- unique(merge(ps[,!names(ps) %in% c("VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
   sets[["NAFO_MARF_SETS"]][is.na(sets[["NAFO_MARF_SETS"]])] <- "<not recorded>"
 
   sets[(is.na(sets$LATITUDE) | is.na(sets$LONGITUDE)) & is.na(sets$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "<missing coord>"

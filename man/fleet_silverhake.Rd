@@ -49,8 +49,6 @@ August 27, 2019).}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet
 wrapper.}
     \item{\code{isdbSpp}}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
-    \item{\code{useDate}}{default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering
-ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?}
     \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting
 records will be examined for matches}
     \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and
@@ -90,8 +88,6 @@ be slightly easier to setup, but roracle will extract data faster.}
     \item{\code{quietly}}{default is \code{TRUE}. This specifies whether or not status messages should be
 output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this
 parameter to TRUE causes the package to try to imitate historic matching techniques.}
-    \item{\code{HS}}{default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to
-imitate historic matching techniques.}
     \item{\code{debuggit}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will

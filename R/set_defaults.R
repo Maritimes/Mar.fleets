@@ -28,8 +28,6 @@
 #' @param marfGear default is \code{'all'}, but all wrappers have (overwritable) fleet-specific
 #' values.  This is a vector of MARFIS gear codes known to have caught this species.
 #' @param isdbSpp default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper
-#' @param useDate default is \code{'LANDED_DATE'}. Which ISDB date should be used while filtering
-#' ISDB data?  \code{DATE_FISHED}, or \code{LANDED_DATE}?
 #' @param tripcd_id default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting
 #' records will be examined for matches
 #' @param returnMARFIS default is \code{TRUE}. Do you want a list object containing marfis trip and
@@ -86,8 +84,6 @@
 #' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be
 #' output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this
 #' parameter to TRUE causes the package to try to imitate historic matching techniques.
-#' @param HS default is \code{FALSE}. Setting this parameter to TRUE causes the package to try to
-#' imitate historic matching techniques.
 #' @param debuggit default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 #' debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
@@ -115,7 +111,6 @@ set_defaults <- function(lics = 'all',
                          marfGear = 'all',
                          marfSpp = 'all',
                          isdbSpp = 'all',
-                         useDate = 'LANDED_DATE',
                          tripcd_id = NULL,
                          returnMARFIS = T,
                          returnISDB = T,
@@ -141,7 +136,6 @@ set_defaults <- function(lics = 'all',
                          debugMARFTripIDs = NULL,
                          debugISDBTripIDs = NULL,
                          debugISDBTripNames = NULL,
-                         HS = FALSE,
                          debuggit=FALSE,
                          ...){
   defaults <- as.list(environment())

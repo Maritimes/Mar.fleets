@@ -17,7 +17,6 @@ returns a data.frame with the following columns:
   \item \code{LICENCE_ID}
   \item \code{PRO_SPC_INFO_ID}
   \item \code{LOG_EFRT_STD_INFO_ID         }
-  \item \code{LANDED_DATE/DATE_FISHED} - one of these, depending on parameter \code{useDate}
   \item \code{T_DATE1}
   \item \code{T_DATE2}
   \item \code{MD_CODE}

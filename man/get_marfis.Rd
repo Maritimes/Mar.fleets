@@ -4,13 +4,7 @@
 \alias{get_marfis}
 \title{get_marfis}
 \usage{
-get_marfis(
-  thisFleet = NULL,
-  marfSpp = "all",
-  useDate = "LANDED_DATE",
-  nafoCode = "all",
-  ...
-)
+get_marfis(thisFleet = NULL, marfSpp = "all", nafoCode = "all", ...)
 }
 \arguments{
 \item{thisFleet}{default is \code{NULL}. This is a dataframe that must include
@@ -18,8 +12,6 @@ the columns "LICENCE_ID","VR_NUMBER" and GEAR_CODE.  It can take the results fro
 \code{Mar.fleets::get_fleet()}}
 
 \item{marfSpp}{default is \code{NULL}. This is a MARFIS species code.}
-
-\item{useDate}{default is \code{'LANDED_DATE'}. Can also be \code{'DATE_FISHED'}.}
 
 \item{nafoCode}{default is \code{'all'}. This is a vector of NAFO AREAS (MARFIS) that will be
 used to limit the fleet to.  If this is left as NULL, a popup will allow the user to select
