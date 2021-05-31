@@ -1,6 +1,27 @@
-marfisSummarizer <- function(this=NULL, byGr = F, bySpp = F, byYr= F){
-  t <- this$marf$MARF_TRIPS
-  c <- this$marf$MARF_CATCHES
+#' @title marfisSummarizer
+#' @description This is a simple tool that quickly breaks down the results of any of the fleet
+#' wrappers to provide information on the number of trips, unique vessels, unique licences, and total
+#' catch.  These results can be aggregated by YEAR, SPECIES_CODE, and GEAR TYPE.
+#' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
+#' @param byGr  default is \code{TRUE}. If TRUE, the summed weights and numbers of unique trips and
+#' licence_ids will will be broken down by all identified gear types. If FALSE,
+#' weights will be summed, irrespective of gear.
+#' @param bySpp  default is \code{TRUE}. If TRUE, the summed weights and numbers of unique trips and
+#' licence_ids will will be broken down by all identified landed species. If FALSE,
+#' weights will be summed, irrespective of landed species.
+#' @param byYr  default is \code{TRUE}.   If TRUE, the summed weights and numbers of unique trips
+#' and licence_ids will will be broken down by each year in which a landing was identified. If FALSE,
+#' weights will be summed, irrespective of year.
+#' @examples \dontrun{
+#' summary <- marfisSummarizer(data = Halibut2017, byGr = TRUE)
+#'        }
+#' @family simpleproducts
+#' @return a data frame
+#' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
+#' @export
+marfisSummarizer <- function(data=NULL, byGr = TRUE, bySpp = TRUE, byYr= TRUE){
+  t <- data$marf$MARF_TRIPS
+  c <- data$marf$MARF_CATCHES
   all <- merge(t, c)
   all$YEAR <- lubridate::year(all$T_DATE1)
   thisVessN <- length(unique(all$VR_NUMBER_FISHING))
@@ -43,8 +64,9 @@ marfisSummarizer <- function(this=NULL, byGr = F, bySpp = F, byYr= F){
   }else{
     res <- data.frame("YEAR" = "ALL", "NTRIPS" = thisTripsN, "NVESS"= thisVessN, "NLICS"= thisLicsN, "GEAR_CODE"="ALL", "SPECIES_CODE" = "ALL", "RND_WEIGHT_KGS"= sum(all$RND_WEIGHT_KGS))
   }
-  allFields <- c("NTRIPS", "NVESS", "NLICS", "YEAR","GEAR_CODE", "SPECIES_CODE","RND_WEIGHT_KGS")
+  allFields <- c("YEAR","NTRIPS", "NVESS", "NLICS", "GEAR_CODE", "SPECIES_CODE","RND_WEIGHT_KGS")
 
   res<- res[,allFields]
+  res<- res[with(res,order(YEAR, GEAR_CODE, NTRIPS)),]
   return(res)
 }

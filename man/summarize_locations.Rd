@@ -68,6 +68,7 @@ Other coreFuncs:
 
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
+\code{\link{marfisSummarizer}()},
 \code{\link{quickMap}()}
 }
 \author{

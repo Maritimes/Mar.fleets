@@ -8,6 +8,8 @@
 #' @param marfGear default is \code{c(12, 41, 51, 59)}. This is a vector of MARFIS gear codes known to have caught
 #' this species. The default values can be replaced with a smaller selection to only return information
 #' for a gear-specific subset of fishing activity.
+#' @param area default is \code{c("3NOPS4VWX")}.  This restricts the data to particular NAFO areas.
+#' Setting it to "ALL" or NULL removes the NAFO restrictions are returns all results.
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @examples \dontrun{
@@ -37,8 +39,9 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_halibut <- function(marfGear = c(12, 41, 51, 59), useLocal = NULL, ...){
-  if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  data = fleet_(fleet = "HALIBUT", marfSpp = 130, marfGear = marfGear, isdbSpp = 30, area = "ALL", tripcd_id = c(30,7057,7058), areaFile = 'Areas_Halibut_sf', useLocal = useLocal,...)
+fleet_halibut <- function(marfGear = c(12, 41, 51, 59), area= "3NOPS4VWX", useLocal = NULL, ...){
+  if (!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
+  if (is.null(area) || area =="ALL")area =="ALL"
+  data = fleet_(fleet = "HALIBUT", marfSpp = 130, marfGear = marfGear, isdbSpp = 30, area = area, tripcd_id = c(30,7057,7058), areaFile = 'Areas_Halibut_sf', useLocal = useLocal,...)
   return(data)
 }

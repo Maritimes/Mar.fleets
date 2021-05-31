@@ -4,12 +4,20 @@
 \alias{fleet_halibut}
 \title{fleet_halibut}
 \usage{
-fleet_halibut(marfGear = c(12, 41, 51, 59), useLocal = NULL, ...)
+fleet_halibut(
+  marfGear = c(12, 41, 51, 59),
+  area = "3NOPS4VWX",
+  useLocal = NULL,
+  ...
+)
 }
 \arguments{
 \item{marfGear}{default is \code{c(12, 41, 51, 59)}. This is a vector of MARFIS gear codes known to have caught
 this species. The default values can be replaced with a smaller selection to only return information
 for a gear-specific subset of fishing activity.}
+
+\item{area}{default is \code{c("3NOPS4VWX")}.  This restricts the data to particular NAFO areas.
+Setting it to "ALL" or NULL removes the NAFO restrictions are returns all results.}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
