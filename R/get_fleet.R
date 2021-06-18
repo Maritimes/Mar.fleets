@@ -321,7 +321,8 @@ get_fleet<-function(...){
 
     # Grab fishing activity of those with valid combos of licence and gear code  -------------------------------------------------------------------------------
 
-    PRO_SPC_INFO_new <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
+    # PRO_SPC_INFO_new1 <-PRO_SPC_INFO[paste0(PRO_SPC_INFO$LICENCE_ID,"_",PRO_SPC_INFO$GEAR_CODE) %in% paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE),]
+    PRO_SPC_INFO_new<-PRO_SPC_INFO[PRO_SPC_INFO$GEAR_CODE %in% args$marfGear,]
 
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSGrs")
     dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSGrs")
@@ -363,17 +364,8 @@ get_fleet<-function(...){
   get_fleetActivity_ora<- function(licDf = NULL, ...){
     args <- list(...)$args
     if (args$debuggit) Mar.utils::where_now()
-    # uGears <- unique(args$lics$LIC_GEAR)
-    # if (length(uGears)==1){
-    #   all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",uGears))
-    # }else{
-    #MMM
-    all_LicGr <- unique(paste0(licDf$LICENCE_ID,"_",licDf$GEAR_CODE))
-    # }
-
     where_date <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
-
-    where_Gr <- paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(unique(licDf$GEAR_CODE[!licDf$GEAR_CODE %in% -99]),apos = F),")")
+    where_Gr <- paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(args$marfGear,apos = F),")")
 
     if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
       where_Area <- paste0("AND (",paste0("N.AREA LIKE ('",paste0(unique(args$area$AREA),"%"),"')", collapse = " OR "),")")
@@ -398,12 +390,12 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSDates")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSDates")
 
-    theFleet2 <- theFleet[paste0(theFleet$LICENCE_ID,"_", theFleet$GEAR_CODE) %in% all_LicGr,]
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSLicGears")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSLicGears")
+    # theFleet2 <- theFleet[paste0(theFleet$LICENCE_ID,"_", theFleet$GEAR_CODE) %in% all_LicGr,]
+    # dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSLicGears")
+    # dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSLicGears")
 
-    if (args$debuggit) Mar.utils::changeDetector(pre_ = theFleet, post_ = theFleet2, fields = "LICENCE_ID", flagTxt = "PS filtered by licence/gear combo")
-    theFleet <- theFleet2
+    # if (args$debuggit) Mar.utils::changeDetector(pre_ = theFleet, post_ = theFleet2, fields = "LICENCE_ID", flagTxt = "PS filtered by licence/gear combo")
+    # theFleet <- theFleet2
     if (nrow(theFleet)<1) stop("No fleet activity found")
     return(theFleet)
   }

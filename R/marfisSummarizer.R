@@ -23,13 +23,19 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byYr= TRUE, byNAFO = FALSE){
-  t <- data$marf$MARF_TRIPS
-  c <- data$marf$MARF_CATCHES
-  n <- unique(data$marf$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID", "NAFO_MARF_SETS")])
-  colnames(n)[colnames(n)=="NAFO_MARF_SETS"] <- "NAFO"
 
-  all <- merge(t, c)
-  all <- merge(all, n)
+  if(!"MARF_CATCHES" %in% names(data$marf)){
+    all <- data$marf$MARF_TRIPS
+    colnames(all)[colnames(all)=="NAFO_MARF_TRIPS"] <- "NAFO"
+    all$SPECIES_CODE <- "-9"
+  }else{
+    t <- data$marf$MARF_TRIPS
+    c <- data$marf$MARF_CATCHES
+    n <- unique(data$marf$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID", "NAFO_MARF_SETS")])
+    colnames(n)[colnames(n)=="NAFO_MARF_SETS"] <- "NAFO"
+    all <- merge(t, c)
+    all <- merge(all, n)
+  }
   all$YEAR <- lubridate::year(all$T_DATE1)
   thisVessN <- length(unique(all$VR_NUMBER_FISHING))
   thisLicsN <- length(unique(all$LICENCE_ID))
@@ -39,6 +45,8 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
 
   if (byGr | bySpp | byYr | byNAFO){
     potFields <- c("GEAR_CODE", "SPECIES_CODE", "YEAR", "LICENCE_ID", "TRIP_ID_MARF","VR_NUMBER_FISHING", "NAFO")
+    if(!"MARF_CATCHES" %in% names(data$marf)) potFields <- c("GEAR_CODE", "YEAR", "LICENCE_ID", "TRIP_ID_MARF","VR_NUMBER_FISHING", "NAFO")
+
     aggFields <- c("RND_WEIGHT_KGS")
     aggFields <- c(aggFields, "LICENCE_ID")
     aggFields <- c(aggFields, "VR_NUMBER_FISHING")
@@ -50,15 +58,14 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
     potFields <- potFields[!potFields %in% aggFields]
     all <- all[,colnames(all) %in% aggFields]
     thisAgg = aggregate(RND_WEIGHT_KGS ~ ., data = all, FUN = sum)
-
-    LICSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "VR_NUMBER_FISHING", "TRIP_ID_MARF") ]])
+    LICSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "VR_NUMBER_FISHING", "TRIP_ID_MARF"), drop=FALSE ]])
     LICSAgg <- aggregate(LICENCE_ID ~ ., data = LICSAgg, FUN = length)
-    VRSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "LICENCE_ID", "TRIP_ID_MARF") ]])
+    VRSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "LICENCE_ID", "TRIP_ID_MARF"), drop=FALSE ]])
     VRSAgg <- aggregate(VR_NUMBER_FISHING ~ ., data = VRSAgg, FUN = length)
-    TRIPSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "LICENCE_ID", "VR_NUMBER_FISHING") ]])
+    TRIPSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "LICENCE_ID", "VR_NUMBER_FISHING"), drop=FALSE ]])
     TRIPSAgg <- aggregate(TRIP_ID_MARF ~ ., data = TRIPSAgg, FUN = length)
 
-    all2 <- thisAgg[,!names(thisAgg) %in% c("LICENCE_ID", "VR_NUMBER_FISHING", "TRIP_ID_MARF")]
+    all2 <- thisAgg[,!names(thisAgg) %in% c("LICENCE_ID", "VR_NUMBER_FISHING", "TRIP_ID_MARF"), drop=FALSE]
     thisAgg2 <- aggregate(RND_WEIGHT_KGS ~ ., data = all2, FUN = sum)
 
     res <- merge(thisAgg2, LICSAgg)

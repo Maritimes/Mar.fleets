@@ -375,6 +375,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   trips <- unique(ps[, !names(ps) %in% c("CONF_NUMBER_HI", "CONF_NUMBER_HO", "HAIL_OUT_ID_HI", "HAIL_OUT_ID_HO", "ISDB_TRIP", "OBS_ID")]) #, "OBS_PRESENT")])
   # ps$RND_WEIGHT_KGS<-NULL
   trips[["OBS_PRESENT"]][is.na(trips[["OBS_PRESENT"]])] <- -9
+  trips[["LOG_EFRT_STD_INFO_ID"]][is.na(trips[["LOG_EFRT_STD_INFO_ID"]])] <- -9
   trips <-
     stats::aggregate(
       x = list(RND_WEIGHT_KGS  = trips$RND_WEIGHT_KGS),
@@ -385,10 +386,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
                 SPECIES_CODE = trips$SPECIES_CODE,
                 LICENCE_ID = trips$LICENCE_ID,
                 GEAR_CODE = trips$GEAR_CODE,
-                # DATE_FISHED = trips$DATE_FISHED,
-                # LANDED_DATE = trips$LANDED_DATE,
                 LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
-                #RND_WEIGHT_KGS = trips$RND_WEIGHT_KGS,
                 LOA = trips$LOA,
                 T_DATE1 = trips$T_DATE1,
                 T_DATE2 = trips$T_DATE2,
