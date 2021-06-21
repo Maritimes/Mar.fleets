@@ -6,7 +6,7 @@
 \usage{
 fleet_halibut(
   marfGear = c(12, 41, 51, 59),
-  area = "3NOPS4VWX",
+  area = "3NOPS4VWX5",
   useLocal = NULL,
   ...
 )
@@ -16,8 +16,9 @@ fleet_halibut(
 this species. The default values can be replaced with a smaller selection to only return information
 for a gear-specific subset of fishing activity.}
 
-\item{area}{default is \code{c("3NOPS4VWX")}.  This restricts the data to particular NAFO areas.
-Setting it to "ALL" or NULL removes the NAFO restrictions are returns all results.}
+\item{area}{default is \code{"3NOPS4VWX5"}.  This restricts the data to particular NAFO areas.
+Setting it to "ALL" or NULL removes the NAFO restrictions are returns all results.  For Halibut,
+2 other valid entries are \code{"3NOPS"} and \code{"4VWX5"}}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -208,10 +209,8 @@ Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 130
   \item \code{isdbSpp} = 30
-  \item \code{nafoCode} = "ALL", which, for this fleet is c('3N\%','3O\%','3PS\%','4V\%','4W\%','4X\%','5\%')
   \item \code{tripcd_id} = c(30,7057,7058)
   \item \code{fleet} = "HALIBUT"
-  \item \code{areaFile} == "Areas_Halibut_sf"
 }
 }
 \examples{

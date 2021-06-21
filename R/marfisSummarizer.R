@@ -11,7 +11,8 @@
 #' weights will be summed, irrespective of landed species.
 #' @param byYr  default is \code{TRUE}.   If TRUE, the summed weights and numbers of unique trips
 #' and licence_ids will will be broken down by each year in which a landing was identified. If FALSE,
-#' weights will be summed, irrespective of year.
+#' weights will be summed, irrespective of year. "Year" is taken from the end date of the associated
+#' trip record.
 #' @param byNAFO  default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 #' and licence_ids will will be broken down by <reported> NAFO division in which a landing was
 #' identified. If FALSE, weights will be summed, irrespective of <reported> NAFO division.
@@ -36,7 +37,7 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
     all <- merge(t, c)
     all <- merge(all, n)
   }
-  all$YEAR <- lubridate::year(all$T_DATE1)
+  all$YEAR <- lubridate::year(all$T_DATE2)
   thisVessN <- length(unique(all$VR_NUMBER_FISHING))
   thisLicsN <- length(unique(all$LICENCE_ID))
   thisTripsN <- length(unique(all$TRIP_ID_MARF))

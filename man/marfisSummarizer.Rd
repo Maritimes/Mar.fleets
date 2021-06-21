@@ -4,7 +4,14 @@
 \alias{marfisSummarizer}
 \title{marfisSummarizer}
 \usage{
-marfisSummarizer(data = NULL, byGr = TRUE, bySpp = TRUE, byYr = TRUE)
+marfisSummarizer(
+  data = NULL,
+  tonnes = F,
+  byGr = TRUE,
+  bySpp = TRUE,
+  byYr = TRUE,
+  byNAFO = FALSE
+)
 }
 \arguments{
 \item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
@@ -19,7 +26,12 @@ weights will be summed, irrespective of landed species.}
 
 \item{byYr}{default is \code{TRUE}.   If TRUE, the summed weights and numbers of unique trips
 and licence_ids will will be broken down by each year in which a landing was identified. If FALSE,
-weights will be summed, irrespective of year.}
+weights will be summed, irrespective of year. "Year" is taken from the end date of the associated
+trip record.}
+
+\item{byNAFO}{default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
+and licence_ids will will be broken down by <reported> NAFO division in which a landing was
+identified. If FALSE, weights will be summed, irrespective of <reported> NAFO division.}
 }
 \value{
 a data frame
