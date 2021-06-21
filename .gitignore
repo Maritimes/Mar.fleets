@@ -21,3 +21,4 @@
 /inst/runners
 /inst/*.RData
 /inst/*.sql
+comparanator.RData
