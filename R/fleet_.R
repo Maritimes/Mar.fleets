@@ -99,10 +99,10 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
     message("Sorry - this package is draft.  Please contact Mike.McMahon@dfo-mpo.gc.ca if you want to try it out it")
     stop()
   }
-
   if (is.null(fleet)){
     stop("Please provide a fleet")
   }
+  utils::globalVariables(c("LIC_CORE","LIC_AREAS","LIC_GEAR_SPEC"))
   dbEnv<-NA
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
   lics <- LIC_CORE[LIC_CORE$FLEET==fleet,]

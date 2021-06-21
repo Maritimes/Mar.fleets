@@ -39,12 +39,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE, plotMARFSurf = FALSE, plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL, marfSurfSpp = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
-  if (is.null(marfSurfSpp)){
-   marfSurfSpp <- data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]
-  }
-  if (is.null(isdbSurfSpp)){
-    isdbSurfSpp <- data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]
-  }
+
   if (tolower(surfRes)=="med"){
     det = 10000
   }else if (tolower(surfRes)=="high"){
@@ -52,8 +47,17 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   } else{
     det = 1000
   }
+
+
+
   if ((plotISDB | plotISDBSurf)) {
-    isdbSppComm <- paste0(data$isdb$ISDB_CATCHES$SUMMARY[data$isdb$ISDB_CATCHES$SUMMARY$SPEC %in% isdbSurfSpp,"COMMON"], collapse = "_")
+    if (is.null(isdbSurfSpp)) isdbSurfSpp <- data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]
+    isdbSppComm <- paste0(SPECIES_ISDB[SPECIES_ISDB$SPECCD_ID == isdbSurfSpp,"COMMON"], collapse = "_")
+  }
+
+  if ((plotMARF | plotMARFSurf)) {
+    if (is.null(marfSurfSpp)) marfSurfSpp <- data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]
+    marfSppComm <- paste0(SPECIES_MARFIS[SPECIES_MARFIS$SPECIES_CODE == marfSurfSpp,"SPECIES_NAME"], collapse = "_")
   }
   bbLat <- NA
   bbLon <- NA
@@ -74,7 +78,7 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
 
   if (nafo) {
     m <- leaflet::addPolygons(group = "NAFO",
-                              map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=F,
+                              map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
                               label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 1.5,
                               labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE) )
     overlayGroups <- c(overlayGroups, "NAFO")
@@ -155,9 +159,10 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
       )
 
       marfSurf = makeSurface(data = commSets[,c("LATITUDE","LONGITUDE","RND_WEIGHT_KGS")])
+      groupname = paste0("MARFIS_surf_",marfSppComm)
       palSurf <- leaflet::colorNumeric(surfCols, raster::values(marfSurf), na.color = "transparent")
-      m = leaflet::addRasterImage(map=m, group="MARFIS_surf", marfSurf, colors = palSurf, opacity = 1)
-      baseGroups <- c(baseGroups, "MARFIS_surf")
+      m = leaflet::addRasterImage(map=m, group=groupname, marfSurf, colors = palSurf, opacity = 1)
+      overlayGroups <- c(overlayGroups, groupname)
       extM<-raster::extent(marfSurf)
       bbLat <- c(bbLat, extM@ymin, extM@ymax)
       bbLon <- c(bbLon, extM@xmin, extM@xmax)
@@ -212,7 +217,7 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
       groupname = paste0("ISDB_surf_",isdbSppComm)
       palSurf2 <- leaflet::colorNumeric(surfCols, raster::values(isdbSurf), na.color = "transparent")
       m = leaflet::addRasterImage(map=m, group=groupname, isdbSurf, colors = palSurf2, opacity = 1)
-      baseGroups <- c(baseGroups, groupname)
+      overlayGroups <- c(overlayGroups, groupname)
       extI<-raster::extent(isdbSurf)
       bbLat <- c(bbLat, extI@ymin, extI@ymax)
       bbLon <- c(bbLon, extI@xmin, extI@xmax)

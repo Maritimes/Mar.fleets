@@ -58,16 +58,16 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
     if(byNAFO) aggFields <- c(aggFields, "NAFO")
     potFields <- potFields[!potFields %in% aggFields]
     all <- all[,colnames(all) %in% aggFields]
-    thisAgg = aggregate(RND_WEIGHT_KGS ~ ., data = all, FUN = sum)
+    thisAgg = stats::aggregate(RND_WEIGHT_KGS ~ ., data = all, FUN = sum)
     LICSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "VR_NUMBER_FISHING", "TRIP_ID_MARF"), drop=FALSE ]])
-    LICSAgg <- aggregate(LICENCE_ID ~ ., data = LICSAgg, FUN = length)
+    LICSAgg <- stats::aggregate(LICENCE_ID ~ ., data = LICSAgg, FUN = length)
     VRSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "LICENCE_ID", "TRIP_ID_MARF"), drop=FALSE ]])
-    VRSAgg <- aggregate(VR_NUMBER_FISHING ~ ., data = VRSAgg, FUN = length)
+    VRSAgg <- stats::aggregate(VR_NUMBER_FISHING ~ ., data = VRSAgg, FUN = length)
     TRIPSAgg <- unique(thisAgg[,aggFields[!aggFields %in% c("RND_WEIGHT_KGS", "LICENCE_ID", "VR_NUMBER_FISHING"), drop=FALSE ]])
-    TRIPSAgg <- aggregate(TRIP_ID_MARF ~ ., data = TRIPSAgg, FUN = length)
+    TRIPSAgg <- stats::aggregate(TRIP_ID_MARF ~ ., data = TRIPSAgg, FUN = length)
 
     all2 <- thisAgg[,!names(thisAgg) %in% c("LICENCE_ID", "VR_NUMBER_FISHING", "TRIP_ID_MARF"), drop=FALSE]
-    thisAgg2 <- aggregate(RND_WEIGHT_KGS ~ ., data = all2, FUN = sum)
+    thisAgg2 <- stats::aggregate(RND_WEIGHT_KGS ~ ., data = all2, FUN = sum)
 
     res <- merge(thisAgg2, LICSAgg)
     res <- merge(res, VRSAgg)
