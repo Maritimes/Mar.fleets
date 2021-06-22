@@ -159,7 +159,7 @@ set_defaults <- function(lics = 'all',
     if (argg$areaFile == 'Strata_Mar_4VSW_sf') argg$areaFileField = 'StrataID'
     if (argg$areaFile == 'LFAs_sf') argg$areaFileField = 'LFA'
     if (argg$areaFile == 'Grids_Lobster_sf') argg$areaFileField = 'GRID'
-    if (argg$areaFile == 'Areas_Snowcrab_sf') argg$areaFileField = 'AREA3'
+    if (argg$areaFile == 'Areas_Snowcrab_sf') argg$areaFileField = 'AREA1'
     if (argg$areaFile == 'Areas_Snowcrab_Slope_sf') argg$areaFileField = 'AREA2'
     if (argg$areaFile == 'Areas_Shrimp_sf') argg$areaFileField = 'BOX_NAME'
     if (argg$areaFile == 'Areas_Surfclam_sf') argg$areaFileField = 'AREA'
