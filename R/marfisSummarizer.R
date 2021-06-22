@@ -16,6 +16,8 @@
 #' @param byNAFO  default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 #' and licence_ids will will be broken down by <reported> NAFO division in which a landing was
 #' identified. If FALSE, weights will be summed, irrespective of <reported> NAFO division.
+#' @param byCust  default is \code{NULL}. This can be the name of any field found in \code{<data>$marf$MARF_SETS}
+#' by which you would like to see aggregated results
 #' @examples \dontrun{
 #' summary <- marfisSummarizer(data = Halibut2017, byGr = TRUE)
 #'        }
@@ -23,8 +25,8 @@
 #' @return a data frame
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byYr= TRUE, byNAFO = FALSE){
-
+marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byYr= TRUE, byNAFO = FALSE, byCust = NULL){
+  defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
   if(!"MARF_CATCHES" %in% names(data$marf)){
     all <- data$marf$MARF_TRIPS
     colnames(all)[colnames(all)=="NAFO_MARF_TRIPS"] <- "NAFO"
@@ -32,11 +34,19 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
   }else{
     t <- data$marf$MARF_TRIPS
     c <- data$marf$MARF_CATCHES
+    all <- merge(t, c)
+
+    if(!is.null(byCust)) {
+      cust <- unique(data$marf$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID", byCust)])
+      colnames(cust)[colnames(cust)==byCust] <- "CUSTOM"
+      all <- merge(all, cust)
+    }
     n <- unique(data$marf$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID", "NAFO_MARF_SETS")])
     colnames(n)[colnames(n)=="NAFO_MARF_SETS"] <- "NAFO"
-    all <- merge(t, c)
+
     all <- merge(all, n)
   }
+
   all$YEAR <- lubridate::year(all$T_DATE2)
   thisVessN <- length(unique(all$VR_NUMBER_FISHING))
   thisLicsN <- length(unique(all$LICENCE_ID))
@@ -44,9 +54,10 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
 
   res <- data.frame("NTRIPS" = thisTripsN, "NVESS"= thisVessN, "NLICS"= thisLicsN)
 
-  if (byGr | bySpp | byYr | byNAFO){
+  if (byGr | bySpp | byYr | byNAFO | !is.null(byCust)){
     potFields <- c("GEAR_CODE", "SPECIES_CODE", "YEAR", "LICENCE_ID", "TRIP_ID_MARF","VR_NUMBER_FISHING", "NAFO")
     if(!"MARF_CATCHES" %in% names(data$marf)) potFields <- c("GEAR_CODE", "YEAR", "LICENCE_ID", "TRIP_ID_MARF","VR_NUMBER_FISHING", "NAFO")
+    if (!is.null(byCust)) potFields <- c(potFields, "CUSTOM")
 
     aggFields <- c("RND_WEIGHT_KGS")
     aggFields <- c(aggFields, "LICENCE_ID")
@@ -56,6 +67,7 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
     if(bySpp) aggFields <- c(aggFields, "SPECIES_CODE")
     if(byYr) aggFields <- c(aggFields, "YEAR")
     if(byNAFO) aggFields <- c(aggFields, "NAFO")
+    if (!is.null(byCust)) aggFields <- c(aggFields, "CUSTOM")
     potFields <- potFields[!potFields %in% aggFields]
     all <- all[,colnames(all) %in% aggFields]
     thisAgg = stats::aggregate(RND_WEIGHT_KGS ~ ., data = all, FUN = sum)
@@ -77,15 +89,18 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
     colnames(res)[colnames(res)=="VR_NUMBER_FISHING"] <- "NVESS"
     colnames(res)[colnames(res)=="TRIP_ID_MARF"] <- "NTRIPS"
     res[,potFields]<-"ALL"
+    if(!byYr) res[, "YEAR"] <- defYr
   }else{
-    res <- data.frame("YEAR" = "ALL", "NTRIPS" = thisTripsN, "NVESS"= thisVessN, "NLICS"= thisLicsN, "GEAR_CODE"="ALL", "SPECIES_CODE" = "ALL", "NAFO" = "ALL", "RND_WEIGHT_KGS"= sum(all$RND_WEIGHT_KGS))
+    res <- data.frame("YEAR" = defYr, "NTRIPS" = thisTripsN, "NVESS"= thisVessN, "NLICS"= thisLicsN, "GEAR_CODE"="ALL", "SPECIES_CODE" = "ALL", "NAFO" = "ALL", "CUSTOM"= "ALL", "RND_WEIGHT_KGS"= sum(all$RND_WEIGHT_KGS))
   }
-  allFields <- c("YEAR","NTRIPS", "NVESS", "NLICS", "GEAR_CODE", "SPECIES_CODE","NAFO","RND_WEIGHT_KGS")
+  allFields <- c("YEAR","NTRIPS", "NVESS", "NLICS", "GEAR_CODE", "SPECIES_CODE","NAFO", "RND_WEIGHT_KGS")
+  if (!is.null(byCust)) allFields <- c(allFields, "CUSTOM")
 
   res<- res[,allFields]
   res<- res[with(res,order(YEAR, GEAR_CODE, NTRIPS)),]
   if (tonnes){
     res$RND_WEIGHT_TONNES <- res$RND_WEIGHT_KGS/1000
   }
+  if (!is.null(byCust)) colnames(res)[colnames(res)=="CUSTOM"] <- byCust
   return(res)
 }

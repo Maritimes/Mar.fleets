@@ -40,6 +40,8 @@
 #' @export
 quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE, plotMARFSurf = FALSE, plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL, marfSurfSpp = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
 
+
+
   if (tolower(surfRes)=="med"){
     det = 10000
   }else if (tolower(surfRes)=="high"){
@@ -76,13 +78,31 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
     baseGroups <-  c(baseGroups, c("Bathymetry"))
   }
 
-  if (nafo) {
+
+  bonusLayer <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFile","VALUE"])
+  bonusField <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFileField","VALUE"])
+
+  if (bonusLayer != "NAFOSubunits_sf" & bonusField != "NAFO_1"){
+    theData     <-   eval(parse(text=paste0("Mar.data::",bonusLayer)))
+    theData[[bonusField]] <-  as.factor(theData[[bonusField]])
+    factpal <- leaflet::colorFactor(c("#FF4C4C", "#E9E946"), theData[[bonusField]])
+
+    bonusLayerCln <- gsub(x = bonusLayer, pattern = "_sf",replacement = "")
+    m <- leaflet::addPolygons(group = bonusLayerCln,
+                              map = m, data = theData, stroke = FALSE, smoothFactor = 0, fillOpacity = 0.5,
+                              color = factpal(theData[[bonusField]]),
+                              label=theData[[bonusField]], weight = 1.5,
+                              labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2) )
+    overlayGroups <- c(overlayGroups, bonusLayerCln)
+  }
+
     m <- leaflet::addPolygons(group = "NAFO",
                               map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
-                              label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 1.5,
-                              labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE) )
+                              label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.9,
+                              labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2) )
     overlayGroups <- c(overlayGroups, "NAFO")
-  }
+
+
   titleHTML <- paste0("<div style='
   .leaflet-control.map-title {
     transform: translate(-50%,20%);
