@@ -50,6 +50,6 @@ fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, useLoca
     marfGear = c(41,51,59)
   }
 
-  data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), tripcd_id = c(10, 7001), area= "4X5YZ", useLocal = useLocal,...)
+  data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), marfGear = marfGear, tripcd_id = c(10, 7001), area= "4X5YZ", areaFileField = "COD", useLocal = useLocal,...)
   return(data)
 }

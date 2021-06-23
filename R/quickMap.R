@@ -81,26 +81,25 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
 
   bonusLayer <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFile","VALUE"])
   bonusField <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFileField","VALUE"])
-
-  if (bonusLayer != "NAFOSubunits_sf" & bonusField != "NAFO_1"){
+  if (bonusLayer != "NAFOSubunits_sf" | bonusField != "NAFO_1"){
     theData     <-   eval(parse(text=paste0("Mar.data::",bonusLayer)))
+    theData <- theData[!is.na(theData[[bonusField]]),]
     theData[[bonusField]] <-  as.factor(theData[[bonusField]])
-    factpal <- leaflet::colorFactor(c("#FF4C4C", "#E9E946"), theData[[bonusField]])
-
+    factpal <- leaflet::colorFactor(palette = "viridis", theData[[bonusField]])
     bonusLayerCln <- gsub(x = bonusLayer, pattern = "_sf",replacement = "")
     m <- leaflet::addPolygons(group = bonusLayerCln,
-                              map = m, data = theData, stroke = FALSE, smoothFactor = 0, fillOpacity = 0.5,
+                              map = m, data = theData, stroke = T, smoothFactor = 0, fillOpacity = 0.5,
                               color = factpal(theData[[bonusField]]),
                               label=theData[[bonusField]], weight = 1.5,
-                              labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2) )
+                              labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2)
+    )
     overlayGroups <- c(overlayGroups, bonusLayerCln)
   }
-
-    m <- leaflet::addPolygons(group = "NAFO",
-                              map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
-                              label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.9,
-                              labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2) )
-    overlayGroups <- c(overlayGroups, "NAFO")
+  m <- leaflet::addPolygons(group = "NAFO",
+                            map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
+                            label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.9,
+                            labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2) )
+  overlayGroups <- c(overlayGroups, "NAFO")
 
 
   titleHTML <- paste0("<div style='
