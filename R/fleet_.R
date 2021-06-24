@@ -106,7 +106,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
   lics <- LIC_CORE[LIC_CORE$FLEET==fleet,]
   if (nrow(lics)==0)stop("No licences found - stopping")
-  if(is.null(area)){
+  if(is.null(area) | area == "ALL"){
     area <-  LIC_AREAS[FALSE,]
   } else {
     area <-  LIC_AREAS[LIC_AREAS$FLEET == fleet & LIC_AREAS$FLEET_AREA_ID == area,]

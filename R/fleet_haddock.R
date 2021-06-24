@@ -9,7 +9,7 @@
 #' this species. The default values can be replaced with a smaller selection to only return information
 #' for a gear-specific subset of fishing activity.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
-#' @param area default is \code{NULL}. This is either "4X5Y" or "5ZJM".
+#' @param area default is \code{"ALL"}. This is either "4X5Y", "5ZJM", or "ALL".
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
 #' @examples \dontrun{
@@ -44,9 +44,10 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_haddock <- function(marfGear = c(12, 41, 51, 59), type = NULL, area= NULL, useLocal = NULL, ...){
+fleet_haddock <- function(marfGear = c(12, 41, 51, 59), type = NULL, area= "ALL", useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
+
   area <- toupper(area)
 
   if (!is.null(type) && type =="MOBILE"){
@@ -56,7 +57,6 @@ fleet_haddock <- function(marfGear = c(12, 41, 51, 59), type = NULL, area= NULL,
   }
 
   gearSpecs <- ifelse(type == "MOBILE", "4X5Y", "ALL")
-  area <- ifelse(type == "MOBILE", ifelse(area == "4X5Y", "4X5Y", "5ZJM"), "ALL")
-  data <- fleet_(fleet = "HADDOCK", marfSpp = 110, marfGear = marfGear, isdbSpp = 11, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
+  data <- fleet_(fleet = "HADDOCK", marfSpp = 110, marfGear = marfGear, isdbSpp = 11, area = area, areaFileField = "COD_BEST", gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
   return(data)
 }

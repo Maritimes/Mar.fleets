@@ -67,7 +67,20 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   clustMARF <- NULL
   clustISDB <- NULL
   surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
+  # m <- leaflet::leaflet() %>% htmlwidgets::onRender("alert( 'Hello, world!')")
   m <- leaflet::leaflet()
+  # %>% htmlwidgets::onRender("showLegend = true;  // default value showing the legend
+  #
+  # var toggleLegend = function(){
+  #     if(showLegend === true){
+  #     /* use jquery to select your DOM elements that has the class 'legend' */
+  #        $('.legend').hide();
+  #        showLegend = false;
+  #     }else{
+  #        $('.legend').show();
+  #        showLegend = true;
+  #     }
+  # }")
   m <- leaflet::addTiles(m)
   baseGroups <- "None"
   if (bathy){
@@ -130,7 +143,7 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   }
 
   markerLegendHTML <- function(IconSet) {
-    legendHtml <- "<div style='padding: 10px; padding-bottom: 10px;'>"
+    legendHtml <- "<div class='legend', style='padding: 10px; padding-bottom: 10px;'>"
     n <- 1
     for (Icon in IconSet) {
       if (Icon[["library"]] == "fa") {
@@ -147,23 +160,35 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   }
 
   ship <-     leaflet::makeAwesomeIcon(icon = "ship", markerColor = "darkred", iconColor = "black", library = "fa")
+  ship_coord <-   leaflet::makeAwesomeIcon(icon = "ship", markerColor = "pink", iconColor = "black", library = "fa")
   isdb_OBS <- leaflet::makeAwesomeIcon(icon = "eye", markerColor = "blue", iconColor = "black", library = "fa")
+  isdb_OBS_coord <- leaflet::makeAwesomeIcon(icon = "eye", markerColor = "pink", iconColor = "black", library = "fa")
   isdb_Log <- leaflet::makeAwesomeIcon(icon = "eye-slash", markerColor = "darkblue", iconColor = "black", library = "fa")
+  isdb_Log_coord <- leaflet::makeAwesomeIcon(icon = "eye-slash", markerColor = "pink", iconColor = "black", library = "fa")
   iconSet  <- leaflet::awesomeIconList(
     MARFIS = ship,
+    MARFIS_coord_issue = ship_coord,
     ISDB_OBS = isdb_OBS,
-    ISDB_Log = isdb_Log
+    ISDB_OBS_coord_issue = isdb_OBS_coord,
+    ISDB_LOG = isdb_Log,
+    ISDB_LOG_coord_issue = isdb_Log_coord
   )
 
-  if(!plotMARF) iconSet$commSets <- NULL
+  if(!plotMARF) {
+    iconSet$MARFIS <- NULL
+    iconSet$MARFIS_coord_issue <- NULL
+  }
 
   if(!plotISDB) {
     iconSet$ISDB_OBS <- NULL
     iconSet$ISDB_Log <- NULL
+    iconSet$ISDB_OBS_coord_issue <- NULL
+    iconSet$ISDB_Log_coord_issue <- NULL
   }
 
   if ((plotMARF | plotMARFSurf)  & class(data$marf$MARF_SETS)=="data.frame"){
     commSets <- Mar.utils::df_qc_spatial(data$marf$MARF_SETS)
+    commSets$icon<- ifelse(commSets$NAFO_MARF_SETS != commSets$NAFO_MARF_SETS_CALC,"MARFIS_coord_issue", "MARFIS")
     message(nrow(data$marf$MARF_SETS)-nrow(commSets), " MARF positions had bad coordinates and couldn't be used")
 
     if (plotMARFSurf){
@@ -203,11 +228,13 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
           }
       "))
       }
-      m <- leaflet::addAwesomeMarkers(map = m, group = "MARFIS", data = commSets, lng = commSets$LONGITUDE, lat = commSets$LATITUDE, icon = ship, clusterOptions = clustMARF,
+      m <- leaflet::addAwesomeMarkers(map = m, group = "MARFIS", data = commSets, lng = commSets$LONGITUDE, lat = commSets$LATITUDE, icon = ~iconSet[icon], clusterOptions = clustMARF,
                                       popup = paste0("MARFIS TRIP_ID:", commSets$TRIP_ID_MARF,
                                                      "<br>PRO_SPC_INFO_ID: ", commSets$PRO_SPC_INFO_ID,
                                                      "<br>LOG_EFRT_STD_INFO_ID: ", commSets$LOG_EFRT_STD_INFO_ID,
-                                                     "<br><br>RND_WEIGHT_KGS: ", commSets$RND_WEIGHT_KGS)
+                                                     "<br>RND_WEIGHT_KGS: ", commSets$RND_WEIGHT_KGS,
+                                                     "<br><br>Reported NAFO: ", commSets$NAFO_MARF_SETS,
+                                                     "<br>Calculated NAFO: ", commSets$NAFO_MARF_SETS_CALC)
       )
       overlayGroups <- c(overlayGroups, "MARFIS")
       bbLat <- c(bbLat, min(commSets$LATITUDE, na.rm = T),max(commSets$LATITUDE, na.rm = T))
@@ -218,8 +245,11 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   }
   if ((plotISDB | plotISDBSurf) & class(data$isdb$ISDB_SETS)=="data.frame"){
     isdbSets <- Mar.utils::df_qc_spatial(data$isdb$ISDB_SETS)
-    isdbSets$icon<- ifelse(isdbSets$SOURCE ==0, "ISDB_OBS", "ISDB_Log")
-    message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had no coordinates and couldn't be used")
+
+    isdbSets$icon<- ifelse(isdbSets$SOURCE ==0,
+                           ifelse(isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC, "ISDB_OBS_coord_issue", "ISDB_OBS"),
+                           ifelse(isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC, "ISDB_LOG_coord_issue", "ISDB_LOG"))
+    message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had bad coordinates and couldn't be used")
 
     if (plotISDBSurf){
       theseCat <- data$isdb$ISDB_CATCHES$ALL[data$isdb$ISDB_CATCHES$ALL$SPECCD_ID %in% isdbSurfSpp,c("TRIP_ID", "FISHSET_ID", isdbSurfField)]
@@ -264,7 +294,9 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
                                       popup = paste0("ISDB TRIP_ID: ",isdbSets$TRIP_ID,
                                                      "<br>FISHSET_ID: ", isdbSets$FISHSET_ID,
                                                      "<br>LOG_EFRT_STD_INFO_ID: ",isdbSets$LOG_EFRT_STD_INFO_ID,
-                                                     "<br>SOURCE: ",isdbSets$SOURCE)
+                                                     "<br>SOURCE: ",isdbSets$SOURCE,
+                                                     "<br><br>Reported NAFO: ", isdbSets$NAFO_ISDB_SETS,
+                                                     "<br>Calculated NAFO: ", isdbSets$NAFO_ISDB_SETS_CALC)
       )
 
       overlayGroups <- c(overlayGroups, "ISDB")
@@ -294,8 +326,27 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   }
   overlayGroups <- overlayGroups[!is.na(overlayGroups)]
   m <- leaflet::addLayersControl(map=m, baseGroups = baseGroups, overlayGroups = overlayGroups, options = leaflet::layersControlOptions(collapsed = TRUE))
-  m <- leaflet::addControl(map=m, html = titleHTML, position = "bottomleft")
+  if (!is.null(title)) m <- leaflet::addControl(map=m, html = titleHTML, position = "bottomleft")
+  m <- leaflet::addControl(map=m, html = markerLegendHTML(IconSet = iconSet), position = "topright")
   m <- leaflet::hideGroup(map=m, group = "MARFIS")
   m <- leaflet::hideGroup(map=m, group = "ISDB")
+  # m<-
+    # htmlwidgets::onRender("
+    #  showLegend = true;  // default value showing the legend
+    #
+    # var toggleLegend = function(){
+    #     if(showLegend === true){
+    #     /* use jquery to select your DOM elements that has the class 'legend' */
+    #        $('.legend').hide();
+    #        showLegend = false;
+    #     }else{
+    #        $('.legend').show();
+    #        showLegend = true;
+    #     }
+    # }
+    #          ")
+  # m <- leaflet::addEasyButton(map=m, leaflet::easyButton(icon="fa-globe", title="Show Legend"
+  #                                                        ,onClick=leaflet::JS("toggleLegend();"))
+  #                                                        )
   return(m)
 }

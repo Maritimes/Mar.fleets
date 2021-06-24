@@ -60,17 +60,6 @@ summarize_locations<-function(get_isdb = NULL,
     return(res)
   }
 
-  # mTrips <- get_marfis$MARF_TRIPS[,c("TRIP_ID_MARF","NAFO_MARF_TRIPS")]
-  # mTrips$NAFO_MARF_TRIPS <- trimNAFONames(mTrips$NAFO_MARF_TRIPS, args$nafoDet)
-  #
-  # mTripsSummRpt <- stats::aggregate(
-  #   x = list(cnt = mTrips$TRIP_ID_MARF ),
-  #   by = list(NAFO = mTrips$NAFO_MARF_TRIPS
-  #   ),
-  #   length
-  # )
-  # mTripsSummRpt$SRC <- "mTripsSummRpt"
-
   mSets <- get_marfis$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID","NAFO_MARF_SETS","NAFO_MARF_SETS_CALC")]
   mSets$NAFO_MARF_SETS <- trimNAFONames(mSets$NAFO_MARF_SETS, args$nafoDet)
   mSets$NAFO_MARF_SETS_CALC <- trimNAFONames(mSets$NAFO_MARF_SETS_CALC, args$nafoDet)

@@ -10,13 +10,13 @@
 #' for a gear-specific subset of fishing activity.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param mesh default is \code{'ALL'}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
-#' @param component default is \code{NULL}. This is either "WESTERN" or "EASTERN".
+#' @param area default is \code{'ALL'}. This is either "WESTERN", "EASTERN" or "ALL".
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
 #' @examples \dontrun{
 #' db <- fleet_pollock(type = "FIXED",
 #'                     mesh = "SMALL",
-#'                     component = "WESTERN",
+#'                     area = "WESTERN",
 #'                     year = 2018,
 #'                     useLocal = F,
 #'                     oracle.username = "<name>",
@@ -26,7 +26,7 @@
 #'                     )
 #' local <- fleet_pollock(type = "MOBILE",
 #'                        mesh = "LARGE",
-#'                        component = "EASTERN",
+#'                        area = "EASTERN",
 #'                        year = 2018,
 #'                        useLocal = T,
 #'                        data.dir = "c:/data_folder"
@@ -46,11 +46,11 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_pollock <- function(marfGear = c(12,41,51,59), type = NULL, mesh='ALL', component = NULL, useLocal = NULL, ...){
+fleet_pollock <- function(marfGear = c(12,41,51,59), type = NULL, mesh='ALL', area = "ALL", useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   mesh <- toupper(mesh)
-  component <- toupper(component)
+  area <- toupper(area)
 
   if (!is.null(type) && type =="MOBILE"){
     marfGear = c(12)
@@ -59,7 +59,6 @@ fleet_pollock <- function(marfGear = c(12,41,51,59), type = NULL, mesh='ALL', co
   }
 
   gearSpecs <- ifelse(mesh == "ALL", "ALL",ifelse(mesh == "SMALL", "SMALL", "LARGE"))
-  area <- ifelse(component == "WESTERN", "WESTERN", "EASTERN")
   data <- fleet_(fleet = "POLLOCK", marfSpp = 170, marfGear = marfGear, isdbSpp = 16, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
   return(data)
 }
