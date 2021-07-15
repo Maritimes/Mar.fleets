@@ -35,7 +35,8 @@
 #'   \item \code{isdbSpp} = 4321
 #'   \item \code{tripcd_id} = c(4320,7062)
 #'   \item \code{fleet} = "SCALLOP_OFF" or "SCALLOP_INSH", depending on selections
-#'   \item \code{areaFile} == "Areas_Scallop_sf"
+#'   \item \code{areaFile} == "Areas_Scallop_sf" (offshore)
+#'   \item \code{areaFile} == "SPAs_Scallop_sf" (inshore)
 #' }
 #' @inherit fleet_ details
 #' @export
@@ -45,14 +46,17 @@ fleet_scallop <- function(marfGear = c(71), fleet = NULL, useLocal = NULL, ...){
   fleet <- toupper(fleet)
   if (fleet == "OFFSHORE"){
     fleet <- "SCALLOP_OFF"
+    areaFile = "Areas_Scallop_sf"
   }else if (fleet == "INSHORE"){
     fleet <- "SCALLOP_INSH"
+    areaFile = "SPAs_Scallop_sf"
   }else if (fleet == "UNKNOWN"){
     fleet <- "SCALLOP_UNK"
+    areaFile = "Areas_Scallop_sf"
   }else{
     stop("Value for 'fleet' is unrecognized")
   }
 
-  data <- fleet_(fleet = fleet, marfSpp = 612, marfGear = marfGear, isdbSpp = 4321, tripcd_id = c(4320,7062), areaFile = "Areas_Scallop_sf", useLocal = useLocal,...)
+  data <- fleet_(fleet = fleet, marfSpp = 612, marfGear = marfGear, isdbSpp = 4321, tripcd_id = c(4320,7062), areaFile = areaFile, useLocal = useLocal,...)
   return(data)
 }

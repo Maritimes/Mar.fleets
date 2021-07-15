@@ -204,7 +204,8 @@ Hardcoded parameters for this fleet are as follows:
   \item \code{isdbSpp} = 4321
   \item \code{tripcd_id} = c(4320,7062)
   \item \code{fleet} = "SCALLOP_OFF" or "SCALLOP_INSH", depending on selections
-  \item \code{areaFile} == "Areas_Scallop_sf"
+  \item \code{areaFile} == "Areas_Scallop_sf" (offshore)
+  \item \code{areaFile} == "SPAs_Scallop_sf" (inshore)
 }
 }
 \examples{
