@@ -79,7 +79,18 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
                     ")
       ISTRIPS<- args$cxn$thecmd(args$cxn$channel, tripSQL)
     }
+    if (!args$keepSurveyTrips){
+      if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
+        if (!args$quietly) {
+          message(paste0("\n","Dropping these survey trips:","\n"))
+          print(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])
+        }
+      }
+      ISTRIPS = ISTRIPS[(ISTRIPS$TRIPCD_ID < 7010 | ISTRIPS$TRIPCD_ID == 7099),]
+      dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Surveys")
+      dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Surveys")
 
+    }
     ISTRIPS$LANDING_DATE <- as.Date(ISTRIPS$LANDING_DATE)
     ISTRIPS$BOARD_DATE <- as.Date(ISTRIPS$BOARD_DATE)
     ISTRIPS[is.na(ISTRIPS$LANDING_DATE),"LANDING_DATE"]<- '9999-01-01'
@@ -94,8 +105,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
 
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Dates")
     dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Dates")
-
-
 
     ISTRIPS = ISTRIPS[,c("TRIP_ISDB", "TRIP", "TRIPCD_ID", "BOARD_DATE", "LANDING_DATE", "VR", "LIC", "MARFIS_CONF_NUMBER")]
     if(nrow(ISTRIPS)>0) ISTRIPS$SRC<-NA
@@ -148,19 +157,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
 
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_VRLic")
     dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_VRLic")
-
-    if (!args$keepSurveyTrips){
-      if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
-        if (!args$quietly) {
-          message(paste0("\n","Dropping these survey trips:","\n"))
-          print(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])
-        }
-      }
-      ISTRIPS = ISTRIPS[(ISTRIPS$TRIPCD_ID < 7010 | ISTRIPS$TRIPCD_ID == 7099),]
-      dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Surveys")
-      dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Surveys")
-
-    }
 
     if (nrow(ISTRIPS)>0){
       theTripCols <- c("MARFIS_CONF_NUMBER","VR","LIC") #"LICENSE_NO",
@@ -257,6 +253,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
   #these are all, potential isdb trips based on dates, licences, vrs, tripcd_ids, etc
 
   if (!is.null(isdb_TRIPS_all)){
+
     isdb_TRIPIDs_all <- unique(isdb_TRIPS_all$ISTRIPS)
 
     trips <- NA
@@ -265,7 +262,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
     unmatchables <- NA
 
     trips <- do.call(match_trips, list(isdbTrips = isdb_TRIPIDs_all, marfMatch = get_marfis$MARF_MATCH, args = args))
-
+###    trips$ISDB_MARFIS_POST_MATCHED <-
     if (all(is.na(trips$ISDB_MARFIS_POST_MATCHED))){
       isdb_TRIPS_all <- NA
       isdb_SETS_all <- NA
@@ -277,13 +274,23 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
       catches <- NA
     }else{
 
+      if(args$dropUnmatchedISDB){
+        if (nrow(trips$ISDB_MARFIS_POST_MATCHED)>0) trips$ISDB_MARFIS_POST_MATCHED <- trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]
+      }
+      dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_ISDB, stepDesc = "isdb_droppedUnmatched")
+      dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(trips$ISDB_MARFIS_POST_MATCHED[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_droppedUnmatched")
+      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known =  trips$ISDB_MARFIS_POST_MATCHED$VR, stepDesc = "isdb_droppedUnmatched")
+      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known =  trips$ISDB_MARFIS_POST_MATCHED$LIC, stepDesc = "isdb_droppedUnmatched")
+
     if (args$debuggit) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
     matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
                     "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
                     "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
                     "match_LICDATE", "match_LICDATE_DETS", "T_DATE1_LIC", "T_DATE2_LIC",
                     "match_swappedDATE", "match_swappedDATE_DETS", "T_DATE1_swap", "T_DATE2_swap")
+
     isdb_TRIPS_all <- trips$ISDB_MARFIS_POST_MATCHED[, !names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields]
+
     isdb_TRIPS_match_dets <- trips$ISDB_MARFIS_POST_MATCHED[, c("TRIP_ID_ISDB", "TRIP_ID_MARF",names(trips$ISDB_MARFIS_POST_MATCHED)[names(trips$ISDB_MARFIS_POST_MATCHED) %in% matchFields])]
     msum <- trips$MATCH_SUMMARY_TRIPS
     ISDB_UNMATCHABLES <- trips$ISDB_UNMATCHABLES
@@ -306,7 +313,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
           catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
           catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
           catches <- merge(catches, ISSPECIESCODES[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
-
         }else{
           # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
           catchSQL = paste0("SELECT CA.SPECCD_ID,
