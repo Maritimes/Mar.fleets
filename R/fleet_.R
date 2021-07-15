@@ -106,7 +106,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
   lics <- LIC_CORE[LIC_CORE$FLEET==fleet,]
   if (nrow(lics)==0)stop("No licences found - stopping")
-  if(is.null(area) | area == "ALL"){
+  if(any(is.null(area) | length(area)==0)){
     area <-  LIC_AREAS[FALSE,]
   } else {
     area <-  LIC_AREAS[LIC_AREAS$FLEET == fleet & LIC_AREAS$FLEET_AREA_ID == area,]
@@ -160,11 +160,6 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
 
 
       if (length(isdb)>1 && class(isdb$ISDB_TRIPS)=="data.frame"){
-        if(args$dropUnmatchedISDB){
-          if (nrow(isdb$ISDB_TRIPS)>0) isdb$ISDB_TRIPS <- isdb$ISDB_TRIPS[!is.na(isdb$ISDB_TRIPS$TRIP_ID_MARF),]
-
-          if(any(!is.na(isdb$ISDB_SETS))) isdb$ISDB_SETS <- isdb$ISDB_SETS[!is.na(isdb$ISDB_SETS$TRIP_ID_MARF),]
-        }
 
         data[["isdb"]]<- isdb
         data$isdb$debug <-NULL
