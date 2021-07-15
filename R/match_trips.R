@@ -81,6 +81,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_TRIP$match_TripName <- logical()
     }
+    match_TRIP$ISDB_TRIP_O <- match_TRIP$ISDB_TRIP_M <- NULL
     return(match_TRIP)
   }
   matchHI <- function(df = NULL){
@@ -213,8 +214,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       return(thisMarfMatch)
     }
 
-    #may regret this, but doing a cross join of isdb and marf trips
-    # xData <- merge(thisIsdbTrips, thisMarfMatch)
+    #cross join of isdb and marf trips
     thisIsdbTripsDt<-data.table::setDT(thisIsdbTrips)
     thisMarfMatchDt<-data.table::setDT(thisMarfMatch)
 
@@ -286,7 +286,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_DateMin[which(match_DateMin$mVR|match_DateMin$mLIC|match_DateMin$mMix1|match_DateMin$mMix2|match_DateMin$mTripcd_id),"match_Date"] <- TRUE
     match_DateMin <- match_DateMin[match_DateMin$match_Date == TRUE,]
     # match_DateMin$VR <-  match_DateMin$VR_NUMBER <-  match_DateMin$LIC <-  match_DateMin$LICENCE_ID  <-
-    match_DateMin$CLOSEST1 <- NULL
+    match_DateMin$CLOSEST1 <- match_DateMin$SRC <- NULL
     colnames(match_DateMin)[colnames(match_DateMin)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_DATE"
     return(match_DateMin)
   }
@@ -296,6 +296,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   match_VR <- matchVR(df = isdbTrips)
   match_LIC <- matchLIC(df = isdbTrips)
   match_Date <- matchDate(df = isdbTrips)
+
   knowncombos_all <- as.data.frame(rbind(as.matrix(match_TripName[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_TRIP")]),
                                          as.matrix(match_HI[,c("TRIP_ID_ISDB","TRIP_ID_MARF_HI")]),
                                          as.matrix(match_HO[,c("TRIP_ID_ISDB","TRIP_ID_MARF_HO")]),
@@ -320,6 +321,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_CONF1 <-  merge(knowncombos_cnt, match_TripName, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB", "TRIP_ID_MARF_TRIP"), all.x=T)
     match_CONF1 <-  merge(match_CONF1, match_HI, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_HI"), all.x=T)
     match_CONF1 <-  merge(match_CONF1, match_HO, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_HO"), all.x=T)
+    match_CONF1$SRC <- NULL
     #these guys are generic - vrs, lics and dates.  some combination must occur together to match
     #match_tmp grabs all of the records that got matched by lic or vr
     #match_CONF2B than attempts to merge these lic/vr records with any lic/vr records that occurred within an acceptable window of time
@@ -336,7 +338,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_tmp[c("match_Date", "match_VR", "match_LIC", "mTripcd_id", "swapVR", "swapLIC", "mMix1", "mMix2", "mLIC", "mVR")][is.na(match_tmp[c("match_Date", "match_VR", "match_LIC", "mTripcd_id", "swapVR", "swapLIC", "mMix1", "mMix2", "mLIC", "mVR")])] <- FALSE
     #mTripcd_id not used for matching, just for math to help break ties
     match_tmp <- match_tmp[which(match_tmp$match_Date & (match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id) >0),]
-    if (nrow(match_tmp)>0){
+    match_tmp$SRC <- NULL
+     if (nrow(match_tmp)>0){
       match_tmp$cnt_dateMatch <- match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id
       match_tmp$swappedLIC_VR <- FALSE
       match_tmp[which(match_tmp$swapLIC|match_tmp$swapVR|match_tmp$mMix1|match_tmp$mMix2),"swappedLIC_VR"]<-T
@@ -360,7 +363,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       Unmatchables <- nrow(matchNone)
       if (nrow(matchNone)==0)matchNone <- NA
     }else{
-
       matches$cnt <- NULL
       matches$cnt_dateMatch <- NULL
       #PRIOR1 counts matches by trip name, Hail in code and hail out confirmation codes - these are very isdb specific - most likely matches
@@ -386,10 +388,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
       matchNone <- matchNone[!(matchNone$TRIP_ID_MARF %in% matches$TRIP_ID_MARF),]
       if(nrow(matchNone)>0) {
-        Unmatchables = nrow(matchNone)
+        Unmatchables <- nrow(matchNone)
         matchNone$ISDB_TRIP_M <- NULL
       }else{
-        Unmatchables = 0
+        Unmatchables <- 0
         matchNone <- NA
       }
 
@@ -402,8 +404,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
         matches <- matches[!(matches$TRIP_ID_ISDB %in% dups),]
         MultiMatches = nrow(dupRows)
       }else{
-
-        MultiMatches = 0
+        MultiMatches <- 0
         dupRows <- NA
       }
 
