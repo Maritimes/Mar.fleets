@@ -118,10 +118,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   getPS <- function(allProSpc = NULL, ...){
     args <- list(...)$args
     if (args$debuggit) Mar.utils::where_now()
-    theseGears = unique(thisFleet$GEAR_CODE)
-    all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
+    # theseGears = unique(thisFleet$GEAR_CODE)
+    # all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","NAFO_UNIT_AREAS","VESSELS","TRIPS"),
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","VESSELS", "NAFO_UNIT_AREAS","TRIPS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
       if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
@@ -151,7 +151,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
       }
       # PS_df = merge(PS_df, NAFO_UNIT_AREAS[,c("AREA_ID","NAFO_AREA")], by.y="AREA_ID", by.x="NAFO_UNIT_AREA_ID", all.x=T)
       #used VR_NUMBER_FISHING to join
-      PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER")
+      PS_df = merge(PS_df, VESSELS[,c("VR_NUMBER", "LOA")], by.x="VR_NUMBER_FISHING", by.y="VR_NUMBER", all.x = T)
       PS_df = merge(PS_df, TRIPS[,c("TRIP_ID", "EARLIEST_DATE_TIME", "LATEST_DATE_TIME")], by="TRIP_ID", all.x = T)
       colnames(PS_df)[colnames(PS_df)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
       colnames(PS_df)[colnames(PS_df)=="LATEST_DATE_TIME"] <- "T_DATE2"
