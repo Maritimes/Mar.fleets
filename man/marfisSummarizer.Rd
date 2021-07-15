@@ -10,7 +10,8 @@ marfisSummarizer(
   byGr = TRUE,
   bySpp = TRUE,
   byYr = TRUE,
-  byNAFO = FALSE
+  byNAFO = FALSE,
+  byCust = NULL
 )
 }
 \arguments{
@@ -32,6 +33,9 @@ trip record.}
 \item{byNAFO}{default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 and licence_ids will will be broken down by <reported> NAFO division in which a landing was
 identified. If FALSE, weights will be summed, irrespective of <reported> NAFO division.}
+
+\item{byCust}{default is \code{NULL}. This can be the name of any field found in \code{<data>$marf$MARF_SETS}
+by which you would like to see aggregated results}
 }
 \value{
 a data frame

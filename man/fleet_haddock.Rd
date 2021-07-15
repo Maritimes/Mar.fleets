@@ -7,7 +7,7 @@
 fleet_haddock(
   marfGear = c(12, 41, 51, 59),
   type = NULL,
-  area = NULL,
+  area = "ALL",
   useLocal = NULL,
   ...
 )
@@ -19,7 +19,7 @@ for a gear-specific subset of fishing activity.}
 
 \item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
-\item{area}{default is \code{NULL}. This is either "4X5Y" or "5ZJM".}
+\item{area}{default is \code{"ALL"}. This is either "4X5Y", "5ZJM", or "ALL".}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).

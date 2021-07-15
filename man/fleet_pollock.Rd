@@ -8,7 +8,7 @@ fleet_pollock(
   marfGear = c(12, 41, 51, 59),
   type = NULL,
   mesh = "ALL",
-  component = NULL,
+  area = "ALL",
   useLocal = NULL,
   ...
 )
@@ -22,7 +22,7 @@ for a gear-specific subset of fishing activity.}
 
 \item{mesh}{default is \code{'ALL'}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".}
 
-\item{component}{default is \code{NULL}. This is either "WESTERN" or "EASTERN".}
+\item{area}{default is \code{'ALL'}. This is either "WESTERN", "EASTERN" or "ALL".}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -223,7 +223,7 @@ Hardcoded parameters for this fleet are as follows:
 \dontrun{
 db <- fleet_pollock(type = "FIXED",
                     mesh = "SMALL",
-                    component = "WESTERN",
+                    area = "WESTERN",
                     year = 2018,
                     useLocal = F,
                     oracle.username = "<name>",
@@ -233,7 +233,7 @@ db <- fleet_pollock(type = "FIXED",
                     )
 local <- fleet_pollock(type = "MOBILE",
                        mesh = "LARGE",
-                       component = "EASTERN",
+                       area = "EASTERN",
                        year = 2018,
                        useLocal = T,
                        data.dir = "c:/data_folder"
