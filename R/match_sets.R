@@ -9,9 +9,6 @@
 #' the two databases are matched.
 #' @param marf_sets default is \code{NULL}. This is the MARF_SETS output of the
 #' \code{Mar.fleets::get_marfis()} function - it contains information about the MARFIS sets.
-#' @param maxSetDiff_hr default is \code{24}.  This is how many hours are allowed between
-#' reported ISDB and MARFIS sets before.  Sets differing by more than this time span
-#' will never be matched.
 #' @param ... other arguments passed to methods
 #' @import data.table
 #' @family fleets
@@ -20,7 +17,7 @@
 #' @note as this was developed for the Maritimes region, internal position QC requires that
 #' Latitudes outside of 35:52 and Longitudes outside of -75:-45 are flagged and not used to match
 #' @noRd
-match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, maxSetDiff_hr =48, ...){
+match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, ...){
   args <- list(...)$args
   if (args$debuggit){
     Mar.utils::where_now()
@@ -111,7 +108,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf$DUR_DIFF <- NA
   megadf[,"DUR_DIFF"]<- as.numeric(abs(difftime(megadf$DATE_TIME,megadf$EF_FISHED_DATETIME, units="hours")))
   megadf$BADTIM <- FALSE
-  megadf <- megadf[megadf$DUR_DIFF <= maxSetDiff_hr,]
+  megadf <- megadf[megadf$DUR_DIFF <= args$maxSetDiff_hr,]
   if (nrow(megadf)==0)return(NA)
   megadf[megadf$BADTIM_I==T | megadf$BADTIM_M==T |is.na(megadf$DUR_DIFF),"BADTIM"]<-TRUE
   megadf$BADTIM_I <- megadf$BADTIM_M <- NULL
