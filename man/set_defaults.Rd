@@ -23,6 +23,7 @@ set_defaults(
   year = NULL,
   keepSurveyTrips = TRUE,
   matchMaxDayDiff = 2,
+  maxSetDiff_hr = 48,
   dropUnmatchedISDB = TRUE,
   data.dir = file.path(getwd(), "data"),
   oracle.username = "_none_",

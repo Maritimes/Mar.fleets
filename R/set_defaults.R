@@ -123,6 +123,7 @@ set_defaults <- function(lics = 'all',
                          year = NULL,
                          keepSurveyTrips = TRUE,
                          matchMaxDayDiff = 2,
+                         maxSetDiff_hr = 48,
                          dropUnmatchedISDB = TRUE,
                          data.dir = file.path(getwd(), 'data'),
                          oracle.username = '_none_',
@@ -165,6 +166,7 @@ set_defaults <- function(lics = 'all',
     if (argg$areaFile == 'Areas_Surfclam_sf') argg$areaFileField = 'AREA'
     if (argg$areaFile == 'Areas_Halibut_sf') argg$areaFileField = 'Strata'
     if (argg$areaFile == 'Areas_Scallop_sf') argg$areaFileField = 'StrataID'
+    if (argg$areaFile == 'SPAs_Scallop_sf') argg$areaFileField = 'layer'
   }
 
   # notify user on unknown sent parameters
