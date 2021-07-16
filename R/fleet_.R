@@ -158,7 +158,6 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
     if (args$returnISDB){
       isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, args=args))
 
-
       if (length(isdb)>1 && class(isdb$ISDB_TRIPS)=="data.frame"){
 
         data[["isdb"]]<- isdb
