@@ -3,6 +3,8 @@
 #' wrappers to provide information on the number of trips, unique vessels, unique licences, and total
 #' catch.  These results can be aggregated by YEAR, SPECIES_CODE, and GEAR TYPE.
 #' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
+#' @param units  default is \code{"KGS"}. This is the units you want weights returned in.  Valid
+#' options are any of "KGS", "TONNES", "LBS".
 #' @param byGr  default is \code{TRUE}. If TRUE, the summed weights and numbers of unique trips and
 #' licence_ids will will be broken down by all identified gear types. If FALSE,
 #' weights will be summed, irrespective of gear.
@@ -25,7 +27,7 @@
 #' @return a data frame
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byYr= TRUE, byNAFO = FALSE, byCust = NULL){
+marfisSummarizer <- function(data=NULL, units="KGS", byGr = TRUE, bySpp = TRUE, byYr= TRUE, byNAFO = FALSE, byCust = NULL){
   defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
   if(!"MARF_CATCHES" %in% names(data$marf)){
     all <- data$marf$MARF_TRIPS
@@ -98,8 +100,12 @@ marfisSummarizer <- function(data=NULL, tonnes=F, byGr = TRUE, bySpp = TRUE, byY
 
   res<- res[,allFields]
   res<- res[with(res,order(YEAR, GEAR_CODE, NTRIPS)),]
-  if (tonnes){
+  if (units == "TONNES"){
     res$RND_WEIGHT_TONNES <- res$RND_WEIGHT_KGS/1000
+    res$RND_WEIGHT_KGS <- NULL
+  } else if (units == "LBS"){
+    res$RND_WEIGHT_LBS <- res$RND_WEIGHT_KGS*2.20462
+    res$RND_WEIGHT_KGS <- NULL
   }
   if (!is.null(byCust)) colnames(res)[colnames(res)=="CUSTOM"] <- byCust
   return(res)
