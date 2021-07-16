@@ -81,8 +81,8 @@ quickMap(data=redfishresults, vms= redfishVMS, nafo=TRUE)
 \seealso{
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
-\code{\link{marfisSummarizer}()},
-\code{\link{summarize_locations}()}
+\code{\link{summarize_locations}()},
+\code{\link{summarizer}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

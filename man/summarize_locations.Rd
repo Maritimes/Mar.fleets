@@ -68,8 +68,8 @@ Other coreFuncs:
 
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
-\code{\link{marfisSummarizer}()},
-\code{\link{quickMap}()}
+\code{\link{quickMap}()},
+\code{\link{summarizer}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

@@ -30,9 +30,9 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{marfisSummarizer}()},
 \code{\link{quickMap}()},
-\code{\link{summarize_locations}()}
+\code{\link{summarize_locations}()},
+\code{\link{summarizer}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
