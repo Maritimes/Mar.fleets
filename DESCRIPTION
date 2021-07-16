@@ -23,11 +23,12 @@ Suggests:
     DBI,
     gstat,
     leaflet,
+    lubridate,
     raster,
+    RODBC,
     ROracle,
     sf,
-    sp,
-    RODBC
+    sp
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
