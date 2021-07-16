@@ -108,7 +108,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf$DUR_DIFF <- NA
   megadf[,"DUR_DIFF"]<- as.numeric(abs(difftime(megadf$DATE_TIME,megadf$EF_FISHED_DATETIME, units="hours")))
   megadf$BADTIM <- FALSE
-  megadf <- megadf[megadf$DUR_DIFF <= args$maxSetDiff_hr,]
+  megadf <- megadf[megadf$DUR_DIFF <= args$maxSetDiff_Hr,]
   if (nrow(megadf)==0)return(NA)
   megadf[megadf$BADTIM_I==T | megadf$BADTIM_M==T |is.na(megadf$DUR_DIFF),"BADTIM"]<-TRUE
   megadf$BADTIM_I <- megadf$BADTIM_M <- NULL

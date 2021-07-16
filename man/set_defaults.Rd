@@ -22,8 +22,8 @@ set_defaults(
   dateEnd = NULL,
   year = NULL,
   keepSurveyTrips = TRUE,
-  matchMaxDayDiff = 2,
-  maxSetDiff_hr = 48,
+  maxTripDiff_Hr = 48,
+  maxSetDiff_Hr = 48,
   dropUnmatchedISDB = TRUE,
   data.dir = file.path(getwd(), "data"),
   oracle.username = "_none_",
@@ -105,9 +105,12 @@ are provided.}
 \item{keepSurveyTrips}{default is \code{TRUE}. Within the ISDB database are non-commercial,
 survey trips.  Setting this to \code{FALSE} ensures these trips are dropped.}
 
-\item{matchMaxDayDiff}{default is \code{2}. Any MARFIS and ISDB trips that vary by more than the
+\item{maxTripDiff_Hr}{default is \code{48}. Any MARFIS and ISDB trips that vary by more than the
 # of days specified here will NOT be considered matches (on the basis of common Vessel, licence
 and date).  They may still match on confirmation codes and/or trip names.}
+
+\item{maxSetDiff_Hr}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
+# of hours specified here will NOT be considered matches.}
 
 \item{dropUnmatchedISDB}{default is \code{TRUE}.}
 

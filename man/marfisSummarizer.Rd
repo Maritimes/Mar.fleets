@@ -6,7 +6,7 @@
 \usage{
 marfisSummarizer(
   data = NULL,
-  tonnes = F,
+  units = "KGS",
   byGr = TRUE,
   bySpp = TRUE,
   byYr = TRUE,
@@ -16,6 +16,9 @@ marfisSummarizer(
 }
 \arguments{
 \item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
+
+\item{units}{default is \code{"KGS"}. This is the units you want weights returned in.  Valid
+options are any of "KGS", "TONNES", "LBS".}
 
 \item{byGr}{default is \code{TRUE}. If TRUE, the summed weights and numbers of unique trips and
 licence_ids will will be broken down by all identified gear types. If FALSE,

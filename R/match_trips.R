@@ -228,16 +228,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 
     #below we first find the closest trips in time using the smallest difference of all calculated times
     match_DateMin<- xData[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
-    #should their be a tie for smallest time (in matching trips), use the average time difference for all calculated times
-    # match_DateMean<- match_Date[, {tmp <- CLOSEST; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
-
     match_DateMin <- as.data.frame(match_DateMin)
-    # match_DateMean <- as.data.frame(match_DateMean)
 
-    #hard cutoff - anything more than matchMaxDayDiff different is not a match, and is dropped here
-
-    match_DateMin <- match_DateMin[match_DateMin$CLOSEST1 <=args$matchMaxDayDiff,]
-    # match_DateMean <- match_DateMean[match_DateMean$CLOSEST1 <=args$matchMaxDayDiff,]
+    #hard cutoff - anything more than maxTripDiff_Hr different is not a match, and is dropped here
+    maxTripDiff_Day <- args$maxTripDiff_Hr/24
+    match_DateMin <- match_DateMin[match_DateMin$CLOSEST1 <=maxTripDiff_Day,]
 
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 >= 8,])>0) match_DateMin[match_DateMin$CLOSEST1 >= 8, "match_DATE_DETS"] <- "ISDB/MARF activity more than a week different"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 8,])>0) match_DateMin[match_DateMin$CLOSEST1 < 8, "match_DATE_DETS"] <- "ISDB/MARF activity within a week"
