@@ -1,6 +1,5 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 .onAttach <- function(libname, pkgname) {
-
   Mar.utils::updateCheck(gitPkg = 'Maritimes/Mar.fleets')
   localVer = utils::packageDescription('Mar.fleets')$Version
   packageStartupMessage(paste0("Version: ", localVer))
@@ -11,3 +10,4 @@
   Sys.setenv(TZ = "America/Halifax")
 }
 
+utils::globalVariables(c("GEARS","LIC_AREAS","LIC_CORE","LIC_GEAR_SPEC","SPECIES_ISDB","SPECIES_MARFIS"))
