@@ -149,8 +149,7 @@ Depending on your value for \code{useLocal}, different values become necessary.
 }}
 
 \item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be
-output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this
-parameter to TRUE causes the package to try to imitate historic matching techniques.}
+output to the console while the scripts run.}
 
 \item{debugLics}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
 provide information about when the script drops them from

@@ -84,8 +84,7 @@
 #' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 #' be slightly easier to setup, but roracle will extract data faster.
 #' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be
-#' output to the console while the scripts run.#' @param HS default is \code{FALSE}. Setting this
-#' parameter to TRUE causes the package to try to imitate historic matching techniques.
+#' output to the console while the scripts run.
 #' @param debuggit default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 #' debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
