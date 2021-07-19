@@ -315,18 +315,19 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   allLogEff <-  unique(stats::na.omit(thisFleet$LOG_EFRT_STD_INFO))
   allProSpc <-  unique(stats::na.omit(thisFleet$PRO_SPC_INFO_ID))
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
+
   ps <- do.call(getPS, list(allProSpc = allProSpc, args=args))
   if (nrow(ps)<1){
     message(paste0("\n","No MARFIS data meets criteria"))
     return(invisible(NULL))
   }
+
   sets<-  do.call(getSets, list(log_efrt = allLogEff, args=args))
   sets <- unique(merge(ps[,!names(ps) %in% c("VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID")], sets, all.x=T))
   sets[["NAFO_MARF_SETS"]][is.na(sets[["NAFO_MARF_SETS"]])] <- "<not recorded>"
-
   sets[(is.na(sets$LATITUDE) | is.na(sets$LONGITUDE)) & is.na(sets$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "<missing coord>"
-  ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
 
+  ed <-  do.call(getED, list(mondocs =allMondocs, args=args))
   if (!is.null(ed) && nrow(ed)>0){
     ps<- unique(merge(ps, ed, all.x = T))
     if (nrow(ps)<1){
@@ -394,6 +395,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
       FUN = sum
     )
   trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
+  trips[["LOG_EFRT_STD_INFO_ID"]][trips[["LOG_EFRT_STD_INFO_ID"]]==-9] <- NA
   catchFields <- c("LOG_EFRT_STD_INFO_ID",  "SPECIES_CODE", "RND_WEIGHT_KGS"  ) #"NAFO_MARF_TRIPS",
 if(nrow(trips)>0){
   catches <- trips[,c("TRIP_ID_MARF", catchFields)]
