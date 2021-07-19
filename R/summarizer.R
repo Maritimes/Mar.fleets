@@ -20,8 +20,10 @@
 #' identified. If FALSE, weights will be summed, irrespective of <reported> NAFO division.
 #' @param byCust  default is \code{NULL}. This can be the name of any field found in \code{<data>$marf$MARF_SETS}
 #' by which you would like to see aggregated results
-#' @param doMARF  default is \code{T}. This indicates that the MARFIS results should be summarized.
-#' @param doISDB  default is \code{T}. This indicates that the ISDB results should be summarized.
+#' @param doMARF  default is \code{TRUE}. This indicates that the MARFIS results should be summarized.
+#' @param doISDB  default is \code{TRUE}. This indicates that the ISDB results should be summarized.
+#' @param quietly default is \code{FALSE}. This specifies whether or not status messages should be
+#' output to the console while the scripts run.
 #' @examples \dontrun{
 #' summary <- summarizer(data = Halibut2017, byGr = TRUE)
 #'        }
@@ -29,25 +31,25 @@
 #' @return a data frame
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= TRUE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, speccd_id = NULL, doMARF=T, doISDB=T){
+summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= TRUE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, speccd_id = NULL, doMARF=T, doISDB=T, quietly = F){
   defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
 
   summISDB <- function(){
     if (is.null(speccd_id)) {
       speccd_id <- data$params$user[data$params$user$PARAMETER == "isdbSpp", "VALUE"][1]
-      message(paste0("No speccd_id was specified - defaulting to ",speccd_id))
+      if (!quietly) message(paste0("No speccd_id was specified - defaulting to ",speccd_id, " (target species for wrapper)"))
     }
     t <- data$isdb$ISDB_TRIPS[,c("TRIP_ID_ISDB", "VR", "LIC")]
     if (any(is.na(t$VR))){
       badVR <- length(t[is.na(t$VR),])
-      message(paste0(badVR, " of your trips was missing a valid Vessel. There is no way to
+      if (!quietly)  message(paste0(badVR, " of your trips was missing a valid Vessel. There is no way to
                      differentiate between missing vessels, so all missing values will be considered
                      as a single vessel, identified as '-999'"))
       t[["VR"]][is.na(t[["VR"]])] <- -999
     }
     if (any(is.na(t$LIC))){
       badLic <- length(t[is.na(t$LIC),])
-      message(paste0(badLic, " of your trips was missing a valid LICENCE. There is no way to
+      if (!quietly) message(paste0(badLic, " of your trips was missing a valid LICENCE. There is no way to
                      differentiate between missing licences, so all missing values will be considered
                      as a single licence, identified as '-999'"))
       t[["LIC"]][is.na(t[["LIC"]])] <- -999

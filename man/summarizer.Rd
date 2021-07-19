@@ -14,7 +14,8 @@ summarizer(
   byCust = NULL,
   speccd_id = NULL,
   doMARF = T,
-  doISDB = T
+  doISDB = T,
+  quietly = F
 )
 }
 \arguments{
@@ -43,9 +44,12 @@ identified. If FALSE, weights will be summed, irrespective of <reported> NAFO di
 \item{byCust}{default is \code{NULL}. This can be the name of any field found in \code{<data>$marf$MARF_SETS}
 by which you would like to see aggregated results}
 
-\item{doMARF}{default is \code{T}. This indicates that the MARFIS results should be summarized.}
+\item{doMARF}{default is \code{TRUE}. This indicates that the MARFIS results should be summarized.}
 
-\item{doISDB}{default is \code{T}. This indicates that the ISDB results should be summarized.}
+\item{doISDB}{default is \code{TRUE}. This indicates that the ISDB results should be summarized.}
+
+\item{quietly}{default is \code{FALSE}. This specifies whether or not status messages should be
+output to the console while the scripts run.}
 }
 \value{
 a data frame
