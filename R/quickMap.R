@@ -188,7 +188,9 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
 
   if ((plotMARF | plotMARFSurf)  & class(data$marf$MARF_SETS)=="data.frame"){
     commSets <- Mar.utils::df_qc_spatial(data$marf$MARF_SETS)
-    commSets$icon<- ifelse(commSets$NAFO_MARF_SETS != commSets$NAFO_MARF_SETS_CALC,"MARFIS_coord_issue", "MARFIS")
+    commSets$icon<- "MARFIS"
+    commSets[which(is.na(commSets$NAFO_MARF_SETS) | (commSets$NAFO_MARF_SETS  != commSets$NAFO_MARF_SETS_CALC)),"icon"] <- "MARFIS_coord_issue"
+
     message(nrow(data$marf$MARF_SETS)-nrow(commSets), " MARF positions had bad coordinates and couldn't be used")
 
     if (plotMARFSurf){
@@ -246,9 +248,12 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   if ((plotISDB | plotISDBSurf) & class(data$isdb$ISDB_SETS)=="data.frame"){
     isdbSets <- Mar.utils::df_qc_spatial(data$isdb$ISDB_SETS)
 
-    isdbSets$icon<- ifelse(isdbSets$SOURCE ==0,
-                           ifelse(isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC, "ISDB_OBS_coord_issue", "ISDB_OBS"),
-                           ifelse(isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC, "ISDB_LOG_coord_issue", "ISDB_LOG"))
+    isdbSets$icon <- "ISDB_OBS"
+    isdbSets[which(isdbSets$SOURCE ==0 & (is.na(isdbSets$NAFO_ISDB_SETS) | (isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC))),"icon"] <- "ISDB_OBS_coord_issue"
+    isdbSets[which(isdbSets$SOURCE ==0 & (isdbSets$NAFO_ISDB_SETS  == isdbSets$NAFO_ISDB_SETS_CALC)),"icon"] <- "ISDB_OBS"
+    isdbSets[which(isdbSets$SOURCE ==1 & (is.na(isdbSets$NAFO_ISDB_SETS) | (isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC))),"icon"] <- "ISDB_LOG_coord_issue"
+    isdbSets[which(isdbSets$SOURCE ==1 & (isdbSets$NAFO_ISDB_SETS  == isdbSets$NAFO_ISDB_SETS_CALC)),"icon"] <- "ISDB_LOG"
+
     message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had bad coordinates and couldn't be used")
 
     if (plotISDBSurf){
