@@ -174,10 +174,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
     if (args$debuggit) Mar.utils::where_now()
     badDate <- as.POSIXct(as.Date("2100-01-01"))
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE"),
+      Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE", "ISGEARS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = args$quietly)
-      ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID")]
+      ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID", "GEAR_ID")]
 
       colnames(ISFISHSETS)[colnames(ISFISHSETS)=="NAFAREA_ID"] <- "NAFO_ISDB_SETS"
 
@@ -188,10 +188,12 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
                                                               ISSETPROFILE_WIDE$DATE_TIME2),
                                                        ISSETPROFILE_WIDE$DATE_TIME1),
                                                 origin = "1970-01-01")
+      ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "GEAR_ID")], all.x=T)
+      ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISGEARS[,c("GEAR_ID", "GEARCD_ID" )], all.x=T)
 
     }else{
 
-      FSSQL  <- paste0("SELECT distinct FS.TRIP_ID, FS.FISHSET_ID, FS.SOURCE, FS.SETCD_ID, NAFAREA_ID AS NAFO_ISDB_SETS
+      FSSQL  <- paste0("SELECT distinct FS.TRIP_ID, FS.FISHSET_ID, FS.SOURCE, FS.SETCD_ID, FS.NAFAREA_ID AS NAFO_ISDB_SETS, FS.GEAR_ID
                 FROM OBSERVER.ISFISHSETS FS
                 WHERE ",Mar.utils::big_in(vec=unique(isdbTrips$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
@@ -210,6 +212,13 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
                                                               ISSETPROFILE_WIDE$DATE_TIME2),
                                                        ISSETPROFILE_WIDE$DATE_TIME1),
                                                 origin = "1970-01-01")
+
+      GRSQL <- paste0("SELECT GEAR_ID, GEARCD_ID
+                FROM OBSERVER.ISGEARS
+                WHERE ",Mar.utils::big_in(vec=unique(ISFISHSETS$TRIP_ID), vec.field = "TRIP_ID"))
+      ISGEARS<- args$cxn$thecmd(args$cxn$channel, GRSQL)
+      ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISFISHSETS[,c("FISHSET_ID", "GEAR_ID")], all.x=T)
+      ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISGEARS, all.x = T)
     }
     # Grab the first available, valid coord pair --------------------------------------------------
     tmp=apply(ISSETPROFILE_WIDE,1,function(x){
@@ -232,7 +241,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
     ISSETPROFILE_WIDE = cbind(ISSETPROFILE_WIDE,coords)
 
     ISFISHSETS <- unique(ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFO_ISDB_SETS")])
-    ISSETPROFILE_WIDE <- unique(ISSETPROFILE_WIDE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE")])
+    ISSETPROFILE_WIDE <- unique(ISSETPROFILE_WIDE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE","GEARCD_ID")])
 
     ISSETPROFILE_WIDE[,c("LATITUDE","LONGITUDE")] <- as.numeric(as.character(unlist(ISSETPROFILE_WIDE[,c("LATITUDE","LONGITUDE")])))
 
