@@ -37,14 +37,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_shrimp <- function(marfGear = c(19,62), type=NULL,  useLocal = NULL, ...){
+fleet_shrimp <- function(marfGear = c(19,62), useLocal = NULL, ...){
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-
-  if (!is.null(type) && type =="TRAP"){
-    marfGear = c(62)
-  }else if (!is.null(type) && type == "TRAWL"){
-    marfGear = c(19)
-  }
 
   data = fleet_(fleet = "SHRIMP", marfSpp = c(702), marfGear = marfGear, isdbSpp = c(16,28), tripcd_id = c(2210), areaFile = "Areas_Shrimp_sf", useLocal = useLocal,...)
   return(data)
