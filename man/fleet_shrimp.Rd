@@ -4,14 +4,12 @@
 \alias{fleet_shrimp}
 \title{fleet_shrimp}
 \usage{
-fleet_shrimp(marfGear = c(19, 62), type = NULL, useLocal = NULL, ...)
+fleet_shrimp(marfGear = c(19, 62), useLocal = NULL, ...)
 }
 \arguments{
 \item{marfGear}{default is \code{c(19,62)}. This is a vector of MARFIS gear codes known to have caught
 this species. The default values can be replaced with a smaller selection to only return information
 for a gear-specific subset of fishing activity.}
-
-\item{type}{default is \code{NULL}. This is either "TRAWL" or "TRAP".}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -106,6 +104,8 @@ consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1
 the script will provide information about when the script drops them from
 consideration.}
   }}
+
+\item{type}{default is \code{NULL}. This is either "TRAWL" or "TRAP".}
 }
 \value{
 specific returned objects can be specified by the user, but the default result is a list
