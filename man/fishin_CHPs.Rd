@@ -7,6 +7,7 @@
 fishin_CHPs(
   marfGear = c(12, 21, 41, 51, 59, 62),
   type = NULL,
+  stock = NULL,
   useLocal = NULL,
   ...
 )
@@ -16,7 +17,10 @@ fishin_CHPs(
 this species. The default values can be replaced with a smaller selection to only return information
 for a gear-specific subset of fishing activity.}
 
-\item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
+\item{type}{default is \code{NULL}. This is either "ALL", "FIXED" or "MOBILE". "ALL" just gets
+results for all gear types}
+
+\item{stock}{default is \code{NULL}. This is either "4X5Y" or "5Z".}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -208,16 +212,16 @@ Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = c(100, 110, 170)
   \item \code{isdbSpp} = c(10, 11, 16)
-  \item \code{tripcd_id} =
-  \item \code{fleet} =
-  \item \code{area} =
-  \item \code{gearSpecs} =
+  \item \code{tripcd_id} = c(10, 7001)
+  \item \code{fleet} = "CHP"
+  \item \code{stock} = 5Z or 4X5Y
 }
 }
 \examples{
 \dontrun{
 db <- fishin_CHPs(type = "FIXED",
-                    year = 2018,
+                    dateStart =  "2016-04-01", dateEnd= "2017-03-31",
+                    stock = "5Z",
                     useLocal = F,
                     oracle.username = "<name>",
                     oracle.password="<password>",
@@ -225,6 +229,8 @@ db <- fishin_CHPs(type = "FIXED",
                     usepkg = "roracle"
                     )
 local <- fishin_CHPs(type = "MOBILE",
+                       dateStart =  "2016-04-01", dateEnd= "2017-03-31",
+                       stock = "4X5Y",
                        year = 2018,
                        useLocal = T,
                        data.dir = "c:/data_folder"
