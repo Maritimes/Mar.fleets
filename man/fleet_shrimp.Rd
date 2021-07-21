@@ -104,8 +104,6 @@ consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1
 the script will provide information about when the script drops them from
 consideration.}
   }}
-
-\item{type}{default is \code{NULL}. This is either "TRAWL" or "TRAP".}
 }
 \value{
 specific returned objects can be specified by the user, but the default result is a list

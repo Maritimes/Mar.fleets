@@ -8,7 +8,6 @@
 #' @param marfGear default is \code{c(19,62)}. This is a vector of MARFIS gear codes known to have caught
 #' this species. The default values can be replaced with a smaller selection to only return information
 #' for a gear-specific subset of fishing activity.
-#' @param type default is \code{NULL}. This is either "TRAWL" or "TRAP".
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @examples \dontrun{
