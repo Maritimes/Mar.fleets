@@ -3,24 +3,44 @@
 #' functions.
 #' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
 #' @param title default is \code{NULL}. This will be shown as the title of the map.
-#' @param plotMARF default is \code{TRUE}. Should MARFIS data be plotted?
-#' @param plotISDB default is \code{TRUE}. Should ISDB data be plotted?
-#' @param cluster default is \code{TRUE}. If \code{TRUE}, MARF and ISDB data will be grouped until
-#' the map is zoomed in sufficiently  If \code{FALSE}, every MARF and/or ISDB data point will be shown.
-#' @param plotMARFSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be generated
-#' for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS" field.
-#' @param plotISDBSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be generated
-#' for the ISDB data. ISDB data contains several fields data for many species.  By default, the
-#'  interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
-#'  options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
-#'  respectively.
-#' @param isdbSurfField default is \code{"EST_COMBINED_WT"}.  Other valid values are "EST_NUM_CAUGHT" and "EST_DISCARD_WT".
+#' @param plotMARF default is \code{TRUE}. Should MARFIS data be plotted? If there are more than
+#' 1500 positions, the data will be displayed clustered.
+#' @param overloadMARF default is \code{"cluster"}. Valid values are 'cluster', and 'random'. This
+#' map gets really slow when dealing with many positions, and this parameter indicates what should
+#' be done with the MARFIS data if there are more sets than can reasonably be shown (i.e >1500).
+#' \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
+#' as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.
+#' @param plotISDB default is \code{TRUE}. Should ISDB data be plotted? If there are more than
+#' 1500 positions, the data will be displayed clustered.
+#' @param overloadISDB default is \code{"cluster"}. Valid values are 'cluster', and 'random'. This
+#' map gets really slow when dealing with many positions, and this parameter indicates what should
+#' be done with the ISDB data if there are more sets than can reasonably be shown (i.e >1500).
+#' \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
+#' as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.
+#' @param clusterMARF default is \code{TRUE}. If \code{TRUE}, MARF data will be grouped until
+#' the map is zoomed in sufficiently  If \code{FALSE}, every MARF data point will be shown. If the
+#' MARFIS data has > 1500 positions, it will be clustered regardless of this setting.
+#' @param clusterISDB default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
+#' the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the
+#' ISDB data has > 1500 positions, it will be clustered regardless of this setting.
+#' @param plotMARFSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
+#' generated for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS"
+#' field.
+#' @param plotISDBSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
+#' generated for the ISDB data. ISDB data contains several fields data for many species.  By default,
+#' the interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
+#' options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
+#' respectively.
+#' @param isdbSurfField default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT"
+#' and "EST_DISCARD_WT".
 #' @param marfSurfSpp default is \code{NULL}.  If nothing is provided, the default directed species
 #' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
-#' (i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$ISDB_CATCHES can be used.
+#' (i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$ISDB_CATCHES can be
+#' used.
 #' @param isdbSurfSpp default is \code{NULL}.  If nothing is provided, the default directed species
 #' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
-#' (i.e. "30" will be used.))  Any  isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can be used.
+#' (i.e. "30" will be used.)).  Any isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can
+#' be used.
 #' @param vms default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.
 #' If provided, VMS data will be plotted.
 #' @param bathy default is \code{TRUE}. If \code{TRUE}, a bathymetry layer will be available.
@@ -38,9 +58,7 @@
 #' @return a leaflet map.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, cluster = TRUE, plotMARFSurf = FALSE, plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL, marfSurfSpp = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
-
-
+quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, overloadMARF = "cluster", plotISDB = TRUE, overloadISDB = "cluster", clusterMARF = TRUE, clusterISDB = TRUE, plotMARFSurf = FALSE, plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL, marfSurfSpp = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
 
   if (tolower(surfRes)=="med"){
     det = 10000
@@ -50,7 +68,11 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
     det = 1000
   }
 
-
+  compareValues <- function(s1, s2) {
+    c1 <- unique(strsplit(s1, "")[[1]])
+    c2 <- unique(strsplit(s2, "")[[1]])
+    length(intersect(c1,c2))/length(c1)
+  }
 
   if ((plotISDB | plotISDBSurf)) {
     if (is.null(isdbSurfSpp)) isdbSurfSpp <- data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]
@@ -66,22 +88,12 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   overlayGroups <- NA
   clustMARF <- NULL
   clustISDB <- NULL
+  clustLimit <- 1500
   surfCols <- c("#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026")
-  # m <- leaflet::leaflet() %>% htmlwidgets::onRender("alert( 'Hello, world!')")
   m <- leaflet::leaflet()
-  # %>% htmlwidgets::onRender("showLegend = true;  // default value showing the legend
-  #
-  # var toggleLegend = function(){
-  #     if(showLegend === true){
-  #     /* use jquery to select your DOM elements that has the class 'legend' */
-  #        $('.legend').hide();
-  #        showLegend = false;
-  #     }else{
-  #        $('.legend').show();
-  #        showLegend = true;
-  #     }
-  # }")
-  m <- leaflet::addTiles(m)
+  m <- leaflet::addTiles(map = m)
+
+
   baseGroups <- "None"
   if (bathy){
     m <- leaflet::addWMSTiles(map = m,
@@ -143,7 +155,7 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   }
 
   markerLegendHTML <- function(IconSet) {
-    legendHtml <- "<div class='legend', style='padding: 10px; padding-bottom: 10px;'>"
+    legendHtml <- "<div id='legend', style='display:none; padding: 10px; padding-bottom: 10px;'>Legend"
     n <- 1
     for (Icon in IconSet) {
       if (Icon[["library"]] == "fa") {
@@ -188,10 +200,11 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
 
   if ((plotMARF | plotMARFSurf)  & class(data$marf$MARF_SETS)=="data.frame"){
     commSets <- Mar.utils::df_qc_spatial(data$marf$MARF_SETS)
-    commSets$icon<- "MARFIS"
-    commSets[which(is.na(commSets$NAFO_MARF_SETS) | (commSets$NAFO_MARF_SETS  != commSets$NAFO_MARF_SETS_CALC)),"icon"] <- "MARFIS_coord_issue"
+    commSets$icon <- "MARFIS"
+    commSets$coordchk <- mapply(compareValues, commSets$NAFO_MARF_SETS,commSets$NAFO_MARF_SETS_CALC)
 
-    message(nrow(data$marf$MARF_SETS)-nrow(commSets), " MARF positions had bad coordinates and couldn't be used")
+    commSets[which(commSets$coordchk <1),"icon"] <- "MARFIS_coord_issue"
+    commSets$coordchk <- NULL
 
     if (plotMARFSurf){
       theseCat <- data$marf$MARF_CATCHES[data$marf$MARF_CATCHES$SPECIES_CODE %in% marfSurfSpp,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "RND_WEIGHT_KGS")]
@@ -215,8 +228,11 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
     }
 
     if (plotMARF & nrow(commSets)>0){
-      if (cluster) {
-        clustMARF = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
+
+      if (nrow(commSets)>clustLimit){
+        message(paste0("The marf data has too many results to be shown on the map (i.e. > ", clustLimit,"). The choice indicated by overloadMARF ('",overloadMARF,"') will be imposed."))
+        if (overloadMARF == "cluster"){
+          clustMARF = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
         function (cluster) {
           var childCount = cluster.getChildCount();
           if (childCount < 100) {
@@ -229,7 +245,11 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
             return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', className: 'marker-cluster', iconSize: new L.Point(40, 40) });
           }
       "))
+        }else{
+          commSets <- commSets[sample.int(nrow(commSets), clustLimit),]
+        }
       }
+
       m <- leaflet::addAwesomeMarkers(map = m, group = "MARFIS", data = commSets, lng = commSets$LONGITUDE, lat = commSets$LATITUDE, icon = ~iconSet[icon], clusterOptions = clustMARF,
                                       popup = paste0("MARFIS TRIP_ID:", commSets$TRIP_ID_MARF,
                                                      "<br>PRO_SPC_INFO_ID: ", commSets$PRO_SPC_INFO_ID,
@@ -247,12 +267,19 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   }
   if ((plotISDB | plotISDBSurf) & class(data$isdb$ISDB_SETS)=="data.frame"){
     isdbSets <- Mar.utils::df_qc_spatial(data$isdb$ISDB_SETS)
+    isdbSets[["NAFO_ISDB_SETS"]][is.na(isdbSets[["NAFO_ISDB_SETS"]])] <- -9
+    isdbSets[["NAFO_ISDB_SETS_CALC"]][is.na(isdbSets[["NAFO_ISDB_SETS_CALC"]])] <- -8
 
-    isdbSets$icon <- "ISDB_OBS"
-    isdbSets[which(isdbSets$SOURCE ==0 & (is.na(isdbSets$NAFO_ISDB_SETS) | (isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC))),"icon"] <- "ISDB_OBS_coord_issue"
-    isdbSets[which(isdbSets$SOURCE ==0 & (isdbSets$NAFO_ISDB_SETS  == isdbSets$NAFO_ISDB_SETS_CALC)),"icon"] <- "ISDB_OBS"
-    isdbSets[which(isdbSets$SOURCE ==1 & (is.na(isdbSets$NAFO_ISDB_SETS) | (isdbSets$NAFO_ISDB_SETS  != isdbSets$NAFO_ISDB_SETS_CALC))),"icon"] <- "ISDB_LOG_coord_issue"
-    isdbSets[which(isdbSets$SOURCE ==1 & (isdbSets$NAFO_ISDB_SETS  == isdbSets$NAFO_ISDB_SETS_CALC)),"icon"] <- "ISDB_LOG"
+    isdbSets$icon <- NA
+    isdbSets$coordchk <- mapply(compareValues, isdbSets$NAFO_ISDB_SETS,isdbSets$NAFO_ISDB_SETS_CALC)
+
+
+    isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_OBS_coord_issue"
+    isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk == 1),"icon"] <- "ISDB_OBS"
+    isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_LOG_coord_issue"
+    isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk -- 1 ),"icon"] <- "ISDB_LOG"
+
+    isdbSets$coordchk <- NULL
 
     message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had bad coordinates and couldn't be used")
 
@@ -278,10 +305,10 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
     }
 
     if (plotISDB & nrow(isdbSets)>0){
-
-
-      if (cluster){
-        clustISDB = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
+      if (nrow(isdbSets)>clustLimit){
+        message(paste0("The ISDB data has too many results to be shown on the map (i.e. > ", clustLimit,"). The choice indicated by overloadISDB ('",overloadISDB,"') will be imposed."))
+        if (overloadISDB == "cluster"){
+          clustISDB = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
       function (cluster) {
         var childCount = cluster.getChildCount();
         if (childCount < 500) {
@@ -294,7 +321,12 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
           return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', className: 'marker-cluster', iconSize: new L.Point(40, 40) });
         }
       "))
+        }else{
+          isdbSets <- isdbSets[sample.int(nrow(isdbSets), clustLimit),]
+        }
       }
+
+
       m <- leaflet::addAwesomeMarkers(map = m, group = "ISDB", data=isdbSets,lng = isdbSets$LONGITUDE , lat = isdbSets$LATITUDE, icon =  ~iconSet[icon], clusterOptions = clustISDB,
                                       popup = paste0("ISDB TRIP_ID: ",isdbSets$TRIP_ID,
                                                      "<br>FISHSET_ID: ", isdbSets$FISHSET_ID,
@@ -332,26 +364,20 @@ quickMap <- function(data=NULL, title = NULL, plotMARF = TRUE, plotISDB = TRUE, 
   overlayGroups <- overlayGroups[!is.na(overlayGroups)]
   m <- leaflet::addLayersControl(map=m, baseGroups = baseGroups, overlayGroups = overlayGroups, options = leaflet::layersControlOptions(collapsed = TRUE))
   if (!is.null(title)) m <- leaflet::addControl(map=m, html = titleHTML, position = "bottomleft")
+  m <- leaflet::addEasyButton(map = m, leaflet::easyButton(position = "topright",
+    icon = htmltools::span(class = "star", htmltools::HTML("&starf;")),
+    onClick = leaflet::JS("
+    function(btn, map){
+      var x = document.getElementById('legend');
+      if (x.style.display === 'none') {
+        x.style.display ='block';
+      } else {
+        x.style.display = 'none';
+      }
+    }
+    ")))
   m <- leaflet::addControl(map=m, html = markerLegendHTML(IconSet = iconSet), position = "topright")
   m <- leaflet::hideGroup(map=m, group = "MARFIS")
   m <- leaflet::hideGroup(map=m, group = "ISDB")
-  # m<-
-    # htmlwidgets::onRender("
-    #  showLegend = true;  // default value showing the legend
-    #
-    # var toggleLegend = function(){
-    #     if(showLegend === true){
-    #     /* use jquery to select your DOM elements that has the class 'legend' */
-    #        $('.legend').hide();
-    #        showLegend = false;
-    #     }else{
-    #        $('.legend').show();
-    #        showLegend = true;
-    #     }
-    # }
-    #          ")
-  # m <- leaflet::addEasyButton(map=m, leaflet::easyButton(icon="fa-globe", title="Show Legend"
-  #                                                        ,onClick=leaflet::JS("toggleLegend();"))
-  #                                                        )
   return(m)
 }
