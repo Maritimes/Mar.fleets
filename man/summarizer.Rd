@@ -8,11 +8,12 @@ summarizer(
   data = NULL,
   units = "KGS",
   bySpp = TRUE,
-  byYr = TRUE,
+  byYr = FALSE,
   byGr = TRUE,
   byNAFO = FALSE,
   byCust = NULL,
-  speccd_id = NULL,
+  specMARF = NULL,
+  specISDB = NULL,
   doMARF = T,
   doISDB = T,
   quietly = F
@@ -25,17 +26,18 @@ summarizer(
 options are any of "KGS", "TONNES", "LBS".}
 
 \item{bySpp}{default is \code{TRUE}. If TRUE, the summed weights and numbers of unique trips and
-licence_ids will will be broken down by all identified landed species. If FALSE,
-weights will be summed, irrespective of landed species.}
+licence_ids will will be broken down by all identified landed species. If FALSE,aggregations will
+ignore differences in landed species.}
 
-\item{byYr}{default is \code{TRUE}.   If TRUE, the summed weights and numbers of unique trips
+\item{byYr}{default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 and licence_ids will will be broken down by each year in which a landing was identified. If FALSE,
-weights will be summed, irrespective of year. "Year" is taken from the end date of the associated
-trip record.}
+aggregations will ignore differences in year. "Year" is taken from the end date of the associated
+trip record (i.e. <data>$marf$MARF_SETS$T_DATE2 for MARF, and <data>$isdb$ISDB_SETS$DATE_TIME for
+ISDB).}
 
 \item{byGr}{default is \code{TRUE}. If TRUE, the summed weights and numbers of unique trips and
-licence_ids will will be broken down by all identified gear types. If FALSE,
-weights will be summed, irrespective of gear.}
+licence_ids will will be broken down by all identified gear types. If FALSE, aggregations will
+ignore differences in gear types.}
 
 \item{byNAFO}{default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 and licence_ids will will be broken down by <reported> NAFO division in which a landing was
@@ -43,6 +45,12 @@ identified. If FALSE, weights will be summed, irrespective of <reported> NAFO di
 
 \item{byCust}{default is \code{NULL}. This can be the name of any field found in \code{<data>$marf$MARF_SETS}
 by which you would like to see aggregated results}
+
+\item{specMARF}{default is \code{NULL}.  If your data is for a fleet returns multiple species, you can
+enter an MARFIS species code here, and the MARF data  will be limited to those species.}
+
+\item{specISDB}{default is \code{NULL}.  If your data is for a fleet returns multiple species, you can
+enter an ISDB species code here, and the ISDB data will be limited to those species.}
 
 \item{doMARF}{default is \code{TRUE}. This indicates that the MARFIS results should be summarized.}
 
@@ -52,12 +60,16 @@ by which you would like to see aggregated results}
 output to the console while the scripts run.}
 }
 \value{
-a data frame
+by default, a list containing an object with the results of both MARF and ISDB is
+returned.  If either \code{doMARF} or \code{doISDB} is set to FALSE, than the returned object is
+a dataframe
 }
 \description{
-This is a simple tool that quickly breaks down the results of any of the fleet
+This is a tool that quickly breaks down the results of any of the fleet
 wrappers to provide information on the number of trips, unique vessels, unique licences, and total
-catch.  These results can be aggregated by YEAR, SPECIES_CODE, and GEAR TYPE.
+catch.  These results can be further aggregated by Year, NAFO area, Species code, GEAR TYPE, as
+well as by any fields that exist in the TRIPS or SETS object of the marfis or isdb results
+(or both).
 }
 \examples{
 \dontrun{
