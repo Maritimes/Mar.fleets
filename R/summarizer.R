@@ -128,6 +128,7 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
     res <- merge(data.table::setDF(counts), data.table::setDF(sums))
     res <- res[with(res,order(YEAR, NTRIPS)),]
     for (s in 1:length(sumFields)){
+      if (sumFields[s]=="EST_NUM_CAUGHT") next
       if (units == "TONNES") res[[paste0(sumFields[s],"_TONNES")]]<-res[[sumFields[s]]]/1000
       if (units == "LBS") res[[paste0(sumFields[s],"_LBS")]]<-res[[sumFields[s]]]*2.20462
       if (units != "KGS") res[[sumFields[s]]] <- NULL
