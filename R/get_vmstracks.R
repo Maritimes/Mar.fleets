@@ -18,14 +18,13 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 get_vmstracks<-function(data = NULL, ...){
-
   argsUser <- list(...)
   args <- do.call(set_defaults, list(argsUser=argsUser))$args
   if (args$useLocal==TRUE){
     message("\n", "VMS data requires a connection to the network.  It cannot be run locally")
     return(NULL)
   }
-  if(args$debuggit) Mar.utils::where_now()
+  if(args$debug) Mar.utils::where_now()
 
  vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
                                                                 mDate=as.Date(character()),
