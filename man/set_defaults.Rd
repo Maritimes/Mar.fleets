@@ -37,7 +37,7 @@ set_defaults(
   debugMARFTripIDs = NULL,
   debugISDBTripIDs = NULL,
   debugISDBTripNames = NULL,
-  debuggit = FALSE,
+  debug = FALSE,
   ...
 )
 }
@@ -171,7 +171,7 @@ consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1
 the script will provide information about when the script drops them from
 consideration.}
 
-\item{debuggit}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
+\item{debug}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
 
 \item{...}{other arguments passed to methods}
