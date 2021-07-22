@@ -25,7 +25,7 @@
 #' @export
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
-  if (args$debuggit)    Mar.utils::where_now()
+  if (args$debug)    Mar.utils::where_now()
   ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- NA
 
   if (is.null(get_marfis)){
@@ -48,7 +48,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
   if (!is.null(keepSurveyTrips)) args$keepSurveyTrips <- keepSurveyTrips
   get_isdb_trips<-function(mVR_LIC = NULL,...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     # Sometimes ISDB does not have the correct MARFIS licenses - extract them from MARFIS,
     # merge them on to the ISDB data, and use them preferentially
     mLICS <- sub("\\_.*", "", mVR_LIC)
@@ -171,7 +171,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
   }
   get_isdb_sets<-function(isdbTrips=NULL,...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     badDate <- as.POSIXct(as.Date("2100-01-01"))
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE", "ISGEARS"),
@@ -251,7 +251,8 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
     }
     ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, flag.land = T)
     colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO_BEST"] <- "NAFO_ISDB_SETS_CALC"
-    if (args$areaFile != "NAFOSubunits_sf"){
+
+    if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
       ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
     }
     ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
@@ -291,7 +292,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known =  trips$ISDB_MARFIS_POST_MATCHED$VR, stepDesc = "isdb_droppedUnmatched")
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known =  trips$ISDB_MARFIS_POST_MATCHED$LIC, stepDesc = "isdb_droppedUnmatched")
 
-    if (args$debuggit) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
+    if (args$debug) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
     matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
                     "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
                     "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
@@ -310,7 +311,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
       isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
       sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = get_marfis$MARF_SETS, args = args))
       if (!all(is.na(sets))) {
-        if (args$debuggit) message("DEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
+        if (args$debug) message("DEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
         isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
         isdb_SETS_all$TRIP_ID_ISDB <- isdb_SETS_all$TRIP_ID_MARF <- NULL
         isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
