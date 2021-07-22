@@ -51,7 +51,7 @@ summarize_locations<-function(get_isdb = NULL,
                               get_marfis = NULL,
                               ...){
   args <- list(...)$args
-  if (args$debuggit) Mar.utils::where_now()
+  if (args$debug) Mar.utils::where_now()
   trimNAFONames<- function(nafoString = NULL, det = det){
     toTrim <- nafoString[nchar(nafoString)<=4]
     noTrim <- nafoString[!(nafoString %in% toTrim)]
@@ -132,7 +132,7 @@ summarize_locations<-function(get_isdb = NULL,
   colnames(summary)[colnames(summary)=="oSetsSummCalc"] <- "SETS_ISDB_calculated"
   res <- list()
   res[["NAFO"]] <- summary
-  if (args$areaFile != "NAFOSubunits_sf"){
+  if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     mSets_cust <- get_marfis$MARF_SETS[,c("LOG_EFRT_STD_INFO_ID",args$areaFileField)]
     mSetsSummRpt_cust <- stats::aggregate(
       x = list(cnt = mSets_cust$LOG_EFRT_STD_INFO_ID ),
