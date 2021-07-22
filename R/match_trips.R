@@ -45,14 +45,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   MultiMatches = 0
 
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
-  if (args$debuggit) Mar.utils::where_now()
+  if (args$debug) Mar.utils::where_now()
   k <- TRIP_ID_MARF <- CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- PRIOR1 <- PRIOR2 <- NA
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
     if (!args$quietly)message(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
     return(NULL)
   }
-  marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "LOA","ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2")])
+  marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2")])
   marfMatch <- clean_ISDB_Trip(df = marfMatch, field = "ISDB_TRIP", out_name = "ISDB_TRIP_M")
   isdbTrips <- clean_ISDB_Trip(df = isdbTrips, field = "TRIP", out_name = "ISDB_TRIP_O")
   isdbTrips$VR_LIC = paste0(isdbTrips$VR,"_",isdbTrips$LIC )
@@ -64,7 +64,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # 3 - add matches to df called matches
 
   matchTripNames <- function(df = NULL){
-    if (args$debuggit)    Mar.utils::where_now()
+    if (args$debug)    Mar.utils::where_now()
     # MARFIS TRIP NAME ----------------------------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$ISDB_TRIP_O),c("TRIP_ID_ISDB", "ISDB_TRIP_O")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("TRIP_ID_MARF","ISDB_TRIP_M")])
@@ -85,7 +85,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     return(match_TRIP)
   }
   matchHI <- function(df = NULL){
-    if (args$debuggit)    Mar.utils::where_now()
+    if (args$debug)    Mar.utils::where_now()
     # MARFIS HAILIN CONFIRMATION NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HI),c("TRIP_ID_MARF","CONF_NUMBER_HI")])
@@ -109,7 +109,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     return(match_CONF_HI)
   }
   matchHO <- function(df = NULL){
-    if (args$debuggit)    Mar.utils::where_now()
+    if (args$debug)    Mar.utils::where_now()
     # MARFIS HAILOUT CONFIRMATION NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")])
@@ -132,7 +132,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     return(match_CONF_HO)
   }
   matchVR <- function(df = NULL){
-    if (args$debuggit)    Mar.utils::where_now()
+    if (args$debug)    Mar.utils::where_now()
     # MARFIS VR NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$VR),c("TRIP_ID_ISDB", "VR", "LIC")])
     #MARF - combine using both fishing and landing vessel vrs, then combine and get unique list
@@ -167,7 +167,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     return(match_VR)
   }
   matchLIC <- function(df = NULL){
-    if (args$debuggit)    Mar.utils::where_now()
+    if (args$debug)    Mar.utils::where_now()
     # MARFIS VR NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$LIC),c("TRIP_ID_ISDB", "LIC", "VR")])
     thisMarfMatch <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID")])
@@ -199,7 +199,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     return(match_LIC)
   }
   matchDate <- function(df = NULL){
-    if (args$debuggit)    Mar.utils::where_now()
+    if (args$debug)    Mar.utils::where_now()
     #DATE RANGE --------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
     thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", "VR_NUMBER_FISHING", "LICENCE_ID")])
@@ -310,8 +310,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       length
     )
     knowncombos_cnt <- merge(knowncombos_cnt, isdbTrips[, c("TRIP_ID_ISDB", "TRIP", "TRIPCD_ID", "SRC")], all.x=T)
-    matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) |!is.na(marfMatch$OBS_PRESENT) ,]
-
+    #matchNone must have values for either ISDB_TRIP, OBS_ID of non-NA value for OB_PRESENT that is not "N"
+    matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) | (!is.na(marfMatch$OBS_PRESENT) & marfMatch$OBS_PRESENT!="N") ,]
     # these guys are matched on trip-specific values (ie trip name, confirmation codes).  Likelihood of  duplicates is low
     match_CONF1 <-  merge(knowncombos_cnt, match_TripName, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB", "TRIP_ID_MARF_TRIP"), all.x=T)
     match_CONF1 <-  merge(match_CONF1, match_HI, by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_HI"), all.x=T)
@@ -354,7 +354,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if(nrow(matches)==0){
       message("No matches found")
       matchGood <- matches
-      matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) |!is.na(marfMatch$OBS_PRESENT) ,]
+      matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) | (!is.na(marfMatch$OBS_PRESENT) & marfMatch$OBS_PRESENT!="N") ,]
+
       Unmatchables <- nrow(matchNone)
       if (nrow(matchNone)==0)matchNone <- NA
     }else{
@@ -410,14 +411,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
         Obs_Trip_Name = nrow(matchGood[matchGood$match_TripName,])
         Hail_In_Conf_Code = nrow(matchGood[matchGood$match_CONF_HI,])
         Hail_Out_Conf_Code = nrow(matchGood[matchGood$match_CONF_HO,])
-        Date_Lic_VR_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_LIC,])
-        Date_Lic_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_LIC,])
-        Date_VR_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_VR,])
+        Date_Lic_VR_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_LIC & matchGood$match_VR,])
+        Date_Lic_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_LIC & !matchGood$match_VR,])
+        Date_VR_Combo = nrow(matchGood[matchGood$match_Date & matchGood$match_VR & !matchGood$match_LIC,])
         Likely_Swapped_VR_LIC = nrow(matchGood[matchGood$swappedLIC_VR,])
         Total_Matches = nrow(matchGood)
       }else{
         message("No matches found")
-        matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) |!is.na(marfMatch$OBS_PRESENT) ,]
+        matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) | (!is.na(marfMatch$OBS_PRESENT) & marfMatch$OBS_PRESENT!="N") ,]
         Unmatchables <- nrow(matchNone)
         if (nrow(matchNone)==0)matchNone <- NA
       }
