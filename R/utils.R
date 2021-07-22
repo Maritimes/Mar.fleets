@@ -11,7 +11,6 @@
 #' "sets" contains information about individual fishing activities, including
 #' locations, dates, durations, gear amount, etc..
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
 clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CLN"){
   df[,out_name] <- gsub(pattern = "[^[:alnum:]]", replacement = "", x=  df[,field])
   return(df)
