@@ -6,18 +6,18 @@
 \usage{
 quickMap(
   data = NULL,
-  title = NULL,
   plotMARF = TRUE,
-  overloadMARF = "cluster",
-  plotISDB = TRUE,
-  overloadISDB = "cluster",
   clusterMARF = TRUE,
-  clusterISDB = TRUE,
+  overloadMARF = "cluster",
   plotMARFSurf = FALSE,
+  marfSurfSpp = NULL,
+  plotISDB = TRUE,
+  clusterISDB = TRUE,
+  overloadISDB = "cluster",
   plotISDBSurf = FALSE,
   isdbSurfField = "EST_COMBINED_WT",
   isdbSurfSpp = NULL,
-  marfSurfSpp = NULL,
+  title = NULL,
   vms = NULL,
   bathy = TRUE,
   nafo = TRUE,
@@ -27,10 +27,12 @@ quickMap(
 \arguments{
 \item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
 
-\item{title}{default is \code{NULL}. This will be shown as the title of the map.}
-
 \item{plotMARF}{default is \code{TRUE}. Should MARFIS data be plotted? If there are more than
 1500 positions, the data will be displayed clustered.}
+
+\item{clusterMARF}{default is \code{TRUE}. If \code{TRUE}, MARF data will be grouped until
+the map is zoomed in sufficiently  If \code{FALSE}, every MARF data point will be shown. If the
+MARFIS data has > 1500 positions, it will be clustered regardless of this setting.}
 
 \item{overloadMARF}{default is \code{"cluster"}. Valid values are 'cluster', and 'random'. This
 map gets really slow when dealing with many positions, and this parameter indicates what should
@@ -38,8 +40,21 @@ be done with the MARFIS data if there are more sets than can reasonably be shown
 \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
 as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.}
 
+\item{plotMARFSurf}{default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
+generated for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS"
+field.}
+
+\item{marfSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
+will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
+(i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$MARF_CATCHES can be
+used.}
+
 \item{plotISDB}{default is \code{TRUE}. Should ISDB data be plotted? If there are more than
 1500 positions, the data will be displayed clustered.}
+
+\item{clusterISDB}{default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
+the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the
+ISDB data has > 1500 positions, it will be clustered regardless of this setting.}
 
 \item{overloadISDB}{default is \code{"cluster"}. Valid values are 'cluster', and 'random'. This
 map gets really slow when dealing with many positions, and this parameter indicates what should
@@ -47,36 +62,21 @@ be done with the ISDB data if there are more sets than can reasonably be shown (
 \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
 as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.}
 
-\item{clusterMARF}{default is \code{TRUE}. If \code{TRUE}, MARF data will be grouped until
-the map is zoomed in sufficiently  If \code{FALSE}, every MARF data point will be shown. If the
-MARFIS data has > 1500 positions, it will be clustered regardless of this setting.}
-
-\item{clusterISDB}{default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
-the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the
-ISDB data has > 1500 positions, it will be clustered regardless of this setting.}
-
-\item{plotMARFSurf}{default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
-generated for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS"
-field.}
-
 \item{plotISDBSurf}{default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
 generated for the ISDB data. ISDB data contains several fields data for many species.  By default,
 the interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
 options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
 respectively.}
 
-\item{isdbSurfField}{default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT"
-and "EST_DISCARD_WT".}
+\item{isdbSurfField}{default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT",
+"EST_KEPT_WT", and "EST_DISCARD_WT".}
 
 \item{isdbSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
 will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 (i.e. "30" will be used.)).  Any isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can
 be used.}
 
-\item{marfSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
-will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
-(i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$ISDB_CATCHES can be
-used.}
+\item{title}{default is \code{NULL}. This will be shown as the title of the map.}
 
 \item{vms}{default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.
 If provided, VMS data will be plotted.}
@@ -101,7 +101,7 @@ redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/d
 redfishVMS<-get_vmstracks(get_marfis = redfishresults$marf, get_isdb = redfishresults$isdb,
     useLocal=F, oracle.username = "me", oracle.password = "mypassword",
     oracle.dsn="PTRAN", usepkg='roracle')
-quickMap(data=redfishresults, vms= redfishVMS, nafo=TRUE)
+quickMap(data=redfishresults, vms= redfishVMS)
        }
 }
 \seealso{
