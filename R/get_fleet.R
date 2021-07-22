@@ -21,7 +21,7 @@ get_fleet<-function(...){
 
   args <-list(...)
 
-  if (args$debuggit)  Mar.utils::where_now()
+  if (args$debug)  Mar.utils::where_now()
 
   MARFLEETS_LIC <- PRO_SPC_INFO <- TRIPS <- NAFO_UNIT_AREAS  <- LOG_EFRT_ENTRD_DETS <- LOG_EFRT_STD_INFO <- GEARS <- NA
   theseLics <- NA
@@ -43,7 +43,7 @@ get_fleet<-function(...){
 
   sizeFilt <- function(df=NULL, gearSpecRelevant = NULL, gearSpecDF = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     if (!is.na(args$gearSpecs$MIN)){
       gearSpecRelevant <- gearSpecRelevant[grep("[[:digit:]]", gearSpecRelevant$DATA_VALUE), ]
       gearSpecRelevant$DATA_VALUE <- as.numeric(gearSpecRelevant$DATA_VALUE)
@@ -55,7 +55,7 @@ get_fleet<-function(...){
 
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearSize")
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearSize")
-      if (args$debuggit) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
+      if (args$debug) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
       df<- df_new
       log_eff <- NA
     }
@@ -63,7 +63,7 @@ get_fleet<-function(...){
   }
   typeFilt <- function(df=NULL, gearSpecRelevant = NULL, gearSpecDF = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     if (!is.na(args$gearSpecs$TYPE)){
       #apply the requested filter
       gearSpecRelevant_types <- gearSpecRelevant[toupper(gearSpecRelevant$DATA_VALUE) %in% args$gearSpecs$TYPE,"LOG_EFRT_STD_INFO_ID"]
@@ -72,7 +72,7 @@ get_fleet<-function(...){
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearTypeFilt")
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearTypeFilt")
 
-      if (args$debuggit) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "gearTypeFilt")
+      if (args$debug) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "gearTypeFilt")
       df<- df_new
       log_eff <- NA
     }
@@ -81,7 +81,7 @@ get_fleet<-function(...){
   chk_Gears <- function(df=NULL, gearSpecDF = NULL, ...){
     #this function figures out what categories of gears we're dealing with, and will let us determine what filters might be possible
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     if(!args$useLocal){
       grs = unique(df$GEAR_CODE)
       gearQry <- paste0("SELECT DISTINCT
@@ -165,15 +165,11 @@ get_fleet<-function(...){
 
   get_fleetLicences_loc<-function(...){
     args <- list(...)
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
                                tables = c("MARFLEETS_LIC"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC$LICENCE_ID, stepDesc = "flt_initial")
-    # if (args$debuggit){
-    #   browser()
-      #here, I successively use the licence info to compare against the records in MARFLEETS_LIC. This will facilitate understanding when certain records that
-      # might be expected are dropped
       if (all(is.na(args$lics$LIC_TYPE))){
         MARFLEETS_LIC_L <- MARFLEETS_LIC
       } else{
@@ -205,14 +201,14 @@ get_fleet<-function(...){
     # }
     MARFLEETS_LIC_new <- MARFLEETS_LIC[which(eval(parse(text=theseLics))),]
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new$LICENCE_ID, stepDesc = "flt_licTypeSubtypeSpCombo")
-    if (args$debuggit) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC, post_ = MARFLEETS_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/sp filter")
+    if (args$debug) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC, post_ = MARFLEETS_LIC_new, fields = "LICENCE_ID", flagTxt = "initial lic type/subtype/sp filter")
     MARFLEETS_LIC <- MARFLEETS_LIC_new
 
     # Filter licences by desired date range -------------------------------------------------------------------------------------------------------------------
     dateFilt <- paste0("MARFLEETS_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARFLEETS_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
     MARFLEETS_LIC_new <- MARFLEETS_LIC[which(eval(parse(text=dateFilt))),]
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new$LICENCE_ID, stepDesc = "flt_licDates")
-    if (args$debuggit) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC, post_ = MARFLEETS_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+    if (args$debug) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC, post_ = MARFLEETS_LIC_new, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
     LICDETS<- unique(MARFLEETS_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
     licDf <- unique(MARFLEETS_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
     res=list()
@@ -222,9 +218,9 @@ get_fleet<-function(...){
   }
   get_fleetLicences_ora<-function(...){
     args <- list(...)
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
 
-    if (args$debuggit | !any(is.null(dbEnv$debugLics))){
+    if (args$debug | !any(is.null(dbEnv$debugLics))){
       # message("To handle debugging, a lot of data must first be extracted, so that each step can be checked.  This step will take ~1 minute")
       MARFLEETS_LIC_Qry <- paste0("SELECT *
                             FROM MARFISSCI.MARFLEETS_LIC WHERE ",theseLicsOra)
@@ -233,7 +229,7 @@ get_fleet<-function(...){
       MARFLEETS_LIC <- args$cxn$thecmd(args$cxn$channel, MARFLEETS_LIC_Qry)
       LICDETS<- unique(MARFLEETS_LIC[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
 
-      # message("Completed big extraction.  To avoid this in the future, don't use debuggit, don't send debugLics or change to useLocal = T.")
+      # message("Completed big extraction.  To avoid this in the future, don't use debug, don't send debugLics or change to useLocal = T.")
 
       if (all(is.na(args$lics$LIC_TYPE))){
         MARFLEETS_LIC_L <- MARFLEETS_LIC
@@ -266,7 +262,7 @@ get_fleet<-function(...){
       dateFilt <- paste0("MARFLEETS_LIC$L_ORIGIN_DATE <= '", args$dateEnd, "' & MARFLEETS_LIC$L_EXPIRY_DATE >= '",args$dateStart,"'")
       MARFLEETS_LIC_new_date <- MARFLEETS_LIC[which(eval(parse(text=dateFilt))),]
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC_new_date$LICENCE_ID, stepDesc = "flt_licDatesOra")
-      if (args$debuggit) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC_new, post_ = MARFLEETS_LIC_new_date, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
+      if (args$debug) Mar.utils::changeDetector(pre_ = MARFLEETS_LIC_new, post_ = MARFLEETS_LIC_new_date, fields = "LICENCE_ID", flagTxt = "lic start end dates applied")
       MARFLEETS_LIC <- MARFLEETS_LIC_new_date
 
       # if (all(is.na(args$marfGear))){
@@ -298,10 +294,10 @@ get_fleet<-function(...){
 
   get_fleetActivity_loc<- function(licDf = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
 
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
-                               tables = c("PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS"),
+                               tables = c("PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS", "VESSELS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = args$quietly)
 
     # Handle the various data we just pulled ------------------------------------------------------------------------------------------------------------------
@@ -340,7 +336,7 @@ get_fleet<-function(...){
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSDates")
     dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSDates")
 
-    if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by dates")
+    if (args$debug) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by dates")
     PRO_SPC_INFO <- PRO_SPC_INFO_new
 
     # limit fishing activity to fleet-specified areas ---------------------------------------------------------------------------------------------------------
@@ -352,11 +348,12 @@ get_fleet<-function(...){
       dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PRO_SPC_INFO_new$TRIP_ID, stepDesc = "flt_PSNAFOAreas")
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSNAFOAreas")
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSNAFOAreas")
-
-      if (args$debuggit) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by licenced NAFO")
+      PRO_SPC_INFO$NAFO_AREA <- NULL
+      if (args$debug) Mar.utils::changeDetector(pre_ = PRO_SPC_INFO, post_ = PRO_SPC_INFO_new, fields = "LICENCE_ID", flagTxt = "PS filtered by licenced NAFO")
       PRO_SPC_INFO <- PRO_SPC_INFO_new
     }
 
+  PRO_SPC_INFO <- merge(PRO_SPC_INFO, VESSELS[, c("VR_NUMBER", "LOA")], all.x = T)
     # Clean results -------------------------------------------------------------------------------------------------------------------------------------------
     PRO_SPC_INFO$NAFO_UNIT_AREA_ID<-PRO_SPC_INFO$TRIP_ID <- NULL
     if (nrow(PRO_SPC_INFO)<1) stop("No fleet activity found")
@@ -365,7 +362,7 @@ get_fleet<-function(...){
   }
   get_fleetActivity_ora<- function(licDf = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
     where_date <-  paste0("AND (T.EARLIEST_DATE_TIME <= to_date('",args$dateEnd,"','YYYY-MM-DD') AND T.LATEST_DATE_TIME >= to_date('",args$dateStart,"','YYYY-MM-DD'))")
     where_Gr <- paste0("AND PS.GEAR_CODE IN (",Mar.utils::SQL_in(args$marfGear,apos = F),")")
 
@@ -377,11 +374,13 @@ get_fleet<-function(...){
 
     fleetAct_qry = paste0("SELECT PS.LICENCE_ID, PS.PRO_SPC_INFO_ID, PS.LOG_EFRT_STD_INFO_ID, PS.GEAR_CODE, PS.MON_DOC_ID,
 MD.VR_NUMBER, T.EARLIEST_DATE_TIME T_DATE1,T.LATEST_DATE_TIME T_DATE2,
-N.AREA NAFO
-FROM MARFISSCI.PRO_SPC_INFO PS, MARFISSCI.TRIPS T, MARFISSCI.NAFO_UNIT_AREAS N, MARFISSCI.MON_DOCS MD
+N.AREA NAFO, V.LOA
+FROM MARFISSCI.PRO_SPC_INFO PS, MARFISSCI.TRIPS T, MARFISSCI.NAFO_UNIT_AREAS N, MARFISSCI.MON_DOCS MD,
+MARFISSCI.VESSELS V
 WHERE
 MD.MON_DOC_ID = PS.MON_DOC_ID
 AND PS.TRIP_ID = T.TRIP_ID
+AND MD.VR_NUMBER = V.VR_NUMBER
 AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
                           ,where_date, " "
                           ,where_Gr, " "
@@ -391,12 +390,12 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
     theFleet = args$cxn$thecmd(args$cxn$channel, fleetAct_qry)
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSDates")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSDates")
-
+    theFleet$NAFO <- NULL
     # theFleet2 <- theFleet[paste0(theFleet$LICENCE_ID,"_", theFleet$GEAR_CODE) %in% all_LicGr,]
     # dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSLicGears")
     # dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSLicGears")
 
-    # if (args$debuggit) Mar.utils::changeDetector(pre_ = theFleet, post_ = theFleet2, fields = "LICENCE_ID", flagTxt = "PS filtered by licence/gear combo")
+    # if (args$debug) Mar.utils::changeDetector(pre_ = theFleet, post_ = theFleet2, fields = "LICENCE_ID", flagTxt = "PS filtered by licence/gear combo")
     # theFleet <- theFleet2
     if (nrow(theFleet)<1) stop("No fleet activity found")
     return(theFleet)
@@ -404,7 +403,7 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
 
   get_fleetGear_loc<-function(df = NULL, ...){
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
 
     # Get all of the records for our df that might link to gear info ----------------------------------------
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
@@ -443,7 +442,7 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
   get_fleetGear_ora<-function(df = NULL, ...){
     #MMM need to add gear filter results to ISDBdebugtrips results
     args <- list(...)$args
-    if (args$debuggit) Mar.utils::where_now()
+    if (args$debug) Mar.utils::where_now()
 
     # Get all of the records for our df that might link to gear info ----------------------------------------
 
@@ -495,10 +494,11 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
     df <- do.call(get_fleetGear_ora, list(df=actDf,args=args))
   }
   df$NAFO <-NULL
-  df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),])
+  df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE, LOA )),])
   res <- list()
   res[["LICDETS"]]<-licDets
-  res[["FLEET"]] <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE )),c("VR_NUMBER", "LICENCE_ID", "GEAR_CODE")])
+  res[["FLEET"]] <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE, LOA )),c("VR_NUMBER", "LICENCE_ID", "GEAR_CODE", "LOA")])
+  df$LOA <- df$NAFO_AREA <- NULL
   res[["FLEET_ACTIVITY"]]<- df
 
   return(res)
