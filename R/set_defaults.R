@@ -85,7 +85,7 @@
 #' be slightly easier to setup, but roracle will extract data faster.
 #' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be
 #' output to the console while the scripts run.
-#' @param debuggit default is \code{FALSE}. If TRUE, this parameter causes the package to run in
+#' @param debug default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 #' debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
 #' provide information about when the script drops them from
@@ -138,7 +138,7 @@ set_defaults <- function(lics = 'all',
                          debugMARFTripIDs = NULL,
                          debugISDBTripIDs = NULL,
                          debugISDBTripNames = NULL,
-                         debuggit=FALSE,
+                         debug=FALSE,
                          ...){
   defaults <- as.list(environment())
   sentArgs <- list(...)
@@ -205,7 +205,7 @@ set_defaults <- function(lics = 'all',
       paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
     }
     # paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
-
+if(exists("dbEnv")){
     dbEnv$debugLics <- argg$debugLics
     dbEnv$debugVRs <- argg$debugVRs
     dbEnv$debugMARFTripIDs <- argg$debugMARFTripIDs
@@ -214,6 +214,7 @@ set_defaults <- function(lics = 'all',
       dbEnv$debugISDBTripNamesLookup <- clean_ISDB_Trip(df=data.frame(ISDB_TRIP = argg$debugISDBTripNames), field = "ISDB_TRIP", out_name = "ISDB_TRIP_CLN")
       dbEnv$debugISDBTripNames <- dbEnv$debugISDBTripNamesLookup$ISDB_TRIP_CLN
     }
+}
 res <- list()
 res[["params"]]<- paramDf
 res[["args"]]<- argg
