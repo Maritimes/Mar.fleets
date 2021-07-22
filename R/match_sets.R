@@ -19,7 +19,7 @@
 #' @noRd
 match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, ...){
   args <- list(...)$args
-  if (args$debuggit){
+  if (args$debug){
     Mar.utils::where_now()
     T_match_sets=Sys.time()
   }
