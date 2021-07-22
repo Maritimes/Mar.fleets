@@ -130,7 +130,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
   args <- do.call(can_run, args$args)
 
-  if (args$debuggit) Mar.utils::where_now()
+  if (args$debug) Mar.utils::where_now()
 
   #set up results list, and populate according to arguments
   data <- list()

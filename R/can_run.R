@@ -8,7 +8,7 @@
 #' @noRd
 can_run <- function(...){
   args=list(...)
-  if (args$debuggit){
+  if (args$debug){
     Mar.utils::where_now()
   }
 
