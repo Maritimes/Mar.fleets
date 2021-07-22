@@ -125,8 +125,10 @@ quickMap <- function(data=NULL,
   }
   m <- leaflet::addPolygons(group = "NAFO",
                             map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
-                            label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.9,
-                            labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2) )
+                            label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.4,
+                            labelOptions = leaflet::labelOptions(noHide = T, textOnly = TRUE, textsize = 0.2,
+                            style = list(
+                              "color" = "rgba(0,0,0,0.55)")))
   overlayGroups <- c(overlayGroups, "NAFO")
 
 
@@ -350,12 +352,26 @@ quickMap <- function(data=NULL,
   }
 
   if ("data.frame" %in% class(vms)){
-    pal <- leaflet::colorFactor(
-      palette = c('black','red'),
-      domain = vms$OBS
-    )
-    m <- leaflet::addPolylines(map = m, group = "VMS", data = vms, stroke = TRUE, color= ~pal(OBS), weight = 2, popup = ifelse(vms$OBS == 0,"UNOBSERVED","OBSERVED"))
-    overlayGroups <- c(overlayGroups, "VMS")
+    vmsObs <- vms[vms$OBS==1,]
+    vmsUnObs <- vms[vms$OBS!=1,]
+
+    m <- leaflet::addPolylines(map = m, group = "VMS_no_observer", data = vmsUnObs, stroke = TRUE, color= "#666666", weight = 1.5,
+                               label=~paste0("VR: ",VR_NUMBER),
+                               labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2,
+                                                                    style = list("color" = "black")),
+                                popup = ~paste0("NO OBSERVER on board
+                                                <br><dd>VR_NUMBER: ",VR_NUMBER,
+                                               "<br><dd>trekMin:",trekMin,
+                                               "<br><dd>trekMax:",trekMax))
+    m <- leaflet::addPolylines(map = m, group = "VMS_observer", data = vmsObs, stroke = TRUE, color= "red", weight = 1.5,
+                               label=~paste0("VR: ",VR_NUMBER),
+                               labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2,
+                                                                    style = list("color" = "mahogany")),
+                               popup = ~paste0("OBSERVER present
+                                                <br><dd>VR_NUMBER: ",VR_NUMBER,
+                                               "<br><dd>trekMin:",trekMin,
+                                               "<br><dd>trekMax:",trekMax))
+    overlayGroups <- c(overlayGroups, "VMS_observer", "VMS_no_observer")
   }
 
   bbLat <- bbLat[!is.na(bbLat)]
