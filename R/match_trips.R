@@ -81,7 +81,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_TRIP$match_TripName <- logical()
     }
+    dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = match_TRIP$ISDB_TRIP_O, stepDesc = "matchTrips_TripName")
     match_TRIP$ISDB_TRIP_O <- match_TRIP$ISDB_TRIP_M <- NULL
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_TRIP$TRIP_ID_ISDB, stepDesc = "matchTrips_TripName")
     return(match_TRIP)
   }
   matchHI <- function(df = NULL){
@@ -105,7 +107,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_CONF_HI$match_CONF_HI <- logical()
     }
-
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HI$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
     return(match_CONF_HI)
   }
   matchHO <- function(df = NULL){
@@ -129,6 +131,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_CONF_HO$match_CONF_HO <- logical()
     }
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HO$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
+
     return(match_CONF_HO)
   }
   matchVR <- function(df = NULL){
@@ -164,6 +168,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_VR$match_VR <- logical()
     }
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_VR$TRIP_ID_ISDB, stepDesc = "matchTrips_VR")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_VR$VR, stepDesc = "matchTrips_VR")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_VR$LIC, stepDesc = "matchTrips_VR")
+
     return(match_VR)
   }
   matchLIC <- function(df = NULL){
@@ -196,6 +204,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_LIC$match_LIC <- logical()
     }
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_LIC$TRIP_ID_ISDB, stepDesc = "matchTrips_LIC")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_LIC$VR, stepDesc = "matchTrips_LIC")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_LIC$LIC, stepDesc = "matchTrips_LIC")
     return(match_LIC)
   }
   matchDate <- function(df = NULL){
@@ -283,6 +294,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     # match_DateMin$VR <-  match_DateMin$VR_NUMBER <-  match_DateMin$LIC <-  match_DateMin$LICENCE_ID  <-
     match_DateMin$CLOSEST1 <- match_DateMin$SRC <- NULL
     colnames(match_DateMin)[colnames(match_DateMin)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_DATE"
+
+    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_DateMin$TRIP_ID_ISDB, stepDesc = "matchTrips_date")
+    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_DateMin$VR, stepDesc = "matchTrips_date")
+    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_DateMin$LIC, stepDesc = "matchTrips_date")
+
     return(match_DateMin)
   }
   match_TripName <- matchTripNames(df = isdbTrips)
@@ -345,7 +361,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       matches$match_VR <- matches$match_LIC <- matches$match_Date <- matches$mTripcd_id <- matches$swappedLIC_VR <- FALSE
     }
     matches[c("match_TripName", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date","mTripcd_id","swappedLIC_VR")][is.na(matches[c("match_TripName", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date", "mTripcd_id","swappedLIC_VR")])] <- FALSE
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = matches$TRIP_ID_ISDB, stepDesc = "matchTrips_Initial")
     dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = matches$ISDB_TRIP_O, stepDesc = "matchTrips_Initial")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = matches$VR, stepDesc = "matchTrips_Initial")
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = matches$LIC, stepDesc = "matchTrips_Initial")
