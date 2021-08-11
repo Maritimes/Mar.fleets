@@ -14,7 +14,6 @@ set_defaults(
   tripcd_id = NULL,
   returnMARFIS = T,
   returnISDB = T,
-  manual_fleet = F,
   areaFile = "NAFOSubunits_sf",
   areaFileField = "NAFO_1",
   nafoDet = 2,
@@ -66,12 +65,10 @@ wrapper.}
 records will be examined for matches}
 
 \item{returnMARFIS}{default is \code{TRUE}. Do you want a list object containing marfis trip and
-set information as part of your results? (requires \code{returnFleet = T})}
+set information as part of your results?}
 
 \item{returnISDB}{default is \code{TRUE}. Do you want a list object containing isdb trip and set
-information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
-
-\item{manual_fleet}{default is \code{FALSE}.}
+information as part of your results? (requires \code{returnMARFIS = T})}
 
 \item{areaFile}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to
 check the trips and sets against. By default,

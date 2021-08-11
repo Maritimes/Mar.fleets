@@ -59,10 +59,9 @@ wrapper.}
     \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting
 records will be examined for matches}
     \item{\code{returnMARFIS}}{default is \code{TRUE}. Do you want a list object containing marfis trip and
-set information as part of your results? (requires \code{returnFleet = T})}
+set information as part of your results?}
     \item{\code{returnISDB}}{default is \code{TRUE}. Do you want a list object containing isdb trip and set
-information as part of your results? (requires \code{returnFleet = T} & \code{returnMARFIS = T})}
-    \item{\code{manual_fleet}}{default is \code{FALSE}.}
+information as part of your results? (requires \code{returnMARFIS = T})}
     \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to
 check the trips and sets against. By default,
 Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}

@@ -7,20 +7,22 @@
 quickMap(
   data = NULL,
   plotMARF = TRUE,
+  showAllMARFSets = TRUE,
   clusterMARF = TRUE,
   overloadMARF = "cluster",
   plotMARFSurf = FALSE,
-  marfSurfSpp = NULL,
+  marfSpp = NULL,
   plotISDB = TRUE,
+  showAllISDBSets = TRUE,
   clusterISDB = TRUE,
   overloadISDB = "cluster",
   plotISDBSurf = FALSE,
-  isdbSurfField = "EST_COMBINED_WT",
-  isdbSurfSpp = NULL,
+  isdbField = "EST_COMBINED_WT",
+  isdbSpp = NULL,
   title = NULL,
   vms = NULL,
   bathy = TRUE,
-  nafo = TRUE,
+  nafo = FALSE,
   surfRes = "low"
 )
 }
@@ -29,6 +31,11 @@ quickMap(
 
 \item{plotMARF}{default is \code{TRUE}. Should MARFIS data be plotted? If there are more than
 1500 positions, the data will be displayed clustered.}
+
+\item{showAllMARFSets}{default is \code{TRUE}. By default, the map will show all fishing
+locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
+caught the specified \code{marfSpp} will be shown.  This can be useful for fleets that can retain
+multiple species.}
 
 \item{clusterMARF}{default is \code{TRUE}. If \code{TRUE}, MARF data will be grouped until
 the map is zoomed in sufficiently  If \code{FALSE}, every MARF data point will be shown. If the
@@ -44,13 +51,18 @@ as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, a
 generated for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS"
 field.}
 
-\item{marfSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
+\item{marfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
 will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 (i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$MARF_CATCHES can be
 used.}
 
 \item{plotISDB}{default is \code{TRUE}. Should ISDB data be plotted? If there are more than
 1500 positions, the data will be displayed clustered.}
+
+\item{showAllISDBSets}{default is \code{TRUE}. By default, the map will show all of the ISDB set
+locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
+caught the specified \code{isdbSpp} will be shown.  This can be useful for looking at the
+locations of particular species.}
 
 \item{clusterISDB}{default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
 the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the
@@ -65,13 +77,13 @@ as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, a
 \item{plotISDBSurf}{default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
 generated for the ISDB data. ISDB data contains several fields data for many species.  By default,
 the interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
-options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
+options can be overwritten by changing the values of \code{isdbField} and \code{isdbSpp},
 respectively.}
 
-\item{isdbSurfField}{default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT",
+\item{isdbField}{default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT",
 "EST_KEPT_WT", and "EST_DISCARD_WT".}
 
-\item{isdbSurfSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
+\item{isdbSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
 will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 (i.e. "30" will be used.)).  Any isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can
 be used.}
@@ -82,8 +94,6 @@ be used.}
 If provided, VMS data will be plotted.}
 
 \item{bathy}{default is \code{TRUE}. If \code{TRUE}, a bathymetry layer will be available.}
-
-\item{nafo}{default is \code{TRUE}. This indicates whether or not the NAFO areas should be plotted.}
 
 \item{surfRes}{default is \code{'low'}. This determines the resolution of any output surfaces.  Valid
 values are 'low', 'med' or 'high'.  Higher values increase the time it takes to generate the surface.}

@@ -4,10 +4,14 @@
 #' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
 #' @param plotMARF default is \code{TRUE}. Should MARFIS data be plotted? If there are more than
 #' 1500 positions, the data will be displayed clustered.
+#' @param showAllMARFSets default is \code{TRUE}. By default, the map will show all fishing
+#' locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
+#' caught the specified \code{marfSpp} will be shown.  This can be useful for fleets that can retain
+#' multiple species.
 #' @param plotMARFSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
 #' generated for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS"
 #' field.
-#' @param marfSurfSpp default is \code{NULL}.  If nothing is provided, the default directed species
+#' @param marfSpp default is \code{NULL}.  If nothing is provided, the default directed species
 #' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 #' (i.e. "130" will be used.))  Any  marfis species code(s) found in <data>$marf$MARF_CATCHES can be
 #' used.
@@ -21,12 +25,16 @@
 #' as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.
 #' @param plotISDB default is \code{TRUE}. Should ISDB data be plotted? If there are more than
 #' 1500 positions, the data will be displayed clustered.
+#' @param showAllISDBSets default is \code{TRUE}. By default, the map will show all of the ISDB set
+#' locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
+#' caught the specified \code{isdbSpp} will be shown.  This can be useful for looking at the
+#' locations of particular species.
 #' @param plotISDBSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
 #' generated for the ISDB data. ISDB data contains several fields data for many species.  By default,
 #' the interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
-#' options can be overwritten by changing the values of \code{isdbSurfField} and \code{isdbSurfSpp},
+#' options can be overwritten by changing the values of \code{isdbField} and \code{isdbSpp},
 #' respectively.
-#' @param isdbSurfSpp default is \code{NULL}.  If nothing is provided, the default directed species
+#' @param isdbSpp default is \code{NULL}.  If nothing is provided, the default directed species
 #' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 #' (i.e. "30" will be used.)).  Any isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can
 #' be used.
@@ -38,13 +46,12 @@
 #' be done with the ISDB data if there are more sets than can reasonably be shown (i.e >1500).
 #' \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
 #' as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.
-#' @param isdbSurfField default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT",
+#' @param isdbField default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT",
 #' "EST_KEPT_WT", and "EST_DISCARD_WT".
 #' @param title default is \code{NULL}. This will be shown as the title of the map.
 #' @param vms default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.
 #' If provided, VMS data will be plotted.
 #' @param bathy default is \code{TRUE}. If \code{TRUE}, a bathymetry layer will be available.
-#' @param nafo  default is \code{TRUE}. This indicates whether or not the NAFO areas should be plotted.
 #' @param surfRes default is \code{'low'}. This determines the resolution of any output surfaces.  Valid
 #' values are 'low', 'med' or 'high'.  Higher values increase the time it takes to generate the surface.
 #' @examples \dontrun{
@@ -59,9 +66,9 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 quickMap <- function(data=NULL,
-                     plotMARF = TRUE, clusterMARF = TRUE, overloadMARF = "cluster", plotMARFSurf = FALSE, marfSurfSpp = NULL,
-                     plotISDB = TRUE, clusterISDB = TRUE, overloadISDB = "cluster", plotISDBSurf = FALSE, isdbSurfField = "EST_COMBINED_WT", isdbSurfSpp = NULL,
-                     title = NULL, vms= NULL, bathy = TRUE, nafo=TRUE, surfRes = "low"){
+                     plotMARF = TRUE, showAllMARFSets = TRUE, clusterMARF = TRUE, overloadMARF = "cluster", plotMARFSurf = FALSE, marfSpp = NULL,
+                     plotISDB = TRUE, showAllISDBSets = TRUE, clusterISDB = TRUE, overloadISDB = "cluster", plotISDBSurf = FALSE, isdbField = "EST_COMBINED_WT", isdbSpp = NULL,
+                     title = NULL, vms= NULL, bathy = TRUE, nafo=FALSE, surfRes = "low"){
 
   if (tolower(surfRes)=="med"){
     det = 10000
@@ -78,13 +85,13 @@ quickMap <- function(data=NULL,
   }
 
   if ((plotISDB | plotISDBSurf)) {
-    if (is.null(isdbSurfSpp)) isdbSurfSpp <- data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]
-    isdbSppComm <- paste0(SPECIES_ISDB[SPECIES_ISDB$SPECCD_ID == isdbSurfSpp,"COMMON"], collapse = "_")
+    if (is.null(isdbSpp)) isdbSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]))
+    isdbSppComm <- paste0(SPECIES_ISDB[SPECIES_ISDB$SPECCD_ID %in% isdbSpp,"COMMON"], collapse = "_")
   }
 
   if ((plotMARF | plotMARFSurf)) {
-    if (is.null(marfSurfSpp)) marfSurfSpp <- data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]
-    marfSppComm <- paste0(SPECIES_MARFIS[SPECIES_MARFIS$SPECIES_CODE == marfSurfSpp,"SPECIES_NAME"], collapse = "_")
+    if (is.null(marfSpp)) marfSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]))
+    marfSppComm <- paste0(SPECIES_MARFIS[SPECIES_MARFIS$SPECIES_CODE %in% marfSpp,"SPECIES_NAME"], collapse = "_")
   }
   bbLat <- NA
   bbLon <- NA
@@ -127,11 +134,9 @@ quickMap <- function(data=NULL,
                             map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
                             label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.4,
                             labelOptions = leaflet::labelOptions(noHide = T, textOnly = TRUE, textsize = 0.2,
-                            style = list(
-                              "color" = "rgba(0,0,0,0.55)")))
+                                                                 style = list(
+                                                                   "color" = "rgba(0,0,0,0.55)")))
   overlayGroups <- c(overlayGroups, "NAFO")
-
-
   titleHTML <- paste0("<div style='
   .leaflet-control.map-title {
     transform: translate(-50%,20%);
@@ -207,18 +212,35 @@ quickMap <- function(data=NULL,
     commSets <- Mar.utils::df_qc_spatial(data$marf$MARF_SETS)
     commSets$icon <- "MARFIS"
     commSets$coordchk <- mapply(compareValues, commSets$NAFO_MARF_SETS,commSets$NAFO_MARF_SETS_CALC)
+    if (showAllMARFSets){
+      theseCatM <- data$marf$MARF_CATCHES[,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "SPECIES_CODE","RND_WEIGHT_KGS")]
+    }else{
+      theseCatM <- data$marf$MARF_CATCHES[data$marf$MARF_CATCHES$SPECIES_CODE %in% marfSpp,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "SPECIES_CODE","RND_WEIGHT_KGS")]
+    }
+    theseCatM <- merge(theseCatM, SPECIES_MARFIS[, c("SPECIES_CODE","SPECIES_NAME")])
+    theseCatM$SPECIES_CODE <- NULL
+    theseCatM_sp <- aggregate(by=theseCatM[c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")], x = theseCatM[c("SPECIES_NAME")], paste, collapse = "</dd><dd>")
+    theseCatM_sp$SPECIES_NAME <- paste0("<dd>",theseCatM_sp$SPECIES_NAME,"</dd>")
+
+    theseCatM_sum <- aggregate(by=theseCatM[c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")], x = theseCatM[c("RND_WEIGHT_KGS")], sum)
+    theseCatM <- merge(theseCatM_sum, theseCatM_sp)
+    colnames(theseCatM)[colnames(theseCatM)=="SPECIES_NAME"] <- "spp"
+
+    if (showAllMARFSets) {
+      commSets <- merge(commSets, theseCatM, all.x=T)
+    }else{
+      commSets <- merge(commSets, theseCatM)
+    }
+
 
     commSets[which(commSets$coordchk <1),"icon"] <- "MARFIS_coord_issue"
     commSets$coordchk <- NULL
 
     if (plotMARFSurf){
-      theseCat <- data$marf$MARF_CATCHES[data$marf$MARF_CATCHES$SPECIES_CODE %in% marfSurfSpp,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "RND_WEIGHT_KGS")]
-      marfSurfDat <- merge(commSets[,c("LATITUDE","LONGITUDE","LOG_EFRT_STD_INFO_ID")], theseCat)
       marfSurfDat <- stats::aggregate(
-        x = list(RND_WEIGHT_KGS = marfSurfDat$RND_WEIGHT_KGS),
-        by = list(LATITUDE = marfSurfDat$LATITUDE,
-                  LONGITUDE = marfSurfDat$LONGITUDE
-        ),
+        x = list(RND_WEIGHT_KGS = commSets$RND_WEIGHT_KGS),
+        by = list(LATITUDE = commSets$LATITUDE,
+                  LONGITUDE = commSets$LONGITUDE),
         sum
       )
 
@@ -231,13 +253,10 @@ quickMap <- function(data=NULL,
       bbLat <- c(bbLat, extM@ymin, extM@ymax)
       bbLon <- c(bbLon, extM@xmin, extM@xmax)
     }
-
     if (plotMARF & nrow(commSets)>0){
-
-      if (nrow(commSets)>clustLimit){
-        message(paste0("The marf data has too many results to be shown on the map (i.e. > ", clustLimit,"). The choice indicated by overloadMARF ('",overloadMARF,"') will be imposed."))
-        if (overloadMARF == "cluster"){
-          clustMARF = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
+      if (nrow(commSets)>clustLimit) message(paste0("The marf data has too many results to be shown on the map (i.e. > ", clustLimit,"). The choice indicated by overloadMARF ('",overloadMARF,"') will be imposed."))
+      if ((nrow(commSets)>clustLimit & overloadMARF == "cluster") | clusterMARF){
+        clustMARF = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
         function (cluster) {
           var childCount = cluster.getChildCount();
           if (childCount < 100) {
@@ -250,18 +269,17 @@ quickMap <- function(data=NULL,
             return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', className: 'marker-cluster', iconSize: new L.Point(40, 40) });
           }
       "))
-        }else{
-          commSets <- commSets[sample.int(nrow(commSets), clustLimit),]
-        }
       }
+      if (nrow(commSets)>clustLimit & overloadMARF != "cluster") commSets <- commSets[sample.int(nrow(commSets), clustLimit),]
 
       m <- leaflet::addAwesomeMarkers(map = m, group = "MARFIS", data = commSets, lng = commSets$LONGITUDE, lat = commSets$LATITUDE, icon = ~iconSet[icon], clusterOptions = clustMARF,
                                       popup = paste0("MARFIS TRIP_ID:", commSets$TRIP_ID_MARF,
                                                      "<br>PRO_SPC_INFO_ID: ", commSets$PRO_SPC_INFO_ID,
                                                      "<br>LOG_EFRT_STD_INFO_ID: ", commSets$LOG_EFRT_STD_INFO_ID,
-                                                     "<br>RND_WEIGHT_KGS: ", commSets$RND_WEIGHT_KGS,
-                                                     "<br><br>Reported NAFO: ", commSets$NAFO_MARF_SETS,
-                                                     "<br>Calculated NAFO: ", commSets$NAFO_MARF_SETS_CALC)
+                                                     "<br>SPP: ", commSets$spp,
+                                                     "<br>RND_WEIGHT_KGS: ", commSets$RND_WEIGHT_KGS," kgs <br>(combined wt of all spp above)",
+                                                     ifelse(commSets$NAFO_MARF_SETS != commSets$NAFO_MARF_SETS_CALC,paste0("<br><br>Reported NAFO: ", commSets$NAFO_MARF_SETS,
+                                                                                                                           "<br>Calculated NAFO: ", commSets$NAFO_MARF_SETS_CALC),""))
       )
       overlayGroups <- c(overlayGroups, "MARFIS")
       bbLat <- c(bbLat, min(commSets$LATITUDE, na.rm = T),max(commSets$LATITUDE, na.rm = T))
@@ -274,32 +292,47 @@ quickMap <- function(data=NULL,
     isdbSets <- Mar.utils::df_qc_spatial(data$isdb$ISDB_SETS)
     isdbSets[["NAFO_ISDB_SETS"]][is.na(isdbSets[["NAFO_ISDB_SETS"]])] <- -9
     isdbSets[["NAFO_ISDB_SETS_CALC"]][is.na(isdbSets[["NAFO_ISDB_SETS_CALC"]])] <- -8
-
     isdbSets$icon <- NA
     isdbSets$coordchk <- mapply(compareValues, isdbSets$NAFO_ISDB_SETS,isdbSets$NAFO_ISDB_SETS_CALC)
-
-
     isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_OBS_coord_issue"
     isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk == 1),"icon"] <- "ISDB_OBS"
     isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_LOG_coord_issue"
     isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk -- 1 ),"icon"] <- "ISDB_LOG"
-
     isdbSets$coordchk <- NULL
-
     message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had bad coordinates and couldn't be used")
+    if (showAllISDBSets) {
+      theseCat <- data$isdb$ISDB_CATCHES$ALL[,c("TRIP_ID", "FISHSET_ID", "SPECCD_ID", isdbField)]
+    }else{
+      theseCat <- data$isdb$ISDB_CATCHES$ALL[data$isdb$ISDB_CATCHES$ALL$SPECCD_ID %in% isdbSpp,c("TRIP_ID", "FISHSET_ID", "SPECCD_ID", isdbField)]
+    }
+    theseCat <- merge(theseCat, SPECIES_ISDB[, c("SPECCD_ID","COMMON")])
+    theseCat$SPECIES_CODE <- NULL
+    theseCat_sp <- aggregate(by=theseCat[c("TRIP_ID", "FISHSET_ID")], x = theseCat[c("COMMON")], paste, collapse = "</dd><dd>")
+    theseCat_sp$COMMON <- paste0("<dd>",theseCat_sp$COMMON,"</dd>")
+    theseCat_sum <- aggregate(by=theseCat[c("TRIP_ID", "FISHSET_ID")], x = theseCat[isdbField], sum)
+    theseCat <- merge(theseCat_sum, theseCat_sp)
+
+    colnames(theseCat)[colnames(theseCat)=="get(isdbField)"] <- isdbField
+    colnames(theseCat)[colnames(theseCat)=="COMMON"] <- "spp"
+
+    if (showAllISDBSets) {
+      isdbSets <- merge(isdbSets, theseCat, all.x=T)
+    }else{
+      isdbSets <- merge(isdbSets, theseCat)
+    }
 
     if (plotISDBSurf){
-      theseCat <- data$isdb$ISDB_CATCHES$ALL[data$isdb$ISDB_CATCHES$ALL$SPECCD_ID %in% isdbSurfSpp,c("TRIP_ID", "FISHSET_ID", isdbSurfField)]
-      isdbSurfDat <- merge(isdbSets[,c("LATITUDE","LONGITUDE","TRIP_ID", "FISHSET_ID")], theseCat)
+      # theseCat <- data$isdb$ISDB_CATCHES$ALL[data$isdb$ISDB_CATCHES$ALL$SPECCD_ID %in% isdbSpp,c("TRIP_ID", "FISHSET_ID", isdbField)]
+      # isdbSurfDat <- merge(isdbSets[,c("LATITUDE","LONGITUDE","TRIP_ID", "FISHSET_ID")], theseCat)
       isdbSurfDat <- stats::aggregate(
-        x = list(aggField = isdbSurfDat[isdbSurfField]),
-        by = list(LATITUDE = isdbSurfDat$LATITUDE,
-                  LONGITUDE = isdbSurfDat$LONGITUDE
+        x = list(aggField = isdbSets[isdbField]),
+        by = list(LATITUDE = isdbSets$LATITUDE,
+                  LONGITUDE = isdbSets$LONGITUDE
         ),
         sum
       )
 
-      isdbSurf = makeSurface(data = isdbSurfDat[,c("LATITUDE","LONGITUDE",isdbSurfField)])
+      isdbSurf = makeSurface(data = isdbSurfDat[,c("LATITUDE","LONGITUDE",isdbField)])
       groupname = paste0("ISDB_surf_",isdbSppComm)
       palSurf2 <- leaflet::colorNumeric(surfCols, raster::values(isdbSurf), na.color = "transparent")
       m = leaflet::addRasterImage(map=m, group=groupname, isdbSurf, colors = palSurf2, opacity = 1)
@@ -310,10 +343,9 @@ quickMap <- function(data=NULL,
     }
 
     if (plotISDB & nrow(isdbSets)>0){
-      if (nrow(isdbSets)>clustLimit){
-        message(paste0("The ISDB data has too many results to be shown on the map (i.e. > ", clustLimit,"). The choice indicated by overloadISDB ('",overloadISDB,"') will be imposed."))
-        if (overloadISDB == "cluster"){
-          clustISDB = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
+      if (nrow(isdbSets)>clustLimit) message(paste0("The ISDB data has too many results to be shown on the map (i.e. > ", clustLimit,"). The choice indicated by overloadISDB ('",overloadISDB,"') will be imposed."))
+      if ((nrow(isdbSets)>clustLimit & overloadISDB == "cluster") | clusterISDB){
+        clustISDB = leaflet::markerClusterOptions(iconCreateFunction=leaflet::JS("
       function (cluster) {
         var childCount = cluster.getChildCount();
         if (childCount < 500) {
@@ -326,19 +358,21 @@ quickMap <- function(data=NULL,
           return new L.DivIcon({ html: '<div style=\"background-color:'+c+'\"><span>' + childCount + '</span></div>', className: 'marker-cluster', iconSize: new L.Point(40, 40) });
         }
       "))
-        }else{
-          isdbSets <- isdbSets[sample.int(nrow(isdbSets), clustLimit),]
-        }
       }
+      if (nrow(isdbSets)>clustLimit & overloadISDB != "cluster") isdbSets <- isdbSets[sample.int(nrow(isdbSets), clustLimit),]
 
+      isdbunits <- "kgs<br>(combined wt of all spp above)"
+      if (!grepl(pattern = "_wt", x = isdbField, ignore.case = T)) isdbunits <- "<br>(combined count of all spp above)"
 
       m <- leaflet::addAwesomeMarkers(map = m, group = "ISDB", data=isdbSets,lng = isdbSets$LONGITUDE , lat = isdbSets$LATITUDE, icon =  ~iconSet[icon], clusterOptions = clustISDB,
                                       popup = paste0("ISDB TRIP_ID: ",isdbSets$TRIP_ID,
                                                      "<br>FISHSET_ID: ", isdbSets$FISHSET_ID,
                                                      "<br>LOG_EFRT_STD_INFO_ID: ",isdbSets$LOG_EFRT_STD_INFO_ID,
                                                      "<br>SOURCE: ",isdbSets$SOURCE,
-                                                     "<br><br>Reported NAFO: ", isdbSets$NAFO_ISDB_SETS,
-                                                     "<br>Calculated NAFO: ", isdbSets$NAFO_ISDB_SETS_CALC)
+                                                     "<br>SPP: ", isdbSets$spp,
+                                                     "<br>",toupper(isdbField),": ", isdbSets[,isdbField]," ", isdbunits,
+                                                     ifelse(isdbSets$NAFO_ISDB_SETS != isdbSets$NAFO_ISDB_SETS_CALC,paste0("<br><br>Reported NAFO: ", isdbSets$NAFO_ISDB_SETS,
+                                                                                                                           "<br>Calculated NAFO: ", isdbSets$NAFO_ISDB_SETS_CALC),""))
       )
 
       overlayGroups <- c(overlayGroups, "ISDB")
@@ -359,7 +393,7 @@ quickMap <- function(data=NULL,
                                label=~paste0("VR: ",VR_NUMBER),
                                labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2,
                                                                     style = list("color" = "black")),
-                                popup = ~paste0("NO OBSERVER on board
+                               popup = ~paste0("NO OBSERVER on board
                                                 <br><dd>VR_NUMBER: ",VR_NUMBER,
                                                "<br><dd>trekMin:",trekMin,
                                                "<br><dd>trekMax:",trekMax))
@@ -384,8 +418,8 @@ quickMap <- function(data=NULL,
   m <- leaflet::addLayersControl(map=m, baseGroups = baseGroups, overlayGroups = overlayGroups, options = leaflet::layersControlOptions(collapsed = TRUE))
   if (!is.null(title)) m <- leaflet::addControl(map=m, html = titleHTML, position = "bottomleft")
   m <- leaflet::addEasyButton(map = m, leaflet::easyButton(position = "topright",
-    icon = htmltools::span(class = "star", htmltools::HTML("&starf;")),
-    onClick = leaflet::JS("
+                                                           icon = htmltools::span(class = "star", htmltools::HTML("&starf;")),
+                                                           onClick = leaflet::JS("
     function(btn, map){
       var x = document.getElementById('legend');
       if (x.style.display === 'none') {
@@ -398,5 +432,7 @@ quickMap <- function(data=NULL,
   m <- leaflet::addControl(map=m, html = markerLegendHTML(IconSet = iconSet), position = "topright")
   m <- leaflet::hideGroup(map=m, group = "MARFIS")
   m <- leaflet::hideGroup(map=m, group = "ISDB")
+  m <- leaflet::hideGroup(map=m, group = "NAFO")
+  m <- leaflet::hideGroup(map=m, group = bonusLayerCln)
   return(m)
 }

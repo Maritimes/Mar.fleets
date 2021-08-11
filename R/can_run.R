@@ -82,7 +82,8 @@ can_run <- function(...){
   isdbTabs = c("ISFISHSETS",
                "ISSETPROFILE_WIDE",
                "ISTRIPS",
-               "ISVESSELS")
+               "ISVESSELS",
+               "ISCATCHES")
 
   args[["marfTabs"]] <- marfTabs
   args[["isdbTabs"]] <- isdbTabs
@@ -96,8 +97,8 @@ can_run <- function(...){
       return(res)
     }else{
       message(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
-      message(paste0(MARFIS,".RData"),sep= "\n")
-      message(paste0(ISDB,".RData"),sep= "\n")
+      message(paste0(paste0(MARFIS,".RData"),collapse = "\n"))
+      message(paste0(paste0(ISDB,".RData"),collapse = "\n"))
       stop()
     }
   }else{
