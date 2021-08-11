@@ -219,10 +219,10 @@ quickMap <- function(data=NULL,
     }
     theseCatM <- merge(theseCatM, SPECIES_MARFIS[, c("SPECIES_CODE","SPECIES_NAME")])
     theseCatM$SPECIES_CODE <- NULL
-    theseCatM_sp <- aggregate(by=theseCatM[c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")], x = theseCatM[c("SPECIES_NAME")], paste, collapse = "</dd><dd>")
+    theseCatM_sp <- stats::aggregate(by=theseCatM[c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")], x = theseCatM[c("SPECIES_NAME")], paste, collapse = "</dd><dd>")
     theseCatM_sp$SPECIES_NAME <- paste0("<dd>",theseCatM_sp$SPECIES_NAME,"</dd>")
 
-    theseCatM_sum <- aggregate(by=theseCatM[c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")], x = theseCatM[c("RND_WEIGHT_KGS")], sum)
+    theseCatM_sum <- stats::aggregate(by=theseCatM[c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")], x = theseCatM[c("RND_WEIGHT_KGS")], sum)
     theseCatM <- merge(theseCatM_sum, theseCatM_sp)
     colnames(theseCatM)[colnames(theseCatM)=="SPECIES_NAME"] <- "spp"
 
@@ -307,9 +307,9 @@ quickMap <- function(data=NULL,
     }
     theseCat <- merge(theseCat, SPECIES_ISDB[, c("SPECCD_ID","COMMON")])
     theseCat$SPECIES_CODE <- NULL
-    theseCat_sp <- aggregate(by=theseCat[c("TRIP_ID", "FISHSET_ID")], x = theseCat[c("COMMON")], paste, collapse = "</dd><dd>")
+    theseCat_sp <- stats::aggregate(by=theseCat[c("TRIP_ID", "FISHSET_ID")], x = theseCat[c("COMMON")], paste, collapse = "</dd><dd>")
     theseCat_sp$COMMON <- paste0("<dd>",theseCat_sp$COMMON,"</dd>")
-    theseCat_sum <- aggregate(by=theseCat[c("TRIP_ID", "FISHSET_ID")], x = theseCat[isdbField], sum)
+    theseCat_sum <- stats::aggregate(by=theseCat[c("TRIP_ID", "FISHSET_ID")], x = theseCat[isdbField], sum)
     theseCat <- merge(theseCat_sum, theseCat_sp)
 
     colnames(theseCat)[colnames(theseCat)=="get(isdbField)"] <- isdbField
