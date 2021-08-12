@@ -86,7 +86,7 @@ respectively.}
 \item{isdbSpp}{default is \code{NULL}.  If nothing is provided, the default directed species
 will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 (i.e. "30" will be used.)).  Any isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can
-be used.}
+be used.  Entering \code{"?"} generates a user-selectable list of all of the available species.}
 
 \item{title}{default is \code{NULL}. This will be shown as the title of the map.}
 
