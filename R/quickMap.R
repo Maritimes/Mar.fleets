@@ -37,7 +37,7 @@
 #' @param isdbSpp default is \code{NULL}.  If nothing is provided, the default directed species
 #' will be pulled from the input data (e.g. if the data from fleet_halibut() is provided, halibut
 #' (i.e. "30" will be used.)).  Any isdb species code(s) found in <data>$isdb$ISDB_CATCHES$ALL can
-#' be used.
+#' be used.  Entering \code{"?"} generates a user-selectable list of all of the available species.
 #' @param clusterISDB default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
 #' the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the
 #' ISDB data has > 1500 positions, it will be clustered regardless of this setting.
@@ -81,16 +81,53 @@ quickMap <- function(data=NULL,
   compareValues <- function(s1, s2) {
     c1 <- unique(strsplit(s1, "")[[1]])
     c2 <- unique(strsplit(s2, "")[[1]])
-    length(intersect(c1,c2))/length(c1)
+    return(length(intersect(c1,c2))/length(c1))
+    #as is, allows for c1 to be "5ZJ", while c2 is "5ZEJ" (ie all chars from 1 are in 2)
+    #below would force identical
+    # (length(intersect(c1,c2))/length(c1)+length(intersect(c1,c2))/length(c2))/2
   }
 
   if ((plotISDB | plotISDBSurf)) {
     if (is.null(isdbSpp)) isdbSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]))
+
+    if (!is.null(isdbSpp) && isdbSpp == "?"){
+      isdbSppPickDone <- FALSE
+      while (!isdbSppPickDone){
+        availISDBSppCd <- unique(data$isdb$ISDB_CATCHES$SUMMARY[,c("SPEC", "COMMON", "SCI")])
+        isdbSppPick <- utils::select.list(c("ALL",paste0(availISDBSppCd$COMMON, " (",availISDBSppCd$SPEC,")")),
+                                          multiple=T, graphics=T,
+                                          title='ISDB Spp?')
+        if (length(isdbSppPick) == 0) {
+          stop("ISDB spp selection cancelled.  Stopping")
+        }else{
+          isdbSppPickDone <- TRUE
+        }
+      }
+          isdbSpp = sub(".*\\((.*)\\).*", "\\1", isdbSppPick)
+    }
+    if (isdbSpp == "ALL") isdbSpp <- unique(data$isdb$ISDB_CATCHES$SUMMARY$SPEC)
     isdbSppComm <- paste0(SPECIES_ISDB[SPECIES_ISDB$SPECCD_ID %in% isdbSpp,"COMMON"], collapse = "_")
   }
 
   if ((plotMARF | plotMARFSurf)) {
     if (is.null(marfSpp)) marfSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]))
+    if (!is.null(marfSpp) && marfSpp == "?"){
+      marfSppPickDone <- FALSE
+      while (!marfSppPickDone){
+        availMARFSppCd <- unique(data$marf$MARF_CATCHES$SPECIES_CODE)
+        availMARFSppCd <- SPECIES_MARFIS[SPECIES_MARFIS$SPECIES_CODE %in% availMARFSppCd,c("SPECIES_CODE", "SPECIES_NAME")]
+        marfSppPick <- utils::select.list(c("ALL",paste0(availMARFSppCd$SPECIES_NAME, " (",availMARFSppCd$SPECIES_CODE,")")),
+                                          multiple=T, graphics=T,
+                                          title='MARF Spp?')
+        if (length(marfSppPick) == 0) {
+          stop("MARF spp selection cancelled.  Stopping")
+        }else{
+          marfSppPickDone <- TRUE
+        }
+      }
+      marfSpp = sub(".*\\((.*)\\).*", "\\1", marfSppPick)
+    }
+    if (marfSpp == "ALL") marfSpp <- unique(data$marf$MARF_CATCHES$SPECIES_CODE)
     marfSppComm <- paste0(SPECIES_MARFIS[SPECIES_MARFIS$SPECIES_CODE %in% marfSpp,"SPECIES_NAME"], collapse = "_")
   }
   bbLat <- NA
@@ -210,8 +247,6 @@ quickMap <- function(data=NULL,
 
   if ((plotMARF | plotMARFSurf)  & class(data$marf$MARF_SETS)=="data.frame"){
     commSets <- Mar.utils::df_qc_spatial(data$marf$MARF_SETS)
-    commSets$icon <- "MARFIS"
-    commSets$coordchk <- mapply(compareValues, commSets$NAFO_MARF_SETS,commSets$NAFO_MARF_SETS_CALC)
     if (showAllMARFSets){
       theseCatM <- data$marf$MARF_CATCHES[,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "SPECIES_CODE","RND_WEIGHT_KGS")]
     }else{
@@ -232,8 +267,10 @@ quickMap <- function(data=NULL,
       commSets <- merge(commSets, theseCatM)
     }
 
+    commSets$icon <- "MARFIS"
 
-    commSets[which(commSets$coordchk <1),"icon"] <- "MARFIS_coord_issue"
+    commSets$coordchk <- mapply(compareValues, commSets$NAFO_MARF_SETS,commSets$NAFO_MARF_SETS_CALC)
+    commSets[which(commSets$coordchk != 1),"icon"] <- "MARFIS_coord_issue"
     commSets$coordchk <- NULL
 
     if (plotMARFSurf){
@@ -290,15 +327,6 @@ quickMap <- function(data=NULL,
   }
   if ((plotISDB | plotISDBSurf) & class(data$isdb$ISDB_SETS)=="data.frame"){
     isdbSets <- Mar.utils::df_qc_spatial(data$isdb$ISDB_SETS)
-    isdbSets[["NAFO_ISDB_SETS"]][is.na(isdbSets[["NAFO_ISDB_SETS"]])] <- -9
-    isdbSets[["NAFO_ISDB_SETS_CALC"]][is.na(isdbSets[["NAFO_ISDB_SETS_CALC"]])] <- -8
-    isdbSets$icon <- NA
-    isdbSets$coordchk <- mapply(compareValues, isdbSets$NAFO_ISDB_SETS,isdbSets$NAFO_ISDB_SETS_CALC)
-    isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_OBS_coord_issue"
-    isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk == 1),"icon"] <- "ISDB_OBS"
-    isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_LOG_coord_issue"
-    isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk -- 1 ),"icon"] <- "ISDB_LOG"
-    isdbSets$coordchk <- NULL
     message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had bad coordinates and couldn't be used")
     if (showAllISDBSets) {
       theseCat <- data$isdb$ISDB_CATCHES$ALL[,c("TRIP_ID", "FISHSET_ID", "SPECCD_ID", isdbField)]
@@ -320,6 +348,17 @@ quickMap <- function(data=NULL,
     }else{
       isdbSets <- merge(isdbSets, theseCat)
     }
+
+    isdbSets[["NAFO_ISDB_SETS"]][is.na(isdbSets[["NAFO_ISDB_SETS"]])] <- -9
+    isdbSets[["NAFO_ISDB_SETS_CALC"]][is.na(isdbSets[["NAFO_ISDB_SETS_CALC"]])] <- -8
+    isdbSets$icon <- NA
+    isdbSets$coordchk <- mapply(compareValues, isdbSets$NAFO_ISDB_SETS,isdbSets$NAFO_ISDB_SETS_CALC)
+    isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_OBS_coord_issue"
+    isdbSets[which(isdbSets$SOURCE ==0 & isdbSets$coordchk == 1),"icon"] <- "ISDB_OBS"
+    isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk < 1 ),"icon"] <- "ISDB_LOG_coord_issue"
+    isdbSets[which(isdbSets$SOURCE ==1 & isdbSets$coordchk == 1 ),"icon"] <- "ISDB_LOG"
+    isdbSets$coordchk <- NULL
+
 
     if (plotISDBSurf){
       # theseCat <- data$isdb$ISDB_CATCHES$ALL[data$isdb$ISDB_CATCHES$ALL$SPECCD_ID %in% isdbSpp,c("TRIP_ID", "FISHSET_ID", isdbField)]
