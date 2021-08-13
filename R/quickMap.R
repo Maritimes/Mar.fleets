@@ -290,7 +290,8 @@ quickMap <- function(data=NULL,
 
       marfSurf = makeSurface(data = commSets[,c("LATITUDE","LONGITUDE","RND_WEIGHT_KGS")])
       groupname = paste0("MARFIS_surf_",marfSppComm)
-      palSurf <- leaflet::colorNumeric(surfCols, raster::values(marfSurf), na.color = "transparent")
+      palSurf <- leaflet::colorNumeric(reverse = T, palette = "viridis", raster::values(marfSurf), na.color = "transparent")
+
       m = leaflet::addRasterImage(map=m, group=groupname, marfSurf, colors = palSurf, opacity = 1)
       overlayGroups <- c(overlayGroups, groupname)
       extM<-raster::extent(marfSurf)
@@ -380,7 +381,8 @@ quickMap <- function(data=NULL,
 
       isdbSurf = makeSurface(data = isdbSurfDat[,c("LATITUDE","LONGITUDE",isdbField)])
       groupname = paste0("ISDB_surf_",isdbSppComm)
-      palSurf2 <- leaflet::colorNumeric(surfCols, raster::values(isdbSurf), na.color = "transparent")
+      palSurf2 <- leaflet::colorNumeric(reverse = T, palette = "viridis", raster::values(isdbSurf), na.color = "transparent")
+
       m = leaflet::addRasterImage(map=m, group=groupname, isdbSurf, colors = palSurf2, opacity = 1)
       overlayGroups <- c(overlayGroups, groupname)
       extI<-raster::extent(isdbSurf)
