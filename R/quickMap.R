@@ -88,7 +88,6 @@ quickMap <- function(data=NULL,
   }
 
   if ((plotISDB | plotISDBSurf)) {
-    if (is.null(isdbSpp)) isdbSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]))
 
     if (!is.null(isdbSpp) && isdbSpp == "?"){
       isdbSppPickDone <- FALSE
@@ -103,14 +102,18 @@ quickMap <- function(data=NULL,
           isdbSppPickDone <- TRUE
         }
       }
-          isdbSpp = sub(".*\\((.*)\\).*", "\\1", isdbSppPick)
+      isdbSpp = sub(".*\\((.*)\\).*", "\\1", isdbSppPick)
     }
-    if (isdbSpp == "ALL") isdbSpp <- unique(data$isdb$ISDB_CATCHES$SUMMARY$SPEC)
+
+    if (is.null(isdbSpp)) {
+      isdbSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]))
+    } else if (isdbSpp == "ALL") {
+      isdbSpp <- unique(data$isdb$ISDB_CATCHES$SUMMARY$SPEC)
+    }
     isdbSppComm <- paste0(SPECIES_ISDB[SPECIES_ISDB$SPECCD_ID %in% isdbSpp,"COMMON"], collapse = "_")
   }
 
   if ((plotMARF | plotMARFSurf)) {
-    if (is.null(marfSpp)) marfSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]))
     if (!is.null(marfSpp) && marfSpp == "?"){
       marfSppPickDone <- FALSE
       while (!marfSppPickDone){
@@ -127,7 +130,11 @@ quickMap <- function(data=NULL,
       }
       marfSpp = sub(".*\\((.*)\\).*", "\\1", marfSppPick)
     }
-    if (marfSpp == "ALL") marfSpp <- unique(data$marf$MARF_CATCHES$SPECIES_CODE)
+    if (is.null(marfSpp)) {
+      marfSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="marfSpp","VALUE"]))
+    }else if (marfSpp == "ALL"){
+      marfSpp <- unique(data$marf$MARF_CATCHES$SPECIES_CODE)
+    }
     marfSppComm <- paste0(SPECIES_MARFIS[SPECIES_MARFIS$SPECIES_CODE %in% marfSpp,"SPECIES_NAME"], collapse = "_")
   }
   bbLat <- NA
@@ -468,7 +475,7 @@ quickMap <- function(data=NULL,
       }
     }
     ")))
-  m <- leaflet::addControl(map=m, html = markerLegendHTML(IconSet = iconSet), position = "topright")
+  if (plotMARF | plotISDB) m <- leaflet::addControl(map=m, html = markerLegendHTML(IconSet = iconSet), position = "topright")
   m <- leaflet::hideGroup(map=m, group = "MARFIS")
   m <- leaflet::hideGroup(map=m, group = "ISDB")
   m <- leaflet::hideGroup(map=m, group = "NAFO")
