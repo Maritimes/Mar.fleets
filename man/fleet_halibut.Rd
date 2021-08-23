@@ -235,6 +235,7 @@ Other fleets:
 \code{\link{fleet_cucumber}()},
 \code{\link{fleet_haddock}()},
 \code{\link{fleet_hagfish}()},
+\code{\link{fleet_herring}()},
 \code{\link{fleet_jonah}()},
 \code{\link{fleet_pollock}()},
 \code{\link{fleet_redCrab}()},

@@ -160,6 +160,7 @@ quickMap <- function(data=NULL,
 
   bonusLayer <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFile","VALUE"])
   bonusField <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFileField","VALUE"])
+  bonusLayerCln <- NA
   if (bonusLayer != "NAFOSubunits_sf" | bonusField != "NAFO_1"){
     theData     <-   eval(parse(text=paste0("Mar.data::",bonusLayer)))
     theData <- theData[!is.na(theData[[bonusField]]),]
@@ -172,7 +173,7 @@ quickMap <- function(data=NULL,
                               label=theData[[bonusField]], weight = 1.5,
                               labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2)
     )
-    overlayGroups <- c(overlayGroups, bonusLayerCln)
+    if (!is.na(bonusLayerCln))overlayGroups <- c(overlayGroups, bonusLayerCln)
   }
   m <- leaflet::addPolygons(group = "NAFO",
                             map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
@@ -481,6 +482,6 @@ quickMap <- function(data=NULL,
   m <- leaflet::hideGroup(map=m, group = "MARFIS")
   m <- leaflet::hideGroup(map=m, group = "ISDB")
   m <- leaflet::hideGroup(map=m, group = "NAFO")
-  m <- leaflet::hideGroup(map=m, group = bonusLayerCln)
+  if (!is.na(bonusLayerCln)) m <- leaflet::hideGroup(map=m, group = bonusLayerCln)
   return(m)
 }
