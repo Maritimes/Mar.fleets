@@ -20,7 +20,9 @@ This function looks for issues with sent parameters.
 \seealso{
 Other utils: 
 \code{\link{clean_ISDB_Trip}()},
-\code{\link{go}()}
+\code{\link{go}()},
+\code{\link{isDraft}()},
+\code{\link{valuesOK}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

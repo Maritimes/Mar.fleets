@@ -6,9 +6,10 @@
 #' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
 #' mesh, etc), and depending on which options are selected, different fleets are identified, and
 #' their data is extracted.
-#' @param marfGear default is \code{''}. This is a vector of MARFIS gear codes known to have caught
-#' this species. The default values can be replaced with a smaller selection to only return information
-#' for a gear-specific subset of fishing activity.
+#' @param marfGear default is \code{c(51, 54, 60, 81)}. This is a vector of MARFIS gear codes
+#' known to have been used by this fleet. The default values can be replaced with a subset of these to
+#' only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
+#' the script will not run.
 #' @param type default is \code{NULL}. This is either "LL" (longline), "HARPOON", or "OTHER" (e.g. tended line. angling).
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
@@ -37,11 +38,16 @@
 #'   \item \code{tripcd_id} = c(72,73)
 #'   \item \code{fleet} = SWORDFISHTUNASLL or SWORDFISHTUNASHARP, depending on value for type
 #' }
+#' The following parameters are "softcoded" - any or all of the values can be
+#' provided, but other values are not allowed.
+#' \itemize{
+#'   \item \code{marfGear} = c(51, 54, 60, 81)
+#' }
 #' @inherit fleet_ details
 #' @export
 fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, useLocal = NULL, ...){
+  isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-
   type <- toupper(type)
   if (!is.null(type) && type=="LL"){
     marfGear = c(51)
@@ -50,6 +56,7 @@ fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, u
   }else if (!is.null(type) && type == "OTHER"){
     marfGear = c(54,60)
   }
+  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(51, 54, 60, 81))
   data = fleet_(fleet = 'SWORDFISHTUNAS', marfSpp = c(251,257,259,379), marfGear = marfGear, isdbSpp = c(72, 73, 190, 191, 192, 846,215,223,230,231,233,234,237,246,592,965,1004), tripcd_id = c(72,73), useLocal = useLocal,...)
   return(data)
 }

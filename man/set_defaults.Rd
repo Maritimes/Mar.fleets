@@ -24,6 +24,7 @@ set_defaults(
   maxTripDiff_Hr = 48,
   maxSetDiff_Hr = 48,
   dropUnmatchedISDB = TRUE,
+  manualMatch = FALSE,
   data.dir = file.path(getwd(), "data"),
   oracle.username = "_none_",
   oracle.password = "_none_",
@@ -111,6 +112,10 @@ and date).  They may still match on confirmation codes and/or trip names.}
 
 \item{dropUnmatchedISDB}{default is \code{TRUE}.}
 
+\item{manualMatch}{default is \code{FALSE}. This parameter is only used when calling functions
+from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+input format.}
+
 \item{data.dir}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}
 
@@ -184,8 +189,15 @@ The desired date range can be specified multiple ways - either using \code{year}
 \seealso{
 Other coreFuncs: 
 \code{\link{fleet_}()},
+\code{\link{getED}()},
+\code{\link{getHIC}()},
+\code{\link{getHOC}()},
+\code{\link{getPS}()},
 \code{\link{get_fleet}()},
+\code{\link{get_isdb_sets}()},
+\code{\link{get_isdb_trips}()},
 \code{\link{get_isdb}()},
+\code{\link{get_marfis_sets}()},
 \code{\link{get_marfis}()},
 \code{\link{summarize_locations}()}
 }

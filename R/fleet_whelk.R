@@ -5,9 +5,6 @@
 #' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
 #' mesh, etc), and depending on which options are selected, different fleets are identified, and
 #' their data is extracted.
-#' @param marfGear default is \code{ c(62)}. This is a vector of MARFIS gear codes known to have caught
-#' this species. The default values can be replaced with a smaller selection to only return information
-#' for a gear-specific subset of fishing activity.
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @examples \dontrun{
@@ -28,16 +25,17 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
-#'   \item \code{marfSpp} = c(615)
+#'   \item \code{marfGear} = 62
+#'   \item \code{marfSpp} = 615
 #'   \item \code{isdbSpp} = c(4210,4211)
-#'   \item \code{tripcd_id} = c(4211)
+#'   \item \code{tripcd_id} = 4211
 #'   \item \code{fleet} = "WHELK"
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_whelk <- function(marfGear = c(62), useLocal = NULL, ...){
+fleet_whelk <- function(useLocal = NULL, ...){
+  isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-
-    data = fleet_(fleet = "WHELK", marfSpp = c(615), marfGear = marfGear, isdbSpp = c(4210,4211), tripcd_id = c(4211), useLocal = useLocal,...)
+  data = fleet_(fleet = "WHELK", marfSpp = 615, marfGear = 62, isdbSpp = c(4210,4211), tripcd_id = 4211, useLocal = useLocal,...)
   return(data)
 }

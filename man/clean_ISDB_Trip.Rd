@@ -27,7 +27,9 @@ This function cleans ISDB trip names of spaces/odd characters to improve the pot
 \seealso{
 Other utils: 
 \code{\link{go}()},
-\code{\link{paramOK}()}
+\code{\link{isDraft}()},
+\code{\link{paramOK}()},
+\code{\link{valuesOK}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

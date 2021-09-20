@@ -93,7 +93,6 @@
 #'   down the sets by the custom area will also be provided.
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
 fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   # if (!go()){
   #   message("Sorry - this package is draft.  Please contact Mike.McMahon@dfo-mpo.gc.ca if you want to try it out it")
@@ -104,6 +103,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   }
   dbEnv<-NA
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
+  browser()
   lics <- LIC_CORE[LIC_CORE$FLEET==fleet,]
   if (nrow(lics)==0)stop("No licences found - stopping")
   if(any(is.null(area) | length(area)==0)){

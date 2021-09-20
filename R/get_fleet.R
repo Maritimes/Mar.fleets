@@ -16,7 +16,6 @@
 #'   \item \code{VR_NUMBER}
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
 get_fleet<-function(...){
 
   args <-list(...)

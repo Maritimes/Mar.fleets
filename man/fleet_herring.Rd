@@ -13,8 +13,9 @@ fleet_herring(
 }
 \arguments{
 \item{marfGear}{default is \code{c(24,31,41,42,61,63)}. This is a vector of MARFIS gear codes
-known to have caught this species. The default values can be replaced with a smaller selection to
-only return information for a gear-specific subset of fishing activity.}
+known to have been used by this fleet. The default values can be replaced with a subset of these to
+only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
+the script will not run.}
 
 \item{area}{default is \code{"4VWX5YP"}.  This restricts the data to particular NAFO areas.
 Setting it to "ALL" or NULL removes the NAFO restrictions are returns all results.}
@@ -80,6 +81,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{maxSetDiff_Hr}}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 # of hours specified here will NOT be considered matches.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
+    \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
+from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+input format.}
     \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}
     \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
@@ -208,9 +212,13 @@ Hardcoded parameters for this fleet are as follows:
 \itemize{
   \item \code{marfSpp} = 200
   \item \code{isdbSpp} = 60
-  \item \code{tripcd_id} = c(60)
-  \item \code{area} = "4VWX5YP"
+  \item \code{tripcd_id} = 60
   \item \code{fleet} = "HERRING"
+}
+The following parameters are "softcoded" - any or all of the values can be
+provided, but other values are not allowed.
+\itemize{
+  \item \code{marfGear} = c(24,31,41,42,61,63)
 }
 }
 \examples{

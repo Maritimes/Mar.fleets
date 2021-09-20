@@ -4,13 +4,9 @@
 \alias{fleet_rockCrab}
 \title{fleet_rockCrab}
 \usage{
-fleet_rockCrab(marfGear = c(62), useLocal = NULL, ...)
+fleet_rockCrab(useLocal = NULL, ...)
 }
 \arguments{
-\item{marfGear}{default is \code{c(62)}. This is a vector of MARFIS gear codes known to have caught
-this species. The default values can be replaced with a smaller selection to only return information
-for a gear-specific subset of fishing activity.}
-
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
 Depending on your value for \code{useLocal}, different values become necessary.
@@ -45,6 +41,8 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
 August 27, 2019).}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet
 wrapper.}
+    \item{\code{marfGear}}{default is \code{'all'}, but all wrappers have (overwritable) fleet-specific
+values.  This is a vector of MARFIS gear codes known to have caught this species.}
     \item{\code{isdbSpp}}{default is \code{'all'}. The ISDB species code, usually sent by the fleet wrapper}
     \item{\code{tripcd_id}}{default is \code{NULL}.  If a tripcd_id from ISDB is provided, all matting
 records will be examined for matches}
@@ -72,6 +70,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{maxSetDiff_Hr}}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 # of hours specified here will NOT be considered matches.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
+    \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
+from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+input format.}
     \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}
     \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
@@ -198,9 +199,10 @@ Licence Information for any fleet is accessible via the following calls.  Please
 \note{
 Hardcoded parameters for this fleet are as follows:
 \itemize{
+  \item \code{marfGear} = 62
   \item \code{marfSpp} = c(704,742)
-  \item \code{isdbSpp} = c(2513)
-  \item \code{tripcd_id} = c(2509)
+  \item \code{isdbSpp} = 2513
+  \item \code{tripcd_id} = 2509
   \item \code{fleet} = "ROCKCRAB"
 }
 }

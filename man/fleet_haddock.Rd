@@ -8,18 +8,24 @@ fleet_haddock(
   marfGear = c(12, 41, 51, 59),
   type = NULL,
   area = "ALL",
+  areaFileField = "COD_BEST",
   useLocal = NULL,
   ...
 )
 }
 \arguments{
-\item{marfGear}{default is \code{''}. This is a vector of MARFIS gear codes known to have caught
-this species. The default values can be replaced with a smaller selection to only return information
-for a gear-specific subset of fishing activity.}
+\item{marfGear}{default is \code{c(12, 41, 51, 59)}. This is a vector of MARFIS gear codes
+known to have been used by this fleet. The default values can be replaced with a subset of these to
+only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
+the script will not run.}
 
 \item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
 \item{area}{default is \code{"ALL"}. This is either "4X5Y", "5ZJM", or "ALL".}
+
+\item{areaFileField}{default is \code{"COD_BEST"}.  This ensures that when set positions from
+MARFIS and ISDB data are compared to NAFO divisions, they are compared to groundfish-specific
+divisions of NAFO, including "4X_SS" and "4X_BoF".}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -65,9 +71,6 @@ information as part of your results? (requires \code{returnMARFIS = T})}
     \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to
 check the trips and sets against. By default,
 Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
-    \item{\code{areaFileField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object
-which specifies exactly which field of the areas object data
-should be compared against.}
     \item{\code{nafoDet}}{default is \code{2}, but values between \code{1} and \code{4} are acceptable. This
 specifies the level of detail that will be used in the summarized locations table.  Using the
 default value of 2, trips and sets will be summarized by areas such as "4X", "4V" and "5Z" (i.e 2
@@ -82,6 +85,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{maxSetDiff_Hr}}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 # of hours specified here will NOT be considered matches.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
+    \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
+from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+input format.}
     \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}
     \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
@@ -215,6 +221,11 @@ Hardcoded parameters for this fleet are as follows:
   \item \code{area} = 4X5Y, 5ZJM, or all depending on selections
   \item \code{gearSpecs} = 4X5Y or ALL, depending on selections
 
+}
+The following parameters are "softcoded" - any or all of the values can be
+provided, but other values are not allowed.
+\itemize{
+  \item \code{marfGear} = c(12, 41, 51, 59)
 }
 }
 \examples{

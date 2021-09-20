@@ -1,4 +1,4 @@
-#' @title quickMap
+#' @title quick_map
 #' @description This function generates a simple leaflet plot for the output from Mar.bycatch
 #' functions.
 #' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
@@ -18,11 +18,11 @@
 #' @param clusterMARF default is \code{TRUE}. If \code{TRUE}, MARF data will be grouped until
 #' the map is zoomed in sufficiently  If \code{FALSE}, every MARF data point will be shown. If the
 #' MARFIS data has > 1500 positions, it will be clustered regardless of this setting.
-#' @param overloadMARF default is \code{"cluster"}. Valid values are 'cluster', and 'random'. This
+#' @param overloadMARF default is \code{"cluster"}. Valid values are "cluster", and "random". This
 #' map gets really slow when dealing with many positions, and this parameter indicates what should
 #' be done with the MARFIS data if there are more sets than can reasonably be shown (i.e >1500).
-#' \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
-#' as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.
+#' \code{"cluster"} causes the data to be shown as grouped symbols which expand into discrete points
+#' as you zoom in.  \code{"random"} just grabs a random selection of 1500 points, and plots those.
 #' @param plotISDB default is \code{TRUE}. Should ISDB data be plotted? If there are more than
 #' 1500 positions, the data will be displayed clustered.
 #' @param showAllISDBSets default is \code{TRUE}. By default, the map will show all of the ISDB set
@@ -41,34 +41,36 @@
 #' @param clusterISDB default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
 #' the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the
 #' ISDB data has > 1500 positions, it will be clustered regardless of this setting.
-#' @param overloadISDB default is \code{"cluster"}. Valid values are 'cluster', and 'random'. This
+#' @param overloadISDB default is \code{"cluster"}. Valid values are "cluster", and "random". This
 #' map gets really slow when dealing with many positions, and this parameter indicates what should
 #' be done with the ISDB data if there are more sets than can reasonably be shown (i.e >1500).
-#' \code{'cluster} causes the data to be shown as grouped symbols which expand into discrete points
-#' as you zoom in.  \code{'random'} just grabs a random selection of 1500 points, and plots those.
+#' \code{"cluster"} causes the data to be shown as grouped symbols which expand into discrete points
+#' as you zoom in.  \code{"random"} just grabs a random selection of 1500 points, and plots those.
 #' @param isdbField default is \code{"EST_COMBINED_WT"}. Other valid values are "EST_NUM_CAUGHT",
 #' "EST_KEPT_WT", and "EST_DISCARD_WT".
 #' @param title default is \code{NULL}. This will be shown as the title of the map.
 #' @param vms default is \code{NULL}. This is optional, but can be the output from \code{get_vmstracks()}.
 #' If provided, VMS data will be plotted.
 #' @param bathy default is \code{TRUE}. If \code{TRUE}, a bathymetry layer will be available.
-#' @param surfRes default is \code{'low'}. This determines the resolution of any output surfaces.  Valid
-#' values are 'low', 'med' or 'high'.  Higher values increase the time it takes to generate the surface.
+#' @param surfRes default is \code{"low"}. This determines the resolution of any output surfaces.  Valid
+#' values are "low", "med" or "high".  Higher values increase the time it takes to generate the surface.
 #' @examples \dontrun{
 #' redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/data/")
 #' redfishVMS<-get_vmstracks(get_marfis = redfishresults$marf, get_isdb = redfishresults$isdb,
 #'     useLocal=F, oracle.username = "me", oracle.password = "mypassword",
-#'     oracle.dsn="PTRAN", usepkg='roracle')
-#' quickMap(data=redfishresults, vms= redfishVMS)
+#'     oracle.dsn="PTRAN", usepkg="roracle")
+#' quick_map(data=redfishresults, vms= redfishVMS)
 #'        }
 #' @family simpleproducts
 #' @return a leaflet map.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-quickMap <- function(data=NULL,
-                     plotMARF = TRUE, showAllMARFSets = TRUE, clusterMARF = TRUE, overloadMARF = "cluster", plotMARFSurf = FALSE, marfSpp = NULL,
-                     plotISDB = TRUE, showAllISDBSets = TRUE, clusterISDB = TRUE, overloadISDB = "cluster", plotISDBSurf = FALSE, isdbField = "EST_COMBINED_WT", isdbSpp = NULL,
-                     title = NULL, vms= NULL, bathy = TRUE, nafo=FALSE, surfRes = "low"){
+quick_map <- function(data=NULL,
+                     plotMARF = TRUE, showAllMARFSets = TRUE, clusterMARF = TRUE,
+                     overloadMARF = "cluster", plotMARFSurf = FALSE, marfSpp = NULL,
+                     plotISDB = TRUE, showAllISDBSets = TRUE, clusterISDB = TRUE,
+                     overloadISDB = "cluster", plotISDBSurf = FALSE, isdbField = "EST_COMBINED_WT", isdbSpp = NULL,
+                     title = NULL, vms= NULL, bathy = TRUE, surfRes = "low"){
 
   if (tolower(surfRes)=="med"){
     det = 10000

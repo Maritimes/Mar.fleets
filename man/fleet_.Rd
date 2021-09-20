@@ -64,6 +64,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{maxSetDiff_Hr}}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 # of hours specified here will NOT be considered matches.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
+    \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
+from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+input format.}
     \item{\code{useLocal}}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
 Depending on your value for \code{useLocal}, different values become necessary.
@@ -207,8 +210,15 @@ test <- fleet_(fleet="POLLOCK_MOBILE", area="WESTERN", gearSpecs="SMALL" )
 }
 \seealso{
 Other coreFuncs: 
+\code{\link{getED}()},
+\code{\link{getHIC}()},
+\code{\link{getHOC}()},
+\code{\link{getPS}()},
 \code{\link{get_fleet}()},
+\code{\link{get_isdb_sets}()},
+\code{\link{get_isdb_trips}()},
 \code{\link{get_isdb}()},
+\code{\link{get_marfis_sets}()},
 \code{\link{get_marfis}()},
 \code{\link{set_defaults}()},
 \code{\link{summarize_locations}()}

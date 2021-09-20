@@ -5,9 +5,10 @@
 #' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
 #' mesh, etc), and depending on which options are selected, different fleets are identified, and
 #' their data is extracted.
-#' @param marfGear default is \code{c(12,41,51,59)}. This is a vector of MARFIS gear codes known to have caught
-#' this species. The default values can be replaced with a smaller selection to only return information
-#' for a gear-specific subset of fishing activity.
+#' @param marfGear default is \code{c(12,41,51,59)}. This is a vector of MARFIS gear codes
+#' known to have been used by this fleet. The default values can be replaced with a subset of these to
+#' only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
+#' the script will not run.
 #' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param mesh default is \code{'ALL'}. This is either "SMALL" (i.e. 1-129mm) or "LARGE" (i.e. 130mm+), or "ALL".
 #' @param area default is \code{'ALL'}. This is either "WESTERN", "EASTERN" or "ALL".
@@ -40,25 +41,28 @@
 #'   \item \code{marfSpp} =170
 #'   \item \code{isdbSpp} = 16
 #'   \item \code{tripcd_id} = 7001
-#'   \item \code{fleet} = "POLLOCK_MOBILE" or "POLLOCK_FIXED", depending on selections
-#'   \item \code{area} = "WESTERN" or "EASTERN", depending on selections
-#'   \item \code{gearSpecs} = "ALL", "SMALL" or "LARGE", depending on selections
+#'   \item \code{fleet} = "POLLOCK"
+#' }
+#' The following parameters are "softcoded" - any or all of the values can be
+#' provided, but other values are not allowed.
+#' \itemize{
+#'   \item \code{marfGear} = c(12,41,51,59)
 #' }
 #' @inherit fleet_ details
 #' @export
 fleet_pollock <- function(marfGear = c(12,41,51,59), type = NULL, mesh='ALL', area = "ALL", useLocal = NULL, ...){
+  isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   mesh <- toupper(mesh)
   area <- toupper(area)
-
   if (!is.null(type) && type =="MOBILE"){
     marfGear = c(12)
   }else if (!is.null(type) && type =="FIXED"){
     marfGear = c(41,51,59)
   }
-
+  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12,41,51,59))
   gearSpecs <- ifelse(mesh == "ALL", "ALL",ifelse(mesh == "SMALL", "SMALL", "LARGE"))
-  data <- fleet_(fleet = "POLLOCK", marfSpp = 170, marfGear = marfGear, isdbSpp = 16, area = area, gearSpecs = gearSpecs, tripcd_id = c(7001), useLocal = useLocal,...)
+  data <- fleet_(fleet = "POLLOCK", marfSpp = 170, marfGear = marfGear, isdbSpp = 16, area = area, gearSpecs = gearSpecs, tripcd_id = 7001, useLocal = useLocal,...)
   return(data)
 }

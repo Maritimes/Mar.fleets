@@ -5,9 +5,11 @@
 #' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
 #' mesh, etc), and depending on which options are selected, different fleets are identified, and
 #' their data is extracted.
-#' @param marfGear default is \code{c(71)}. This is a vector of MARFIS gear codes known to have caught
-#' this species. The default values can be replaced with a smaller selection to only return information
-#' for a gear-specific subset of fishing activity.
+#' @param areaFile  default is \code{"Areas_Surfclam_sf"}.  This is a spatial file with boundaries
+#' appropriate for the fleet.  If NULL, set positions from MARFIS and ISDB data are compared to NAFO
+#' divisions. Including \code{areaFile = "Areas_Surfclam_sf"} ensures that MARFIS and ISDB set
+#' locations are compared to Surfclam-specific areas (i.e. strata),  but \code{NULL} or any dataset
+#' from Mar.data is acceptable.
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
 #' @examples \dontrun{
@@ -28,17 +30,17 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @note Hardcoded parameters for this fleet are as follows:
 #' \itemize{
+#'   \item \code{marfGear} = 71
 #'   \item \code{marfSpp} = 608
 #'   \item \code{isdbSpp} = 4355
 #'   \item \code{tripcd_id} = 4355
 #'   \item \code{fleet} = "SURFCLAM"
-#'   \item \code{areaFile} = "Areas_Surfclam_sf"
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_surfclam <- function(marfGear = c(71), useLocal = NULL, ...){
-  message("This wrapper has never been QC'd")
+fleet_surfclam <- function(areaFile = "Areas_Surfclam_sf", useLocal = NULL, ...){
+  isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  data <- fleet_(fleet = "SURFCLAM", marfSpp = 608, marfGear = marfGear, isdbSpp = 4355, tripcd_id = c(4355), areaFile = "Areas_Surfclam_sf", useLocal = useLocal,...)
+  data <- fleet_(fleet = "SURFCLAM", marfSpp = 608, marfGear = 71, isdbSpp = 4355, tripcd_id = 4355, areaFile = areaFile, useLocal = useLocal,...)
   return(data)
 }

@@ -4,12 +4,24 @@
 \alias{fleet_shrimp}
 \title{fleet_shrimp}
 \usage{
-fleet_shrimp(marfGear = c(19, 62), useLocal = NULL, ...)
+fleet_shrimp(
+  marfGear = c(19, 62),
+  areaFile = "Areas_Shrimp_sf",
+  useLocal = NULL,
+  ...
+)
 }
 \arguments{
-\item{marfGear}{default is \code{c(19,62)}. This is a vector of MARFIS gear codes known to have caught
-this species. The default values can be replaced with a smaller selection to only return information
-for a gear-specific subset of fishing activity.}
+\item{marfGear}{default is \code{c(19,62)}. This is a vector of MARFIS gear codes
+known to have been used by this fleet. The default values can be replaced with a subset of these to
+only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
+the script will not run.}
+
+\item{areaFile}{default is \code{"Areas_Shrimp_sf"}.  This is a spatial file with boundaries
+appropriate for the fleet.  If NULL, set positions from MARFIS and ISDB data are compared to NAFO
+divisions. Including \code{areaFile = "Areas_Shrimp_sf"} ensures that MARFIS and ISDB set
+locations are compared to Shrimp-specific areas (i.e. strata),  but \code{NULL} or any dataset
+from Mar.data is acceptable.}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -52,9 +64,6 @@ records will be examined for matches}
 set information as part of your results?}
     \item{\code{returnISDB}}{default is \code{TRUE}. Do you want a list object containing isdb trip and set
 information as part of your results? (requires \code{returnMARFIS = T})}
-    \item{\code{areaFile}}{default is \code{'NAFOSubunits_sf'}.  This is used to identify which areas to
-check the trips and sets against. By default,
-Mar.data::NAFOSubunits_sf is ued, but any objects in Mar.data could be used.}
     \item{\code{areaFileField}}{default is \code{'NAFO_1'}. This is a field within the \code{areas} object
 which specifies exactly which field of the areas object data
 should be compared against.}
@@ -72,6 +81,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{maxSetDiff_Hr}}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 # of hours specified here will NOT be considered matches.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
+    \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
+from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+input format.}
     \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}
     \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
@@ -198,11 +210,15 @@ Licence Information for any fleet is accessible via the following calls.  Please
 \note{
 Hardcoded parameters for this fleet are as follows:
 \itemize{
-  \item \code{marfSpp} = c(702)
+  \item \code{marfSpp} = 702
   \item \code{isdbSpp} = c(16,28)
-  \item \code{tripcd_id} = c(2210)
+  \item \code{tripcd_id} = 2210
   \item \code{fleet} = "NSHRIMP"
-  \item \code{areaFile} = Areas_Shrimp_sf
+}
+The following parameters are "softcoded" - any or all of the values can be
+provided, but other values are not allowed.
+\itemize{
+  \item \code{marfGear} = c(19,62)
 }
 }
 \examples{

@@ -5,12 +5,16 @@
 #' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
 #' mesh, etc), and depending on which options are selected, different fleets are identified, and
 #' their data is extracted.
-#' @param marfGear default is \code{''}. This is a vector of MARFIS gear codes known to have caught
-#' this species. The default values can be replaced with a smaller selection to only return information
-#' for a gear-specific subset of fishing activity.
+#' @param marfGear default is \code{c('12, 21, 41, 51, 59, 62')}. This is a vector of MARFIS gear codes
+#' known to have been used by this fleet. The default values can be replaced with a subset of these to
+#' only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
+#' the script will not run.
 #' @param type default is \code{NULL}. This is either "ALL", "FIXED" or "MOBILE". "ALL" just gets
 #' results for all gear types
 #' @param stock default is \code{NULL}. This is either "4X5Y" or "5Z".
+#' @param areaFileField  default is \code{"COD"}.  This ensures that when set positions from
+#' MARFIS and ISDB data are compared to NAFO divisions, they are compared to groundfish-specific
+#' divisions of NAFO, including "4X" and "4VsW".
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
 #' @examples \dontrun{
@@ -40,15 +44,19 @@
 #'   \item \code{isdbSpp} = c(10, 11, 16)
 #'   \item \code{tripcd_id} = c(10, 7001)
 #'   \item \code{fleet} = "CHP"
-#'   \item \code{stock} = 5Z or 4X5Y
+#' }
+#' The following parameters are "softcoded" - any or all of the values can be
+#' provided, but other values are not allowed.
+#' \itemize{
+#'   \item \code{marfGear} = c(12, 21, 41, 51, 59, 62)
 #' }
 #' @inherit fleet_ details
 #' @export
-fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock = NULL, useLocal = NULL, ...){
+fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock = NULL, areaFileField = "COD", useLocal = NULL, ...){
+  isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   area <- toupper(stock)
-
   if (!is.null(type) && type=="MOBILE"){
     marfGear = c(12)
   }else if (!is.null(type) && type=="FIXED"){
@@ -56,8 +64,7 @@ fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock =
   }else if (!is.null(type) && type=="ALL"){
     #just get all gear
   }
-
-
-  data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), marfGear = marfGear, tripcd_id = c(10, 7001), area= area, areaFileField = "COD", useLocal = useLocal,...)
+  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12, 21, 41, 51, 59, 62))
+  data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), marfGear = marfGear, tripcd_id = c(10, 7001), area= area, areaFileField = areaFileField, useLocal = useLocal,...)
   return(data)
 }

@@ -30,7 +30,7 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{quickMap}()},
+\code{\link{quick_map}()},
 \code{\link{summarize_locations}()},
 \code{\link{summarizer}()}
 }

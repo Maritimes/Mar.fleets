@@ -54,6 +54,9 @@
 #' @param maxSetDiff_Hr default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 #' # of hours specified here will NOT be considered matches.
 #' @param dropUnmatchedISDB default is \code{TRUE}.
+#' @param manualMatch default is \code{FALSE}. This parameter is only used when calling functions
+#' from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
+#' input format.
 #' @param useLocal default is \code{FALSE}. This specifies whether to run the script against local
 #' data or against Oracle (requires network or VPN).
 #' Depending on your value for \code{useLocal}, different values become necessary.
@@ -104,7 +107,6 @@
 #' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-#' @export
 set_defaults <- function(lics = 'all',
                          gearSpecs = 'all',
                          area = 'all',
@@ -124,6 +126,7 @@ set_defaults <- function(lics = 'all',
                          maxTripDiff_Hr = 48,
                          maxSetDiff_Hr = 48,
                          dropUnmatchedISDB = TRUE,
+                         manualMatch = FALSE,
                          data.dir = file.path(getwd(), 'data'),
                          oracle.username = '_none_',
                          oracle.password = '_none_',
@@ -141,6 +144,7 @@ set_defaults <- function(lics = 'all',
   defaults <- as.list(environment())
   sentArgs <- list(...)
   #ensure hardcoded args take priority over user args
+  browser()
   submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser, quietly = T)
 
   #ensure submitted args take priority over default args
