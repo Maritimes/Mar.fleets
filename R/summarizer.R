@@ -43,6 +43,7 @@
 summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, specMARF = NULL, specISDB = NULL, doMARF=T, doISDB=T, quietly = F){
   defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
   summISDB <- function(){
+    if (!"isdb" %in% names(data)) return(NULL)
     byCustISDB <-NULL
     t <- data$isdb$ISDB_TRIPS #[,c("TRIP_ID_ISDB", "VR", "LIC")]
     s <- data$isdb$ISDB_SETS
@@ -70,7 +71,6 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
                      as a single licence, identified as '-999'"))
       t[["LIC"]][is.na(t[["LIC"]])] <- -999
     }
-
     all <- merge(t, s[, !names(s) %in% c("TRIP_ID_MARF")], by.x="TRIP_ID_ISDB", by.y="TRIP_ID")
     all <- merge(all, c[, !names(c) %in% c("TRIP_ID_MARF")], by="FISHSET_ID")
     rm(list=c("t","s","c"))
@@ -139,6 +139,7 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
   }
 
   summMARF <- function(){
+    if (!"marf" %in% names(data)) return(NULL)
     byCustMARF <- NULL
     t <- data$marf$MARF_TRIPS
     t$YEAR <- lubridate::year(t$T_DATE2)
@@ -241,18 +242,14 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
 
 
   if (doISDB) ISDB <- summISDB()
-
   if (doMARF) MARF <- summMARF()
-  if (all(exists("ISDB")& exists("MARF"))){
-    res <- list()
-    res$ISDB <- ISDB
-    res$MARF <- MARF
-  }else if (exists("MARF")){
-    res <- MARF
-  }else if (exists("ISDB")){
-    res <- ISDB
-  }else{
-    res <- "Error"
-  }
+
+  res <- list()
+  if (is.null(ISDB)) ISDB <- "No data to summarize"
+  if (is.null(MARF)) MARF <- "No data to summarize"
+
+  res$ISDB <- ISDB
+  res$MARF <- MARF
+
   return(res)
 }

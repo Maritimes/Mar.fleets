@@ -37,7 +37,7 @@ valuesOK <- function(valSent = NULL, valOK = NULL, valID = NULL){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 isDraft <- function(){
  this <- utils::winDialog(type = c("okcancel"), 'By proceeding, I acknowlege that this analytic is in draft form, and that the asessment lead has not reviewed its results')
- message("You are welcome to contact Mike.McMahon@dfo-mpo.gc.ca, and ask that he work with the assessment lead and prioritize this analytic.\n
+ message("You are welcome to contact Mike.McMahon@dfo-mpo.gc.ca, and ask that he work with the assessment lead and prioritize QC'ing this analytic.\n
 Alternatively, if you ARE the assessment lead, please ensure you provide feedback so we can work towards removing this message.")
  if (this != "OK") stop("Stopped by user")
 }

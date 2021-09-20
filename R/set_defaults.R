@@ -144,7 +144,6 @@ set_defaults <- function(lics = 'all',
   defaults <- as.list(environment())
   sentArgs <- list(...)
   #ensure hardcoded args take priority over user args
-  browser()
   submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser, quietly = T)
 
   #ensure submitted args take priority over default args

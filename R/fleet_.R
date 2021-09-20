@@ -103,7 +103,6 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   }
   dbEnv<-NA
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
-  browser()
   lics <- LIC_CORE[LIC_CORE$FLEET==fleet,]
   if (nrow(lics)==0)stop("No licences found - stopping")
   if(any(is.null(area) | length(area)==0)){
