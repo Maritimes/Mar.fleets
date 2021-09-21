@@ -37,8 +37,7 @@ valuesOK <- function(valSent = NULL, valOK = NULL, valID = NULL){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 isDraft <- function(){
  this <- utils::winDialog(type = c("okcancel"), 'By proceeding, I acknowlege that this analytic is in draft form, and that the asessment lead has not reviewed its results')
- message("You are welcome to contact Mike.McMahon@dfo-mpo.gc.ca, and ask that he work with the assessment lead and prioritize QC'ing this analytic.\n
-Alternatively, if you ARE the assessment lead, please ensure you provide feedback so we can work towards removing this message.")
+ message("You are welcome to contact Mike.McMahon@dfo-mpo.gc.ca, and ask that he work with the assessment lead and prioritize QC'ing this analytic.  Alternatively, if you ARE the assessment lead, please ensure you provide feedback so we can work towards removing this message.")
  if (this != "OK") stop("Stopped by user")
 }
 
@@ -106,7 +105,7 @@ can_run <- function(...){
                                                     fn.oracle.username = args$oracle.username,
                                                     fn.oracle.password = args$oracle.password,
                                                     fn.oracle.dsn = args$oracle.dsn,
-                                                    quietly = args$quietly))
+                                                    quietly = TRUE))
     return(cxn)
   }
 
@@ -116,14 +115,14 @@ can_run <- function(...){
     tables <- gsub("ISDB","OBSERVER", tables)
     fails = 0
     for (t in 1:length(tables)){
-      if (!args$quietly)message(paste0("Checking access to ",tables[t],": "))
+      # if (quietly=FALSE)message(paste0("Checking access to ",tables[t],": "))
       qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM<=1")
       test = args$cxn$thecmd(args$cxn$channel, qry, rows_at_time = 1)
       if (is.character(test)) {
         fails=fails+1
-        if (!args$quietly)message(" failed","\n")
+        # if (quietly=FALSE)message(" failed","\n")
       }else{
-        if (!args$quietly)message(" success","\n")
+        # if (quietly=FALSE)message(" success","\n")
       }
     }
     if (fails>0){
@@ -202,7 +201,7 @@ can_run <- function(...){
       stop()
       # return(FALSE)
     }else{
-      if (!args$quietly)  message("\nDB connection established.\n")
+      # if (!args$quietly)  message("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
       res <- args
       return(res)

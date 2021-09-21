@@ -35,7 +35,7 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","VESSELS","TRIPS","MON_DOC_ENTRD_DETS",
                                                                                             "HAIL_IN_CALLS", "HAIL_OUTS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                 env = environment(), quietly = args$quietly)
+                                 env = environment(), quietly = TRUE)
 
 
       if(any(TRIP_ID_MARF %in% "ALL")){

@@ -23,6 +23,7 @@ set_defaults(
   keepSurveyTrips = TRUE,
   maxTripDiff_Hr = 48,
   maxSetDiff_Hr = 48,
+  maxSetDiff_Km = 100,
   dropUnmatchedISDB = TRUE,
   manualMatch = FALSE,
   data.dir = file.path(getwd(), "data"),
@@ -31,7 +32,6 @@ set_defaults(
   oracle.dsn = "PTRAN",
   usepkg = "roracle",
   useLocal = FALSE,
-  quietly = TRUE,
   debugLics = NULL,
   debugVRs = NULL,
   debugMARFTripIDs = NULL,
@@ -110,6 +110,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
 \item{maxSetDiff_Hr}{default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 # of hours specified here will NOT be considered matches.}
 
+\item{maxSetDiff_Km}{default is \code{100}. Any MARFIS and ISDB sets with positions more than the
+# of kilometers specified here will NOT be considered matches.}
+
 \item{dropUnmatchedISDB}{default is \code{TRUE}.}
 
 \item{manualMatch}{default is \code{FALSE}. This parameter is only used when calling functions
@@ -149,9 +152,6 @@ Depending on your value for \code{useLocal}, different values become necessary.
       \item param \code{usepkg} required
     }
 }}
-
-\item{quietly}{default is \code{TRUE}. This specifies whether or not status messages should be
-output to the console while the scripts run.}
 
 \item{debugLics}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
 provide information about when the script drops them from

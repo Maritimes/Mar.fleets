@@ -30,26 +30,26 @@
 match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
 
-  Obs_Trip_Name = 0
-  Hail_In_Conf_Code = 0
-  Hail_Out_Conf_Code = 0
-  Date_Lic_VR_Combo =0
-  Date_Lic_Combo = 0
-  Date_VR_Combo = 0
-  Likely_Swapped_VR_LIC = 0
-  Total_Matches = 0
+  Obs_Trip_Name <- 0
+  Hail_In_Conf_Code <- 0
+  Hail_Out_Conf_Code <- 0
+  Date_Lic_VR_Combo <- 0
+  Date_Lic_Combo <- 0
+  Date_VR_Combo <- 0
+  Likely_Swapped_VR_LIC <- 0
+  Total_Matches <- 0
   matchGood <- NA
   dupRows <- NA
   matchNone <- NA
   Unmatchables <- 0
-  MultiMatches = 0
+  MultiMatches <- 0
 
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
   if (args$debug) Mar.utils::where_now()
   k <- TRIP_ID_MARF <- CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- PRIOR1 <- PRIOR2 <- NA
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
-    if (!args$quietly)message(paste0("\n","Either marfis of ISDB did not have any trips to try match against"))
+    message(paste0("\n","No trips to try match against"))
     return(NULL)
   }
   marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2")])
@@ -338,8 +338,12 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     #match_CONF2B than attempts to merge these lic/vr records with any lic/vr records that occurred within an acceptable window of time
     #the date matches will also work for cases where the licence and vr were reversed (nMix1 or nMix2 = T).
 
-    match_tmp <- merge(knowncombos_cnt[,c("TRIP_ID_ISDB", "TRIP_ID_MARF","SRC")], match_VR[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_VR", "swapVR", "match_VR" )], by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"),  by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_VR"), all.x=T)
-    match_tmp <- merge(match_tmp, match_LIC[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_LIC", "swapLIC", "match_LIC" )], by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_LIC"), all.x=T)
+    match_tmp <- merge(knowncombos_cnt[,c("TRIP_ID_ISDB", "TRIP_ID_MARF","SRC")],
+                       match_VR[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_VR", "swapVR", "match_VR" )],
+                       by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"),  by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_VR"), all.x=T)
+    match_tmp <- merge(match_tmp,
+                       match_LIC[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_LIC", "swapLIC", "match_LIC" )],
+                       by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_LIC"), all.x=T)
     match_tmp <- merge(match_tmp,
                        match_Date[which(match_Date$mVR|match_Date$mLIC|match_Date$mMix1|match_Date$mMix2),
                                   c("TRIP_ID_ISDB", "TRIP_ID_MARF_DATE", "VR", "LIC","mTripcd_id", "mMix2", "mMix1",  "mLIC", "mVR", "match_Date", "match_DATE_DETS" )],
@@ -578,6 +582,9 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf$BADPOS_I <- megadf$BADPOS_M <- NULL
   megadf[,"DIST_DIFF"]<- round(geosphere::distGeo(p1 = megadf[,c("LONGITUDE_I","LATITUDE_I")],
                                                   p2 = megadf[,c("LONGITUDE_M","LATITUDE_M")]),0)
+  megadf <- megadf[megadf$DIST_DIFF <= (args$maxSetDiff_Km*1000),]
+  if (nrow(megadf)==0)return(NA)
+
   megadf$MATCH<- NA
   matches_all<- data.frame(TRIP_ID_ISDB=numeric(),
                            FISHSET_ID=numeric(),
@@ -597,12 +604,15 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
       bestTim <- triptim[which.min(triptim$DUR_DIFF),]
       bestTim <- bestTim[bestTim$BADTIM ==F,]
       if (nrow(bestPos)==1 && nrow(bestTim)==1){
+        #these sets are closest in time and space
         thisTrip_MATCHED <- thisTrip[rownames(bestPos),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
         thisTrip_MATCHED$SET_MATCH <- "POS AND TIME"
       }else if(nrow(bestPos)==0 && nrow(bestTim)==1){
+        #these sets are closest in time (but not closest in space)
         thisTrip_MATCHED <- thisTrip[rownames(bestTim),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
         thisTrip_MATCHED$SET_MATCH <- "TIME"
       }else if(nrow(bestPos)==1 && nrow(bestTim)==0){
+        #these sets are closest in space (but not closest in time)
         thisTrip_MATCHED <- thisTrip[rownames(bestPos),c("TRIP_ID_ISDB", "FISHSET_ID", "TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID")]
         thisTrip_MATCHED$SET_MATCH <- "POS"
       }else{

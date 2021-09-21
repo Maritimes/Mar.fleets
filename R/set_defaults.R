@@ -53,6 +53,8 @@
 #' and date).  They may still match on confirmation codes and/or trip names.
 #' @param maxSetDiff_Hr default is \code{48}. Any MARFIS and ISDB sets that vary by more than the
 #' # of hours specified here will NOT be considered matches.
+#' @param maxSetDiff_Km default is \code{100}. Any MARFIS and ISDB sets with positions more than the
+#' # of kilometers specified here will NOT be considered matches.
 #' @param dropUnmatchedISDB default is \code{TRUE}.
 #' @param manualMatch default is \code{FALSE}. This parameter is only used when calling functions
 #' from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
@@ -85,8 +87,6 @@
 #' @param usepkg default is \code{'roracle'}. This indicates whether the connection to Oracle should
 #' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
 #' be slightly easier to setup, but roracle will extract data faster.
-#' @param quietly default is \code{TRUE}. This specifies whether or not status messages should be
-#' output to the console while the scripts run.
 #' @param debug default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 #' debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
@@ -125,6 +125,7 @@ set_defaults <- function(lics = 'all',
                          keepSurveyTrips = TRUE,
                          maxTripDiff_Hr = 48,
                          maxSetDiff_Hr = 48,
+                         maxSetDiff_Km = 100,
                          dropUnmatchedISDB = TRUE,
                          manualMatch = FALSE,
                          data.dir = file.path(getwd(), 'data'),
@@ -133,7 +134,6 @@ set_defaults <- function(lics = 'all',
                          oracle.dsn = 'PTRAN',
                          usepkg = 'roracle',
                          useLocal = FALSE,
-                         quietly=TRUE,
                          debugLics = NULL,
                          debugVRs = NULL,
                          debugMARFTripIDs = NULL,
@@ -173,6 +173,9 @@ set_defaults <- function(lics = 'all',
 
   # notify user on unknown sent parameters
   jakes <- setdiff(names(argg),names(defaults))
+  if ("quietly" %in% jakes) message("The 'quietly' parameter is no longer valid")
+  jakes = jakes[!(jakes %in% 'quietly')]
+
   if (length(jakes)>0){
     warning(paste0("This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }
