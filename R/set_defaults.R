@@ -151,7 +151,7 @@ set_defaults <- function(lics = 'all',
 
   # have all of our arguments - further process some of them ------------------------------------------------------------------------------------------------
   # convert year (if present to dateStart and dateEnd)
-  dateArgs <- Mar.utils::vali_dates(dateStart = argg$dateStart, dateEnd = argg$dateEnd, year = argg$year, quietly = argg$quietly)
+  dateArgs <- Mar.utils::vali_dates(dateStart = argg$dateStart, dateEnd = argg$dateEnd, year = argg$year, quietly = T)
   argg$dateStart <- dateArgs$dateStart
   argg$dateEnd <- dateArgs$dateEnd
   argg$year <- NULL
