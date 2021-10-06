@@ -115,7 +115,7 @@ can_run <- function(...){
     tables <- gsub("ISDB","OBSERVER", tables)
     fails = 0
     for (t in 1:length(tables)){
-      # if (quietly=FALSE)message(paste0("Checking access to ",tables[t],": "))
+      message(paste0("Checking access to ",tables[t],": "))
       qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM<=1")
       test = args$cxn$thecmd(args$cxn$channel, qry, rows_at_time = 1)
       if (is.character(test)) {
@@ -166,18 +166,22 @@ can_run <- function(...){
                "GEARS")
 
   isdbTabs = c("ISFISHSETS",
-               "ISSETPROFILE_WIDE",
                "ISTRIPS",
                "ISVESSELS",
-               "ISCATCHES")
+               "ISCATCHES",
+               "ISSPECIESCODES")
+
+  obsTabs = c("ISSETPROFILE_WIDE")
 
   args[["marfTabs"]] <- marfTabs
   args[["isdbTabs"]] <- isdbTabs
+  args[["obsTabs"]] <- obsTabs
   ISDB = paste0("ISDB.",isdbTabs)
   MARFIS = paste0("MARFISSCI.",marfTabs)
+  OBS = paste0("OBSERVER.",obsTabs)
 
   if (args$useLocal){
-    if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args))){
+    if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args)) & do.call(wantLocal,list(OBS,args=args))){
       args[['cxn']] <- TRUE
       res <- args
       return(res)
@@ -185,6 +189,7 @@ can_run <- function(...){
       message(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
       message(paste0(paste0(MARFIS,".RData"),collapse = "\n"))
       message(paste0(paste0(ISDB,".RData"),collapse = "\n"))
+      message(paste0(paste0(OBS,".RData"),collapse = "\n"))
       stop()
     }
   }else{
@@ -206,7 +211,7 @@ can_run <- function(...){
       res <- args
       return(res)
     }
-    if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
+    if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)) && do.call(tblAccess,list(OBS, args=args)))){
       message("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
       res <- args
       return(res)
@@ -292,6 +297,17 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = TRUE,
                              tables = args$isdbTabs,
+                             env = environment(), quietly = FALSE)
+
+  message("\nChecking for and/or extracting Observer data...\n")
+  Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
+                             fn.oracle.password = oracle.password,
+                             fn.oracle.dsn = oracle.dsn,
+                             usepkg = usepkg,
+                             schema = "OBSERVER",
+                             data.dir = data.dir,
+                             checkOnly = TRUE,
+                             tables = args$obsTabs,
                              env = environment(), quietly = FALSE)
   message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
 }
