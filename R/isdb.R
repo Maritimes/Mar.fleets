@@ -339,7 +339,10 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   if (args$debug) Mar.utils::where_now()
   badDate <- as.POSIXct(as.Date("2100-01-01"))
   if(args$useLocal){
-    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISSETPROFILE_WIDE", "ISGEARS"),
+    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS", "ISGEARS"),
+                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                               env = environment(), quietly = TRUE)
+    Mar.utils::get_data_tables(schema = "OBSERVER", data.dir = args$data.dir, tables = c("ISSETPROFILE_WIDE"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                env = environment(), quietly = TRUE)
     ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID", "GEAR_ID")]
@@ -414,12 +417,14 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
     message(paste0("\n","No ISDB sets"))
     return(NULL)
   }
+  sink <- capture.output(sf::sf_use_s2(FALSE))
   ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, flag.land = T)
   colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO_BEST"] <- "NAFO_ISDB_SETS_CALC"
 
   if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
   }
+  sink <- capture.output(sf::sf_use_s2(TRUE))
   ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
   return(ISSETPROFILE_WIDE)
 }

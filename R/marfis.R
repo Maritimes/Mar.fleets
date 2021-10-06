@@ -434,12 +434,12 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
   PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
   PS_sets<-unique(PS_sets)
   colnames(PS_sets)[colnames(PS_sets)=="NAFO_AREA"] <- "NAFO_MARF_SETS"
-
-
+  sink <- capture.output(sf::sf_use_s2(FALSE))
   PS_sets <- Mar.utils::identify_area(PS_sets, flag.land = TRUE)
   colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
   if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     PS_sets <- Mar.utils::identify_area(PS_sets, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
   }
+  sink <- capture.output(sf::sf_use_s2(TRUE))
   return(PS_sets)
 }
