@@ -168,8 +168,7 @@ can_run <- function(...){
   isdbTabs = c("ISFISHSETS",
                "ISTRIPS",
                "ISVESSELS",
-               "ISCATCHES",
-               "ISSPECIESCODES")
+               "ISCATCHES")
 
   obsTabs = c("ISSETPROFILE_WIDE")
 

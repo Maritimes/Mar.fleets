@@ -113,13 +113,13 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
           isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
           if(!args$manualMatch){
            if(args$useLocal){
-            Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISSPECIESCODES","ISFISHSETS","ISCATCHES"),
+            Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
                                        usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                        env = environment(), quietly = TRUE)
             ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
             catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
             catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
-            catches <- merge(catches, ISSPECIESCODES[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
+            catches <- merge(catches, SPECIES_ISDB[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
           }else{
             # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
             catchSQL = paste0("SELECT CA.SPECCD_ID,
