@@ -20,16 +20,20 @@
 get_vmstracks<-function(data = NULL, ...){
   argsUser <- list(...)
   args <- do.call(set_defaults, list(argsUser=argsUser))$args
+  if(args$debug) t12 <- Mar.utils::where_now(returnTime = T)
   if (args$useLocal==TRUE){
     message("\n", "VMS data requires a connection to the network.  It cannot be run locally")
+    if (args$debug) {
+      t12_ <- proc.time() - t12
+      message("\tExiting get_vmstracks() (",round(t12_[1],0),"s elapsed)")
+    }
     return(NULL)
   }
-  if(args$debug) Mar.utils::where_now()
 
- vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
-                                                                mDate=as.Date(character()),
-                                                                OBS=numeric(),
-                                                                stringsAsFactors=FALSE)
+  vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
+                                                    mDate=as.Date(character()),
+                                                    OBS=numeric(),
+                                                    stringsAsFactors=FALSE)
 
   marDat<-merge(data$marf$MARF_SETS, data$marf$MARF_TRIPS, by.x = c("MON_DOC_ID","TRIP_ID_MARF") , by.y=c("MON_DOC_ID","TRIP_ID_MARF"), all.x=T)
 
@@ -67,6 +71,10 @@ get_vmstracks<-function(data = NULL, ...){
                                     quietly = TRUE)
   if (is.null(allVMS)){
     message("\n", "No VMS data could be found matching your parameters")
+    if (args$debug) {
+      t12_ <- proc.time() - t12
+      message("\tExiting get_vmstracks() (",round(t12_[1],0),"s elapsed)")
+    }
     return(NULL)
   }
   if(nrow(allVMS)==1000000)message("Your extraction was truncated - you got the maximum number of records allowed.")
@@ -102,5 +110,10 @@ get_vmstracks<-function(data = NULL, ...){
   all_VMS_cln_segs$SPEED_KMHR <- round(all_VMS_cln_segs$DIST_KM/all_VMS_cln_segs$DUR_HRS,2)
   #bunch of values below only relevant to single points - don't make sense for lines
   all_VMS_cln_segs$SPEED_KNOTS  <- all_VMS_cln_segs$LATITUDE  <- all_VMS_cln_segs$LONGITUDE <- all_VMS_cln_segs$elapsedDist_m <- all_VMS_cln_segs$elapsedTime_min <- all_VMS_cln_segs$UPDATE_DATE <- NULL
+
+  if (args$debug) {
+    t12_ <- proc.time() - t12
+    message("\tExiting get_vmstracks() (",round(t12_[1],0),"s elapsed)")
+  }
   return(all_VMS_cln_segs)
 }

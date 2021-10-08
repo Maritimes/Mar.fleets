@@ -42,17 +42,17 @@
 #' }
 "LIC_GEAR_SPEC"
 
-#' GEARS Metadata
+#' GEARS_MARFIS Metadata
 #'
 #' This is an rda file of a lookup table used to associate different MARFIS gear codes with name of the gear:
 #' @docType data
-#' @usage data(GEARS)
+#' @usage data(GEARS_MARFIS)
 #' @format  rda
 #' \describe{
 #' \item{GEAR_CODE}{code identifying the type of gear}
 #' \item{GEAR}{name of the gear}
 #' }
-"GEARS"
+"GEARS_MARFIS"
 
 #' SPECIES_MARFIS Metadata
 #'

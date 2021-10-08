@@ -45,11 +45,15 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   MultiMatches <- 0
 
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t22 <- Mar.utils::where_now(returnTime = T)
   k <- TRIP_ID_MARF <- CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- PRIOR1 <- PRIOR2 <- NA
 
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
     message(paste0("\n","No trips to try match against"))
+    if (args$debug) {
+      t22_ <- proc.time() - t22
+      message("\tExiting match_trips() - No trips: (", round(t22_[1],0),"s elapsed)")
+    }
     return(NULL)
   }
   marfMatch <- unique(marfMatch[,c("TRIP_ID_MARF","MON_DOC_ID","VR_NUMBER_FISHING", "LICENCE_ID","GEAR_CODE","VR_NUMBER_LANDING", "ISDB_TRIP","OBS_ID","OBS_PRESENT","CONF_NUMBER_HI","CONF_NUMBER_HO","T_DATE1","T_DATE2")])
@@ -64,7 +68,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   # 3 - add matches to df called matches
 
   matchTripNames <- function(df = NULL){
-    if (args$debug)    Mar.utils::where_now()
+    if (args$debug) t23 <- Mar.utils::where_now(returnTime = T)
     # MARFIS TRIP NAME ----------------------------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$ISDB_TRIP_O),c("TRIP_ID_ISDB", "ISDB_TRIP_O")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$ISDB_TRIP_M),c("TRIP_ID_MARF","ISDB_TRIP_M")])
@@ -72,6 +76,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_TRIP"
       thisMarfMatch$match_TripName <- logical()
+
+      if (args$debug) {
+        t23_ <- proc.time() - t23
+        message("\tExiting matchTripNames() - no tripName matches: (", round(t23_[1],0),"s elapsed)")
+      }
       return(thisMarfMatch)
     }
     match_TRIP <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "ISDB_TRIP_O", by.y = "ISDB_TRIP_M"))
@@ -84,10 +93,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = match_TRIP$ISDB_TRIP_O, stepDesc = "matchTrips_TripName")
     match_TRIP$ISDB_TRIP_O <- match_TRIP$ISDB_TRIP_M <- NULL
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_TRIP$TRIP_ID_ISDB, stepDesc = "matchTrips_TripName")
+    if (args$debug) {
+      t23_ <- proc.time() - t23
+      message("\tExiting matchTripNames() (",round(t23_[1],0),"s elapsed)")
+    }
     return(match_TRIP)
   }
   matchHI <- function(df = NULL){
-    if (args$debug)    Mar.utils::where_now()
+    if (args$debug)  t24 <- Mar.utils::where_now(returnTime = T)
     # MARFIS HAILIN CONFIRMATION NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HI),c("TRIP_ID_MARF","CONF_NUMBER_HI")])
@@ -95,6 +108,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HI"
       thisMarfMatch$match_CONF_HI <- logical()
+      if (args$debug) {
+        t24_ <- proc.time() - t24
+        message("\tExiting matchHI() - no HI matches: (", round(t24_[1],0),"s elapsed)")
+      }
       return(thisMarfMatch)
     }
     s <- strsplit(as.character(thisMarfMatch$CONF_NUMBER_HI), ',')
@@ -108,10 +125,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_CONF_HI$match_CONF_HI <- logical()
     }
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HI$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
+    if (args$debug) {
+      t24_ <- proc.time() - t24
+      message("\tExiting matchHI() (",round(t24_[1],0),"s elapsed)")
+    }
     return(match_CONF_HI)
   }
   matchHO <- function(df = NULL){
-    if (args$debug)    Mar.utils::where_now()
+    if (args$debug) t25 <- Mar.utils::where_now(returnTime = T)
     # MARFIS HAILOUT CONFIRMATION NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$MARFIS_CONF_NUMBER),c("TRIP_ID_ISDB", "MARFIS_CONF_NUMBER")])
     thisMarfMatch <- unique(marfMatch[!is.na(marfMatch$CONF_NUMBER_HO),c("TRIP_ID_MARF","CONF_NUMBER_HO")])
@@ -119,6 +140,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_HO"
       thisMarfMatch$match_CONF_HO <- logical()
+      if (args$debug) {
+        t25_ <- proc.time() - t25
+        message("\tExiting matchHO() - no HO matches: (", round(t25_[1],0),"s elapsed)")
+      }
       return(thisMarfMatch)
     }
     p <- strsplit(as.character(thisMarfMatch$CONF_NUMBER_HO), ',')
@@ -132,11 +157,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_CONF_HO$match_CONF_HO <- logical()
     }
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HO$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
-
+    if (args$debug) {
+      t25_ <- proc.time() - t25
+      message("\tExiting matchHO() (",round(t25_[1],0),"s elapsed)")
+    }
     return(match_CONF_HO)
   }
   matchVR <- function(df = NULL){
-    if (args$debug)    Mar.utils::where_now()
+    if (args$debug) t26 <- Mar.utils::where_now(returnTime = T)
     # MARFIS VR NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$VR),c("TRIP_ID_ISDB", "VR", "LIC")])
     #MARF - combine using both fishing and landing vessel vrs, then combine and get unique list
@@ -149,6 +177,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_VR"
       thisMarfMatch$match_VR <- logical()
+      if (args$debug) {
+        t26_ <- proc.time() - t26
+        message("\tExiting matchHO() - no VR matches: (", round(t26_[1],0),"s elapsed)")
+      }
       return(thisMarfMatch)
     }
     match_VR <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "VR", by.y = "VR_m"))
@@ -171,11 +203,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_VR$TRIP_ID_ISDB, stepDesc = "matchTrips_VR")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_VR$VR, stepDesc = "matchTrips_VR")
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_VR$LIC, stepDesc = "matchTrips_VR")
-
+    if (args$debug) {
+      t26_ <- proc.time() - t26
+      message("\tExiting matchVR() (",round(t26_[1],0),"s elapsed)")
+    }
     return(match_VR)
   }
   matchLIC <- function(df = NULL){
-    if (args$debug)    Mar.utils::where_now()
+    if (args$debug) t27 <- Mar.utils::where_now(returnTime = T)
     # MARFIS VR NUMBER -----------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$LIC),c("TRIP_ID_ISDB", "LIC", "VR")])
     thisMarfMatch <- unique(marfMatch[, c("TRIP_ID_MARF","LICENCE_ID")])
@@ -183,6 +218,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_LIC"
       thisMarfMatch$match_LIC <- logical()
+      if (args$debug) {
+        t27_ <- proc.time() - t27
+        message("\tExiting matchLIC() - no LIC matches: (", round(t27_[1],0),"s elapsed)")
+      }
       return(thisMarfMatch)
     }
     match_LIC <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "LIC", by.y = "LICENCE_ID"))
@@ -207,10 +246,15 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_LIC$TRIP_ID_ISDB, stepDesc = "matchTrips_LIC")
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_LIC$VR, stepDesc = "matchTrips_LIC")
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_LIC$LIC, stepDesc = "matchTrips_LIC")
+
+    if (args$debug) {
+      t27_ <- proc.time() - t27
+      message("\tExiting matchLIC() (",round(t27_[1],0),"s elapsed)")
+    }
     return(match_LIC)
   }
   matchDate <- function(df = NULL){
-    if (args$debug)    Mar.utils::where_now()
+    if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
     #DATE RANGE --------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
     thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", "VR_NUMBER_FISHING", "LICENCE_ID")])
@@ -222,6 +266,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_DATE"
       thisMarfMatch$match_Date <- logical()
+      if (args$debug) {
+        t28_ <- proc.time() - t28
+        message("\tExiting matchDate() - no date matches: (", round(t28_[1],0),"s elapsed)")
+      }
       return(thisMarfMatch)
     }
 
@@ -299,6 +347,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_DateMin$VR, stepDesc = "matchTrips_date")
     dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_DateMin$LIC, stepDesc = "matchTrips_date")
 
+    if (args$debug) {
+      t28_ <- proc.time() - t28
+      message("\tExiting matchDate() (",round(t28_[1],0),"s elapsed)")
+    }
     return(match_DateMin)
   }
   match_TripName <- matchTripNames(df = isdbTrips)
@@ -354,7 +406,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     #mTripcd_id not used for matching, just for math to help break ties
     match_tmp <- match_tmp[which(match_tmp$match_Date & (match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id) >0),]
     match_tmp$SRC <- NULL
-     if (nrow(match_tmp)>0){
+    if (nrow(match_tmp)>0){
       match_tmp$cnt_dateMatch <- match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id
       match_tmp$swappedLIC_VR <- FALSE
       match_tmp[which(match_tmp$swapLIC|match_tmp$swapVR|match_tmp$mMix1|match_tmp$mMix2),"swappedLIC_VR"]<-T
@@ -459,6 +511,10 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   res[["MATCH_SUMMARY_TRIPS"]] <- summ_df
   res[["ISDB_UNMATCHABLES"]] <- matchNone
   res[["ISDB_MULTIMATCHES"]] <- dupRows
+  if (args$debug) {
+    t22_ <- proc.time() - t22
+    message("\tExiting match_trips() (",round(t22_[1],0),"s elapsed)")
+  }
   return(res)
 }
 
@@ -483,10 +539,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 #' @noRd
 match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, ...){
   args <- list(...)$args
-  if (args$debug){
-    Mar.utils::where_now()
-    T_match_sets=Sys.time()
-  }
+  if (args$debug) t23 <- Mar.utils::where_now(returnTime = T)
 
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
@@ -511,6 +564,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
     #lat.field and lon.field (i.e. CNT_TIME, CNT_LAT and CNT_LON)
     #this is done to help assess whether or not times and/or positions are appropriate for differentiating
     #sets.  If they're all the same, no point trying to use them
+    if (args$debug) t24 <- Mar.utils::where_now(returnTime = T)
     df$BADTIM<- FALSE
     df$BADPOS<- FALSE
     #qc positions
@@ -548,6 +602,11 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
 
     dets$CNT_TIM <- dets$CNT_POS <- NULL
     df<- merge(df, dets)
+
+    if (args$debug) {
+      t24_ <- proc.time() - t24
+      message("\tExiting qcer() (",round(t24_[1],0),"s elapsed)")
+    }
     return(df)
   }
 
@@ -573,7 +632,13 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf[,"DUR_DIFF"]<- as.numeric(abs(difftime(megadf$DATE_TIME,megadf$EF_FISHED_DATETIME, units="hours")))
   megadf$BADTIM <- FALSE
   megadf <- megadf[megadf$DUR_DIFF <= args$maxSetDiff_Hr,]
-  if (nrow(megadf)==0)return(NA)
+  if (nrow(megadf)==0){
+    if (args$debug) {
+      t23_ <- proc.time() - t23
+      message("\tExiting match_sets() - empty megadf: (", round(t23_[1],0),"s elapsed)")
+    }
+    return(NA)
+  }
   megadf[megadf$BADTIM_I==T | megadf$BADTIM_M==T |is.na(megadf$DUR_DIFF),"BADTIM"]<-TRUE
   megadf$BADTIM_I <- megadf$BADTIM_M <- NULL
   # calc dist between isdb and marfis
@@ -583,8 +648,13 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf[,"DIST_DIFF"]<- round(geosphere::distGeo(p1 = megadf[,c("LONGITUDE_I","LATITUDE_I")],
                                                   p2 = megadf[,c("LONGITUDE_M","LATITUDE_M")]),0)
   megadf <- megadf[megadf$DIST_DIFF <= (args$maxSetDiff_Km*1000),]
-  if (nrow(megadf)==0)return(NA)
-
+  if (nrow(megadf)==0){
+    if (args$debug) {
+      t23_ <- proc.time() - t23
+      message("\tExiting match_sets() - empty megadf2: (", round(t23_[1],0),"s elapsed)")
+    }
+    return(NA)
+  }
   megadf$MATCH<- NA
   matches_all<- data.frame(TRIP_ID_ISDB=numeric(),
                            FISHSET_ID=numeric(),
@@ -629,6 +699,11 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   }
   res= list()
   res[["MAP_ISDB_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
+
+  if (args$debug) {
+    t23_ <- proc.time() - t23
+    message("\tExiting match_sets() (",round(t23_[1],0),"s elapsed)")
+  }
   return(res)
 }
 

@@ -66,11 +66,11 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 quick_map <- function(data=NULL,
-                     plotMARF = TRUE, showAllMARFSets = TRUE, clusterMARF = TRUE,
-                     overloadMARF = "cluster", plotMARFSurf = FALSE, marfSpp = NULL,
-                     plotISDB = TRUE, showAllISDBSets = TRUE, clusterISDB = TRUE,
-                     overloadISDB = "cluster", plotISDBSurf = FALSE, isdbField = "EST_COMBINED_WT", isdbSpp = NULL,
-                     title = NULL, vms= NULL, bathy = TRUE, surfRes = "low"){
+                      plotMARF = TRUE, showAllMARFSets = TRUE, clusterMARF = TRUE,
+                      overloadMARF = "cluster", plotMARFSurf = FALSE, marfSpp = NULL,
+                      plotISDB = TRUE, showAllISDBSets = TRUE, clusterISDB = TRUE,
+                      overloadISDB = "cluster", plotISDBSurf = FALSE, isdbField = "EST_COMBINED_WT", isdbSpp = NULL,
+                      title = NULL, vms= NULL, bathy = TRUE, surfRes = "low"){
 
   if (tolower(surfRes)=="med"){
     det = 10000

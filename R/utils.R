@@ -36,9 +36,9 @@ valuesOK <- function(valSent = NULL, valOK = NULL, valID = NULL){
 #' @return returns NULL
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 isDraft <- function(){
- this <- utils::winDialog(type = c("okcancel"), 'By proceeding, I acknowlege that this analytic is in draft form, and that the asessment lead has not reviewed its results')
- message("You are welcome to contact Mike.McMahon@dfo-mpo.gc.ca, and ask that he work with the assessment lead and prioritize QC'ing this analytic.  Alternatively, if you ARE the assessment lead, please ensure you provide feedback so we can work towards removing this message.")
- if (this != "OK") stop("Stopped by user")
+  this <- utils::winDialog(type = c("okcancel"), 'By proceeding, I acknowlege that this analytic is in draft form, and that the asessment lead has not reviewed its results')
+  message("You are welcome to contact Mike.McMahon@dfo-mpo.gc.ca, and ask that he work with the assessment lead and prioritize QC'ing this analytic.  Alternatively, if you ARE the assessment lead, please ensure you provide feedback so we can work towards removing this message.")
+  if (this != "OK") stop("Stopped by user")
 }
 
 #' @title paramOK
@@ -94,24 +94,28 @@ go <- function(){
 #' @noRd
 can_run <- function(...){
   args=list(...)
-  if (args$debug){
-    Mar.utils::where_now()
-  }
+  if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
 
   connect_Oracle <-function(...){
     #connect_Oracle is just results of trying to establish connection
     args=list(...)$args
+    if (args$debug) t29 <- Mar.utils::where_now(returnTime = T)
     cxn <- do.call(Mar.utils::make_oracle_cxn, list(usepkg = args$usepkg,
                                                     fn.oracle.username = args$oracle.username,
                                                     fn.oracle.password = args$oracle.password,
                                                     fn.oracle.dsn = args$oracle.dsn,
                                                     quietly = TRUE))
+    if (args$debug) {
+      t29_ <- proc.time() - t29
+      message("\tExiting connect_Oracle() (",round(t29_[1],0),"s elapsed)")
+    }
     return(cxn)
   }
 
   tblAccess <- function(tables = NULL,...){
     #tblAccess is T if has necess permiss
     args=list(...)$args
+    if (args$debug) t30 <- Mar.utils::where_now(returnTime = T)
     tables <- gsub("ISDB","OBSERVER", tables)
     fails = 0
     for (t in 1:length(tables)){
@@ -126,29 +130,43 @@ can_run <- function(...){
       }
     }
     if (fails>0){
+        if (args$debug){
+          t30_ <- proc.time() - t30
+        message("\tExiting tblAccess() (",round(t30_[1],0),"s elapsed) - missing access to some")
+      }
       return(FALSE)
     }else{
-      return(TRUE)
+      if (args$debug){
+        t30_ <- proc.time() - t30
+        message("\tExiting tblAccess() (",round(t30_[1],0),"s elapsed)")
+      }
+        return(TRUE)
     }
   }
 
   wantLocal <- function(tables = NULL, ...){
     #wantLocal is T if all necessar things are found
     args<-list(...)$args
+    if (args$debug) t31 <- Mar.utils::where_now(returnTime = T)
     #1 check if local copies available '
-    if (grepl(x = tables[1], pattern = "MARFIS")>0){
-      tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
-      tabs2 = gsub(tabs1,pattern = "MARFISSCI", replacement = "MARFIS")
-      localDataCheck1 <- sapply(X =tabs1, file.exists)
-      localDataCheck2 <- sapply(X =tabs2, file.exists)
-      mChk= data.frame(localDataCheck1, localDataCheck2)
-      mChk$RES <- mChk$localDataCheck1 + localDataCheck2
-      localDataCheck <- all(mChk$RES>0)
-      rm(tabs1, tabs2, localDataCheck1, localDataCheck2, mChk)
-    }else{
-      tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
-      localDataCheck <- all(sapply(X =tabs, file.exists))
-      rm(tabs)
+    # message("fuzz name here??")
+    # if (grepl(x = tables[1], pattern = "MARFIS")>0){
+    #   tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
+    #   tabs2 = gsub(tabs1,pattern = "MARFISSCI", replacement = "MARFIS")
+    #   localDataCheck1 <- sapply(X =tabs1, file.exists)
+    #   localDataCheck2 <- sapply(X =tabs2, file.exists)
+    #   mChk= data.frame(localDataCheck1, localDataCheck2)
+    #   mChk$RES <- mChk$localDataCheck1 + localDataCheck2
+    #   localDataCheck <- all(mChk$RES>0)
+    #   rm(tabs1, tabs2, localDataCheck1, localDataCheck2, mChk)
+    # }else{
+    tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
+    localDataCheck <- all(sapply(X =tabs, file.exists))
+    rm(tabs)
+    # }
+    if (args$debug){
+      t31_ <- proc.time() - t31
+      message("\tExiting wantLocal() (",round(t31_[1],0),"s elapsed)")
     }
     return(localDataCheck)
   }
@@ -162,8 +180,7 @@ can_run <- function(...){
                "NAFO_UNIT_AREAS",
                "PRO_SPC_INFO",
                "TRIPS",
-               "VESSELS",
-               "GEARS")
+               "VESSELS")
 
   isdbTabs = c("ISFISHSETS",
                "ISTRIPS",
@@ -183,6 +200,10 @@ can_run <- function(...){
     if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args)) & do.call(wantLocal,list(OBS,args=args))){
       args[['cxn']] <- TRUE
       res <- args
+      if (args$debug){
+        t28_ <- proc.time() - t28
+        message("\tExiting can_run() (",round(t28_[1],0),"s elapsed)")
+      }
       return(res)
     }else{
       message(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
@@ -203,21 +224,28 @@ can_run <- function(...){
               "\n\t","   R from 32bit to 64bit (or vice versa), and try again."
       )
       stop()
-      # return(FALSE)
     }else{
-      # if (!args$quietly)  message("\nDB connection established.\n")
       args[['cxn']] <- cxnCheck
       res <- args
+
+      if (args$debug){
+        t28_ <- proc.time() - t28
+        message("\tExiting can_run() - db cxn established (", round(t28_[1],0),"s elapsed)")
+      }
       return(res)
     }
     if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)) && do.call(tblAccess,list(OBS, args=args)))){
       message("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
       res <- args
-      return(res)
+      if (args$debug){
+        t28_ <- proc.time() - t28
+        message("\tExiting can_run() - tbl access verified (", round(t28_[1],0),"s elapsed)")
+      }
+
+           return(res)
     }else{
       message("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
       stop()
-      #return(FALSE)
     }
   }
 }
@@ -247,6 +275,7 @@ can_run <- function(...){
 #' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 #' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 #' roracle will extract data ~ 5x faster.
+#' @param ... other arguments passed to methods
 #' @family setup
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
@@ -254,7 +283,11 @@ enable_local <- function(data.dir = NULL,
                          oracle.username = "_none_",
                          oracle.password = "_none_",
                          oracle.dsn = "_none_",
-                         usepkg = "rodbc"){
+                         usepkg = "rodbc",
+                         ...){
+  browser("Check if args exists(probly no), and ensure it gets merged with args below")
+  args <-list(...)$args
+  if (args$debug) t32 <- Mar.utils::where_now(returnTime = T)
   if (is.null(data.dir)|
       oracle.username == "_none_"|
       oracle.password == "_none_" |
@@ -285,7 +318,7 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = TRUE,
                              tables = args$marfTabs,
-                             env = environment(), quietly = FALSE)
+                             env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
 
   message("\nChecking for and/or extracting ISDB data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
@@ -296,7 +329,7 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = TRUE,
                              tables = args$isdbTabs,
-                             env = environment(), quietly = FALSE)
+                             env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
 
   message("\nChecking for and/or extracting Observer data...\n")
   Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
@@ -307,8 +340,12 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = TRUE,
                              tables = args$obsTabs,
-                             env = environment(), quietly = FALSE)
+                             env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
   message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
+  if (args$debug) {
+  t32_ <- proc.time() - t32
+  message("\tExiting enable_local() (",round(t32_[1],0),"s elapsed)")
+}
 }
 
 #' @title summarize_locations
@@ -363,12 +400,17 @@ summarize_locations<-function(get_isdb = NULL,
                               get_marfis = NULL,
                               ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t33 <- Mar.utils::where_now(returnTime = T)
   trimNAFONames<- function(nafoString = NULL, det = det){
+    if (args$debug) tx<- Mar.utils::where_now(returnTime = T)
     toTrim <- nafoString[nchar(nafoString)<=4]
     noTrim <- nafoString[!(nafoString %in% toTrim)]
     toTrim <- substr(toTrim, 1,det)
     res <- sort(c(toTrim, noTrim))
+    if (args$debug) {
+      t33_ <- proc.time() - t33
+    message("\tExiting trimNAFONames() (",round(t33_[1],0),"s elapsed)")
+    }
     return(res)
   }
 
@@ -474,5 +516,9 @@ summarize_locations<-function(get_isdb = NULL,
   }
 
 
+  if (args$debug) {
+    t33_ <- proc.time() - t33
+    message("\tExiting summarize_locations() (",round(t33_[1],0),"s elapsed)")
+  }
   return(res)
 }

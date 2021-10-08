@@ -9,7 +9,8 @@ enable_local(
   oracle.username = "_none_",
   oracle.password = "_none_",
   oracle.dsn = "_none_",
-  usepkg = "rodbc"
+  usepkg = "rodbc",
+  ...
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ provided, it will take priority over your existing value.}
 \item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 roracle will extract data ~ 5x faster.}
+
+\item{...}{other arguments passed to methods}
 }
 \description{
 This function extracts all of the necessary oracle tables to a local folder so that

@@ -145,10 +145,9 @@ set_defaults <- function(lics = 'all',
   sentArgs <- list(...)
   #ensure hardcoded args take priority over user args
   submittedArgs <- Mar.utils::combine_lists(primary = sentArgs$argsFn, ancilliary = sentArgs$argsUser, quietly = T)
-
   #ensure submitted args take priority over default args
   argg <- Mar.utils::combine_lists(primary =  submittedArgs, ancilliary = defaults, quietly = T)
-
+  if (argg$debug)    t27 <- Mar.utils::where_now(returnTime = T)
   # have all of our arguments - further process some of them ------------------------------------------------------------------------------------------------
   # convert year (if present to dateStart and dateEnd)
   dateArgs <- Mar.utils::vali_dates(dateStart = argg$dateStart, dateEnd = argg$dateEnd, year = argg$year, quietly = T)
@@ -180,36 +179,36 @@ set_defaults <- function(lics = 'all',
     warning(paste0("This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }
 
-    paramDf <- argg
-    paramDf <- replace(paramDf, sapply(paramDf, is.data.frame), "see <results>$params$fleet$...")
-    paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
-    paramDf <- replace(paramDf, sapply(paramDf, is.null), "<NULL>")
-    paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
-    paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argg$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
-    paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argg$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
-    paramDf$SOURCE <- NA
+  paramDf <- argg
+  paramDf <- replace(paramDf, sapply(paramDf, is.data.frame), "see <results>$params$fleet$...")
+  paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
+  paramDf <- replace(paramDf, sapply(paramDf, is.null), "<NULL>")
+  paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
+  paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argg$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
+  paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argg$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
+  paramDf$SOURCE <- NA
 
-    paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
-    paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
-    paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"
-    if("year" %in% names(sentArgs$argsUser)){
-      paramDf[paramDf$PARAMETER == "dateStart","SOURCE"] <- "derived from user-supplied 'year'"
-      paramDf[paramDf$PARAMETER == "dateEnd","SOURCE"] <- "derived from user-supplied 'year'"
-    }
+  paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
+  paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
+  paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"
+  if("year" %in% names(sentArgs$argsUser)){
+    paramDf[paramDf$PARAMETER == "dateStart","SOURCE"] <- "derived from user-supplied 'year'"
+    paramDf[paramDf$PARAMETER == "dateEnd","SOURCE"] <- "derived from user-supplied 'year'"
+  }
 
-    toMatch <- c("TRUE", "FALSE","c\\(.*","^[0-9]*$")
-    paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
-    paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
-    paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
-    paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
-    paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
-    if(all(is.na(utils::packageDescription("Mar.fleets")))){
-      paramDf <- rbind(paramDf, c("metadata","Mar.fleets not installed"))
-    }else{
-      paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
-    }
-    # paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
-if(exists("dbEnv")){
+  toMatch <- c("TRUE", "FALSE","c\\(.*","^[0-9]*$")
+  paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
+  paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
+  paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
+  paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
+  paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
+  if(all(is.na(utils::packageDescription("Mar.fleets")))){
+    paramDf <- rbind(paramDf, c("metadata","Mar.fleets not installed"))
+  }else{
+    paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
+  }
+  # paramDf <- rbind(paramDf, c("metadata","Mar.fleets version", utils::packageDescription("Mar.fleets")$Version))
+  if(exists("dbEnv")){
     dbEnv$debugLics <- argg$debugLics
     dbEnv$debugVRs <- argg$debugVRs
     dbEnv$debugMARFTripIDs <- argg$debugMARFTripIDs
@@ -218,9 +217,14 @@ if(exists("dbEnv")){
       dbEnv$debugISDBTripNamesLookup <- clean_ISDB_Trip(df=data.frame(ISDB_TRIP = argg$debugISDBTripNames), field = "ISDB_TRIP", out_name = "ISDB_TRIP_CLN")
       dbEnv$debugISDBTripNames <- dbEnv$debugISDBTripNamesLookup$ISDB_TRIP_CLN
     }
-}
-res <- list()
-res[["params"]]<- paramDf
-res[["args"]]<- argg
-    return(res)
+  }
+  res <- list()
+  res[["params"]]<- paramDf
+  res[["args"]]<- argg
+
+  if (argg$debug){
+    t27_ <- proc.time() - t27
+    message("\tExiting set_defaults() (",round(t27_[1],0),"s elapsed)")
+  }
+  return(res)
 }

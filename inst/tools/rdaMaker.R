@@ -13,12 +13,15 @@ usethis::use_data(LIC_GEAR_SPEC, LIC_GEAR_SPEC, overwrite = T)
 
 
 Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("GEARS", "SPECIES"))
-GEARS <- GEARS[with(GEARS,order(GEAR_CODE)),c("GEAR_CODE", "GEAR")]
+GEARS_MARFIS <- GEARS[with(GEARS,order(GEAR_CODE)),c("GEAR_CODE", "GEAR")]
+
+usethis::use_data(GEARS_MARFIS, GEARS_MARFIS, overwrite = T)
+
 SPECIES_MARFIS <- SPECIES[with(SPECIES,order(SPECIES_CODE)),c("SPECIES_CODE", "SPECIES_NAME")]
 Mar.utils::get_data_tables(schema = "ISDB", data.dir = data.dir, tables = c("ISSPECIESCODES"))
 SPECIES_ISDB <- ISSPECIESCODES[with(ISSPECIESCODES,order(SPECCD_ID)),c("SPECCD_ID", "COMMON", "SCIENTIFIC")]
 
-save(GEARS, file = "../data/GEARS.rda")
+save(GEARS_MARFIS, file = "../data/GEARS_MARFIS.rda")
 save(SPECIES_MARFIS, file = "../data/SPECIES_MARFIS.rda")
 save(SPECIES_ISDB, file = "../data/SPECIES_ISDB.rda")
 # usethis::use_data(GEARS, GEARS, overwrite = T)

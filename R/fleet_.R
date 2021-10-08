@@ -129,8 +129,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
   args <- do.call(can_run, args$args)
 
-  if (args$debug) Mar.utils::where_now()
-
+  if (args$debug) t01<- Mar.utils::where_now(returnTime = T)
   #set up results list, and populate according to arguments
   data <- list()
   data[["params"]]<-list()
@@ -193,5 +192,9 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
     }
   }
   rm(dbEnv, envir = .GlobalEnv)
+  if (args$debug) {
+    t01_ <- proc.time() - t01
+    message("\tExiting fleet_() (",round(t01_[1],0),"s elapsed)")
+  }
   return(data)
 }

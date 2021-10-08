@@ -22,7 +22,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   args <-list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t16 <- Mar.utils::where_now(returnTime = T)
 
   HAIL_OUTS <-HAIL_IN_CALLS <-MON_DOC_ENTRD_DETS <-LOG_EFRT_STD_INFO<-PRO_SPC_INFO<- NAFO_UNIT_AREAS <- VESSELS <- TRIPS <- catches <-  NA
 
@@ -39,6 +39,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   ps <- do.call(getPS, list(allProSpc = allProSpc, args=args))
   if (nrow(ps)<1){
     message(paste0("\n","No MARFIS data meets criteria"))
+    if (args$debug) {
+      t16_ <- proc.time() - t16
+      message("\tExiting get_marfis() - No ps: (", round(t16_[1],0),"s elapsed)")
+    }
     return(invisible(NULL))
   }
 
@@ -54,6 +58,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
     ps<- unique(merge(ps, ed, all.x = T))
     if (nrow(ps)<1){
       message(paste0("\n","No MARFIS data meets criteria"))
+      if (args$debug) {
+        t16_ <- proc.time() - t16
+        message("\tExiting get_marfis() - No ps2: (", round(t16_[1],0),"s elapsed)")
+      }
       return(invisible(NULL))
     }
   }else{
@@ -68,6 +76,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
     ps<- unique(merge(ps,unique(hic), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
       message(paste0("\n","No MARFIS data meets criteria"))
+      if (args$debug) {
+        t16_ <- proc.time() - t16
+        message("\tExiting get_marfis() - No ps3: (", round(t16_[1],0),"s elapsed)")
+      }
       return(invisible(NULL))
     }
   }else{
@@ -82,6 +94,10 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
     ps<- unique(merge(ps,unique(hoc), all.x = T, by = "TRIP_ID"))
     if (nrow(ps)<1){
       message(paste0("\n","No MARFIS data meets criteria"))
+      if (args$debug) {
+        t16_ <- proc.time() - t16
+        message("\tExiting get_marfis() - No ps4: (", round(t16_[1],0),"s elapsed)")
+      }
       return(invisible(NULL))
     }
   }else{
@@ -106,7 +122,7 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
                 LICENCE_ID = trips$LICENCE_ID,
                 GEAR_CODE = trips$GEAR_CODE,
                 LOG_EFRT_STD_INFO_ID = trips$LOG_EFRT_STD_INFO_ID,
-               # LOA = trips$LOA,
+                # LOA = trips$LOA,
                 T_DATE1 = trips$T_DATE1,
                 T_DATE2 = trips$T_DATE2
                 # OBS_PRESENT = trips$OBS_PRESENT
@@ -116,12 +132,12 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   # trips[["OBS_PRESENT"]][trips[["OBS_PRESENT"]]==-9] <- NA
   trips[["LOG_EFRT_STD_INFO_ID"]][trips[["LOG_EFRT_STD_INFO_ID"]]==-9] <- NA
   catchFields <- c("LOG_EFRT_STD_INFO_ID",  "SPECIES_CODE", "RND_WEIGHT_KGS"  ) #"NAFO_MARF_TRIPS",
-if(nrow(trips)>0){
-  catches <- trips[,c("TRIP_ID_MARF", catchFields)]
-  trips <- unique(trips[, !names(trips) %in% catchFields])
-}else{
+  if(nrow(trips)>0){
+    catches <- trips[,c("TRIP_ID_MARF", catchFields)]
+    trips <- unique(trips[, !names(trips) %in% catchFields])
+  }else{
 
-}
+  }
   names(sets) <- gsub('^FV_', '', names(sets))
 
   res<- list()
@@ -130,6 +146,10 @@ if(nrow(trips)>0){
   res[["MARF_SETS"]]<-sets
   res[["MARF_CATCHES"]] <- catches
 
+  if (args$debug) {
+    t16_ <- proc.time() - t16
+    message("\tExiting get_marfis() (",round(t16_[1],0),"s elapsed)")
+  }
   return(res)
 }
 
@@ -142,13 +162,13 @@ if(nrow(trips)>0){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 getPS <- function(allProSpc = NULL, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t17 <- Mar.utils::where_now(returnTime = T)
   # theseGears = unique(thisFleet$GEAR_CODE)
   # all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","VESSELS", "NAFO_UNIT_AREAS","TRIPS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
     PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc,
                           c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
@@ -167,7 +187,7 @@ getPS <- function(allProSpc = NULL, ...){
       # nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
       NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(args$area$AREA, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
       PS_df_new <- PS_df[PS_df$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS$AREA_ID,]
-      if (args$debug) Mar.utils::changeDetector(pre_ = PS_df, post_ = PS_df_new, fields = "LICENCE_ID", flagTxt = "marf_NAFO areas applied")
+      #if (args$debug) Mar.utils::changeDetector(pre_ = PS_df, post_ = PS_df_new, fields = "LICENCE_ID", flagTxt = "marf_NAFO areas applied")
       PS_df <- PS_df_new
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFO")
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFO")
@@ -236,6 +256,10 @@ getPS <- function(allProSpc = NULL, ...){
   PS_df$NAFO_area <- NULL #needed this for filtering by NAFO, but is identical to what's in log_eff
   PS_df$T_DATE1 <- as.Date(PS_df$T_DATE1)
   PS_df$T_DATE2 <- as.Date(PS_df$T_DATE2)
+  if (args$debug) {
+    t17_ <- proc.time() - t17
+    message("\tExiting getPS() (",round(t17_[1],0),"s elapsed)")
+  }
   return(PS_df)
 }
 
@@ -248,14 +272,21 @@ getPS <- function(allProSpc = NULL, ...){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 getED <- function(mondocs = NULL, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t18 <- Mar.utils::where_now(returnTime = T)
   if(args$useLocal){
 
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("MON_DOC_ENTRD_DETS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     ED_df <- MON_DOC_ENTRD_DETS[MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
-    if (nrow(ED_df)<1)return(NULL)
+    if (nrow(ED_df)<1){
+
+      if (args$debug) {
+        t18_ <- proc.time() - t18
+        message("\tExiting getED() - No ED_df: (", round(t18_[1],0),"s elapsed)")
+      }
+      return(NULL)
+    }
     ED_df<- reshape2::dcast(ED_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
     colnames(ED_df)[colnames(ED_df)=="21"] <- "OBS_PRESENT"
     colnames(ED_df)[colnames(ED_df)=="741"] <- "ISDB_TRIP"
@@ -273,7 +304,13 @@ getED <- function(mondocs = NULL, ...){
                  AND ED.MON_DOC_ID BETWEEN ",min(mondocs), " AND ", max(mondocs))
     ED_df<- args$cxn$thecmd(args$cxn$channel, EDQry)
     ED_df <- ED_df[ED_df$MON_DOC_ID %in% mondocs ,]
-    if (nrow(ED_df)<1)return(NULL)
+    if (nrow(ED_df)<1){
+      if (args$debug) {
+        t18_ <- proc.time() - t18
+        message("\tExiting getED() - No ED_df2: (", round(t18_[1],0),"s elapsed)")
+      }
+      return(NULL)
+    }
     ED_df<- reshape2::dcast(ED_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
     colnames(ED_df)[colnames(ED_df)=="21"] <- "OBS_PRESENT"
     colnames(ED_df)[colnames(ED_df)=="741"] <- "ISDB_TRIP"
@@ -284,6 +321,10 @@ getED <- function(mondocs = NULL, ...){
   }
   ED_df <- unique(ED_df)
 
+  if (args$debug) {
+    t18_ <- proc.time() - t18
+    message("\tExiting getED() (",round(t18_[1],0),"s elapsed)")
+  }
   return(ED_df)
 }
 #' @title getHIC
@@ -295,12 +336,12 @@ getED <- function(mondocs = NULL, ...){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 getHIC <- function(trips = NULL, ...){
   args <- list(...)$args
-  if (args$debug)  Mar.utils::where_now()
+  if (args$debug) t19 <- Mar.utils::where_now(returnTime = T)
   if(args$useLocal){
 
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     HIC_df <- unique(HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID','HAIL_IN_TYPE_ID')]
 
   }else{
@@ -315,8 +356,11 @@ getHIC <- function(trips = NULL, ...){
   }
   HIC_df <- unique(HIC_df)
   colnames(HIC_df)[colnames(HIC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HI"
-  # colnames(HIC_df)[colnames(HIC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HI"
-  # if (args$debug) message("getHIC done:",nrow(HIC_df),"\n")
+
+  if (args$debug) {
+    t19_ <- proc.time() - t19
+    message("\tExiting getHIC() (",round(t19_[1],0),"s elapsed)")
+  }
   return(HIC_df)
 }
 
@@ -329,12 +373,12 @@ getHIC <- function(trips = NULL, ...){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 getHOC <- function(trips = NULL, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t20 <- Mar.utils::where_now(returnTime = T)
 
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     HOC_df <- unique(HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID')]
   }else{
     HOCQry<-paste0("SELECT DISTINCT
@@ -348,8 +392,10 @@ getHOC <- function(trips = NULL, ...){
   }
   HOC_df<-unique(HOC_df)
   colnames(HOC_df)[colnames(HOC_df)=="CONF_NUMBER"] <- "CONF_NUMBER_HO"
-  # colnames(HOC_df)[colnames(HOC_df)=="HAIL_OUT_ID"] <- "HAIL_OUT_ID_HO"
-  # if (args$debug) message("getHOC done:",nrow(HOC_df),"\n")
+  if (args$debug) {
+    t20_ <- proc.time() - t20
+    message("\tExiting getHOC() (",round(t20_[1],0),"s elapsed)")
+  }
   return(HOC_df)
 }
 
@@ -362,12 +408,12 @@ getHOC <- function(trips = NULL, ...){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 get_marfis_sets <- function(log_efrt = NULL, ...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t21 <- Mar.utils::where_now(returnTime = T)
 
   if (args$useLocal){
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO", "NAFO_UNIT_AREAS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
     if ("CUSER" %in% names(LOG_EFRT_STD_INFO)){
       #do the appropriate tweaks if haven't been done
@@ -441,5 +487,10 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
     PS_sets <- Mar.utils::identify_area(PS_sets, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
   }
   sink <- capture.output(sf::sf_use_s2(TRUE))
+
+  if (args$debug) {
+    t21_ <- proc.time() - t21
+    message("\tExiting get_marfis_sets() (",round(t21_[1],0),"s elapsed)")
+  }
   return(PS_sets)
 }

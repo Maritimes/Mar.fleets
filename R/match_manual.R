@@ -17,6 +17,7 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
   argsFn <- as.list(environment())
   argsFn$TRIP_ID_MARF <- argsFn$TRIP_ID_ISDB <- NULL
   argsUser <-list(...)
+  if (args$debug)  t25 <- Mar.utils::where_now(returnTime = T)
   # add remaining default args ------------------------------------------------------------------------------------------------------------------------------
 
   if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
@@ -25,17 +26,18 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
   args <- do.call(can_run, args$args)
 
-  if (args$debug)    Mar.utils::where_now()
+
   if (!is.null(TRIP_ID_MARF) && class(TRIP_ID_MARF) == "character")TRIP_ID_MARF <- toupper(TRIP_ID_MARF)
   if (!is.null(TRIP_ID_ISDB) && class(TRIP_ID_ISDB) == "character")TRIP_ID_ISDB <- toupper(TRIP_ID_ISDB)
 
   getMarfMatch <- function(...){
     args <- list(...)$args
+    if (args$debug)  t26 <- Mar.utils::where_now(returnTime = T)
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","VESSELS","TRIPS","MON_DOC_ENTRD_DETS",
                                                                                             "HAIL_IN_CALLS", "HAIL_OUTS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                 env = environment(), quietly = TRUE)
+                                 env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
 
 
       if(any(TRIP_ID_MARF %in% "ALL")){
@@ -103,23 +105,33 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
     }else{
 
     }
+    if (args$debug) {
+      t26_ <- proc.time() - t26
+      message("\tExiting getMarfMatch() (",round(t26_[1],0),"s elapsed)")
+    }
     return(MARF_MATCH)
   }
 
-if (!is.null(TRIP_ID_MARF)){
-  MARF_MATCH <- do.call(getMarfMatch, list(args = args))
-  allLogEff <-  unique(stats::na.omit(MARF_MATCH$LOG_EFRT_STD_INFO))
-  sets<-  do.call(get_marfis_sets, list(log_efrt = allLogEff, args=args))
-  sets <- unique(merge(MARF_MATCH[,!names(MARF_MATCH) %in% c("VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "T_DATE1","T_DATE2")], sets, all.x=T))
-  sets[["NAFO_MARF_SETS"]][is.na(sets[["NAFO_MARF_SETS"]])] <- "<not recorded>"
-  sets[(is.na(sets$LATITUDE) | is.na(sets$LONGITUDE)) & is.na(sets$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "<missing coord>"
-  sets$PRO_SPC_INFO_ID <- sets$SPECIES_CODE <- sets$RND_WEIGHT_KGS <- NULL
-  sets<- unique(sets)
-  marf <- list()
-  marf$MARF_MATCH <- MARF_MATCH
-  marf$MARF_SETS <- sets
-  res <- do.call(get_isdb, list(get_marfis = marf, args=args))
-  res$ISDB_CATCHES <- NULL
-}
+  if (!is.null(TRIP_ID_MARF)){
+    MARF_MATCH <- do.call(getMarfMatch, list(args = args))
+    allLogEff <-  unique(stats::na.omit(MARF_MATCH$LOG_EFRT_STD_INFO))
+    sets<-  do.call(get_marfis_sets, list(log_efrt = allLogEff, args=args))
+    sets <- unique(merge(MARF_MATCH[,!names(MARF_MATCH) %in% c("VR_NUMBER_FISHING", "VR_NUMBER_LANDING","LICENCE_ID", "T_DATE1","T_DATE2")], sets, all.x=T))
+    sets[["NAFO_MARF_SETS"]][is.na(sets[["NAFO_MARF_SETS"]])] <- "<not recorded>"
+    sets[(is.na(sets$LATITUDE) | is.na(sets$LONGITUDE)) & is.na(sets$NAFO_MARF_SETS_CALC),"NAFO_MARF_SETS_CALC"] <- "<missing coord>"
+    sets$PRO_SPC_INFO_ID <- sets$SPECIES_CODE <- sets$RND_WEIGHT_KGS <- NULL
+    sets<- unique(sets)
+    marf <- list()
+    marf$MARF_MATCH <- MARF_MATCH
+    marf$MARF_SETS <- sets
+    res <- do.call(get_isdb, list(get_marfis = marf, args=args))
+    res$ISDB_CATCHES <- NULL
+  }
+
+  if (args$debug) {
+    t25_ <- proc.time() - t25
+    message("\tExiting match_manual() (",round(t25_[1],0),"s elapsed)")
+  }
+
   return(res)
 }

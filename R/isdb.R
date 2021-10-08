@@ -24,7 +24,7 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
-  if (args$debug)    Mar.utils::where_now()
+  if (args$debug) t13 <- Mar.utils::where_now(returnTime = T)
   ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- NA
   if (is.null(get_marfis)){
     message(paste0("\n","No MARFIS data was provided. Please fix your parameters.","\n"))
@@ -88,7 +88,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
       dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known =  trips$ISDB_MARFIS_POST_MATCHED$VR, stepDesc = "isdb_droppedUnmatched")
       dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known =  trips$ISDB_MARFIS_POST_MATCHED$LIC, stepDesc = "isdb_droppedUnmatched")
 
-      if (args$debug) message("DEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
+      # if (args$debug) { message("\tDEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
       matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
                       "match_VRLICDATE", "match_VRLICDATE_DETS", "T_DATE1", "T_DATE2",
                       "match_VRDATE", "match_VRDATE_DETS", "T_DATE1_VR", "T_DATE2_VR",
@@ -107,22 +107,22 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
         isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
         sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = marfSets, args = args))
         if (!all(is.na(sets))) {
-          if (args$debug) message("DEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
+          # if (args$debug) { message("\tDEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
           isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
           isdb_SETS_all$TRIP_ID_ISDB <- isdb_SETS_all$TRIP_ID_MARF <- NULL
           isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
           if(!args$manualMatch){
-           if(args$useLocal){
-            Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
-                                       usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                       env = environment(), quietly = TRUE)
-            ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
-            catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
-            catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
-            catches <- merge(catches, SPECIES_ISDB[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
-          }else{
-            # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
-            catchSQL = paste0("SELECT CA.SPECCD_ID,
+            if(args$useLocal){
+              Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
+                                         usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
+                                         env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+              ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
+              catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
+              catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
+              catches <- merge(catches, SPECIES_ISDB[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
+            }else{
+              # trips <- range(isdb_TRIPIDs_all$TRIP_ISDB)
+              catchSQL = paste0("SELECT CA.SPECCD_ID,
        CA.EST_NUM_CAUGHT, CA.EST_KEPT_WT, CA.EST_DISCARD_WT, CA.EST_COMBINED_WT,
        FS.TRIP_ID,
        CA.FISHSET_ID,
@@ -136,8 +136,8 @@ WHERE
 CA.FISHSET_ID = FS.FISHSET_ID AND
 CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
-            catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
-          }
+              catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
+            }
           }else{
             catches <- NA
           }
@@ -195,7 +195,10 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
   res[["MATCH_DETAILS"]] <- isdb_TRIPS_match_dets
   res[["ISDB_UNMATCHABLES"]] <- ISDB_UNMATCHABLES
   res[["ISDB_MULTIMATCHES"]] <- ISDB_MULTIMATCHES
-
+  if (args$debug) {
+    t13_ <- proc.time() - t13
+    message("\tExiting get_isdb() (",round(t13_[1],0),"s elapsed)")
+  }
   return(res)
 }
 
@@ -208,7 +211,7 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 get_isdb_trips<-function(mVR_LIC = NULL,...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t14<- Mar.utils::where_now(returnTime = T)
   # Sometimes ISDB does not have the correct MARFIS licenses - extract them from MARFIS,
   # merge them on to the ISDB data, and use them preferentially
   mLICS <- sub("\\_.*", "", mVR_LIC)
@@ -220,7 +223,7 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
 
     Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     #NA dates are turned to 9999-01-01 so that they will not meet the criteria of being between our start and end dates
   }else{
     #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet
@@ -241,8 +244,8 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
   }
   if (!args$keepSurveyTrips){
     if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
-        message(paste0("\n","Dropping these survey trips (because of specified value of 'keepSurveyTrips':","\n"))
-        print(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])
+      message(paste0("\n","Dropping these survey trips (because of specified value of 'keepSurveyTrips':","\n"))
+      print(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])
     }
     ISTRIPS = ISTRIPS[(ISTRIPS$TRIPCD_ID < 7010 | ISTRIPS$TRIPCD_ID == 7099),]
     dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Surveys")
@@ -320,10 +323,18 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
     ISTRIPS[,theTripCols] <- suppressWarnings(as.numeric(as.character(unlist(ISTRIPS[,theTripCols]))))
   }else{
     message(paste0("\n","No ISDB trips found"))
+    if (args$debug) {
+      t14_ <- proc.time() - t14
+      message("\tExiting get_isdb_trips() - No trips: (", round(t14_[1],0),"s elapsed)")
+    }
     return(invisible(NULL))
   }
   res <- list()
   res[["ISTRIPS"]] <- ISTRIPS
+  if (args$debug) {
+    t14_ <- proc.time() - t14
+    message("\tExiting get_isdb_trips() (",round(t14_[1],0),"s elapsed)")
+  }
   return(res)
 }
 
@@ -336,15 +347,15 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 get_isdb_sets<-function(isdbTrips=NULL,...){
   args <- list(...)$args
-  if (args$debug) Mar.utils::where_now()
+  if (args$debug) t15<- Mar.utils::where_now(returnTime = T)
   badDate <- as.POSIXct(as.Date("2100-01-01"))
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS", "ISGEARS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     Mar.utils::get_data_tables(schema = "OBSERVER", data.dir = args$data.dir, tables = c("ISSETPROFILE_WIDE"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
     ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID", "GEAR_ID")]
 
     colnames(ISFISHSETS)[colnames(ISFISHSETS)=="NAFAREA_ID"] <- "NAFO_ISDB_SETS"
@@ -415,6 +426,10 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
 
   if (nrow(ISSETPROFILE_WIDE)==0){
     message(paste0("\n","No ISDB sets"))
+    if (args$debug) {
+      t15_ <- proc.time() - t15
+      message("\tExiting get_isdb_sets() - No sets: (", round(t15_[1],0),"s elapsed)")
+    }
     return(NULL)
   }
   sink <- capture.output(sf::sf_use_s2(FALSE))
@@ -426,6 +441,10 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   }
   sink <- capture.output(sf::sf_use_s2(TRUE))
   ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
+  if (args$debug) {
+    t15_ <- proc.time() - t15
+    message("\tExiting get_isdb_sets() (",round(t15_[1],0),"s elapsed)")
+  }
   return(ISSETPROFILE_WIDE)
 }
 
