@@ -83,10 +83,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
       if(args$dropUnmatchedISDB){
         if (nrow(trips$ISDB_MARFIS_POST_MATCHED)>0) trips$ISDB_MARFIS_POST_MATCHED <- trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]
       }
-      dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_ISDB, stepDesc = "isdb_droppedUnmatched")
-      dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(trips$ISDB_MARFIS_POST_MATCHED[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_droppedUnmatched")
-      dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known =  trips$ISDB_MARFIS_POST_MATCHED$VR, stepDesc = "isdb_droppedUnmatched")
-      dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known =  trips$ISDB_MARFIS_POST_MATCHED$LIC, stepDesc = "isdb_droppedUnmatched")
+      if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_ISDB, stepDesc = "isdb_droppedUnmatched")
+      if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(trips$ISDB_MARFIS_POST_MATCHED[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_droppedUnmatched")
+      if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known =  trips$ISDB_MARFIS_POST_MATCHED$VR, stepDesc = "isdb_droppedUnmatched")
+      if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known =  trips$ISDB_MARFIS_POST_MATCHED$LIC, stepDesc = "isdb_droppedUnmatched")
 
       # if (args$debug) { message("\tDEBUG: Matched ", nrow(trips$ISDB_MARFIS_POST_MATCHED[!is.na(trips$ISDB_MARFIS_POST_MATCHED$TRIP_ID_MARF),]), " trips","\n")
       matchFields = c("SRC", "match_TripName", "match_CONF_HI", "match_CONF_HO","match_VR", "match_LIC", "match_TRIPCD_ID", "match_Date"  ,"match_DATE_DETS", "swappedLIC_VR",
@@ -248,8 +248,8 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
       print(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])
     }
     ISTRIPS = ISTRIPS[(ISTRIPS$TRIPCD_ID < 7010 | ISTRIPS$TRIPCD_ID == 7099),]
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Surveys")
-    dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Surveys")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Surveys")
+    if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Surveys")
 
   }
   ISTRIPS$LANDING_DATE <- as.Date(ISTRIPS$LANDING_DATE)
@@ -263,8 +263,8 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
   ISTRIPS = ISTRIPS[(ISTRIPS$LANDING_DATE >= as.Date(args$dateStart) & ISTRIPS$LANDING_DATE <= as.Date(args$dateEnd)) |
                       (ISTRIPS$BOARD_DATE >= as.Date(args$dateStart) & ISTRIPS$BOARD_DATE <= as.Date(args$dateEnd)) ,]
 
-  dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Dates")
-  dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Dates")
+  if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Dates")
+  if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Dates")
 
   ISTRIPS = ISTRIPS[,c("TRIP_ISDB", "TRIP", "TRIPCD_ID", "BOARD_DATE", "LANDING_DATE", "VR", "LIC", "MARFIS_CONF_NUMBER")]
   if(nrow(ISTRIPS)>0) ISTRIPS$SRC<-NA
@@ -303,10 +303,10 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
     ISTRIPS <- ISTRIPS[!(ISTRIPS$TRIP_ISDB %in% ISTRIPS_vrs$TRIP_ISDB),]
     ISTRIPS_found = rbind.data.frame(ISTRIPS_found, ISTRIPS_vrs)
   }
-  dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_initial")
-  dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_initial")
-  dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = ISTRIPS$VR, stepDesc = "isdb_initial")
-  dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = ISTRIPS$LIC, stepDesc = "isdb_initial")
+  if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_initial")
+  if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_initial")
+  if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = ISTRIPS$VR, stepDesc = "isdb_initial")
+  if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = ISTRIPS$LIC, stepDesc = "isdb_initial")
 
   if(nrow(ISTRIPS)>0) {
     #these are just tagging along on the chance that they are matched
@@ -315,8 +315,8 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
   }
   ISTRIPS <- ISTRIPS_found
 
-  dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_VRLic")
-  dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_VRLic")
+  if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_VRLic")
+  if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_VRLic")
 
   if (nrow(ISTRIPS)>0){
     theTripCols <- c("MARFIS_CONF_NUMBER","VR","LIC") #"LICENSE_NO",

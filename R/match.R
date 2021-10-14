@@ -90,9 +90,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_TRIP$match_TripName <- logical()
     }
-    dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = match_TRIP$ISDB_TRIP_O, stepDesc = "matchTrips_TripName")
+    if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = match_TRIP$ISDB_TRIP_O, stepDesc = "matchTrips_TripName")
     match_TRIP$ISDB_TRIP_O <- match_TRIP$ISDB_TRIP_M <- NULL
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_TRIP$TRIP_ID_ISDB, stepDesc = "matchTrips_TripName")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_TRIP$TRIP_ID_ISDB, stepDesc = "matchTrips_TripName")
     if (args$debug) {
       t23_ <- proc.time() - t23
       message("\tExiting matchTripNames() (",round(t23_[1],0),"s elapsed)")
@@ -124,7 +124,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_CONF_HI$match_CONF_HI <- logical()
     }
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HI$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HI$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
     if (args$debug) {
       t24_ <- proc.time() - t24
       message("\tExiting matchHI() (",round(t24_[1],0),"s elapsed)")
@@ -156,7 +156,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_CONF_HO$match_CONF_HO <- logical()
     }
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HO$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_CONF_HO$TRIP_ID_ISDB, stepDesc = "matchTrips_CONF_HI")
     if (args$debug) {
       t25_ <- proc.time() - t25
       message("\tExiting matchHO() (",round(t25_[1],0),"s elapsed)")
@@ -200,9 +200,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_VR$match_VR <- logical()
     }
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_VR$TRIP_ID_ISDB, stepDesc = "matchTrips_VR")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_VR$VR, stepDesc = "matchTrips_VR")
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_VR$LIC, stepDesc = "matchTrips_VR")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_VR$TRIP_ID_ISDB, stepDesc = "matchTrips_VR")
+    if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_VR$VR, stepDesc = "matchTrips_VR")
+    if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_VR$LIC, stepDesc = "matchTrips_VR")
     if (args$debug) {
       t26_ <- proc.time() - t26
       message("\tExiting matchVR() (",round(t26_[1],0),"s elapsed)")
@@ -243,9 +243,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       match_LIC$match_LIC <- logical()
     }
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_LIC$TRIP_ID_ISDB, stepDesc = "matchTrips_LIC")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_LIC$VR, stepDesc = "matchTrips_LIC")
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_LIC$LIC, stepDesc = "matchTrips_LIC")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_LIC$TRIP_ID_ISDB, stepDesc = "matchTrips_LIC")
+    if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_LIC$VR, stepDesc = "matchTrips_LIC")
+    if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_LIC$LIC, stepDesc = "matchTrips_LIC")
 
     if (args$debug) {
       t27_ <- proc.time() - t27
@@ -255,7 +255,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
   matchDate <- function(df = NULL){
     if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
-    browser()
     #DATE RANGE --------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
     thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", "VR_NUMBER_FISHING", "LICENCE_ID")])
@@ -344,9 +343,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     match_DateMin$CLOSEST1 <- match_DateMin$SRC <- NULL
     colnames(match_DateMin)[colnames(match_DateMin)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_DATE"
 
-    dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_DateMin$TRIP_ID_ISDB, stepDesc = "matchTrips_date")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_DateMin$VR, stepDesc = "matchTrips_date")
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_DateMin$LIC, stepDesc = "matchTrips_date")
+    if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_DateMin$TRIP_ID_ISDB, stepDesc = "matchTrips_date")
+    if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_DateMin$VR, stepDesc = "matchTrips_date")
+    if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_DateMin$LIC, stepDesc = "matchTrips_date")
 
     if (args$debug) {
       t28_ <- proc.time() - t28
@@ -418,9 +417,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       matches$match_VR <- matches$match_LIC <- matches$match_Date <- matches$mTripcd_id <- matches$swappedLIC_VR <- FALSE
     }
     matches[c("match_TripName", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date","mTripcd_id","swappedLIC_VR")][is.na(matches[c("match_TripName", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date", "mTripcd_id","swappedLIC_VR")])] <- FALSE
-    dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = matches$ISDB_TRIP_O, stepDesc = "matchTrips_Initial")
-    dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = matches$VR, stepDesc = "matchTrips_Initial")
-    dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = matches$LIC, stepDesc = "matchTrips_Initial")
+    if (!is.null(dbEnv$debugLics)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = matches$ISDB_TRIP_O, stepDesc = "matchTrips_Initial")
+    if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = matches$VR, stepDesc = "matchTrips_Initial")
+    if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = matches$LIC, stepDesc = "matchTrips_Initial")
     matches <- matches[which((matches$match_TripName|matches$match_CONF_HI|matches$match_CONF_HO) |
                                (matches$match_Date & (matches$match_LIC + matches$match_VR + matches$mTripcd_id) >0)),]
     if(nrow(matches)==0){
