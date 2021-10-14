@@ -185,7 +185,8 @@ can_run <- function(...){
   isdbTabs = c("ISFISHSETS",
                "ISTRIPS",
                "ISVESSELS",
-               "ISCATCHES")
+               "ISCATCHES",
+               "ISGEARS")
 
   obsTabs = c("ISSETPROFILE_WIDE")
 
@@ -285,9 +286,9 @@ enable_local <- function(data.dir = NULL,
                          oracle.dsn = "_none_",
                          usepkg = "rodbc",
                          ...){
-  browser("Check if args exists(probly no), and ensure it gets merged with args below")
-  args <-list(...)$args
-  if (args$debug) t32 <- Mar.utils::where_now(returnTime = T)
+  # browser("Check if args exists(probly no), and ensure it gets merged with args below")
+  # args <-list(...)$args
+  # if (args$debug) t32 <- Mar.utils::where_now(returnTime = T)
   if (is.null(data.dir)|
       oracle.username == "_none_"|
       oracle.password == "_none_" |
@@ -342,10 +343,10 @@ enable_local <- function(data.dir = NULL,
                              tables = args$obsTabs,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
   message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
-  if (args$debug) {
-  t32_ <- proc.time() - t32
-  message("\tExiting enable_local() (",round(t32_[1],0),"s elapsed)")
-}
+#   if (args$debug) {
+#   t32_ <- proc.time() - t32
+#   message("\tExiting enable_local() (",round(t32_[1],0),"s elapsed)")
+# }
 }
 
 #' @title summarize_locations
