@@ -255,6 +255,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
   matchDate <- function(df = NULL){
     if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
+    browser()
     #DATE RANGE --------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
     thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", "VR_NUMBER_FISHING", "LICENCE_ID")])
@@ -305,7 +306,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       match_DateMin <- match_DateMin[!(match_DateMin$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB),]
       withinners[,"match_DATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
     }
-    if(nrow(match_DateMin>0)){
+    if(nrow(match_DateMin)>0){
       #a single marfis trip can get matched against multiple ISDB recs based on vr/lic/date - only retain the closest in time
       match_DateMin <- data.table::as.data.table(match_DateMin)
       match_DateMin <- as.data.frame(match_DateMin[match_DateMin[, .I[CLOSEST1 == min(CLOSEST1)], by=TRIP_ID_MARF]$V1])
