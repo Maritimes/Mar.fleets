@@ -481,14 +481,14 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
   PS_sets<-unique(PS_sets)
   colnames(PS_sets)[colnames(PS_sets)=="NAFO_AREA"] <- "NAFO_MARF_SETS"
   #line below reqd to prevent sf warnings from being shown
-  sink <- utils::sink <- capture.output(sf::sf_use_s2(FALSE))
+  sink <- utils::capture.output(sf::sf_use_s2(FALSE))
   PS_sets <- Mar.utils::identify_area(PS_sets, flag.land = TRUE)
   colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
   if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     PS_sets <- Mar.utils::identify_area(PS_sets, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
   }
   #line below reqd to prevent sf warnings from being shown
-  sink <- utils::sink <- capture.output(sf::sf_use_s2(TRUE))
+  sink <- utils::capture.output(sf::sf_use_s2(TRUE))
 
   if (args$debug) {
     t21_ <- proc.time() - t21
