@@ -48,6 +48,11 @@
 #' "3PSA","4VSB" and "5ZEM")
 #' @param keepSurveyTrips default is \code{TRUE}. Within the ISDB database are non-commercial,
 #' survey trips.  Setting this to \code{FALSE} ensures these trips are dropped.
+#' @param keepMissingGear default is \code{TRUE}. Some fleets have particular allowable gear sizes
+#' and types (see gearSpecs). Many cases exist where all of the gear details are not filled it.
+#' When this parameter is set to \code{TRUE}, these 'unknown' types and sizes are retained, and the
+#' values are set to -999.  If it is set to \code{FALSE}, any gears with missing values are dropped
+#' - and they are not included in the results.
 #' @param maxTripDiff_Hr default is \code{48}. Any MARFIS and ISDB trips that vary by more than the
 #' # of days specified here will NOT be considered matches (on the basis of common Vessel, licence
 #' and date).  They may still match on confirmation codes and/or trip names.
@@ -123,6 +128,7 @@ set_defaults <- function(lics = 'all',
                          dateEnd = NULL,
                          year = NULL,
                          keepSurveyTrips = TRUE,
+                         keepMissingGear = TRUE,
                          maxTripDiff_Hr = 48,
                          maxSetDiff_Hr = 48,
                          maxSetDiff_Km = 100,

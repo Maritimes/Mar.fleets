@@ -19,8 +19,7 @@ known to have been used by this fleet. The default values can be replaced with a
 only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
 the script will not run.}
 
-\item{type}{default is \code{NULL}. This is either "ALL", "FIXED" or "MOBILE". "ALL" just gets
-results for all gear types}
+\item{type}{default is \code{NULL}. This is either "FIXED" or "MOBILE".}
 
 \item{stock}{default is \code{NULL}. This is either "4X5Y" or "5Z".}
 
@@ -80,6 +79,11 @@ while a value like 4 would summarize the trips and sets into very specific NAFO 
 "3PSA","4VSB" and "5ZEM")}
     \item{\code{keepSurveyTrips}}{default is \code{TRUE}. Within the ISDB database are non-commercial,
 survey trips.  Setting this to \code{FALSE} ensures these trips are dropped.}
+    \item{\code{keepMissingGear}}{default is \code{TRUE}. Some fleets have particular allowable gear sizes
+and types (see gearSpecs). Many cases exist where all of the gear details are not filled it.
+When this parameter is set to \code{TRUE}, these 'unknown' types and sizes are retained, and the
+values are set to -999.  If it is set to \code{FALSE}, any gears with missing values are dropped
+- and they are not included in the results.}
     \item{\code{maxTripDiff_Hr}}{default is \code{48}. Any MARFIS and ISDB trips that vary by more than the
 # of days specified here will NOT be considered matches (on the basis of common Vessel, licence
 and date).  They may still match on confirmation codes and/or trip names.}
@@ -250,12 +254,10 @@ local <- fishin_CHPs(type = "MOBILE",
 Other fleets: 
 \code{\link{fleet_bluefin}()},
 \code{\link{fleet_cucumber}()},
-\code{\link{fleet_haddock}()},
 \code{\link{fleet_hagfish}()},
 \code{\link{fleet_halibut}()},
 \code{\link{fleet_herring}()},
 \code{\link{fleet_jonah}()},
-\code{\link{fleet_pollock}()},
 \code{\link{fleet_redCrab}()},
 \code{\link{fleet_redfish}()},
 \code{\link{fleet_rockCrab}()},

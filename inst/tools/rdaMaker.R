@@ -10,7 +10,7 @@ usethis::use_data(LIC_GEAR_SPEC, LIC_GEAR_SPEC, overwrite = T)
 # save(LIC_CORE, file = "../data/LIC_CORE.rda")
 # save(LIC_GEAR_SPEC, file = "../data/LIC_GEAR_SPEC.rda")
 # save(LIC_AREAS, file = "../data/LIC_AREAS.rda")
-
+R.utils::sourceDirectory("C:/git/Maritimes/Mar.fleets/R/", modifiedOnly=F)
 
 Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("GEARS", "SPECIES"))
 GEARS_MARFIS <- GEARS[with(GEARS,order(GEAR_CODE)),c("GEAR_CODE", "GEAR")]

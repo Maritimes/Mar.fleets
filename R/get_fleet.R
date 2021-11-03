@@ -40,23 +40,21 @@ get_fleet<-function(...){
 
   # sizeFilt, typeFilt and chk_Gears are used by both the Ora and loc versions of get_fleetGear ------------------------------------------------------------------------
 
-  sizeFilt <- function(df=NULL, gearSpecRelevant = NULL, gearSpecDF = NULL, ...){
+  sizeFilt <- function(df=NULL, ...){
     args <- list(...)$args
     if (args$debug) t03<- Mar.utils::where_now(returnTime = T)
+    # beepr::beep(2);browser()
     if (!is.na(args$gearSpecs$MIN)){
-      gearSpecRelevant <- gearSpecRelevant[grep("[[:digit:]]", gearSpecRelevant$DATA_VALUE), ]
-      gearSpecRelevant$DATA_VALUE <- as.numeric(gearSpecRelevant$DATA_VALUE)
-      #apply the requested filter
-      gearSpecRelevant_size <- gearSpecRelevant[which(gearSpecRelevant$DATA_VALUE >=  args$gearSpecs$MIN &
-                                                        gearSpecRelevant$DATA_VALUE <=  args$gearSpecs$MAX),"LOG_EFRT_STD_INFO_ID"]
-      log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_size,"LOG_EFRT_STD_INFO_ID"])  #"MON_DOC_ID"
-      df_new<-df[df$LOG_EFRT_STD_INFO_ID %in% log_eff,]
+      theseGearSpecRelevant <- df[which(df$GR_SIZE >=  args$gearSpecs$MIN &
+                                          df$GR_SIZE <=  args$gearSpecs$MAX),]
+      if(args$keepMissingGear){
+        theseGearSpecUnk <- df[df$GR_SIZE == -999,]
+        theseGearSpecRelevant <- rbind.data.frame(theseGearSpecRelevant, theseGearSpecUnk)
+      }
 
-      if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearSize")
-      if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearSize")
-      #if (args$debug) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "sets filtered by gear size")
-      df<- df_new
-      log_eff <- NA
+      if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theseGearSpecRelevant$LICENCE_ID, stepDesc = "flt_gearSize")
+      if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theseGearSpecRelevant$VR_NUMBER, stepDesc = "flt_gearSize")
+      df<- theseGearSpecRelevant
     }
 
     if (args$debug) {
@@ -65,20 +63,24 @@ get_fleet<-function(...){
     }
     return(df)
   }
-  typeFilt <- function(df=NULL, gearSpecRelevant = NULL, gearSpecDF = NULL, ...){
+  typeFilt <- function(df=NULL, ...){
     args <- list(...)$args
     if (args$debug) t04<- Mar.utils::where_now(returnTime = T)
+    # beepr::beep(2);browser()
     if (!is.na(args$gearSpecs$TYPE)){
       #apply the requested filter
-      gearSpecRelevant_types <- gearSpecRelevant[toupper(gearSpecRelevant$DATA_VALUE) %in% args$gearSpecs$TYPE,"LOG_EFRT_STD_INFO_ID"]
-      log_eff = unique(gearSpecDF[gearSpecDF$LOG_EFRT_STD_INFO_ID %in% gearSpecRelevant_types,"MON_DOC_ID"])
-      df_new<-df[df$MON_DOC_ID %in% log_eff,]
-      if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = df_new$LICENCE_ID, stepDesc = "flt_gearTypeFilt")
-      if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = df_new$VR_NUMBER, stepDesc = "flt_gearTypeFilt")
+      #Mesh
+      # "S" - SQUARE
+      # "D" - DIAMOND
+      theseGearSpecRelevant <- df[which(df$GR_TYPE %in% args$gearSpecs$TYPE),]
+      if(args$keepMissingGear){
+        theseGearSpecUnk <- df[df$GR_TYPE == "-999",]
+        theseGearSpecRelevant <- rbind.data.frame(theseGearSpecRelevant, theseGearSpecUnk)
+      }
 
-      #if (args$debug) Mar.utils::changeDetector(pre_ = df, post_ = df_new, fields = "LICENCE_ID", flagTxt = "gearTypeFilt")
-      df<- df_new
-      log_eff <- NA
+      if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theseGearSpecRelevant$LICENCE_ID, stepDesc = "flt_gearTypeFilt")
+      if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theseGearSpecRelevant$VR_NUMBER, stepDesc = "flt_gearTypeFilt")
+      df<- theseGearSpecRelevant
     }
     if (args$debug) {
       t04_ <- proc.time() - t04
@@ -86,30 +88,14 @@ get_fleet<-function(...){
     }
     return(df)
   }
-  chk_Gears <- function(df=NULL, gearSpecDF = NULL, ...){
+  chk_Gears <- function(df=NULL, ...){
+
     #this function figures out what categories of gears we're dealing with, and will let us determine what filters might be possible
     args <- list(...)$args
     if (args$debug) t05<- Mar.utils::where_now(returnTime = T)
-    # if(!args$useLocal){
-    #   grs = unique(df$GEAR_CODE)
-    #   gearQry <- paste0("SELECT DISTINCT
-    #                         GEAR_CODE,
-    #                         DESC_ENG DESC_ENG
-    #                         FROM MARFISSCI.GEARS
-    #                         WHERE
-    #                         GEAR_CODE IN (",Mar.utils::SQL_in(grs),")")
-    #   GEARS <- args$cxn$thecmd(args$cxn$channel, gearQry)
-    # }else{
-    #   Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("GEARS"),
-    #                              usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-    #                              env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
-    #   if ("GEAR_DESC" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR_DESC"] <- "DESC_ENG"
-    #   if ("GEAR" %in% names(GEARS)) names(GEARS)[names(GEARS) == "GEAR"] <- "DESC_ENG"
-    #   GEARS = GEARS[,c("GEAR_CODE","DESC_ENG")]
-    #   GEARS = GEARS[GEARS$GEAR_CODE %in% df$GEAR_CODE,]
-    # }
+    GEARS<-unique(df$GEAR_CODE)
+    allGears = tolower(GEARS_MARFIS[GEARS_MARFIS$GEAR_CODE %in% GEARS,"GEAR"])
 
-    allGears = tolower(unique(GEARS_MARFIS$GEAR))
     allGears = allGears[!allGears %in% c("trap net")]
     matchTrap=c('trap','pot')
     matchMesh=c('trawl','seine','net','midwtr', 'drag')
@@ -151,23 +137,57 @@ get_fleet<-function(...){
     grSpSize <- grSpSize[!is.na(grSpSize)]
     grSpCols <- c(grSpType, grSpSize)
 
+    sizeCols <- c(4,8,32,62,66,67,120,806,152,423,431,701)
+    typeCols <- c(5,31,114)
     if(!args$useLocal){
-      # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-      where2 <- paste0("AND COLUMN_DEFN_ID in (",Mar.utils::SQL_in(grSpCols, apos = F),")")
-      gearSpecRelevantQry <- paste0("SELECT DISTINCT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE FROM MARFISSCI.LOG_EFRT_ENTRD_DETS
-                                  WHERE ",Mar.utils::big_in(vec=unique(gearSpecDF$LOG_EFRT_STD_INFO_ID), vec.field = "LOG_EFRT_STD_INFO_ID"), " ",
-                                  where2)
-      gearSpecRelevant<- args$cxn$thecmd(args$cxn$channel, gearSpecRelevantQry)
+      RelevantQry_LE <- paste0("SELECT LOG_EFRT_STD_INFO_ID, COLUMN_DEFN_ID, DATA_VALUE from MARFISSCI.LOG_EFRT_ENTRD_DETS
+      WHERE
+      COLUMN_DEFN_ID IN (",Mar.utils::SQL_in(grSpCols,apos=F),")
+      AND ",Mar.utils::big_in(vec=unique(df$LOG_EFRT_STD_INFO_ID), vec.field="LOG_EFRT_STD_INFO_ID"))
+      LE_df <- args$cxn$thecmd(args$cxn$channel, RelevantQry_LE)
+
+      RelevantQry_MD <- paste0("SELECT MON_DOC_ID, COLUMN_DEFN_ID, DATA_VALUE from MARFISSCI.MON_DOC_ENTRD_DETS
+      WHERE
+      COLUMN_DEFN_ID IN (",Mar.utils::SQL_in(grSpCols,apos=F),")
+      AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field="MON_DOC_ID"))
+      MD_df <- args$cxn$thecmd(args$cxn$channel, RelevantQry_MD)
+
     }else{
       # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS"),
+      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS", "MON_DOC_ENTRD_DETS"),
                                  usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                  env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
-      #MMM failed here - need to modify gearSpecDf reference
-      LOG_EFRT_ENTRD_DETS = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE")]
-      gearSpecRelevant = LOG_EFRT_ENTRD_DETS[LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols,]
-      gearSpecRelevant<- gearSpecRelevant[gearSpecRelevant$LOG_EFRT_STD_INFO_ID %in% gearSpecDF$LOG_EFRT_STD_INFO_ID,]
+      LE_df <- LOG_EFRT_ENTRD_DETS[which(LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% df$LOG_EFRT_STD_INFO_ID &
+                                           LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols), c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE") ]
+
+      MD_df <- MON_DOC_ENTRD_DETS[which(MON_DOC_ENTRD_DETS$MON_DOC_ID %in% df$MON_DOC_ID &
+                                          MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols), c("MON_DOC_ID","COLUMN_DEFN_ID", "DATA_VALUE"),]
     }
+    if (nrow(LE_df)>0){
+      #if need convert units, do now
+      LE_df$COLUMN_DEFN_ID <- replace(LE_df$COLUMN_DEFN_ID, LE_df$COLUMN_DEFN_ID %in% sizeCols, "GR_SIZE")
+      LE_df$COLUMN_DEFN_ID <- replace(LE_df$COLUMN_DEFN_ID, LE_df$COLUMN_DEFN_ID %in% typeCols, "GR_TYPE")
+      LE_df <- reshape2::dcast(LE_df, LOG_EFRT_STD_INFO_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
+      LE_df$GR_SIZE <- as.numeric(LE_df$GR_SIZE)
+      LE_df$GR_TYPE <- toupper(LE_df$GR_TYPE)
+      colnames(LE_df)[colnames(LE_df)=="LOG_EFRT_STD_INFO_ID"] <- "ID_FLD"
+      LE_df$GEAR_SRC <- "LE"
+    }else{
+      LE_df <- data.frame(ID_FLD=integer(0),GR_SIZE=integer(0),GR_TYPE=character(), GEAR_SRC=character())
+    }
+    if (nrow(MD_df)>0){
+      #if need convert units, do now
+      MD_df$COLUMN_DEFN_ID <- replace(MD_df$COLUMN_DEFN_ID, MD_df$COLUMN_DEFN_ID %in% sizeCols, "GR_SIZE")
+      MD_df$COLUMN_DEFN_ID <- replace(MD_df$COLUMN_DEFN_ID, MD_df$COLUMN_DEFN_ID %in% typeCols, "GR_TYPE")
+      MD_df <- reshape2::dcast(MD_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
+      MD_df$GR_SIZE <- as.numeric(MD_df$GR_SIZE)
+      MD_df$GR_TYPE <- toupper(MD_df$GR_TYPE)
+      colnames(MD_df)[colnames(MD_df)=="MON_DOC_ID"] <- "ID_FLD"
+      MD_df$GEAR_SRC <- "MD"
+    }else{
+      MD_df <- data.frame(ID_FLD=integer(0),GR_SIZE=integer(0),GR_TYPE=character(), GEAR_SRC=character())
+    }
+    gearSpecRelevant <- rbind.data.frame(LE_df, MD_df)
 
     if (args$debug) {
       t05_ <- proc.time() - t05
@@ -436,118 +456,64 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
     return(theFleet)
   }
 
-  get_fleetGear_loc<-function(df = NULL, ...){
+  get_fleetGear<-function(df = NULL, ...){
     args <- list(...)$args
     if (args$debug) t10 <- Mar.utils::where_now(returnTime = T)
-
-    # Get all of the records for our df that might link to gear info ----------------------------------------
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
-
-    gearSpecDF <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% df$LOG_EFRT_STD_INFO_ID,]
-    tmp <- merge(gearSpecDF, df[,c("LOG_EFRT_STD_INFO_ID", "T_DATE1", "T_DATE2")], all.x=T)
-
-    gearSpecDF <- tmp[which(as.Date(tmp$FV_FISHED_DATETIME) >= tmp$T_DATE1 & as.Date(tmp$FV_FISHED_DATETIME) <= tmp$T_DATE2),]
-
-    gearSpecDF<- unique(gearSpecDF[gearSpecDF$MON_DOC_ID %in% df$MON_DOC_ID,])
-
-    if(nrow(gearSpecDF)<1){
-      if (args$debug) {
-        t10_ <- proc.time() - t10
-        message("\tExiting get_fleetGear_loc() - no gearSpecDF: (", round(t10_[1],0),"s elapsed)")
-      }
-      return(df)
-    }
-
-    gearSpecRelevant <- do.call(chk_Gears, list(df, gearSpecDF, args=args))
-
+    gearSpecRelevant <- do.call(chk_Gears, list(df, args=args))
     if(nrow(gearSpecRelevant)<1) {
-
       if (args$debug) {
         t10_ <- proc.time() - t10
-        message("\tExiting get_fleetGear_loc() - no gearSpecRelevant: (", round(t10_[1],0),"s elapsed)")
+        message("\tExiting get_fleetGear() - no gearSpecRelevant: (", round(t10_[1],0),"s elapsed)")
       }
       return(df)
     }
     if (nrow(args$gearSpecs)>0){
+      #merge the gear details from both LOG_EFRT and MON_DOC onto the df
+      df_merge <- unique(df[, c("PRO_SPC_INFO_ID","LOG_EFRT_STD_INFO_ID", "MON_DOC_ID")])
+      df_LE <- gearSpecRelevant[gearSpecRelevant$GEAR_SRC == "LE",c("ID_FLD", "GR_TYPE", "GR_SIZE")]
+      df_LE <- merge(df_merge, df_LE, by.x="LOG_EFRT_STD_INFO_ID", by.y = "ID_FLD")
+      df_MD <- gearSpecRelevant[gearSpecRelevant$GEAR_SRC == "MD",c("ID_FLD", "GR_TYPE", "GR_SIZE")]
+      df_MD <- merge(df_merge, df_MD, by.x="MON_DOC_ID", by.y = "ID_FLD")
+      allReportedGears <- rbind.data.frame(df_LE, df_MD)
+      df <- merge(df, allReportedGears, all.x = T)
+      #flag those with no gear info as -999
+      df[["GR_TYPE"]][is.na(df[["GR_TYPE"]])] <- -999
+      df[["GR_SIZE"]][is.na(df[["GR_SIZE"]])] <- -999
 
-      df= do.call(typeFilt, list(df,gearSpecRelevant, gearSpecDF, args=args))
-      df= do.call(sizeFilt, list(df,gearSpecRelevant, gearSpecDF,args=args))
+      if (args$debug) message("n records - pre-size/type filts: ", nrow(df))
+      if (!is.na(args$gearSpecs$TYPE)){
+        df= do.call(typeFilt, list(df, args=args))
+        if (args$debug) message("n records - post-typeFilt: ", nrow(df))
+      }
+      if (!is.na(args$gearSpecs$MIN)){
+        df= do.call(sizeFilt, list(df, args=args))
+        if (args$debug) message("n records - post-sizeFilt: ", nrow(df))
+      }
     }
     if (nrow(df)<1){
       message("\n","No fleet gear found")
     }
     if (args$debug) {
       t10_ <- proc.time() - t10
-      message("\tExiting get_fleetGear_loc() (",round(t10_[1],0),"s elapsed)")
+      message("\tExiting get_fleetGear() (",round(t10_[1],0),"s elapsed)")
     }
     return(df)
 
   }
-  get_fleetGear_ora<-function(df = NULL, ...){
-    #MMM need to add gear filter results to ISDBdebugtrips results
-    args <- list(...)$args
-    if (args$debug) t11 <- Mar.utils::where_now(returnTime = T)
-
-    # Get all of the records for our df that might link to gear info ----------------------------------------
-
-    gearSpecDFQry <- paste0("SELECT DISTINCT
-        I.MON_DOC_ID,
-        I.LOG_EFRT_STD_INFO_ID
-        FROM MARFISSCI.LOG_EFRT_STD_INFO I, MARFISSCI.PRO_SPC_INFO P, MARFISSCI.TRIPS T
-        WHERE
-        I.LOG_EFRT_STD_INFO_ID = P.LOG_EFRT_STD_INFO_ID
-        AND P.TRIP_ID = T.TRIP_ID
-        AND I.FV_FISHED_DATETIME BETWEEN T.EARLIEST_DATE_TIME AND T.LATEST_DATE_TIME
-        AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field = "I.MON_DOC_ID"))
-    gearSpecDF <- args$cxn$thecmd(args$cxn$channel, gearSpecDFQry)
-
-
-    if(nrow(gearSpecDF)<1) {
-      if (args$debug) {
-        t11_ <- proc.time() - t11
-        message("\tExiting get_fleetGear_ora() - no gearSpecDF: (", round(t11_[1],0),"s elapsed)")
-      }
-      return(df)
-    }
-
-    gearSpecRelevant <- do.call(chk_Gears, list(df, gearSpecDF, args=args))
-
-
-    if(nrow(gearSpecRelevant)<1) {
-      if (args$debug) {
-        t11_ <- proc.time() - t11
-        message("\tExiting get_fleetGear_ora() - no gearSpecRelevant: (", round(t11_[1],0),"s elapsed)")
-      }
-      return(df)
-    }
-
-    if (nrow(args$gearSpecs)>0){
-      df= do.call(typeFilt, list(df,gearSpecRelevant, gearSpecDF, args=args))
-      df= do.call(sizeFilt, list(df,gearSpecRelevant, gearSpecDF, args=args))
-    }
-    if (args$debug) {
-      t11_ <- proc.time() - t11
-      message("\tExiting get_fleetGear_ora() (",round(t11_[1],0),"s elapsed)")
-    }
-    return(df)
-
-  }
-
   if (args$useLocal){
     licDf_tmp <- do.call(get_fleetLicences_loc, args)
-    licDets <- licDf_tmp$LICDETS
-    licDf <- licDf_tmp$licDf
-    actDf <- do.call(get_fleetActivity_loc, list(licDf=licDf, args=args))
-    df <- do.call(get_fleetGear_loc, list(df=actDf,args=args))
   }else{
     licDf_tmp <- do.call(get_fleetLicences_ora, args)
-    licDets <- licDf_tmp$LICDETS
-    licDf <- licDf_tmp$licDf
-    actDf <- do.call(get_fleetActivity_ora, list(licDf=licDf, args=args))
-    df <- do.call(get_fleetGear_ora, list(df=actDf,args=args))
   }
+  licDets <- licDf_tmp$LICDETS
+  licDf <- licDf_tmp$licDf
+  if (args$useLocal){
+    actDf <- do.call(get_fleetActivity_loc, list(licDf=licDf, args=args))
+  }else{
+    actDf <- do.call(get_fleetActivity_ora, list(licDf=licDf, args=args))
+  }
+  df <- do.call(get_fleetGear, list(df=actDf,args=args))
+
   df$NAFO <-NULL
   df <- unique(df[with(df,order(VR_NUMBER, LICENCE_ID, GEAR_CODE, LOA )),])
   res <- list()

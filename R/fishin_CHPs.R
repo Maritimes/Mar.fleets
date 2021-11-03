@@ -9,8 +9,7 @@
 #' known to have been used by this fleet. The default values can be replaced with a subset of these to
 #' only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
 #' the script will not run.
-#' @param type default is \code{NULL}. This is either "ALL", "FIXED" or "MOBILE". "ALL" just gets
-#' results for all gear types
+#' @param type default is \code{NULL}. This is either "FIXED" or "MOBILE".
 #' @param stock default is \code{NULL}. This is either "4X5Y" or "5Z".
 #' @param areaFileField  default is \code{"COD"}.  This ensures that when set positions from
 #' MARFIS and ISDB data are compared to NAFO divisions, they are compared to groundfish-specific
@@ -59,12 +58,12 @@ fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock =
   area <- toupper(stock)
   if (!is.null(type) && type=="MOBILE"){
     marfGear = c(12)
+    gearSpecs <- paste0(area,"_MOB")
   }else if (!is.null(type) && type=="FIXED"){
-    marfGear = c(41,51,59)
-  }else if (!is.null(type) && type=="ALL"){
-    #just get all gear
+    marfGear <- c(41,51,59)
+    gearSpecs <- paste0(area,"_FIXED")
   }
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12, 21, 41, 51, 59, 62))
-  data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), marfGear = marfGear, tripcd_id = c(10, 7001), area= area, areaFileField = areaFileField, useLocal = useLocal,...)
+  data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), marfGear = marfGear, tripcd_id = c(10, 7001), area= area, gearSpecs = gearSpecs, areaFileField = areaFileField, useLocal = useLocal,...)
   return(data)
 }
