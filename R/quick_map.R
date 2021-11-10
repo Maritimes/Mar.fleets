@@ -4,10 +4,6 @@
 #' @param data  default is \code{NULL}. This is the entire output from any of the fleet wrappers.
 #' @param plotMARF default is \code{TRUE}. Should MARFIS data be plotted? If there are more than
 #' 1500 positions, the data will be displayed clustered.
-#' @param showAllMARFSets default is \code{TRUE}. By default, the map will show all fishing
-#' locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
-#' caught the specified \code{marfSpp} will be shown.  This can be useful for fleets that can retain
-#' multiple species.
 #' @param plotMARFSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
 #' generated for the MARFIS data. MARFIS point data will be interpolated using the "RND_WGT_KGS"
 #' field.
@@ -25,10 +21,6 @@
 #' as you zoom in.  \code{"random"} just grabs a random selection of 1500 points, and plots those.
 #' @param plotISDB default is \code{TRUE}. Should ISDB data be plotted? If there are more than
 #' 1500 positions, the data will be displayed clustered.
-#' @param showAllISDBSets default is \code{TRUE}. By default, the map will show all of the ISDB set
-#' locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
-#' caught the specified \code{isdbSpp} will be shown.  This can be useful for looking at the
-#' locations of particular species.
 #' @param plotISDBSurf default is \code{FALSE}. If \code{TRUE}, an interpolated surface will be
 #' generated for the ISDB data. ISDB data contains several fields data for many species.  By default,
 #' the interpolation will use the "EST_COMBINED_WT" field for the default directed species, but these
@@ -66,9 +58,9 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 quick_map <- function(data=NULL,
-                      plotMARF = TRUE, showAllMARFSets = TRUE, clusterMARF = TRUE,
+                      plotMARF = TRUE, clusterMARF = TRUE,
                       overloadMARF = "cluster", plotMARFSurf = FALSE, marfSpp = NULL,
-                      plotISDB = TRUE, showAllISDBSets = TRUE, clusterISDB = TRUE,
+                      plotISDB = TRUE, clusterISDB = TRUE,
                       overloadISDB = "cluster", plotISDBSurf = FALSE, isdbField = "EST_COMBINED_WT", isdbSpp = NULL,
                       title = NULL, vms= NULL, bathy = TRUE, surfRes = "low"){
 
@@ -79,7 +71,8 @@ quick_map <- function(data=NULL,
   } else{
     det = 1000
   }
-
+  showAllMARFSets <-ifelse(is.null(marfSpp), TRUE, FALSE)
+  showAllISDBSets <-ifelse(is.null(isdbSpp), TRUE, FALSE)
   compareValues <- function(s1, s2) {
     c1 <- unique(strsplit(s1, "")[[1]])
     c2 <- unique(strsplit(s2, "")[[1]])
@@ -109,7 +102,7 @@ quick_map <- function(data=NULL,
 
     if (is.null(isdbSpp)) {
       isdbSpp <- eval(parse(text=data$params$user[data$params$user$PARAMETER=="isdbSpp","VALUE"]))
-    } else if (isdbSpp == "ALL") {
+    } else if (any(isdbSpp == "ALL")) {
       isdbSpp <- unique(data$isdb$ISDB_CATCHES$SUMMARY$SPEC)
     }
     isdbSppComm <- paste0(SPECIES_ISDB[SPECIES_ISDB$SPECCD_ID %in% isdbSpp,"COMMON"], collapse = "_")
@@ -164,18 +157,27 @@ quick_map <- function(data=NULL,
   bonusField <- gsub('"',"",data$params$user[data$params$user$PARAMETER=="areaFileField","VALUE"])
   bonusLayerCln <- NA
   if (bonusLayer != "NAFOSubunits_sf" | bonusField != "NAFO_1"){
-    theData     <-   eval(parse(text=paste0("Mar.data::",bonusLayer)))
+    if(grepl(pattern = ".shp",x = bonusLayer, ignore.case = T)){
+      theData <- sf::st_read(bonusLayer)
+    }else{
+      theData     <-   eval(parse(text=paste0("Mar.data::",bonusLayer)))
+    }
     theData <- theData[!is.na(theData[[bonusField]]),]
     theData[[bonusField]] <-  as.factor(theData[[bonusField]])
     factpal <- leaflet::colorFactor(palette = "viridis", theData[[bonusField]])
     bonusLayerCln <- gsub(x = bonusLayer, pattern = "_sf",replacement = "")
-    m <- leaflet::addPolygons(group = bonusLayerCln,
+    if(grepl(pattern = ".shp",x = bonusLayerCln, ignore.case = T)){
+      custName <- "customShpFile"
+    }else{
+      custName <- bonusLayerCln
+    }
+    m <- leaflet::addPolygons(group = custName,
                               map = m, data = theData, stroke = T, smoothFactor = 0, fillOpacity = 0.5,
                               color = factpal(theData[[bonusField]]),
                               label=theData[[bonusField]], weight = 1.5,
                               labelOptions = leaflet::labelOptions(noHide = F, textOnly = TRUE, textsize = 0.2)
     )
-    if (!is.na(bonusLayerCln))overlayGroups <- c(overlayGroups, bonusLayerCln)
+    if (!is.na(custName))overlayGroups <- c(overlayGroups, custName)
   }
   m <- leaflet::addPolygons(group = "NAFO",
                             map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
@@ -197,6 +199,8 @@ quick_map <- function(data=NULL,
     font-size: 28px;'>",title,"</div>")
   makeSurface <- function(data=NULL, det= det){
     #just set data to LAT, LONG and <interpfield>, in that order
+    #if interpfield had NA, it is 0
+    data[,3][is.na(data[,3])] <- 0
     data_sp <- Mar.utils::df_to_sp(data)
     grd    <- as.data.frame(sp::spsample(data_sp, "regular", n=det))
     names(grd)  <- c("X", "Y")
@@ -204,7 +208,7 @@ quick_map <- function(data=NULL,
     sp::gridded(grd)     <- TRUE
     sp::fullgrid(grd)    <- TRUE
     sp::proj4string(grd) <- suppressWarnings(sp::proj4string(data_sp))
-    surf <- gstat::idw(eval(parse(text = names(data_sp@data)[3]))~1, data_sp, newdata=grd, idp=3.0)
+    surf <- gstat::idw(formula = eval(parse(text = names(data_sp@data)[3]))~1, locations = data_sp, newdata=grd, idp=3.0)
     surf <- raster::raster(surf)
     landMask <- Mar.data::NAFOSubunitsLnd[Mar.data::NAFOSubunitsLnd@data$NAFO_BEST != "<LAND>", ]
     surf.m     <- raster::mask(surf, landMask)

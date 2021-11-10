@@ -14,7 +14,7 @@
 #' \code{dateEnd} must be associated with a valid entry of
 #' \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 -->
 #' August 27, 2019).
-#' @param lics default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying
+#' @param lics default is \code{'all'}.  Fleet wrappers will populate this with a dataframe specifying
 #' the licence types, subtypes, gear and licence species valid
 #' for a particular fleet.  This information comes from  \code{Mar.fleets::LIC_CORE}.
 #' @param gearSpecs default is \code{'all'}. Fleet wrappers may populate it with a dataframe
@@ -197,6 +197,8 @@ set_defaults <- function(lics = 'all',
   paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
   paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
   paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"
+  # browser()
+  # softCoded <- c()
   if("year" %in% names(sentArgs$argsUser)){
     paramDf[paramDf$PARAMETER == "dateStart","SOURCE"] <- "derived from user-supplied 'year'"
     paramDf[paramDf$PARAMETER == "dateEnd","SOURCE"] <- "derived from user-supplied 'year'"

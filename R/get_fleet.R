@@ -168,8 +168,16 @@ get_fleet<-function(...){
       LE_df$COLUMN_DEFN_ID <- replace(LE_df$COLUMN_DEFN_ID, LE_df$COLUMN_DEFN_ID %in% sizeCols, "GR_SIZE")
       LE_df$COLUMN_DEFN_ID <- replace(LE_df$COLUMN_DEFN_ID, LE_df$COLUMN_DEFN_ID %in% typeCols, "GR_TYPE")
       LE_df <- reshape2::dcast(LE_df, LOG_EFRT_STD_INFO_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
-      LE_df$GR_SIZE <- as.numeric(LE_df$GR_SIZE)
-      LE_df$GR_TYPE <- toupper(LE_df$GR_TYPE)
+      if (!"GR_SIZE" %in% names(LE_df)) {
+        LE_df$GR_SIZE <- -999
+      }else{
+        LE_df$GR_SIZE <- as.numeric(LE_df$GR_SIZE)
+      }
+      if (!"GR_TYPE" %in% names(LE_df)) {
+        LE_df$GR_TYPE <- -999
+      }else{
+        LE_df$GR_TYPE <- toupper(LE_df$GR_TYPE)
+      }
       colnames(LE_df)[colnames(LE_df)=="LOG_EFRT_STD_INFO_ID"] <- "ID_FLD"
       LE_df$GEAR_SRC <- "LE"
     }else{
@@ -180,8 +188,16 @@ get_fleet<-function(...){
       MD_df$COLUMN_DEFN_ID <- replace(MD_df$COLUMN_DEFN_ID, MD_df$COLUMN_DEFN_ID %in% sizeCols, "GR_SIZE")
       MD_df$COLUMN_DEFN_ID <- replace(MD_df$COLUMN_DEFN_ID, MD_df$COLUMN_DEFN_ID %in% typeCols, "GR_TYPE")
       MD_df <- reshape2::dcast(MD_df, MON_DOC_ID ~ COLUMN_DEFN_ID, value.var = "DATA_VALUE")
-      MD_df$GR_SIZE <- as.numeric(MD_df$GR_SIZE)
-      MD_df$GR_TYPE <- toupper(MD_df$GR_TYPE)
+      if (!"GR_SIZE" %in% names(MD_df)) {
+        MD_df$GR_SIZE <- -999
+      }else{
+        MD_df$GR_SIZE <- as.numeric(MD_df$GR_SIZE)
+      }
+      if (!"GR_TYPE" %in% names(MD_df)) {
+        MD_df$GR_TYPE <- -999
+      }else{
+        MD_df$GR_TYPE <- toupper(MD_df$GR_TYPE)
+      }
       colnames(MD_df)[colnames(MD_df)=="MON_DOC_ID"] <- "ID_FLD"
       MD_df$GEAR_SRC <- "MD"
     }else{
@@ -457,8 +473,10 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
   }
 
   get_fleetGear<-function(df = NULL, ...){
+    # this could entirely replaced by chk_Gears
     args <- list(...)$args
     if (args$debug) t10 <- Mar.utils::where_now(returnTime = T)
+
     gearSpecRelevant <- do.call(chk_Gears, list(df, args=args))
     if(nrow(gearSpecRelevant)<1) {
       if (args$debug) {

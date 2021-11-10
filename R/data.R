@@ -54,6 +54,18 @@
 #' }
 "GEARS_MARFIS"
 
+#' GEARS_ISDB Metadata
+#'
+#' This is an rda file of a lookup table used to associate different ISDB gear codes with name of the gear:
+#' @docType data
+#' @usage data(GEARS_ISDB)
+#' @format  rda
+#' \describe{
+#' \item{GEARCD_ID}{code identifying the type of gear}
+#' \item{DESCRIPTION}{name of the gear}
+#' }
+"GEARS_ISDB"
+
 #' SPECIES_MARFIS Metadata
 #'
 #' This is an rda file of a lookup table used to associate different MARFIS species codes with the name of the species:

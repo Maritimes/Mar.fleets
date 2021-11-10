@@ -43,7 +43,7 @@ set_defaults(
 )
 }
 \arguments{
-\item{lics}{default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying
+\item{lics}{default is \code{'all'}.  Fleet wrappers will populate this with a dataframe specifying
 the licence types, subtypes, gear and licence species valid
 for a particular fleet.  This information comes from  \code{Mar.fleets::LIC_CORE}.}
 

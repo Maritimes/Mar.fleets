@@ -7,13 +7,11 @@
 quick_map(
   data = NULL,
   plotMARF = TRUE,
-  showAllMARFSets = TRUE,
   clusterMARF = TRUE,
   overloadMARF = "cluster",
   plotMARFSurf = FALSE,
   marfSpp = NULL,
   plotISDB = TRUE,
-  showAllISDBSets = TRUE,
   clusterISDB = TRUE,
   overloadISDB = "cluster",
   plotISDBSurf = FALSE,
@@ -30,11 +28,6 @@ quick_map(
 
 \item{plotMARF}{default is \code{TRUE}. Should MARFIS data be plotted? If there are more than
 1500 positions, the data will be displayed clustered.}
-
-\item{showAllMARFSets}{default is \code{TRUE}. By default, the map will show all fishing
-locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
-caught the specified \code{marfSpp} will be shown.  This can be useful for fleets that can retain
-multiple species.}
 
 \item{clusterMARF}{default is \code{TRUE}. If \code{TRUE}, MARF data will be grouped until
 the map is zoomed in sufficiently  If \code{FALSE}, every MARF data point will be shown. If the
@@ -57,11 +50,6 @@ used.}
 
 \item{plotISDB}{default is \code{TRUE}. Should ISDB data be plotted? If there are more than
 1500 positions, the data will be displayed clustered.}
-
-\item{showAllISDBSets}{default is \code{TRUE}. By default, the map will show all of the ISDB set
-locations associated with the provided data.  If this is set to \code{FALSE}, only sets that
-caught the specified \code{isdbSpp} will be shown.  This can be useful for looking at the
-locations of particular species.}
 
 \item{clusterISDB}{default is \code{TRUE}. If \code{TRUE}, ISDB data will be grouped until
 the map is zoomed in sufficiently  If \code{FALSE}, every ISDB data point will be shown.  If the

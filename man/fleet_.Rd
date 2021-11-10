@@ -30,7 +30,7 @@ If no \code{dateEnd} is provided, the window will be for 1 year (i.e, 365 days).
 \code{dateEnd} must be associated with a valid entry of
 \code{dateStart} to identify a block of time for a data extraction  (e.g. Jun18, 2018 -->
 August 27, 2019).}
-    \item{\code{lics}}{default is \code{'all'}.  Fleet wrappers will populate it with a dataframe specifying
+    \item{\code{lics}}{default is \code{'all'}.  Fleet wrappers will populate this with a dataframe specifying
 the licence types, subtypes, gear and licence species valid
 for a particular fleet.  This information comes from  \code{Mar.fleets::LIC_CORE}.}
     \item{\code{marfSpp}}{default is \code{'all'}. The marfis species code, usually sent by the fleet

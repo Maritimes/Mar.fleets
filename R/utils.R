@@ -149,17 +149,6 @@ can_run <- function(...){
     args<-list(...)$args
     if (args$debug) t31 <- Mar.utils::where_now(returnTime = T)
     #1 check if local copies available '
-    # message("fuzz name here??")
-    # if (grepl(x = tables[1], pattern = "MARFIS")>0){
-    #   tabs1 = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
-    #   tabs2 = gsub(tabs1,pattern = "MARFISSCI", replacement = "MARFIS")
-    #   localDataCheck1 <- sapply(X =tabs1, file.exists)
-    #   localDataCheck2 <- sapply(X =tabs2, file.exists)
-    #   mChk= data.frame(localDataCheck1, localDataCheck2)
-    #   mChk$RES <- mChk$localDataCheck1 + localDataCheck2
-    #   localDataCheck <- all(mChk$RES>0)
-    #   rm(tabs1, tabs2, localDataCheck1, localDataCheck2, mChk)
-    # }else{
     tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
     localDataCheck <- all(sapply(X =tabs, file.exists))
     rm(tabs)
@@ -509,11 +498,15 @@ summarize_locations<-function(get_isdb = NULL,
     all_cust <- rbind.data.frame(mSetsSummRpt_cust, oSetsSummRpt_cust)
     summary_cust <- reshape2::dcast(all_cust, tmpName ~ SRC, value.var = "cnt")
     summary_cust[is.na(summary_cust)] <- 0
-    summary_cust = summary_cust[with(summary_cust, order(tmpName)), c("tmpName", "MARFIS_sets" , "ISDB_sets")]
+    summary_cust <- summary_cust[with(summary_cust, order(tmpName)), c("tmpName", "MARFIS_sets" , "ISDB_sets")]
 
     colnames(summary_cust)[colnames(summary_cust)=="tmpName"] <- args$areaFileField
-
-    res[[args$areaFile]] <- summary_cust
+    if(grepl(pattern = ".shp",x = args$areaFile, ignore.case = T)){
+      custName <- "customShpFile"
+    }else{
+      custName <- args$areaFile
+    }
+    res[[custName]] <- summary_cust
   }
 
 
