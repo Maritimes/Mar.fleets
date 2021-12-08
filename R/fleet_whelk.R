@@ -33,8 +33,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_whelk <- function(useLocal = NULL, ...){
-  isDraft()
+fleet_whelk <- function(useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   data = fleet_(fleet = "WHELK", marfSpp = 615, marfGear = 62, isdbSpp = c(4210,4211), tripcd_id = 4211, useLocal = useLocal,...)
   return(data)

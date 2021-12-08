@@ -40,8 +40,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_scallop <- function(fleet = NULL, areaFile = NULL, useLocal = NULL, ...){
-  isDraft()
+fleet_scallop <- function(fleet = NULL, areaFile = NULL, useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   fleet <- toupper(fleet)
   if (fleet == "OFFSHORE"){

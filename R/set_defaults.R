@@ -64,6 +64,9 @@
 #' @param manualMatch default is \code{FALSE}. This parameter is only used when calling functions
 #' from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
 #' input format.
+#' @param socks default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
+#' user to acknowledge that they are aware that the script needs further testing.  Setting this to
+#' TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.
 #' @param useLocal default is \code{FALSE}. This specifies whether to run the script against local
 #' data or against Oracle (requires network or VPN).
 #' Depending on your value for \code{useLocal}, different values become necessary.
@@ -134,6 +137,7 @@ set_defaults <- function(lics = 'all',
                          maxSetDiff_Km = 100,
                          dropUnmatchedISDB = TRUE,
                          manualMatch = FALSE,
+                         socks =FALSE,
                          data.dir = file.path(getwd(), 'data'),
                          oracle.username = '_none_',
                          oracle.password = '_none_',

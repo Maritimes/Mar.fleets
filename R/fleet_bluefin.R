@@ -36,8 +36,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_bluefin <- function(marfGear = c(54,60), useLocal = NULL, ...){
-  isDraft()
+fleet_bluefin <- function(marfGear = c(54,60), useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   if (any(!(marfGear) %in% c(54,60))) stop("Please limit specified values of 'marfGear' to any/all of the default values.")
   # stop("wrapper in progress")

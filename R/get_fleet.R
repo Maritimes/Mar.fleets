@@ -359,13 +359,20 @@ get_fleet<-function(...){
                                tables = c("PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS", "VESSELS"),
                                usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
 
+# if ("GASP" %in% args$lics$FLEET){
+#   PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", "DATE_FISHED", "LANDED_DATE")]
+#   TRIPS = PRO_SPC_INFO[,c("PRO_SPC_INFO_ID","DATE_FISHED", "LANDED_DATE")]
+#   colnames(TRIPS)[colnames(TRIPS)=="DATE_FISHED"] <- "T_DATE1"
+#   colnames(TRIPS)[colnames(TRIPS)=="LANDED_DATE"] <- "T_DATE2"
+# }else{
+  PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID")]
+  #TRIPS
+  TRIPS <- TRIPS[,c("TRIP_ID","VR_NUMBER", "EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
+  colnames(TRIPS)[colnames(TRIPS)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
+  colnames(TRIPS)[colnames(TRIPS)=="LATEST_DATE_TIME"] <- "T_DATE2"
+# }
     # Handle the various data we just pulled ------------------------------------------------------------------------------------------------------------------
-    #PRO_SPC_INFO
-    PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID")]
-    #TRIPS
-    TRIPS <- TRIPS[,c("TRIP_ID","VR_NUMBER", "EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
-    colnames(TRIPS)[colnames(TRIPS)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
-    colnames(TRIPS)[colnames(TRIPS)=="LATEST_DATE_TIME"] <- "T_DATE2"
+
     TRIPS$T_DATE1 <- as.Date(TRIPS$T_DATE1)
     TRIPS$T_DATE2 <- as.Date(TRIPS$T_DATE2)
     #NAFO
@@ -391,8 +398,14 @@ get_fleet<-function(...){
     # Limit fishing activity to desired date range ------------------------------------------------------------------------------------------------------------
 
     TRIPS <- TRIPS[which(TRIPS$T_DATE1 <= as.Date(args$dateEnd) &  TRIPS$T_DATE2 >= as.Date(args$dateStart)),]
+    # if ("GASP" %in% args$lics$FLEET){
+    #   PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% TRIPS$PRO_SPC_INFO_ID,]
+    #   # PRO_SPC_INFO_new <- merge(PRO_SPC_INFO_new, TRIPS)
+    # }else{
+
     PRO_SPC_INFO_new <- PRO_SPC_INFO[PRO_SPC_INFO$TRIP_ID %in% TRIPS$TRIP_ID,]
     PRO_SPC_INFO_new <- merge(PRO_SPC_INFO_new, TRIPS)
+    # }
 
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PRO_SPC_INFO_new$LICENCE_ID, stepDesc = "flt_PSDates")
     if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = PRO_SPC_INFO_new$VR_NUMBER, stepDesc = "flt_PSDates")
@@ -418,7 +431,9 @@ get_fleet<-function(...){
     PRO_SPC_INFO <- merge(PRO_SPC_INFO, VESSELS[, c("VR_NUMBER", "LOA")], all.x = T)
     # Clean results -------------------------------------------------------------------------------------------------------------------------------------------
     PRO_SPC_INFO$NAFO_UNIT_AREA_ID<-PRO_SPC_INFO$TRIP_ID <- NULL
-    if (nrow(PRO_SPC_INFO)<1) stop("No fleet activity found")
+    if (nrow(PRO_SPC_INFO)<1) {
+      stop("No fleet activity found")
+    }
 
     if (args$debug) {
       t08_ <- proc.time() - t08

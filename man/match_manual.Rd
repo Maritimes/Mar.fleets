@@ -72,6 +72,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{maxSetDiff_Km}}{default is \code{100}. Any MARFIS and ISDB sets with positions more than the
 # of kilometers specified here will NOT be considered matches.}
     \item{\code{dropUnmatchedISDB}}{default is \code{TRUE}.}
+    \item{\code{socks}}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
+user to acknowledge that they are aware that the script needs further testing.  Setting this to
+TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
     \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}
     \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle

@@ -27,6 +27,7 @@ set_defaults(
   maxSetDiff_Km = 100,
   dropUnmatchedISDB = TRUE,
   manualMatch = FALSE,
+  socks = FALSE,
   data.dir = file.path(getwd(), "data"),
   oracle.username = "_none_",
   oracle.password = "_none_",
@@ -125,6 +126,10 @@ and date).  They may still match on confirmation codes and/or trip names.}
 \item{manualMatch}{default is \code{FALSE}. This parameter is only used when calling functions
 from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
 input format.}
+
+\item{socks}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
+user to acknowledge that they are aware that the script needs further testing.  Setting this to
+TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
 
 \item{data.dir}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
 This is the path to a folder where your *.rdata files are stored.}

@@ -51,8 +51,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock = NULL, areaFileField = "COD", useLocal = NULL, ...){
-  isDraft()
+fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock = NULL, areaFileField = "COD", useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   area <- toupper(stock)

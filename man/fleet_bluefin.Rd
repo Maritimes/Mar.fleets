@@ -4,7 +4,7 @@
 \alias{fleet_bluefin}
 \title{fleet_bluefin}
 \usage{
-fleet_bluefin(marfGear = c(54, 60), useLocal = NULL, ...)
+fleet_bluefin(marfGear = c(54, 60), useLocal = NULL, socks = FALSE, ...)
 }
 \arguments{
 \item{marfGear}{default is \code{c(54,60)}. This is a vector of MARFIS gear codes
@@ -29,6 +29,10 @@ Depending on your value for \code{useLocal}, different values become necessary.
       \item param \code{usepkg} required
     }
 }}
+
+\item{socks}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
+user to acknowledge that they are aware that the script needs further testing.  Setting this to
+TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
 
 \item{...}{
   Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
@@ -232,6 +236,7 @@ local <- fleet_bluefin(year = 2018,
 Other fleets: 
 \code{\link{fishin_CHPs}()},
 \code{\link{fleet_cucumber}()},
+\code{\link{fleet_gaspereau}()},
 \code{\link{fleet_hagfish}()},
 \code{\link{fleet_halibut}()},
 \code{\link{fleet_herring}()},

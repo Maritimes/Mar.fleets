@@ -44,8 +44,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_redfish <- function(marfGear = c(12,21,41,51,59), unit = NULL, useLocal = NULL, ...){
-  isDraft()
+fleet_redfish <- function(marfGear = c(12,21,41,51,59), unit = NULL, useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   unit = toupper(unit)
   if (unit == "UNIT2" | unit == "2" | unit == 2){
     area <- "UNIT2"

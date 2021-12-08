@@ -9,6 +9,7 @@ summarizer(
   units = "KGS",
   bySpp = TRUE,
   byYr = FALSE,
+  byQuarter = FALSE,
   byGr = TRUE,
   byNAFO = FALSE,
   byCust = NULL,
@@ -31,6 +32,12 @@ ignore differences in landed species.}
 
 \item{byYr}{default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 and licence_ids will will be broken down by each year in which a landing was identified. If FALSE,
+aggregations will ignore differences in year. "Year" is taken from the end date of the associated
+trip record (i.e. <data>$marf$MARF_SETS$T_DATE2 for MARF, and <data>$isdb$ISDB_SETS$DATE_TIME for
+ISDB).}
+
+\item{byQuarter}{default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
+and licence_ids will will be broken down by each quarter in which a landing was identified. If FALSE,
 aggregations will ignore differences in year. "Year" is taken from the end date of the associated
 trip record (i.e. <data>$marf$MARF_SETS$T_DATE2 for MARF, and <data>$isdb$ISDB_SETS$DATE_TIME for
 ISDB).}

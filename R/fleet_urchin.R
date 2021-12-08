@@ -41,8 +41,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_urchin <- function(marfGear = c(71,76), useLocal = NULL, ...){
-  isDraft()
+fleet_urchin <- function(marfGear = c(71,76), useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(71,76))
   data = fleet_(fleet = "URCHIN", marfSpp = 650, marfGear = marfGear, isdbSpp = 6400, tripcd_id = 6400, useLocal = useLocal,...)

@@ -74,6 +74,9 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
 from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
 input format.}
+    \item{\code{socks}}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
+user to acknowledge that they are aware that the script needs further testing.  Setting this to
+TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
     \item{\code{useLocal}}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
 Depending on your value for \code{useLocal}, different values become necessary.

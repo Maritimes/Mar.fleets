@@ -38,8 +38,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_snowcrab<- function(areaFile = "Areas_Snowcrab_sf", useLocal = NULL, ...){
-  isDraft()
+fleet_snowcrab<- function(areaFile = "Areas_Snowcrab_sf", useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   data <- fleet_(fleet = "SNOWCRAB", marfSpp = 705, marfGear = 62, isdbSpp = 2526, tripcd_id = c(2509, 7061,7064), areaFile = areaFile, useLocal = useLocal,...)
   return(data)

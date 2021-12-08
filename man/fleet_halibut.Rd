@@ -9,6 +9,7 @@ fleet_halibut(
   area = "3NOPS4VWX5",
   areaFile = "Areas_Halibut_sf",
   useLocal = NULL,
+  socks = FALSE,
   ...
 )
 }
@@ -45,6 +46,10 @@ Depending on your value for \code{useLocal}, different values become necessary.
       \item param \code{usepkg} required
     }
 }}
+
+\item{socks}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
+user to acknowledge that they are aware that the script needs further testing.  Setting this to
+TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
 
 \item{...}{
   Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
@@ -251,6 +256,7 @@ Other fleets:
 \code{\link{fishin_CHPs}()},
 \code{\link{fleet_bluefin}()},
 \code{\link{fleet_cucumber}()},
+\code{\link{fleet_gaspereau}()},
 \code{\link{fleet_hagfish}()},
 \code{\link{fleet_herring}()},
 \code{\link{fleet_jonah}()},

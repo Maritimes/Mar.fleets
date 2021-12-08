@@ -46,8 +46,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_shrimp <- function(marfGear = c(19,62),  areaFile = "Areas_Shrimp_sf", useLocal = NULL, ...){
-  isDraft()
+fleet_shrimp <- function(marfGear = c(19,62),  areaFile = "Areas_Shrimp_sf", useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(19,62))
   data = fleet_(fleet = "SHRIMP", marfSpp = 702, marfGear = marfGear, isdbSpp = c(16,28), tripcd_id = 2210, areaFile = areaFile, useLocal = useLocal,...)

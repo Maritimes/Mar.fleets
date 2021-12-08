@@ -38,8 +38,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_surfclam <- function(areaFile = "Areas_Surfclam_sf", useLocal = NULL, ...){
-  isDraft()
+fleet_surfclam <- function(areaFile = "Areas_Surfclam_sf", useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   data <- fleet_(fleet = "SURFCLAM", marfSpp = 608, marfGear = 71, isdbSpp = 4355, tripcd_id = 4355, areaFile = areaFile, useLocal = useLocal,...)
   return(data)

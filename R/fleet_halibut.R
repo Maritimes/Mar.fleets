@@ -49,8 +49,8 @@
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_halibut <- function(marfGear = c(12, 41, 51, 59), area= "3NOPS4VWX5", areaFile = 'Areas_Halibut_sf', useLocal = NULL, ...){
-  isDraft()
+fleet_halibut <- function(marfGear = c(12, 41, 51, 59), area= "3NOPS4VWX5", areaFile = 'Areas_Halibut_sf', useLocal = NULL, socks = FALSE, ...){
+  if (!socks) isDraft()
   if (!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   if (is.null(area) || area =="ALL")area =="ALL"
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12, 41, 51, 59))

@@ -18,6 +18,11 @@
 #' aggregations will ignore differences in year. "Year" is taken from the end date of the associated
 #' trip record (i.e. <data>$marf$MARF_SETS$T_DATE2 for MARF, and <data>$isdb$ISDB_SETS$DATE_TIME for
 #' ISDB).
+#' @param byQuarter  default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
+#' and licence_ids will will be broken down by each quarter in which a landing was identified. If FALSE,
+#' aggregations will ignore differences in year. "Year" is taken from the end date of the associated
+#' trip record (i.e. <data>$marf$MARF_SETS$T_DATE2 for MARF, and <data>$isdb$ISDB_SETS$DATE_TIME for
+#' ISDB).
 #' @param byNAFO  default is \code{FALSE}.   If TRUE, the summed weights and numbers of unique trips
 #' and licence_ids will will be broken down by <reported> NAFO division in which a landing was
 #' identified. If FALSE, weights will be summed, irrespective of <reported> NAFO division.
@@ -40,7 +45,7 @@
 #' a dataframe
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, specMARF = NULL, specISDB = NULL, doMARF=T, doISDB=T, quietly = F){
+summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuarter = FALSE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, specMARF = NULL, specISDB = NULL, doMARF=T, doISDB=T, quietly = F){
   defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
   summISDB <- function(){
     if (!"isdb" %in% names(data)) return(NULL)
@@ -48,6 +53,7 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
     t <- data$isdb$ISDB_TRIPS #[,c("TRIP_ID_ISDB", "VR", "LIC")]
     s <- data$isdb$ISDB_SETS
     s$YEAR <- lubridate::year(s$DATE_TIME)
+    s$QUARTER <- lubridate::quarter(s$DATE_TIME)
 
     if (is.null(specISDB)) {
       specISDB <- eval(parse(text=data$params$user[data$params$user$PARAMETER == "isdbSpp", "VALUE"]))
@@ -55,7 +61,6 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
     }
 
     c <- data$isdb$ISDB_CATCHES$ALL[data$isdb$ISDB_CATCHES$ALL$SPECCD_ID %in% specISDB,c("SPECCD_ID", "FISHSET_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
-
 
     if (any(is.na(t$VR))){
       badVR <- length(t[is.na(t$VR),])
@@ -79,6 +84,11 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
     aggFields <-c("YEAR")
 
     if(!byYr) all$YEAR <- defYr
+    if(!byQuarter) {
+      all$QUARTER <- "ALL"
+    }else{
+      aggFields <- c(aggFields, "QUARTER")
+    }
 
     if(byNAFO) {
       aggFields <- c(aggFields, "NAFO_ISDB_SETS")
@@ -126,7 +136,7 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
                                              NLICS = length(unique(LIC)),
                                              NTRIPS = length(unique(TRIP_ID_ISDB))), by = c(aggFields)]
     res <- merge(data.table::setDF(counts), data.table::setDF(sums))
-    res <- res[with(res,order(YEAR, NTRIPS)),]
+    res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
     for (s in 1:length(sumFields)){
       if (sumFields[s]=="EST_NUM_CAUGHT") next
       if (units == "TONNES") res[[paste0(sumFields[s],"_TONNES")]]<-res[[sumFields[s]]]/1000
@@ -143,6 +153,7 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
     byCustMARF <- NULL
     t <- data$marf$MARF_TRIPS
     t$YEAR <- lubridate::year(t$T_DATE2)
+    t$QUARTER <- lubridate::quarter(t$T_DATE2)
     if (any(is.na(t$VR_NUMBER_FISHING))){
       badVR <- length(t[is.na(t$VR_NUMBER_FISHING),])
       if (!quietly)  message(paste0(badVR, " of your MARFIS trips were missing a valid Vessel. There is no way to
@@ -181,6 +192,11 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
     aggFields <-c("YEAR")
 
     if(!byYr) all$YEAR <- defYr
+    if(!byQuarter) {
+      all$QUARTER <- "ALL"
+    }else{
+      aggFields <- c(aggFields, "QUARTER")
+    }
 
     if(byNAFO) {
       aggFields <- c(aggFields, "NAFO_MARF_SETS")
@@ -228,7 +244,7 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byGr =
                                              NTRIPS = length(unique(TRIP_ID_MARF))), by = c(aggFields)]
 
     res <- merge(data.table::setDF(counts), data.table::setDF(sums))
-    res <- res[with(res,order(YEAR, NTRIPS)),]
+    res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
 
     if (units == "TONNES"){
       res$RND_WEIGHT_TONNES <- res$RND_WEIGHT_KGS/1000
