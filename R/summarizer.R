@@ -47,8 +47,10 @@
 #' @export
 summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuarter = FALSE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, specMARF = NULL, specISDB = NULL, doMARF=T, doISDB=T, quietly = F){
   defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
+  ISDB <- NA
+  MARF <- NA
   summISDB <- function(){
-    if (!"isdb" %in% names(data)) return(NULL)
+    if (!"isdb" %in% names(data)) return(NA)
     byCustISDB <-NULL
     t <- data$isdb$ISDB_TRIPS #[,c("TRIP_ID_ISDB", "VR", "LIC")]
     s <- data$isdb$ISDB_SETS
@@ -147,9 +149,8 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
     if (!is.null(byCustISDB)) colnames(res)[colnames(res)=="CUSTOM"] <- byCustISDB
     return(res)
   }
-
   summMARF <- function(){
-    if (!"marf" %in% names(data)) return(NULL)
+    if (!"marf" %in% names(data)) return(NA)
     byCustMARF <- NULL
     t <- data$marf$MARF_TRIPS
     t$YEAR <- lubridate::year(t$T_DATE2)
@@ -244,7 +245,11 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
                                              NTRIPS = length(unique(TRIP_ID_MARF))), by = c(aggFields)]
 
     res <- merge(data.table::setDF(counts), data.table::setDF(sums))
-    res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
+    if (byQuarter){
+      res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
+    }else{
+      res <- res[with(res,order(YEAR, NTRIPS)),]
+    }
 
     if (units == "TONNES"){
       res$RND_WEIGHT_TONNES <- res$RND_WEIGHT_KGS/1000
@@ -261,8 +266,8 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
   if (doMARF) MARF <- summMARF()
 
   res <- list()
-  if (is.null(ISDB)) ISDB <- "No data to summarize"
-  if (is.null(MARF)) MARF <- "No data to summarize"
+  if (all(is.na(ISDB))) ISDB <- "No data to summarize"
+  if (all(is.na(MARF))) MARF <- "No data to summarize"
 
   res$ISDB <- ISDB
   res$MARF <- MARF

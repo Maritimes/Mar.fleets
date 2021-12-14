@@ -43,14 +43,21 @@ get_fleet<-function(...){
   sizeFilt <- function(df=NULL, ...){
     args <- list(...)$args
     if (args$debug) t03<- Mar.utils::where_now(returnTime = T)
-    # beepr::beep(2);browser()
     if (!is.na(args$gearSpecs$MIN)){
+      #for fixed gear (CHPs), we need to keep all gillnet - don't sort as though they were hooks
+      if ( args$gearSpecs$FLEET == "CHP" &&  grepl(pattern = "_FIXED", x = args$gearSpecs$FLEET_GEARSPECS_ID)){
+        gn <- df[df$GEAR_CODE == 41,]
+        df <- df[df$GEAR_CODE != 41,]
+      }
+
       theseGearSpecRelevant <- df[which(df$GR_SIZE >=  args$gearSpecs$MIN &
                                           df$GR_SIZE <=  args$gearSpecs$MAX),]
       if(args$keepMissingGear){
         theseGearSpecUnk <- df[df$GR_SIZE == -999,]
         theseGearSpecRelevant <- rbind.data.frame(theseGearSpecRelevant, theseGearSpecUnk)
       }
+      #reattach gillnet to results
+      if (exists("gn")) theseGearSpecRelevant <- rbind.data.frame(theseGearSpecRelevant, gn)
 
       if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theseGearSpecRelevant$LICENCE_ID, stepDesc = "flt_gearSize")
       if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theseGearSpecRelevant$VR_NUMBER, stepDesc = "flt_gearSize")
