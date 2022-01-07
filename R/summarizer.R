@@ -138,7 +138,13 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
                                              NLICS = length(unique(LIC)),
                                              NTRIPS = length(unique(TRIP_ID_ISDB))), by = c(aggFields)]
     res <- merge(data.table::setDF(counts), data.table::setDF(sums))
-    res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
+    # res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
+    if (byQuarter){
+      res <- res[with(res,order(YEAR, QUARTER, NTRIPS)),]
+    }else{
+      res <- res[with(res,order(YEAR, NTRIPS)),]
+    }
+
     for (s in 1:length(sumFields)){
       if (sumFields[s]=="EST_NUM_CAUGHT") next
       if (units == "TONNES") res[[paste0(sumFields[s],"_TONNES")]]<-res[[sumFields[s]]]/1000
