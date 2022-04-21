@@ -306,7 +306,7 @@ enable_local <- function(data.dir = NULL,
                              usepkg = usepkg,
                              schema = "MARFISSCI",
                              data.dir = data.dir,
-                             checkOnly = TRUE,
+                             checkOnly = FALSE,
                              tables = args$marfTabs,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
 
@@ -317,7 +317,7 @@ enable_local <- function(data.dir = NULL,
                              usepkg = usepkg,
                              schema = "ISDB",
                              data.dir = data.dir,
-                             checkOnly = TRUE,
+                             checkOnly = FALSE,
                              tables = args$isdbTabs,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
 
@@ -328,7 +328,7 @@ enable_local <- function(data.dir = NULL,
                              usepkg = usepkg,
                              schema = "OBSERVER",
                              data.dir = data.dir,
-                             checkOnly = TRUE,
+                             checkOnly = FALSE,
                              tables = args$obsTabs,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
   message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
