@@ -76,7 +76,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       thisMarfMatch$TRIP_ID_ISDB <- numeric()
       colnames(thisMarfMatch)[colnames(thisMarfMatch)=="TRIP_ID_MARF"] <- "TRIP_ID_MARF_TRIP"
       thisMarfMatch$match_TripName <- logical()
-
       if (args$debug) {
         t23_ <- proc.time() - t23
         message("\tExiting matchTripNames() - no tripName matches: (", round(t23_[1],0),"s elapsed)")
@@ -389,7 +388,6 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     #match_tmp grabs all of the records that got matched by lic or vr
     #match_CONF2B than attempts to merge these lic/vr records with any lic/vr records that occurred within an acceptable window of time
     #the date matches will also work for cases where the licence and vr were reversed (nMix1 or nMix2 = T).
-
     match_tmp <- merge(knowncombos_cnt[,c("TRIP_ID_ISDB", "TRIP_ID_MARF","SRC")],
                        match_VR[,c("TRIP_ID_ISDB", "TRIP_ID_MARF_VR", "swapVR", "match_VR" )],
                        by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"),  by.y=c("TRIP_ID_ISDB","TRIP_ID_MARF_VR"), all.x=T)
@@ -400,10 +398,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
                        match_Date[which(match_Date$mVR|match_Date$mLIC|match_Date$mMix1|match_Date$mMix2),
                                   c("TRIP_ID_ISDB", "TRIP_ID_MARF_DATE", "VR", "LIC","mTripcd_id", "mMix2", "mMix1",  "mLIC", "mVR", "match_Date", "match_DATE_DETS" )],
                        by.x = c("TRIP_ID_ISDB","TRIP_ID_MARF"), by.y = c("TRIP_ID_ISDB","TRIP_ID_MARF_DATE"), all.x=T)
-
     # replace NAs for unmatched with false so can do math
     match_tmp[c("match_Date", "match_VR", "match_LIC", "mTripcd_id", "swapVR", "swapLIC", "mMix1", "mMix2", "mLIC", "mVR")][is.na(match_tmp[c("match_Date", "match_VR", "match_LIC", "mTripcd_id", "swapVR", "swapLIC", "mMix1", "mMix2", "mLIC", "mVR")])] <- FALSE
-    #mTripcd_id not used for matching, just for math to help break ties
+    # mTripcd_id not used for matching, just for math to help break ties
     match_tmp <- match_tmp[which(match_tmp$match_Date & (match_tmp$match_LIC + match_tmp$match_VR + match_tmp$mTripcd_id) >0),]
     match_tmp$SRC <- NULL
     if (nrow(match_tmp)>0){
@@ -415,6 +412,13 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     }else{
       matches <- match_CONF1
       matches$match_VR <- matches$match_LIC <- matches$match_Date <- matches$mTripcd_id <- matches$swappedLIC_VR <- FALSE
+      matches$cnt_dateMatch <- NA
+      matches$LIC <- NA
+      matches$match_DATE_DETS <-NA
+      matches$mLIC <- NA
+      matches$mVR <- NA
+      matches$VR <- NA
+
     }
     matches[c("match_TripName", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date","mTripcd_id","swappedLIC_VR")][is.na(matches[c("match_TripName", "match_CONF_HI", "match_CONF_HO", "match_LIC", "match_VR", "match_Date", "mTripcd_id","swappedLIC_VR")])] <- FALSE
     if (!is.null(dbEnv$debugLics)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = matches$ISDB_TRIP_O, stepDesc = "matchTrips_Initial")
