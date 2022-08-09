@@ -56,10 +56,10 @@ fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock =
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   area <- toupper(stock)
-  if (!is.null(type) && type=="MOBILE"){
+  if ((length(type)>0) && type=="MOBILE"){
     marfGear = c(12)
     gearSpecs <- paste0(area,"_MOB")
-  }else if (!is.null(type) && type=="FIXED"){
+  }else if ((length(type)>0) && type=="FIXED"){
     marfGear <- c(41,51,59)
     gearSpecs <- paste0(area,"_FIXED")
   }

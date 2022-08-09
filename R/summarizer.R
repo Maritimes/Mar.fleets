@@ -158,9 +158,8 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
   summMARF <- function(){
     if (!"marf" %in% names(data)) return(NA)
     byCustMARF <- NULL
-    t <- data$marf$MARF_TRIPS
-    t$YEAR <- lubridate::year(t$T_DATE2)
-    t$QUARTER <- lubridate::quarter(t$T_DATE2)
+    #t <- data$marf$MARF_TRIPS
+    t <- unique(data$marf$MARF_TRIPS[, !(names(data$marf$MARF_TRIPS) %in% c("MON_DOC_ID"))])
     if (any(is.na(t$VR_NUMBER_FISHING))){
       badVR <- length(t[is.na(t$VR_NUMBER_FISHING),])
       if (!quietly)  message(paste0(badVR, " of your MARFIS trips were missing a valid Vessel. There is no way to
@@ -175,8 +174,21 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
                      as a single licence, identified as '-999'"))
       t[["LICENCE_ID"]][is.na(t[["LICENCE_ID"]])] <- -999
     }
-
-    s <- data$marf$MARF_SETS[, !(names(data$marf$MARF_SETS) %in% c("MON_DOC_ID" , "T_DATE1", "T_DATE2"))]
+    t$YEAR <- lubridate::year(t$T_DATE2)
+    t$QUARTER <- lubridate::quarter(t$T_DATE2)
+    s <- unique(data$marf$MARF_SETS[, !(names(data$marf$MARF_SETS) %in% c("MON_DOC_ID" , "T_DATE1",
+                                                                   "T_DATE2", "NUM_OF_EVENTS", "NUM_OF_GEAR_UNITS","DURATION_IN_HOURS", "EF_FISHED_DATETIME" , "LATITUDE", "LONGITUDE"))])
+    if (any(is.na(s$LOG_EFRT_STD_INFO_ID))){
+      badLESII <- length(t[is.na(t$LICENCE_ID),])
+      if (!quietly) message(paste0(badLESII, " of your MARFIS sets were missing a valid LOG_EFRT_STD_INFO_ID. There is no way to
+                     differentiate between missing sets within a trip, so all missing values will be considered
+                     as a single LOG_EFRT_STD_INFO_ID, identified as '-999'"))
+    s[["LOG_EFRT_STD_INFO_ID"]][is.na(s[["LOG_EFRT_STD_INFO_ID"]])] <- -999
+    }
+    #cases exist where a LOG_EFRT_STD_INFO_ID is repeated - just keep the one with the max NAFO (preferentially removes those starting with "<")
+    s <-data.table::setDT(s)
+    s <- s[, .SD[NAFO_MARF_SETS == max(NAFO_MARF_SETS)], by = list(TRIP_ID_MARF, LOG_EFRT_STD_INFO_ID)]
+    s <- data.table::setDF(s)
 
     if (is.null(specMARF)) {
       specMARF <- eval(parse(text=data$params$user[data$params$user$PARAMETER == "marfSpp", "VALUE"]))
@@ -184,16 +196,28 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
     }
 
     all <- merge(t, s)
-    rm(list=c("t","s"))
+    # rm(list=c("t","s"))
     if(!"MARF_CATCHES" %in% names(data$marf)){
       if (bySpp) message("Can't aggregate MARFIS data by species - the data appears to precede its availability")
       all$SPECIES_CODE <- "ALL"
     }else{
       c <- data$marf$MARF_CATCHES[data$marf$MARF_CATCHES$SPECIES_CODE %in% specMARF,]
+
+      if (any(is.na(c$LOG_EFRT_STD_INFO_ID))){
+        badLESII2 <- length(c[is.na(c$LICENCE_ID),])
+        if (!quietly) message(paste0(badLESII2, " of your MARFIS catches were missing a valid LOG_EFRT_STD_INFO_ID. There is no way to
+                     differentiate between missing sets within a trip, so all missing values will be considered
+                     as a single LOG_EFRT_STD_INFO_ID, identified as '-999'"))
+        c[["LOG_EFRT_STD_INFO_ID"]][is.na(c[["LOG_EFRT_STD_INFO_ID"]])] <- -999
+      }
+      #
+      c<- data.table::setDT(c)
+      c <- c[, .(RND_WEIGHT_KGS = sum(RND_WEIGHT_KGS)), by= list(TRIP_ID_MARF, LOG_EFRT_STD_INFO_ID, SPECIES_CODE)]
+      c<- data.table::setDF(c)
+
       all <- merge(all, c)
       rm(list=c("c"))
     }
-
     sumFields <- c("RND_WEIGHT_KGS")
     countFields <- c("TRIP_ID_MARF","VR_NUMBER_FISHING","LICENCE_ID")
     aggFields <-c("YEAR")

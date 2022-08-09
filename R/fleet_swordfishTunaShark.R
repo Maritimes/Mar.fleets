@@ -49,11 +49,11 @@ fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, u
   if (!socks) isDraft()
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
-  if (!is.null(type) && type=="LL"){
+  if ((length(type)>0) && type=="LL"){
     marfGear = c(51)
-  }else if (!is.null(type) && type == "HARPOON"){
+  }else if ((length(type)>0) && type == "HARPOON"){
     marfGear = c(81)
-  }else if (!is.null(type) && type == "OTHER"){
+  }else if ((length(type)>0) && type == "OTHER"){
     marfGear = c(54,60)
   }
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(51, 54, 60, 81))
