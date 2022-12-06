@@ -47,6 +47,7 @@
 #' @export
 summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuarter = FALSE, byGr = TRUE, byNAFO = FALSE, byCust = NULL, specMARF = NULL, specISDB = NULL, doMARF=T, doISDB=T, quietly = F){
   defYr <- lubridate::year(as.Date(gsub('"',"",data$params$user[data$params$user$PARAMETER == "dateStart", "VALUE"]), format="%Y-%m-%d"))
+
   ISDB <- NA
   MARF <- NA
   summISDB <- function(){
@@ -78,6 +79,10 @@ summarizer <- function(data=NULL, units="KGS", bySpp = TRUE, byYr= FALSE, byQuar
                      as a single licence, identified as '-999'"))
       t[["LIC"]][is.na(t[["LIC"]])] <- -999
     }
+#
+# tt<-merge(s[, !names(s) %in% c("TRIP_ID_MARF")],
+#                      c[, !names(c) %in% c("TRIP_ID_MARF")], by="FISHSET_ID")
+# tt_1<-merge(t, tt, by.x="TRIP_ID_ISDB", by.y="TRIP_ID")
     all <- merge(t, s[, !names(s) %in% c("TRIP_ID_MARF")], by.x="TRIP_ID_ISDB", by.y="TRIP_ID")
     all <- merge(all, c[, !names(c) %in% c("TRIP_ID_MARF")], by="FISHSET_ID")
     rm(list=c("t","s","c"))

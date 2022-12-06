@@ -40,11 +40,11 @@
 #' The following parameters are "softcoded" - any or all of the values can be
 #' provided, but other values are not allowed.
 #' \itemize{
-#'   \item \code{marfGear} = c(12,21,41,51,59)
+#'   \item \code{marfGear} = c(12,15, 16)
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_redfish <- function(marfGear = c(12,21,41,51,59), unit = NULL, useLocal = NULL, socks = FALSE, ...){
+fleet_redfish <- function(marfGear = c(12,15, 16), unit = NULL, useLocal = NULL, socks = FALSE, ...){
   if (!socks) isDraft()
   unit = toupper(unit)
   if (unit == "UNIT2" | unit == "2" | unit == 2){
@@ -58,7 +58,7 @@ fleet_redfish <- function(marfGear = c(12,21,41,51,59), unit = NULL, useLocal = 
   }
 
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12,21,41,51,59))
+  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12,15,16))
   data = fleet_(fleet = "REDFISH", marfSpp = 120, marfGear = marfGear, isdbSpp = 23, area = area, gearSpecs = gearSpecs, tripcd_id = 23, useLocal = useLocal,...)
   return(data)
 }

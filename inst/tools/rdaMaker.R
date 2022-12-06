@@ -11,6 +11,7 @@ usethis::use_data(LIC_GEAR_SPEC, LIC_GEAR_SPEC, overwrite = T)
 data.dir = "C:/DFO-MPO/wrangledData/"
 # Extract MARFIS/ISDB gears and species code tables, limit columns, and include in pkg
 Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("GEARS", "SPECIES"))
+if ("GEAR_DESC" %in% names(GEARS)) colnames(GEARS)[colnames(GEARS)=="GEAR_DESC"] <- "GEAR"
 GEARS_MARFIS <- GEARS[with(GEARS,order(GEAR_CODE)),c("GEAR_CODE", "GEAR")]
 SPECIES_MARFIS <- SPECIES[with(SPECIES,order(SPECIES_CODE)),c("SPECIES_CODE", "SPECIES_NAME")]
 usethis::use_data(GEARS_MARFIS, GEARS_MARFIS, overwrite = T)
