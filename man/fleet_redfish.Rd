@@ -5,7 +5,7 @@
 \title{fleet_redfish}
 \usage{
 fleet_redfish(
-  marfGear = c(12, 21, 41, 51, 59),
+  marfGear = c(12, 15, 16),
   unit = NULL,
   useLocal = NULL,
   socks = FALSE,
@@ -227,7 +227,7 @@ Hardcoded parameters for this fleet are as follows:
 The following parameters are "softcoded" - any or all of the values can be
 provided, but other values are not allowed.
 \itemize{
-  \item \code{marfGear} = c(12,21,41,51,59)
+  \item \code{marfGear} = c(12,15, 16)
 }
 }
 \examples{
