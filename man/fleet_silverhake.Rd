@@ -244,6 +244,7 @@ Other fleets:
 \code{\link{fishin_CHPs}()},
 \code{\link{fleet_bluefin}()},
 \code{\link{fleet_cucumber}()},
+\code{\link{fleet_flatfish}()},
 \code{\link{fleet_gaspereau}()},
 \code{\link{fleet_hagfish}()},
 \code{\link{fleet_halibut}()},
@@ -259,8 +260,7 @@ Other fleets:
 \code{\link{fleet_surfclam}()},
 \code{\link{fleet_swordfishTunaShark}()},
 \code{\link{fleet_urchin}()},
-\code{\link{fleet_whelk}()},
-\code{\link{fleet_winterflounder}()}
+\code{\link{fleet_whelk}()}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}
