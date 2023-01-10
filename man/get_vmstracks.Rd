@@ -28,6 +28,16 @@ returns a dataframe of the VMS data.  The OBS field contains a value>0 if the tr
 This function takes the results from get_marfis() and get_isdb()
 and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
+\examples{
+\dontrun{
+redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/data/")
+redfishVMS<-get_vmstracks(data = redfishresults,
+                          oracle.username = "me",
+                          oracle.password = "mypassword",
+                          oracle.dsn="PTRAN",
+                          usepkg="roracle")
+                          }
+}
 \seealso{
 Other simpleproducts: 
 \code{\link{quick_map}()},

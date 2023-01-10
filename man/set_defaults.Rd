@@ -179,11 +179,11 @@ consideration.}
 
 \item{debugISDBTripIDs}{default is \code{NULL}.  If a vector of ISDB trip IDs is provided, the
 script will provide information about when the script drops them from
-consideration.  Trip "names" are typically in a format like "J18-1234" or "A18-1234A".}
+consideration.}
 
 \item{debugISDBTripNames}{default is \code{NULL}.  If a vector of ISDB trip names is provided,
 the script will provide information about when the script drops them from
-consideration.}
+consideration. Trip "names" are typically in a format like "J18-1234" or "A18-1234A".}
 
 \item{debug}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
