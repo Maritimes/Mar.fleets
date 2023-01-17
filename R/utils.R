@@ -20,12 +20,12 @@ clean_ISDB_Trip <- function(df=NULL, field = "ISDB_TRIP", out_name="ISDB_TRIP_CL
 #' @description This function ensures that the user has not tried to send unacceptable values
 #' @param valSent default is \code{NULL}. This is a vector of values sent by the user
 #' @param valOK default is \code{NULL}. This is a vector of of known, acceptable values
-#' @param valID default is \code{NULL}. This is an identifier for the vector.
+#' @param valID default is \code{"this vector"}. This is an identifier for the vector.
 #' @family utils
 #' @return returns NULL
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-valuesOK <- function(valSent = NULL, valOK = NULL, valID = NULL){
-  if (is.null(valID)) valID <- "this vector"
+valuesOK <- function(valSent = NULL, valOK = NULL, valID = "this vector"){
+  if (is.null(valSent)) stop(valID, " cannot be NULL")
   if (any(!(valSent) %in% valOK)) stop(paste0("Please limit specified values of '",valID,"' to any/all of the default values."))
 }
 

@@ -56,12 +56,14 @@ fishin_CHPs <- function(marfGear = c(12, 21, 41, 51, 59, 62), type=NULL, stock =
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   area <- toupper(stock)
-  if ((length(type)>0) && type=="MOBILE"){
+  if ((length(type)>0) && (length(area)>0) && type=="MOBILE"){
     marfGear = c(12)
     gearSpecs <- paste0(area,"_MOB")
-  }else if ((length(type)>0) && type=="FIXED"){
+  }else if ((length(type)>0) && (length(area)>0) && type=="FIXED"){
     marfGear <- c(41,51,59)
     gearSpecs <- paste0(area,"_FIXED")
+  } else{
+    stop("'stock' and 'type' cannot be NULL")
   }
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12, 21, 41, 51, 59, 62))
   data <- fleet_(fleet = "CHP", marfSpp = c(100, 110, 170), isdbSpp = c(10, 11, 16), marfGear = marfGear, tripcd_id = c(10, 7001), area= area, gearSpecs = gearSpecs, areaFileField = areaFileField, useLocal = useLocal,...)

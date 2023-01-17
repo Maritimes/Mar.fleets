@@ -4,14 +4,14 @@
 \alias{valuesOK}
 \title{valuesOK}
 \usage{
-valuesOK(valSent = NULL, valOK = NULL, valID = NULL)
+valuesOK(valSent = NULL, valOK = NULL, valID = "this vector")
 }
 \arguments{
 \item{valSent}{default is \code{NULL}. This is a vector of values sent by the user}
 
 \item{valOK}{default is \code{NULL}. This is a vector of of known, acceptable values}
 
-\item{valID}{default is \code{NULL}. This is an identifier for the vector.}
+\item{valID}{default is \code{"this vector"}. This is an identifier for the vector.}
 }
 \value{
 returns NULL

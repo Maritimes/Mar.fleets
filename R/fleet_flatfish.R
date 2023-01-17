@@ -51,6 +51,8 @@ fleet_flatfish <- function(marfGear = c(12,21,22), area= NULL, useLocal = NULL, 
     marfGear = c(12)
   }else if (area=="4VWX"){
     marfGear <- c(21,22)
+  }else{
+    stop("'area' cannot be NULL")
   }
 
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")

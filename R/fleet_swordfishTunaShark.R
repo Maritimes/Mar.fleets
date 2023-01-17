@@ -47,6 +47,7 @@
 #' @export
 fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, useLocal = NULL, socks = FALSE, ...){
   if (!socks) isDraft()
+  valuesOK(valSent = NULL, valID = "type", valOK =   c("LL","HARPOON","OTHER"))
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   if ((length(type)>0) && type=="LL"){
@@ -55,6 +56,8 @@ fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, u
     marfGear = c(81)
   }else if ((length(type)>0) && type == "OTHER"){
     marfGear = c(54,60)
+  }else{
+    stop("'type' cannot be NULL")
   }
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(51, 54, 60, 81))
   data = fleet_(fleet = 'SWORDFISHTUNAS', marfSpp = c(251,257,259,379), marfGear = marfGear, isdbSpp = c(72, 73, 190, 191, 192, 846,215,223,230,231,233,234,237,246,592,965,1004), tripcd_id = c(72,73), useLocal = useLocal,...)

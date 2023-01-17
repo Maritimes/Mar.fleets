@@ -45,6 +45,8 @@
 #' @export
 fleet_herring <- function(marfGear = c(24,31,41,42,61,63), area= "4VWX5YP", useLocal = NULL, socks = FALSE, ...){
   if (!socks) isDraft()
+  if(is.null(area))stop("'area' cannot be NULL")
+  area <- toupper(area)
   if (!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(24,31,41,42,61,63))
   data = fleet_(fleet = "HERRING", marfSpp = 200, marfGear = marfGear, isdbSpp = 60, area = area, tripcd_id = 60, useLocal = useLocal,...)
