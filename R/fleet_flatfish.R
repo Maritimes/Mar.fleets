@@ -14,7 +14,6 @@
 #' @inheritDotParams set_defaults -lics -gearSpecs -area
 #' @examples \dontrun{
 #' db <- fleet_flatfish(year = 2018,
-#'                     area = "4VW",
 #'                     useLocal = F,
 #'                     oracle.username = "<name>",
 #'                     oracle.password="<password>",
@@ -22,7 +21,6 @@
 #'                     usepkg = "roracle"
 #'                     )
 #' local <- fleet_flatfish(year = 2018,
-#'                        area = "4VWX",
 #'                        useLocal = T,
 #'                        data.dir = "c:/data_folder"
 #'                       )
@@ -40,7 +38,7 @@
 #' The following parameters are "softcoded" - any or all of the values can be
 #' provided, but other values are not allowed.
 #' \itemize{
-#'   \item \code{marfGear} = c(12,21,22)
+#'   \item \code{marfGear} = c(10,12,15,21,41,51,53,58,59,60,81,98)
 #' }
 #' @inherit fleet_ details
 #' @export

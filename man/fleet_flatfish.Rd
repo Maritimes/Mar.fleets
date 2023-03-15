@@ -5,7 +5,7 @@
 \title{fleet_flatfish}
 \usage{
 fleet_flatfish(
-  marfGear = c(12, 21, 22),
+  marfGear = c(10, 12, 15, 21, 41, 51, 53, 58, 59, 60, 81, 98),
   area = NULL,
   useLocal = NULL,
   socks = FALSE,
