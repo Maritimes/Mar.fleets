@@ -265,6 +265,8 @@ can_run <- function(...){
 #' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 #' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 #' roracle will extract data ~ 5x faster.
+#' @param force.extract  default is \code{FALSE}  This flag forces a re-extraction of all of the
+#' tables (rather than loading previously extracted versions from data.dir)
 #' @param ... other arguments passed to methods
 #' @family setup
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
@@ -274,6 +276,7 @@ enable_local <- function(data.dir = NULL,
                          oracle.password = "_none_",
                          oracle.dsn = "_none_",
                          usepkg = "rodbc",
+                         force.extract= FALSE,
                          ...){
   # browser("Check if args exists(probly no), and ensure it gets merged with args below")
   # args <-list(...)$args
@@ -308,6 +311,7 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = FALSE,
                              tables = args$marfTabs,
+                             force.extract = force.extract,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
 
   message("\nChecking for and/or extracting ISDB data...\n")
@@ -319,6 +323,7 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = FALSE,
                              tables = args$isdbTabs,
+                             force.extract = force.extract,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
 
   message("\nChecking for and/or extracting Observer data...\n")
@@ -330,6 +335,7 @@ enable_local <- function(data.dir = NULL,
                              data.dir = data.dir,
                              checkOnly = FALSE,
                              tables = args$obsTabs,
+                             force.extract = force.extract,
                              env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
   message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
 #   if (args$debug) {

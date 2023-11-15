@@ -10,6 +10,7 @@ enable_local(
   oracle.password = "_none_",
   oracle.dsn = "_none_",
   usepkg = "rodbc",
+  force.extract = FALSE,
   ...
 )
 }
@@ -39,6 +40,9 @@ provided, it will take priority over your existing value.}
 \item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
 use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
 roracle will extract data ~ 5x faster.}
+
+\item{force.extract}{default is \code{FALSE}  This flag forces a re-extraction of all of the
+tables (rather than loading previously extracted versions from data.dir)}
 
 \item{...}{other arguments passed to methods}
 }
