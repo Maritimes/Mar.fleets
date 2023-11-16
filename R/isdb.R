@@ -435,7 +435,7 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   #line below reqd to prevent sf warnings from being shown
   sink <- utils::capture.output(sf::sf_use_s2(FALSE))
   ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, flag.land = T)
-  colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO_BEST"] <- "NAFO_ISDB_SETS_CALC"
+  colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO"] <- "NAFO_ISDB_SETS_CALC"
 
   if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     if(grepl(pattern = ".shp",x = args$areaFile, ignore.case = T)){

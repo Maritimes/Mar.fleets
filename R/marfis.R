@@ -483,7 +483,7 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
   #line below reqd to prevent sf warnings from being shown
   sink <- utils::capture.output(sf::sf_use_s2(FALSE))
   PS_sets <- Mar.utils::identify_area(PS_sets, flag.land = TRUE)
-  colnames(PS_sets)[colnames(PS_sets)=="NAFO_BEST"] <- "NAFO_MARF_SETS_CALC"
+  colnames(PS_sets)[colnames(PS_sets)=="NAFO"] <- "NAFO_MARF_SETS_CALC"
   if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     if(grepl(pattern = ".shp",x = args$areaFile, ignore.case = T)){
       PS_sets <- Mar.utils::identify_area(PS_sets, agg.poly.shp = args$areaFile, agg.poly.field = args$areaFileField, flag.land = TRUE)

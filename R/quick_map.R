@@ -183,7 +183,7 @@ quick_map <- function(data=NULL,
   }
   m <- leaflet::addPolygons(group = "NAFO",
                             map = m, data = Mar.data::NAFOSubunits_sf, stroke = TRUE, color = "#666666", fill=T,
-                            label=Mar.data::NAFOSubunits_sf$NAFO_BEST, weight = 0.4,
+                            label=Mar.data::NAFOSubunits_sf$NAFO, weight = 0.4,
                             labelOptions = leaflet::labelOptions(noHide = T, textOnly = TRUE, textsize = 0.2,
                                                                  style = list(
                                                                    "color" = "rgba(0,0,0,0.55)")))
@@ -212,7 +212,7 @@ quick_map <- function(data=NULL,
     sp::proj4string(grd) <- suppressWarnings(sp::proj4string(data_sp))
     surf <- gstat::idw(formula = eval(parse(text = names(data_sp@data)[3]))~1, locations = data_sp, newdata=grd, idp=3.0)
     surf <- raster::raster(surf)
-    landMask <- Mar.data::NAFOSubunitsLnd[Mar.data::NAFOSubunitsLnd@data$NAFO_BEST != "<LAND>", ]
+    landMask <- Mar.data::NAFOSubunitsLnd[Mar.data::NAFOSubunitsLnd@data$NAFO != "<LAND>", ]
     surf.m     <- raster::mask(surf, landMask)
     return(surf.m)
   }
