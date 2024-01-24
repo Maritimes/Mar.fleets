@@ -568,12 +568,12 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
     #lat.field and lon.field (i.e. CNT_TIME, CNT_LAT and CNT_LON)
     #this is done to help assess whether or not times and/or positions are appropriate for differentiating
     #sets.  If they're all the same, no point trying to use them
+
     if (args$debug) t24 <- Mar.utils::where_now(returnTime = T)
     df$BADTIM<- FALSE
     df$BADPOS<- FALSE
     #qc positions
-    df[(is.na(df[,lat.field]) || df[,lat.field] >  52 || df[,lat.field] < 35 ||
-          is.na(df[,lon.field]) || df[,lon.field] < -75 || df[,lon.field] > -45),"BADPOS"]<-"TRUE"
+    df[(is.na(df[,lat.field]) | df[,lat.field] >  52 | df[,lat.field] < 35 | is.na(df[,lon.field]) | df[,lon.field] < -75 | df[,lon.field] > -45),"BADPOS"]<-"TRUE"
     #qc times would go here, and populate BADTIM if they're bad
     df[is.na(df[,timeField]),"BADTIM"]<-TRUE
     nsets <- df[,c(tripField, timeField, lat.field, lon.field,"BADPOS", "BADTIM")]
