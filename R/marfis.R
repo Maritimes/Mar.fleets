@@ -421,22 +421,15 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
       LOG_EFRT_STD_INFO$CDATE <- NULL
       LOG_EFRT_STD_INFO$UUSER <- NULL
       LOG_EFRT_STD_INFO$UDATE <- NULL
-      LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)] =
-        as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)], 1, 2)) +
-        as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)], 3, 4)) / 60 +
-        as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LATITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE)], 5, 6)) / 3600
-      LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)] =
-        as.numeric(substr(LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)], 1, 2)) +
-        as.numeric(substr(LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)], 3, 4)) / 60 +
-        as.numeric(substr(LOG_EFRT_STD_INFO$DET_LATITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LATITUDE)], 5, 6)) / 3600
-      LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)] = -1 *
-        (as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)], 1, 2)) +
-           as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)], 3, 4)) / 60 +
-           as.numeric(substr(LOG_EFRT_STD_INFO$ENT_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE)], 5, 6)) / 3600)
-      LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)] = -1 *
-        (as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 1, 2)) +
-           as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 3, 4)) / 60 +
-           as.numeric(substr(LOG_EFRT_STD_INFO$DET_LONGITUDE[!is.na(LOG_EFRT_STD_INFO$DET_LONGITUDE)], 5, 6)) / 3600)
+
+      LOG_EFRT_STD_INFO <- Mar.utils::DDMMx_to_DD(df=LOG_EFRT_STD_INFO, format = "DDMMMM", lat.field = "ENT_LATITUDE", lon.field = "ENT_LONGITUDE", WestHemisphere = T)
+      LOG_EFRT_STD_INFO$ENT_LATITUDE <- LOG_EFRT_STD_INFO$ENT_LONGITUDE <- NULL
+      colnames(LOG_EFRT_STD_INFO)[colnames(LOG_EFRT_STD_INFO)=="LAT_DD"] <- "ENT_LATITUDE"
+      colnames(LOG_EFRT_STD_INFO)[colnames(LOG_EFRT_STD_INFO)=="LON_DD"] <- "ENT_LONGITUDE"
+      LOG_EFRT_STD_INFO <- Mar.utils::DDMMx_to_DD(df=LOG_EFRT_STD_INFO, format = "DDMMMM", lat.field = "DET_LATITUDE", lon.field = "DET_LONGITUDE", WestHemisphere = T)
+      LOG_EFRT_STD_INFO$DET_LATITUDE <- LOG_EFRT_STD_INFO$DET_LONGITUDE <- NULL
+      colnames(LOG_EFRT_STD_INFO)[colnames(LOG_EFRT_STD_INFO)=="LAT_DD"] <- "DET_LATITUDE"
+      colnames(LOG_EFRT_STD_INFO)[colnames(LOG_EFRT_STD_INFO)=="LON_DD"] <- "DET_LONGITUDE"
       LOG_EFRT_STD_INFO$LATITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE),LOG_EFRT_STD_INFO$DET_LATITUDE,LOG_EFRT_STD_INFO$ENT_LATITUDE)
       LOG_EFRT_STD_INFO$LONGITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE),LOG_EFRT_STD_INFO$DET_LONGITUDE,LOG_EFRT_STD_INFO$ENT_LONGITUDE)
       save( LOG_EFRT_STD_INFO, file=file.path(args$data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
@@ -467,14 +460,17 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
                       AND ",Mar.utils::big_in(vec=unique(log_efrt), vec.field = "EF.LOG_EFRT_STD_INFO_ID"))
     PS_sets<- args$cxn$thecmd(args$cxn$channel, PSQry1)
     # PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% log_efrt, ]
+
+    PS_sets <- Mar.utils::DDMMx_to_DD(df=PS_sets, format = "DDMMMM", lat.field = "ENT_LATITUDE", lon.field = "ENT_LONGITUDE", WestHemisphere = T)
+    colnames(PS_sets)[colnames(PS_sets)=="LAT_DD"] <- "ENT_LATITUDE"
+    colnames(PS_sets)[colnames(PS_sets)=="LON_DD"] <- "ENT_LONGITUDE"
+    PS_sets <- Mar.utils::DDMMx_to_DD(df=PS_sets, format = "DDMMMM", lat.field = "DET_LATITUDE", lon.field = "DET_LONGITUDE", WestHemisphere = T)
+    colnames(PS_sets)[colnames(PS_sets)=="LAT_DD"] <- "DET_LATITUDE"
+    colnames(PS_sets)[colnames(PS_sets)=="LON_DD"] <- "DET_LONGITUDE"
+
+
     PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
     PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
-    PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)] <- (as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 1, 2))
-                                                   + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 3, 4))/60
-                                                   + as.numeric(substr(PS_sets$LATITUDE[!is.na(PS_sets$LATITUDE)], 5, 6))/3600)
-    PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)] <- -1 * (as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 1, 2))
-                                                          + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 3, 4))/60
-                                                          + as.numeric(substr(PS_sets$LONGITUDE[!is.na(PS_sets$LONGITUDE)], 5, 6))/3600)
 
   }
   PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
