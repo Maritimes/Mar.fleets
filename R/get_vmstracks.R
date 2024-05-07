@@ -88,7 +88,7 @@ get_vmstracks<-function(data = NULL, ...){
   if(nrow(allVMS)==1000000)message("Your extraction was truncated - you got the maximum number of records allowed.")
   all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)
   all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek",
-                                               seqField = "POSITION_UTC_DATE", createShp = F, plot=F)
+                                               seqField = "POSITION_UTC_DATE", create.spatial = F)
 
   all_VMS_cln_segs <- all_VMS_cln_segs[[2]]
   all_VMS_cln_segs<-sf::st_as_sf(all_VMS_cln_segs)
