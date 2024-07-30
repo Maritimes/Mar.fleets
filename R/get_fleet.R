@@ -46,7 +46,7 @@ get_fleet<-function(...){
     if (!is.na(args$gearSpecs$MIN)){
       #for fixed gear (CHPs), we need to keep all gillnet - don't sort as though they were hooks
       #fsame for unit2 redfish
-      if ( (args$gearSpecs$FLEET == "CHP" &&  grepl(pattern = "_FIXED", x = args$gearSpecs$FLEET_GEARSPECS_ID)|
+      if ((args$gearSpecs$FLEET == "CHP" &&  grepl(pattern = "_FIXED", x = args$gearSpecs$FLEET_GEARSPECS_ID))|
            (args$gearSpecs$FLEET == "REDFISH" &&  grepl(pattern = "UNIT2", x = args$gearSpecs$FLEET_GEARSPECS_ID))){
         gn <- df[df$GEAR_CODE == 41,]
         df <- df[df$GEAR_CODE != 41,]
