@@ -106,17 +106,23 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
         isdb_TRIPIDs_all <- isdb_TRIPIDs_all[isdb_TRIPIDs_all$TRIP_ISDB %in% isdb_TRIPS_all$TRIP_ID_ISDB,]
         isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
         sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = marfSets, args = args))
+
         if (!all(is.na(sets))) {
           # if (args$debug) { message("\tDEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
+
           isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
+          cat("**NEW 2024-07-30 - ISDB sets whose positions that do not fall within the areas specified within this fleet's LIC_AREAs are now dropped**")
+          isdb_SETS_all = isdb_SETS_all[grep(paste(args$area$AREA, collapse = '|'),isdb_SETS_all$NAFO_ISDB_SETS_CALC),]
+
           isdb_SETS_all$TRIP_ID_ISDB <- isdb_SETS_all$TRIP_ID_MARF <- NULL
+
           isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
           if(!args$manualMatch){
             if(args$useLocal){
               Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
                                          usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
                                          env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
-              ISFISHSETS <- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdb_TRIPIDs_all$TRIP_ISDB,]
+              ISFISHSETS <- ISFISHSETS[ISFISHSETS$FISHSET_ID %in% isdb_SETS_all$FISHSET_ID,]
               catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
               catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
               catches <- merge(catches, SPECIES_ISDB[, c("SPECCD_ID","COMMON","SCIENTIFIC")])
@@ -134,7 +140,7 @@ ISDB.ISFISHSETS FS,
 ISDB.ISSPECIESCODES SP
 WHERE
 CA.FISHSET_ID = FS.FISHSET_ID AND
-CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_TRIPIDs_all$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
+CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_SETS_all$FISHSET_ID), vec.field = "FS.FISHSET_ID"))
 
               catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
             }
@@ -433,7 +439,7 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
     return(NULL)
   }
   #line below reqd to prevent sf warnings from being shown
-  sink <- utils::capture.output(sf::sf_use_s2(FALSE))
+  sink <- suppressMessages(utils::capture.output(sf::sf_use_s2(FALSE)))
   ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, flag.land = T)
   colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO"] <- "NAFO_ISDB_SETS_CALC"
 
@@ -445,8 +451,11 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
     }
   }
   #line below reqd to prevent sf warnings from being shown
-  sink <- utils::capture.output(sf::sf_use_s2(TRUE))
+  sink <- suppressMessages(utils::capture.output(sf::sf_use_s2(TRUE)))
   ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
+
+
+
   if (args$debug) {
     t15_ <- proc.time() - t15
     message("\tExiting get_isdb_sets() (",round(t15_[1],0),"s elapsed)")

@@ -201,8 +201,7 @@ set_defaults <- function(lics = 'all',
   paramDf[is.na(paramDf$SOURCE),"SOURCE"] <- "default value (overwritable by user)"
   paramDf[paramDf$PARAMETER %in% names(sentArgs$argsUser),"SOURCE"] <- "user-supplied"
   paramDf[paramDf$PARAMETER %in% names(sentArgs$argsFn),"SOURCE"] <- "hardcoded for this fleet"
-  # browser()
-  # softCoded <- c()
+
   if("year" %in% names(sentArgs$argsUser)){
     paramDf[paramDf$PARAMETER == "dateStart","SOURCE"] <- "derived from user-supplied 'year'"
     paramDf[paramDf$PARAMETER == "dateEnd","SOURCE"] <- "derived from user-supplied 'year'"

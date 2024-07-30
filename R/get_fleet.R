@@ -75,7 +75,7 @@ get_fleet<-function(...){
   typeFilt <- function(df=NULL, ...){
     args <- list(...)$args
     if (args$debug) t04<- Mar.utils::where_now(returnTime = T)
-    # beepr::beep(2);browser()
+
     if (!is.na(args$gearSpecs$TYPE)){
       #apply the requested filter
       #Mesh

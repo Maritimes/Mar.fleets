@@ -278,9 +278,6 @@ enable_local <- function(data.dir = NULL,
                          usepkg = "rodbc",
                          force.extract= FALSE,
                          ...){
-  # browser("Check if args exists(probly no), and ensure it gets merged with args below")
-  # args <-list(...)$args
-  # if (args$debug) t32 <- Mar.utils::where_now(returnTime = T)
   if (is.null(data.dir)|
       oracle.username == "_none_"|
       oracle.password == "_none_" |
