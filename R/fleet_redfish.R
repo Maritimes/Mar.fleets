@@ -5,7 +5,7 @@
 #' MOBILE vs FIXED, WESTERN vs EASTERN, 4XY vs 5ZJM, small mesh vs large mesh, diamond vs square
 #' mesh, etc), and depending on which options are selected, different fleets are identified, and
 #' their data is extracted.
-#' @param marfGear default is \code{c(12,21,41,51,59)}. This is a vector of MARFIS gear codes
+#' @param marfGear default is \code{c(12,14,15,21,22,41)}. This is a vector of MARFIS gear codes
 #' known to have been used by this fleet. The default values can be replaced with a subset of these to
 #' only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
 #' the script will not run.
@@ -40,11 +40,11 @@
 #' The following parameters are "softcoded" - any or all of the values can be
 #' provided, but other values are not allowed.
 #' \itemize{
-#'   \item \code{marfGear} = c(12,15, 16)
+#'   \item \code{marfGear} = c(12,14,15,21,22,41)
 #' }
 #' @inherit fleet_ details
 #' @export
-fleet_redfish <- function(marfGear = c(12,15, 16), unit = NULL, useLocal = NULL, socks = FALSE, ...){
+fleet_redfish <- function(marfGear = c(12,14,15,21,22,41), unit = NULL, useLocal = NULL, socks = FALSE, ...){
   if (!socks) isDraft()
   unit = toupper(unit)
   if (unit == "UNIT2" | unit == "2" | unit == 2){
@@ -58,7 +58,7 @@ fleet_redfish <- function(marfGear = c(12,15, 16), unit = NULL, useLocal = NULL,
   }
 
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
-  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12,15,16))
+  valuesOK(valSent = marfGear, valID = "marfGear", valOK =   c(12,14,15,21,22,41))
   data = fleet_(fleet = "REDFISH", marfSpp = 120, marfGear = marfGear, isdbSpp = 23, area = area, gearSpecs = gearSpecs, tripcd_id = 23, useLocal = useLocal,...)
   return(data)
 }

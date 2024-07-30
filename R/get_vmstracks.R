@@ -37,7 +37,6 @@ get_vmstracks<-function(data = NULL, ...){
     }
     return(NULL)
   }
-
   vr_dates1 <- vr_dates2 <- vr_dates3 <- data.frame(VR_NUMBER=integer(),
                                                     mDate=as.Date(character()),
                                                     OBS=numeric(),
@@ -87,6 +86,10 @@ get_vmstracks<-function(data = NULL, ...){
   }
   if(nrow(allVMS)==1000000)message("Your extraction was truncated - you got the maximum number of records allowed.")
   all_VMS_cln <- Mar.utils::VMS_clean_recs(df = allVMS)
+
+  if(F){
+    all_VMS_cln_1 <- merge(all_VMS_cln, vr_dates, all=T)
+  }
   all_VMS_cln_segs <- Mar.utils::make_segments(all_VMS_cln, objField = "trek",
                                                seqField = "POSITION_UTC_DATE", create.spatial = F)
 
@@ -99,6 +102,11 @@ get_vmstracks<-function(data = NULL, ...){
   all_VMS_cln_segs[which(all_VMS_cln_segs$trekMin<all_VMS_cln_segs$mDate
                          & all_VMS_cln_segs$trekMax>all_VMS_cln_segs$mDate),"KEEP"]<-T
   all_VMS_cln_segs<-all_VMS_cln_segs[all_VMS_cln_segs$KEEP ==T,]
+
+  if(nrow(all_VMS_cln_segs)==0){
+    cat("No VMS data was found for these vessels during the specified time frame")
+    return(NA)
+  }
   # drop fields that cause duplicate segments, and then remove those duplicates
   all_VMS_cln_segs$mDate<-all_VMS_cln_segs$KEEP <-all_VMS_cln_segs$cnt <- NULL
   all_VMS_cln_segs <- all_VMS_cln_segs[!duplicated((all_VMS_cln_segs)),]
@@ -106,7 +114,6 @@ get_vmstracks<-function(data = NULL, ...){
   # aggregate the data so that we can tell which lines were observed,
   # marf data flagged with 0 and OBS with 1, since the aggregate sums
   # stuff, only values >0 were observed
-
   agg = unique(stats::aggregate(by=agg[!names(agg) %in% c("OBS")],
                                 x = agg[c("OBS")], sum))
   agg = agg[,c("trek", "OBS")]
