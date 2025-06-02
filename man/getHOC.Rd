@@ -24,11 +24,11 @@ Other coreFuncs:
 \code{\link{getHIC}()},
 \code{\link{getPS}()},
 \code{\link{get_fleet}()},
+\code{\link{get_isdb}()},
 \code{\link{get_isdb_sets}()},
 \code{\link{get_isdb_trips}()},
-\code{\link{get_isdb}()},
-\code{\link{get_marfis_sets}()},
 \code{\link{get_marfis}()},
+\code{\link{get_marfis_sets}()},
 \code{\link{set_defaults}()},
 \code{\link{summarize_locations}()}
 }

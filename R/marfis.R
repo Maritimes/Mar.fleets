@@ -166,9 +166,9 @@ getPS <- function(allProSpc = NULL, ...){
   # theseGears = unique(thisFleet$GEAR_CODE)
   # all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
   if(args$useLocal){
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","VESSELS", "NAFO_UNIT_AREAS","TRIPS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("PRO_SPC_INFO","VESSELS", "NAFO_UNIT_AREAS","TRIPS"),
+                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
     PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc,
                           c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
@@ -246,7 +246,7 @@ getPS <- function(allProSpc = NULL, ...){
                     ",where_HS,"
                     ",where_n, "
                     ",where_sp)
-    PS_df <- args$cxn$thecmd(args$cxn$channel, PSQry0)
+    PS_df <- args$thecmd(args$cxn, PSQry0)
 
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSNAFOSppDates")
     if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSNAFOSppDates")
@@ -275,9 +275,9 @@ getED <- function(mondocs = NULL, ...){
   if (args$debug) t18 <- Mar.utils::where_now(returnTime = T)
   if(args$useLocal){
 
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("MON_DOC_ENTRD_DETS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("MON_DOC_ENTRD_DETS"),
+                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     ED_df <- MON_DOC_ENTRD_DETS[MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
     if (nrow(ED_df)<1){
 
@@ -302,7 +302,7 @@ getED <- function(mondocs = NULL, ...){
                   FROM MARFISSCI.MON_DOC_ENTRD_DETS ED
                   WHERE ED.COLUMN_DEFN_ID IN  (21,741,835)
                  AND ED.MON_DOC_ID BETWEEN ",min(mondocs), " AND ", max(mondocs))
-    ED_df<- args$cxn$thecmd(args$cxn$channel, EDQry)
+    ED_df<- args$thecmd(args$cxn, EDQry)
     ED_df <- ED_df[ED_df$MON_DOC_ID %in% mondocs ,]
     if (nrow(ED_df)<1){
       if (args$debug) {
@@ -339,9 +339,9 @@ getHIC <- function(trips = NULL, ...){
   if (args$debug) t19 <- Mar.utils::where_now(returnTime = T)
   if(args$useLocal){
 
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_IN_CALLS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("HAIL_IN_CALLS"),
+                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     HIC_df <- unique(HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID','HAIL_IN_TYPE_ID')]
 
   }else{
@@ -351,7 +351,7 @@ getHIC <- function(trips = NULL, ...){
                   FROM MARFISSCI.HAIL_IN_CALLS HI
                   WHERE
                   HI.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
-    HIC_df<- args$cxn$thecmd(args$cxn$channel, HICQry)
+    HIC_df<- args$thecmd(args$cxn, HICQry)
     HIC_df <- HIC_df[HIC_df$TRIP_ID %in% trips ,]
   }
   HIC_df <- unique(HIC_df)
@@ -376,9 +376,9 @@ getHOC <- function(trips = NULL, ...){
   if (args$debug) t20 <- Mar.utils::where_now(returnTime = T)
 
   if(args$useLocal){
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("HAIL_OUTS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("HAIL_OUTS"),
+                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     HOC_df <- unique(HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID')]
   }else{
     HOCQry<-paste0("SELECT DISTINCT
@@ -387,7 +387,7 @@ getHOC <- function(trips = NULL, ...){
                    FROM MARFISSCI.HAIL_OUTS HO
                    WHERE
                    HO.TRIP_ID BETWEEN ",min(trips), " AND ", max(trips))
-    HOC_df<- args$cxn$thecmd(args$cxn$channel, HOCQry)
+    HOC_df<- args$thecmd(args$cxn, HOCQry)
     HOC_df <- HOC_df[HOC_df$TRIP_ID %in% trips ,]
   }
   HOC_df<-unique(HOC_df)
@@ -411,9 +411,9 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
   if (args$debug) t21 <- Mar.utils::where_now(returnTime = T)
 
   if (args$useLocal){
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_STD_INFO", "NAFO_UNIT_AREAS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("LOG_EFRT_STD_INFO", "NAFO_UNIT_AREAS"),
+                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
     if ("CUSER" %in% names(LOG_EFRT_STD_INFO)){
       #do the appropriate tweaks if haven't been done
@@ -432,7 +432,7 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
       colnames(LOG_EFRT_STD_INFO)[colnames(LOG_EFRT_STD_INFO)=="LON_DD"] <- "DET_LONGITUDE"
       LOG_EFRT_STD_INFO$LATITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LATITUDE),LOG_EFRT_STD_INFO$DET_LATITUDE,LOG_EFRT_STD_INFO$ENT_LATITUDE)
       LOG_EFRT_STD_INFO$LONGITUDE_EFRT = ifelse(is.na(LOG_EFRT_STD_INFO$ENT_LONGITUDE),LOG_EFRT_STD_INFO$DET_LONGITUDE,LOG_EFRT_STD_INFO$ENT_LONGITUDE)
-      save( LOG_EFRT_STD_INFO, file=file.path(args$data.dir, "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
+      save( LOG_EFRT_STD_INFO, file=file.path(get_pesd_fl_dir(), "MARFISSCI.LOG_EFRT_STD_INFO.RData"), compress=TRUE)
     }
     LOG_EFRT_STD_INFO$LATITUDE_EFRT <- LOG_EFRT_STD_INFO$LONGITUDE_EFRT <- NULL
     PS_sets <- LOG_EFRT_STD_INFO[LOG_EFRT_STD_INFO$LOG_EFRT_STD_INFO_ID %in% log_efrt,c('LOG_EFRT_STD_INFO_ID','FV_NUM_OF_EVENTS','MON_DOC_ID','FV_NUM_OF_GEAR_UNITS','FV_DURATION_IN_HOURS','DET_NAFO_UNIT_AREA_ID', 'DET_LATITUDE','DET_LONGITUDE','ENT_LATITUDE','ENT_LONGITUDE','FV_FISHED_DATETIME')] #'',
@@ -458,7 +458,7 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
                           MARFISSCI.NAFO_UNIT_AREAS N
                      WHERE EF.DET_NAFO_UNIT_AREA_ID = N.AREA_ID
                       AND ",Mar.utils::big_in(vec=unique(log_efrt), vec.field = "EF.LOG_EFRT_STD_INFO_ID"))
-    PS_sets<- args$cxn$thecmd(args$cxn$channel, PSQry1)
+    PS_sets<- args$thecmd(args$cxn, PSQry1)
     # PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% log_efrt, ]
 
     PS_sets <- Mar.utils::DDMMx_to_DD(df=PS_sets, format = "DDMMMM", lat.field = "ENT_LATITUDE", lon.field = "ENT_LONGITUDE", WestHemisphere = T)

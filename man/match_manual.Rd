@@ -75,17 +75,6 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{socks}}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
 user to acknowledge that they are aware that the script needs further testing.  Setting this to
 TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
-    \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
-This is the path to a folder where your *.rdata files are stored.}
-    \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
-objects.}
-    \item{\code{oracle.password}}{default is \code{'_none_'}. This is your password for accessing oracle
-objects.}
-    \item{\code{oracle.dsn}}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing
-oracle objects.  Normally, the value should be "PTRAN"}
-    \item{\code{usepkg}}{default is \code{'roracle'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
-be slightly easier to setup, but roracle will extract data faster.}
     \item{\code{debug}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will

@@ -34,16 +34,10 @@ data or against Oracle (requires network or VPN).
 Depending on your value for \code{useLocal}, different values become necessary.
 \itemize{
  \item{useLocal=TRUE} This implies that you have local data you want to use.
-    \itemize{
-      \item param \code{data.dir} required.  This is the path to your local data
-    }
  \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data.
- Include all of the following:
+ Ensure you include:
   \itemize{
-      \item param \code{oracle.username} required
-      \item param \code{oracle.password} required
-      \item param \code{oracle.dsn} required
-      \item param \code{usepkg} required
+      \item param \code{cxn} a valid oracle connection (e.g. an roracle, rodbc or dbi connection object)
     }
 }}
 
@@ -101,17 +95,6 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
 from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
 input format.}
-    \item{\code{data.dir}}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
-This is the path to a folder where your *.rdata files are stored.}
-    \item{\code{oracle.username}}{default is \code{'_none_'}. This is your username for accessing oracle
-objects.}
-    \item{\code{oracle.password}}{default is \code{'_none_'}. This is your password for accessing oracle
-objects.}
-    \item{\code{oracle.dsn}}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing
-oracle objects.  Normally, the value should be "PTRAN"}
-    \item{\code{usepkg}}{default is \code{'roracle'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
-be slightly easier to setup, but roracle will extract data faster.}
     \item{\code{debug}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
@@ -240,14 +223,10 @@ provided, but other values are not allowed.
 \dontrun{
 db <- fleet_halibut(useLocal = F,
                     year = 2018,
-                    oracle.username = "<name>",
-                    oracle.password="<password>",
-                    oracle.dsn="PTRAN",
-                    usepkg = "roracle"
+                    cxn  = <valid Oracle Connection>
                     )
 local <- fleet_halibut(year = 2018,
-                       useLocal = T,
-                       data.dir = "c:/data_folder"
+                       useLocal = T
                       )
                        }
 }

@@ -1,4 +1,4 @@
-licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedGr= F, byYear = F, NAFOS = "ALL", startYear = 2000, data.dir=NULL, simp =T){
+licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedGr= F, byYear = F, NAFOS = "ALL", startYear = 2000, simp =T, ...){
   if (inc199) {
     marfSppLIC <- c(marfSpp, 199)
   }else{
@@ -7,12 +7,12 @@ licenceCategoryFinder<-function(marfSpp = NULL, marfGr = NULL, inc199 =F, fixedG
   if (!is.null(marfGr)){
     if (fixedGr) marfGr <- c(marfGr,98)
   }
-  Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("PRO_SPC_INFO","MARFLEETS_LIC"))
+  Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(), tables = c("PRO_SPC_INFO","MARFLEETS_LIC"), ...)
   LICS <- unique(MARFLEETS_LIC[MARFLEETS_LIC$SPECIES_CODE %in% marfSppLIC,c("LICENCE_ID", "LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE")])
   colnames(LICS)[colnames(LICS)=="SPECIES_CODE"] <- "SPECIES_CODE_LIC"
   colnames(LICS)[colnames(LICS)=="GEAR_CODE"] <- "GEAR_CODE_LIC"
   if (any(NAFOS != "ALL")){
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("NAFO_UNIT_AREAS"))
+    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(), tables = c("NAFO_UNIT_AREAS"), ...)
     PRO_SPC_INFO = PRO_SPC_INFO[PRO_SPC_INFO$NAFO_UNIT_AREA_ID %in% NAFO_UNIT_AREAS[grep(paste(NAFOS, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),"AREA_ID"],]
   }
 

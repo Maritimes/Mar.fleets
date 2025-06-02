@@ -17,15 +17,11 @@
 #' db <- fleet_swordfishTunaShark(useLocal = F,
 #'                     year = 2018,
 #'                     type= "HARPOON",
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fleet_swordfishTunaShark(year = 2018,
 #'                        type = "LL",
-#'                        useLocal = T,
-#'                        data.dir = "c:/data_folder"
+#'                        useLocal = T
 #'                       )
 #'                        }
 #' @family fleets

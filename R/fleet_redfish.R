@@ -16,15 +16,11 @@
 #' db <- fleet_redfish(unit = "UNIT2",
 #'                     useLocal = F,
 #'                     year = 2018,
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fleet_redfish(unit = "UNIT2",
 #'                        useLocal = T,
-#'                        year = 2018,
-#'                        data.dir = "c:/data_folder"
+#'                        year = 2018
 #'                       )
 #'                        }
 #' @family fleets

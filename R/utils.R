@@ -1,3 +1,7 @@
+get_pesd_fl_dir <- function() {
+  file.path("C:", "DFO-MPO", "PESDData","MarFleets")
+}
+
 #' @title clean_ISDB_Trip
 #' @description This function cleans ISDB trip names of spaces/odd characters to improve the potential for matching.
 #' @param df default is \code{NULL}. This is a dataframe that includes a column of raw ISDB trip names
@@ -52,13 +56,8 @@ paramOK <-function(useLocal = NULL, p = NULL){
   res <- TRUE
   msgs <- NULL
   if (useLocal) {
-    if (!("data.dir" %in% names(p))) {
-      msgs<- c(msgs, "'data.dir' must be provided if useLocal = TRUE")
-      res <- FALSE
-    }
   }else{
-    if (!("oracle.username" %in% names(p))) msgs <- c(msgs, "If you provide 'oracle.username =<yourname>' in the function call, you will not be prompted for it")
-    if (!("oracle.password" %in% names(p))) msgs <- c(msgs, "If you provide 'oracle.password =<yourpassword>' in the function call, you will not be prompted for it")
+    if (!("cxn" %in% names(p))) msgs <- c(msgs, "Please ensure you provide a valid oracle connection as `cxn'")
   }
 
   if (!any(c("year","dateStart") %in% names(p))) {
@@ -96,32 +95,17 @@ can_run <- function(...){
   args=list(...)
   if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
 
-  connect_Oracle <-function(...){
-    #connect_Oracle is just results of trying to establish connection
-    args=list(...)$args
-    if (args$debug) t29 <- Mar.utils::where_now(returnTime = T)
-    cxn <- do.call(Mar.utils::make_oracle_cxn, list(usepkg = args$usepkg,
-                                                    fn.oracle.username = args$oracle.username,
-                                                    fn.oracle.password = args$oracle.password,
-                                                    fn.oracle.dsn = args$oracle.dsn,
-                                                    quietly = TRUE))
-    if (args$debug) {
-      t29_ <- proc.time() - t29
-      message("\tExiting connect_Oracle() (",round(t29_[1],0),"s elapsed)")
-    }
-    return(cxn)
-  }
-
   tblAccess <- function(tables = NULL,...){
     #tblAccess is T if has necess permiss
     args=list(...)$args
+    thecmd = Mar.utils::connectionCheck(args$cxn)
     if (args$debug) t30 <- Mar.utils::where_now(returnTime = T)
     tables <- gsub("ISDB","OBSERVER", tables)
     fails = 0
     for (t in 1:length(tables)){
       message(paste0("Checking access to ",tables[t],": "))
       qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM<=1")
-      test = args$cxn$thecmd(args$cxn$channel, qry, rows_at_time = 1)
+      test = thecmd(args$cxn, qry, rows_at_time = 1)
       if (is.character(test)) {
         fails=fails+1
         # if (quietly=FALSE)message(" failed","\n")
@@ -130,8 +114,8 @@ can_run <- function(...){
       }
     }
     if (fails>0){
-        if (args$debug){
-          t30_ <- proc.time() - t30
+      if (args$debug){
+        t30_ <- proc.time() - t30
         message("\tExiting tblAccess() (",round(t30_[1],0),"s elapsed) - missing access to some")
       }
       return(FALSE)
@@ -140,19 +124,16 @@ can_run <- function(...){
         t30_ <- proc.time() - t30
         message("\tExiting tblAccess() (",round(t30_[1],0),"s elapsed)")
       }
-        return(TRUE)
+      return(TRUE)
     }
   }
 
   wantLocal <- function(tables = NULL, ...){
-    #wantLocal is T if all necessar things are found
     args<-list(...)$args
     if (args$debug) t31 <- Mar.utils::where_now(returnTime = T)
-    #1 check if local copies available '
     tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
     localDataCheck <- all(sapply(X =tabs, file.exists))
     rm(tabs)
-    # }
     if (args$debug){
       t31_ <- proc.time() - t31
       message("\tExiting wantLocal() (",round(t31_[1],0),"s elapsed)")
@@ -175,19 +156,17 @@ can_run <- function(...){
                "ISTRIPS",
                "ISVESSELS",
                "ISCATCHES",
-               "ISGEARS")
-
-  obsTabs = c("ISSETPROFILE_WIDE")
+               "ISGEARS",
+               "ISSETPROFILE")
 
   args[["marfTabs"]] <- marfTabs
   args[["isdbTabs"]] <- isdbTabs
-  args[["obsTabs"]] <- obsTabs
-  ISDB = paste0("ISDB.",isdbTabs)
+
+  ISDB = isdbTabs
   MARFIS = paste0("MARFISSCI.",marfTabs)
-  OBS = paste0("OBSERVER.",obsTabs)
 
   if (args$useLocal){
-    if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args)) & do.call(wantLocal,list(OBS,args=args))){
+    if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args))){
       args[['cxn']] <- TRUE
       res <- args
       if (args$debug){
@@ -196,149 +175,104 @@ can_run <- function(...){
       }
       return(res)
     }else{
-      message(paste0("Cannot proceed offline. Check that all of the following files are in your data.dir (",args$data.dir,"):\n"))
+      message(paste0("Cannot proceed offline. Check that all of the following files are in ", get_pesd_fl_dir(),"):\n"))
       message(paste0(paste0(MARFIS,".RData"),collapse = "\n"))
       message(paste0(paste0(ISDB,".RData"),collapse = "\n"))
-      message(paste0(paste0(OBS,".RData"),collapse = "\n"))
       stop()
     }
   }else{
-    cxnCheck <- do.call(connect_Oracle, list(args=args))
-    if (!is.list(cxnCheck)) {
-      message("\n","Can't create a DB connection - see suggestions below: ",
-              "\n\t","1) Please ensure you've provided valid values for oracle.username and/or oracle.password.",
-              "\n\t","2) Note that if not provided, 'oracle.dsn' defaults to 'PTRAN' which might be different on your computer.",
-              "\n\t","3) Note that 'usepkg' defaults to the value 'rodbc', indicating the RODBC package should be used to created a connection.",
-              "\n\t","   If you use ROracle, include 'usepkg='roracle' as a parameter to your function.",
-              "\n\t","4) If you see an error message below that includes the text 'architecture mismatch', you likely need to switch your ",
-              "\n\t","   R from 32bit to 64bit (or vice versa), and try again."
-      )
-      stop()
-    }else{
-      args[['cxn']] <- cxnCheck
-      res <- args
+    args[['thecmd']] <- Mar.utils::connectionCheck(args$cxn)
+    res <- args
 
-      if (args$debug){
-        t28_ <- proc.time() - t28
-        message("\tExiting can_run() - db cxn established (", round(t28_[1],0),"s elapsed)")
-      }
-      return(res)
+    if (args$debug){
+      t28_ <- proc.time() - t28
+      message("\tExiting can_run() - db cxn established (", round(t28_[1],0),"s elapsed)")
     }
-    if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)) && do.call(tblAccess,list(OBS, args=args)))){
-      message("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
-      res <- args
-      if (args$debug){
-        t28_ <- proc.time() - t28
-        message("\tExiting can_run() - tbl access verified (", round(t28_[1],0),"s elapsed)")
-      }
+    return(res)
+  }
+  if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
+    message("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
+    res <- args
+    if (args$debug){
+      t28_ <- proc.time() - t28
+      message("\tExiting can_run() - tbl access verified (", round(t28_[1],0),"s elapsed)")
+    }
 
-           return(res)
-    }else{
-      message("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
-      stop()
-    }
+    return(res)
+  }else{
+    message("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
+    stop()
   }
 }
+
 
 
 #' @title enable_local
 #' @description This function extracts all of the necessary oracle tables to a local folder so that
 #' the functions can be run locally.
-#' @param data.dir  The default is your working directory. If you are hoping to
-#' load existing data, this folder should identify the folder containing your
-#' *.rdata files.
-#' @param oracle.username default is \code{'_none_'} This is your username for
-#' accessing oracle objects. If you have a value for \code{oracle.username}
-#' stored in your environment (e.g. from an rprofile file), this can be left out
-#' and that value will be used.  If a value for this is provided, it will take
-#' priority over your existing value.
-#' @param oracle.password default is \code{'_none_'} This is your password for
-#' accessing oracle objects. If you have a value for \code{oracle.password}
-#' stored in your environment (e.g. from an rprofile file), this can be left out
-#' and that value will be used.  If a value for this is provided, it will take
-#' priority over your existing value.
-#' @param oracle.dsn default is \code{'_none_'} This is your dsn/ODBC
-#' identifier for accessing oracle objects. If you have a value for
-#' \code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-#' this can be left and that value will be used.  If a value for this is
-#' provided, it will take priority over your existing value.
-#' @param usepkg default is \code{'rodbc'}. This indicates whether the connection to Oracle should
-#' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
-#' roracle will extract data ~ 5x faster.
+#' @param cxn  A valid Oracle connection object. This parameter allows you to
+#' pass an existing connection, reducing the need to establish a new connection
+#' within the function. If provided, it takes precedence over the connection-
+#' related parameters.
 #' @param force.extract  default is \code{FALSE}  This flag forces a re-extraction of all of the
 #' tables (rather than loading previously extracted versions from data.dir)
 #' @param ... other arguments passed to methods
 #' @family setup
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-enable_local <- function(data.dir = NULL,
-                         oracle.username = "_none_",
-                         oracle.password = "_none_",
-                         oracle.dsn = "_none_",
-                         usepkg = "rodbc",
+enable_local <- function(cxn= NULL,
                          force.extract= FALSE,
                          ...){
-  if (is.null(data.dir)|
-      oracle.username == "_none_"|
-      oracle.password == "_none_" |
-      oracle.dsn == "_none_")stop("Can't run as requested.")
+  if (is.null(cxn)) stop("Can't run as requested - a valid connection object (cxn) is required")
 
-  args <- list(data.dir = data.dir,
-               oracle.username = oracle.username,
-               oracle.password = oracle.password,
-               oracle.dsn = oracle.dsn,
-               usepkg = usepkg,
-               debug = FALSE,
-               quietly = TRUE,
-               useLocal = FALSE
+  args <- list(
+    data.dir = get_pesd_fl_dir(),
+    cxn = cxn,
+    debug = FALSE,
+    quietly = TRUE,
+    useLocal = FALSE
   )
 
   can_runCheck <- do.call(can_run, args)
   args <- can_runCheck
-  cxnCheck <- args$cxn
-  if (!(is.list(cxnCheck) || cxnCheck==TRUE)){
-    stop("Can't run as requested.")
-  }
+
   message("\nChecking for and/or extracting MARFIS data...\n")
-  Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
-                             fn.oracle.password = oracle.password,
-                             fn.oracle.dsn = oracle.dsn,
-                             usepkg = usepkg,
+  Mar.utils::get_data_tables(data.dir = get_pesd_fl_dir(),
+                             cxn = cxn,
                              schema = "MARFISSCI",
-                             data.dir = data.dir,
                              checkOnly = FALSE,
                              tables = args$marfTabs,
                              force.extract = force.extract,
-                             env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
+                             env = environment(),
+                             quietly = FALSE, fuzzyMatch=FALSE, ...)
 
   message("\nChecking for and/or extracting ISDB data...\n")
-  Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
-                             fn.oracle.password = oracle.password,
-                             fn.oracle.dsn = oracle.dsn,
-                             usepkg = usepkg,
-                             schema = "ISDB",
-                             data.dir = data.dir,
+
+  Mar.utils::get_data_tables(data.dir = get_pesd_fl_dir(),
+                             cxn = cxn,
+                             schema = "<NA>",
                              checkOnly = FALSE,
                              tables = args$isdbTabs,
                              force.extract = force.extract,
-                             env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
+                             env = environment(),
+                             quietly = FALSE, fuzzyMatch=FALSE, ...)
 
-  message("\nChecking for and/or extracting Observer data...\n")
-  Mar.utils::get_data_tables(fn.oracle.username = oracle.username,
-                             fn.oracle.password = oracle.password,
-                             fn.oracle.dsn = oracle.dsn,
-                             usepkg = usepkg,
-                             schema = "OBSERVER",
-                             data.dir = data.dir,
-                             checkOnly = FALSE,
-                             tables = args$obsTabs,
-                             force.extract = force.extract,
-                             env = environment(), quietly = FALSE, fuzzyMatch=FALSE)
-  message(paste0("\nConfirmed presence of all necessary tables in ", data.dir),"\n")
-#   if (args$debug) {
-#   t32_ <- proc.time() - t32
-#   message("\tExiting enable_local() (",round(t32_[1],0),"s elapsed)")
-# }
+  rdata_file <- file.path(get_pesd_fl_dir(), "ISSETPROFILE.RData")
+  if (file.exists(rdata_file)) {
+    tmp <- new.env()
+    Mar.utils::load_encrypted(rdata_file, env = tmp, ...)
+    ISSETPROFILE  <- Mar.utils::ISSETPROFILE_enwidener(tmp$ISSETPROFILE)
+    assign("ISSETPROFILE", ISSETPROFILE, envir = .GlobalEnv)
+    Mar.utils::save_encrypted(ISSETPROFILE, file     = rdata_file, compress = TRUE)
+    rm(ISSETPROFILE, envir = .GlobalEnv)
+  }
+
+  message("\nConfirmed presence of all necessary tables\n")
+  invisible(TRUE)
+  #   if (args$debug) {
+  #   t32_ <- proc.time() - t32
+  #   message("\tExiting enable_local() (",round(t32_[1],0),"s elapsed)")
+  # }
 }
 
 #' @title summarize_locations
@@ -402,7 +336,7 @@ summarize_locations<-function(get_isdb = NULL,
     res <- sort(c(toTrim, noTrim))
     if (args$debug) {
       t33_ <- proc.time() - t33
-    message("\tExiting trimNAFONames() (",round(t33_[1],0),"s elapsed)")
+      message("\tExiting trimNAFONames() (",round(t33_[1],0),"s elapsed)")
     }
     return(res)
   }

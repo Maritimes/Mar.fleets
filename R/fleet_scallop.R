@@ -16,15 +16,11 @@
 #' db <- fleet_scallop(fleet = "INSHORE",
 #'                     year = 2018,
 #'                     useLocal = F,
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fleet_scallop(fleet = "OFFSHORE",
 #'                        year = 2018,
-#'                        useLocal = T,
-#'                        data.dir = "c:/data_folder"
+#'                        useLocal = T
 #'                       )
 #'                        }
 #' @family fleets

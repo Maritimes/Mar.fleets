@@ -19,14 +19,10 @@
 #' @examples \dontrun{
 #' db <- fleet_shrimp(useLocal = F,
 #'                     year = 2018,
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fleet_shrimp(year = 2018,
-#'                        useLocal = T,
-#'                        data.dir = "c:/data_folder"
+#'                        useLocal = T
 #'                       )
 #'                        }
 #' @family fleets

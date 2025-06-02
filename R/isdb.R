@@ -25,7 +25,7 @@
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
   args <-list(...)$args
   if (args$debug) t13 <- Mar.utils::where_now(returnTime = T)
-  ISTRIPS <- ISFISHSETS <- ISSETPROFILE_WIDE <- ISCATCHES <- ISSPECIESCODES <- NA
+  ISTRIPS <- ISFISHSETS <- ISSETPROFILE <- ISCATCHES <- ISSPECIESCODES <- NA
   if (is.null(get_marfis)){
     message(paste0("\n","No MARFIS data was provided. Please fix your parameters.","\n"))
     stop()
@@ -119,9 +119,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
           isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
           if(!args$manualMatch){
             if(args$useLocal){
-              Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS","ISCATCHES"),
-                                         usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                         env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+              Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                                         tables = c("ISFISHSETS","ISCATCHES"),
+                                         env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
               ISFISHSETS <- ISFISHSETS[ISFISHSETS$FISHSET_ID %in% isdb_SETS_all$FISHSET_ID,]
               catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
               catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
@@ -142,7 +142,7 @@ WHERE
 CA.FISHSET_ID = FS.FISHSET_ID AND
 CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_SETS_all$FISHSET_ID), vec.field = "FS.FISHSET_ID"))
 
-              catches<- args$cxn$thecmd(args$cxn$channel, catchSQL)
+              catches<- args$thecmd(args$cxn, catchSQL)
             }
           }else{
             catches <- NA
@@ -227,9 +227,8 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
 
   if(args$useLocal){
 
-    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISTRIPS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(), cxn  = cxn, tables = c("ISTRIPS"),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     #NA dates are turned to 9999-01-01 so that they will not meet the criteria of being between our start and end dates
   }else{
     #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet
@@ -246,7 +245,7 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
                      MARFIS_CONF_NUMBER
                      FROM ISDB.ISTRIPS
                     ")
-    ISTRIPS<- args$cxn$thecmd(args$cxn$channel, tripSQL)
+    ISTRIPS<- args$thecmd(args$cxn, tripSQL)
   }
   if (!args$keepSurveyTrips){
     if (nrow(ISTRIPS[(ISTRIPS$TRIPCD_ID >= 7010 & ISTRIPS$TRIPCD_ID != 7099),])>0){
@@ -356,25 +355,24 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   if (args$debug) t15<- Mar.utils::where_now(returnTime = T)
   badDate <- as.POSIXct(as.Date("2100-01-01"))
   if(args$useLocal){
-    Mar.utils::get_data_tables(schema = "ISDB", data.dir = args$data.dir, tables = c("ISFISHSETS", "ISGEARS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
-    Mar.utils::get_data_tables(schema = "OBSERVER", data.dir = args$data.dir, tables = c("ISSETPROFILE_WIDE"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+    Mar.utils::get_data_tables(schema = "<NA>", tables = c("ISFISHSETS", "ISGEARS","ISSETPROFILE"),
+                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+    # Mar.utils::get_data_tables(schema = "OBSERVER", data.dir = get_pesd_fl_dir(), cxn  = cxn, tables = c("ISSETPROFILE"),
+    #                            env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID", "GEAR_ID")]
 
     colnames(ISFISHSETS)[colnames(ISFISHSETS)=="NAFAREA_ID"] <- "NAFO_ISDB_SETS"
 
-    ISSETPROFILE_WIDE<-ISSETPROFILE_WIDE[ISSETPROFILE_WIDE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
-    ISSETPROFILE_WIDE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE_WIDE$DATE_TIME1 > badDate,
-                                                     ifelse(ISSETPROFILE_WIDE$DATE_TIME2 > badDate,
-                                                            ifelse(ISSETPROFILE_WIDE$DATE_TIME3 > badDate, ISSETPROFILE_WIDE$DATE_TIME4, ISSETPROFILE_WIDE$DATE_TIME3),
-                                                            ISSETPROFILE_WIDE$DATE_TIME2),
-                                                     ISSETPROFILE_WIDE$DATE_TIME1),
+    ISSETPROFILE<-ISSETPROFILE[ISSETPROFILE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
+    ISSETPROFILE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE$DATE_TIME1 > badDate,
+                                                     ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
+                                                            ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
+                                                            ISSETPROFILE$DATE_TIME2),
+                                                     ISSETPROFILE$DATE_TIME1),
                                               origin = "1970-01-01")
-    ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "GEAR_ID")], all.x=T)
-    ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISGEARS[,c("GEAR_ID", "GEARCD_ID" )], all.x=T)
+    ISSETPROFILE <- merge(ISSETPROFILE, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "GEAR_ID")], all.x=T)
+    ISSETPROFILE <- merge(ISSETPROFILE, ISGEARS[,c("GEAR_ID", "GEARCD_ID" )], all.x=T)
 
   }else{
 
@@ -382,31 +380,31 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
                 FROM OBSERVER.ISFISHSETS FS
                 WHERE ",Mar.utils::big_in(vec=unique(isdbTrips$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
-    ISFISHSETS<- args$cxn$thecmd(args$cxn$channel, FSSQL)
+    ISFISHSETS<- args$thecmd(args$cxn, FSSQL)
 
     SPSQL <- paste0("SELECT FISHSET_ID, SET_NO, DATE_TIME1, DATE_TIME2, DATE_TIME3, DATE_TIME4,
                 LAT1, LAT2, LAT3, LAT4,
                 LONG1, LONG2, LONG3, LONG4
-                FROM OBSERVER.ISSETPROFILE_WIDE
+                FROM OBSERVER.ISSETPROFILE
                 WHERE ",Mar.utils::big_in(vec=unique(ISFISHSETS$FISHSET_ID), vec.field = "FISHSET_ID"))
-    ISSETPROFILE_WIDE<- args$cxn$thecmd(args$cxn$channel, SPSQL)
+    ISSETPROFILE<- args$thecmd(args$cxn, SPSQL)
 
-    ISSETPROFILE_WIDE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE_WIDE$DATE_TIME1 > badDate,
-                                                     ifelse(ISSETPROFILE_WIDE$DATE_TIME2 > badDate,
-                                                            ifelse(ISSETPROFILE_WIDE$DATE_TIME3 > badDate, ISSETPROFILE_WIDE$DATE_TIME4, ISSETPROFILE_WIDE$DATE_TIME3),
-                                                            ISSETPROFILE_WIDE$DATE_TIME2),
-                                                     ISSETPROFILE_WIDE$DATE_TIME1),
+    ISSETPROFILE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE$DATE_TIME1 > badDate,
+                                                     ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
+                                                            ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
+                                                            ISSETPROFILE$DATE_TIME2),
+                                                     ISSETPROFILE$DATE_TIME1),
                                               origin = "1970-01-01")
 
     GRSQL <- paste0("SELECT GEAR_ID, GEARCD_ID
                 FROM OBSERVER.ISGEARS
                 WHERE ",Mar.utils::big_in(vec=unique(ISFISHSETS$TRIP_ID), vec.field = "TRIP_ID"))
-    ISGEARS<- args$cxn$thecmd(args$cxn$channel, GRSQL)
-    ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISFISHSETS[,c("FISHSET_ID", "GEAR_ID")], all.x=T)
-    ISSETPROFILE_WIDE <- merge(ISSETPROFILE_WIDE, ISGEARS, all.x = T)
+    ISGEARS<- args$thecmd(args$cxn, GRSQL)
+    ISSETPROFILE <- merge(ISSETPROFILE, ISFISHSETS[,c("FISHSET_ID", "GEAR_ID")], all.x=T)
+    ISSETPROFILE <- merge(ISSETPROFILE, ISGEARS, all.x = T)
   }
   # Grab the first available, valid coord pair --------------------------------------------------
-  tmp=apply(ISSETPROFILE_WIDE,1,function(x){
+  tmp=apply(ISSETPROFILE,1,function(x){
     #this ensures that the coordinates taken for LAT and LONG are non-NA, non-Zero and one is negative
     if (as.numeric(replace(x["LAT1"],is.na(x["LAT1"]),0))*as.numeric(replace(x["LONG1"],is.na(x["LONG1"]),0))<0) {
       c(x["LAT1"],x["LONG1"])
@@ -423,14 +421,14 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   coords <- as.data.frame(t(tmp))
   colnames(coords)[1]<-"LATITUDE"
   colnames(coords)[2]<-"LONGITUDE"
-  ISSETPROFILE_WIDE = cbind(ISSETPROFILE_WIDE,coords)
+  ISSETPROFILE = cbind(ISSETPROFILE,coords)
 
   ISFISHSETS <- unique(ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFO_ISDB_SETS")])
-  ISSETPROFILE_WIDE <- unique(ISSETPROFILE_WIDE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE","GEARCD_ID")])
+  ISSETPROFILE <- unique(ISSETPROFILE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE","GEARCD_ID")])
 
-  ISSETPROFILE_WIDE[,c("LATITUDE","LONGITUDE")] <- as.numeric(as.character(unlist(ISSETPROFILE_WIDE[,c("LATITUDE","LONGITUDE")])))
+  ISSETPROFILE[,c("LATITUDE","LONGITUDE")] <- as.numeric(as.character(unlist(ISSETPROFILE[,c("LATITUDE","LONGITUDE")])))
 
-  if (nrow(ISSETPROFILE_WIDE)==0){
+  if (nrow(ISSETPROFILE)==0){
     message(paste0("\n","No ISDB sets"))
     if (args$debug) {
       t15_ <- proc.time() - t15
@@ -440,19 +438,19 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   }
   #line below reqd to prevent sf warnings from being shown
   sink <- suppressMessages(utils::capture.output(sf::sf_use_s2(FALSE)))
-  ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, flag.land = T)
-  colnames(ISSETPROFILE_WIDE)[colnames(ISSETPROFILE_WIDE)=="NAFO"] <- "NAFO_ISDB_SETS_CALC"
+  ISSETPROFILE <- Mar.utils::identify_area(ISSETPROFILE, flag.land = T)
+  colnames(ISSETPROFILE)[colnames(ISSETPROFILE)=="NAFO"] <- "NAFO_ISDB_SETS_CALC"
 
   if (args$areaFile != "NAFOSubunits_sf" | args$areaFileField != "NAFO_1"){
     if(grepl(pattern = ".shp",x = args$areaFile, ignore.case = T)){
-      ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, agg.poly.shp = args$areaFile, agg.poly.field = args$areaFileField, flag.land = TRUE)
+      ISSETPROFILE <- Mar.utils::identify_area(ISSETPROFILE, agg.poly.shp = args$areaFile, agg.poly.field = args$areaFileField, flag.land = TRUE)
     }else{
-      ISSETPROFILE_WIDE <- Mar.utils::identify_area(ISSETPROFILE_WIDE, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
+      ISSETPROFILE <- Mar.utils::identify_area(ISSETPROFILE, agg.poly.shp = eval(parse(text=paste0("Mar.data::",args$areaFile))), agg.poly.field = args$areaFileField, flag.land = TRUE)
     }
   }
   #line below reqd to prevent sf warnings from being shown
   sink <- suppressMessages(utils::capture.output(sf::sf_use_s2(TRUE)))
-  ISSETPROFILE_WIDE <- merge (ISFISHSETS,ISSETPROFILE_WIDE, all.y=T)
+  ISSETPROFILE <- merge (ISFISHSETS,ISSETPROFILE, all.y=T)
 
 
 
@@ -460,6 +458,6 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
     t15_ <- proc.time() - t15
     message("\tExiting get_isdb_sets() (",round(t15_[1],0),"s elapsed)")
   }
-  return(ISSETPROFILE_WIDE)
+  return(ISSETPROFILE)
 }
 

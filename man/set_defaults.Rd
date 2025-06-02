@@ -28,11 +28,9 @@ set_defaults(
   dropUnmatchedISDB = TRUE,
   manualMatch = FALSE,
   socks = FALSE,
-  data.dir = file.path(getwd(), "data"),
-  oracle.username = "_none_",
-  oracle.password = "_none_",
-  oracle.dsn = "PTRAN",
-  usepkg = "roracle",
+  data.dir = get_pesd_fl_dir(),
+  cxn = NULL,
+  thecmd = NULL,
   useLocal = FALSE,
   debugLics = NULL,
   debugVRs = NULL,
@@ -131,37 +129,15 @@ input format.}
 user to acknowledge that they are aware that the script needs further testing.  Setting this to
 TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
 
-\item{data.dir}{default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
-This is the path to a folder where your *.rdata files are stored.}
-
-\item{oracle.username}{default is \code{'_none_'}. This is your username for accessing oracle
-objects.}
-
-\item{oracle.password}{default is \code{'_none_'}. This is your password for accessing oracle
-objects.}
-
-\item{oracle.dsn}{default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing
-oracle objects.  Normally, the value should be "PTRAN"}
-
-\item{usepkg}{default is \code{'roracle'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
-be slightly easier to setup, but roracle will extract data faster.}
-
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
 Depending on your value for \code{useLocal}, different values become necessary.
 \itemize{
  \item{useLocal=TRUE} This implies that you have local data you want to use.
-    \itemize{
-      \item param \code{data.dir} required.  This is the path to your local data
-    }
  \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data.
- Include all of the following:
+ Ensure you include:
   \itemize{
-      \item param \code{oracle.username} required
-      \item param \code{oracle.password} required
-      \item param \code{oracle.dsn} required
-      \item param \code{usepkg} required
+      \item param \code{cxn} a valid oracle connection (e.g. an roracle, rodbc or dbi connection object)
     }
 }}
 
@@ -206,11 +182,11 @@ Other coreFuncs:
 \code{\link{getHOC}()},
 \code{\link{getPS}()},
 \code{\link{get_fleet}()},
+\code{\link{get_isdb}()},
 \code{\link{get_isdb_sets}()},
 \code{\link{get_isdb_trips}()},
-\code{\link{get_isdb}()},
-\code{\link{get_marfis_sets}()},
 \code{\link{get_marfis}()},
+\code{\link{get_marfis_sets}()},
 \code{\link{summarize_locations}()}
 }
 \author{

@@ -21,17 +21,13 @@
 #'                     dateStart =  "2016-04-01", dateEnd= "2017-03-31",
 #'                     stock = "5Z",
 #'                     useLocal = F,
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fishin_CHPs(type = "MOBILE",
 #'                        dateStart =  "2016-04-01", dateEnd= "2017-03-31",
 #'                        stock = "4X5Y",
 #'                        year = 2018,
-#'                        useLocal = T,
-#'                        data.dir = "c:/data_folder"
+#'                        useLocal = T
 #'                       )
 #'                        }
 #' @family fleets

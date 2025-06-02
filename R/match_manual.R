@@ -34,10 +34,10 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
     args <- list(...)$args
     if (args$debug)  t26 <- Mar.utils::where_now(returnTime = T)
     if(args$useLocal){
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("PRO_SPC_INFO","VESSELS","TRIPS","MON_DOC_ENTRD_DETS",
+      Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("PRO_SPC_INFO","VESSELS","TRIPS","MON_DOC_ENTRD_DETS",
                                                                                             "HAIL_IN_CALLS", "HAIL_OUTS"),
-                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                 env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+                                 data.dir = get_pesd_fl_dir(), cxn  = cxn,
+                                 env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
 
 
       if(any(TRIP_ID_MARF %in% "ALL")){

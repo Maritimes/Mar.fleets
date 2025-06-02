@@ -4,42 +4,13 @@
 \alias{enable_local}
 \title{enable_local}
 \usage{
-enable_local(
-  data.dir = NULL,
-  oracle.username = "_none_",
-  oracle.password = "_none_",
-  oracle.dsn = "_none_",
-  usepkg = "rodbc",
-  force.extract = FALSE,
-  ...
-)
+enable_local(cxn = NULL, force.extract = FALSE, ...)
 }
 \arguments{
-\item{data.dir}{The default is your working directory. If you are hoping to
-load existing data, this folder should identify the folder containing your
-*.rdata files.}
-
-\item{oracle.username}{default is \code{'_none_'} This is your username for
-accessing oracle objects. If you have a value for \code{oracle.username}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{oracle.password}{default is \code{'_none_'} This is your password for
-accessing oracle objects. If you have a value for \code{oracle.password}
-stored in your environment (e.g. from an rprofile file), this can be left out
-and that value will be used.  If a value for this is provided, it will take
-priority over your existing value.}
-
-\item{oracle.dsn}{default is \code{'_none_'} This is your dsn/ODBC
-identifier for accessing oracle objects. If you have a value for
-\code{oracle.dsn} stored in your environment (e.g. from an rprofile file),
-this can be left and that value will be used.  If a value for this is
-provided, it will take priority over your existing value.}
-
-\item{usepkg}{default is \code{'rodbc'}. This indicates whether the connection to Oracle should
-use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier to setup, but
-roracle will extract data ~ 5x faster.}
+\item{cxn}{A valid Oracle connection object. This parameter allows you to
+pass an existing connection, reducing the need to establish a new connection
+within the function. If provided, it takes precedence over the connection-
+related parameters.}
 
 \item{force.extract}{default is \code{FALSE}  This flag forces a re-extraction of all of the
 tables (rather than loading previously extracted versions from data.dir)}

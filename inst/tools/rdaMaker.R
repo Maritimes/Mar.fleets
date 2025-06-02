@@ -10,14 +10,14 @@ usethis::use_data(LIC_GEAR_SPEC, LIC_GEAR_SPEC, overwrite = T)
 
 data.dir = "C:/DFO-MPO/wrangledData/"
 # Extract MARFIS/ISDB gears and species code tables, limit columns, and include in pkg
-Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = data.dir, tables = c("GEARS", "SPECIES"))
+Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(), tables = c("GEARS", "SPECIES"))
 if ("GEAR_DESC" %in% names(GEARS)) colnames(GEARS)[colnames(GEARS)=="GEAR_DESC"] <- "GEAR"
 GEARS_MARFIS <- GEARS[with(GEARS,order(GEAR_CODE)),c("GEAR_CODE", "GEAR")]
 SPECIES_MARFIS <- SPECIES[with(SPECIES,order(SPECIES_CODE)),c("SPECIES_CODE", "SPECIES_NAME")]
 usethis::use_data(GEARS_MARFIS, GEARS_MARFIS, overwrite = T)
 usethis::use_data(SPECIES_MARFIS, SPECIES_MARFIS, overwrite = T)
 
-Mar.utils::get_data_tables(schema = "ISDB", data.dir = data.dir, tables = c("ISGEARCODES","ISSPECIESCODES"))
+Mar.utils::get_data_tables(schema = "ISDB", data.dir = get_pesd_fl_dir(), tables = c("ISGEARCODES","ISSPECIESCODES"))
 GEARS_ISDB <- ISGEARCODES[with(ISGEARCODES,order(GEARCD_ID)),c("GEARCD_ID", "DESCRIPTION")]
 SPECIES_ISDB <- ISSPECIESCODES[with(ISSPECIESCODES,order(SPECCD_ID)),c("SPECCD_ID", "COMMON", "SCIENTIFIC")]
 usethis::use_data(GEARS_ISDB, GEARS_ISDB, overwrite = T)

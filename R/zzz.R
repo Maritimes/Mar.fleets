@@ -8,6 +8,9 @@
 .onLoad <- function(libname, pkgname){
   options(stringsAsFactors = FALSE)
   Sys.setenv(TZ = "America/Halifax")
+  base_dir <- file.path("C:", "DFO-MPO")
+  pesd_fl_dir <- file.path(base_dir, "PESDData","MarFleets")
+  if (!dir.exists(pesd_fl_dir)) dir.create(pesd_fl_dir, recursive = T)
 }
 
 utils::globalVariables(c("GEARS_MARFIS", "GEARS_ISDB","SPECIES_MARFIS","SPECIES_ISDB",

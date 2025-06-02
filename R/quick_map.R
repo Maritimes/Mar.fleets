@@ -49,10 +49,7 @@
 #' @examples \dontrun{
 #' redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/data/")
 #' redfishVMS<-get_vmstracks(data = redfishresults,
-#'                           oracle.username = "me",
-#'                           oracle.password = "mypassword",
-#'                           oracle.dsn="PTRAN",
-#'                           usepkg="roracle")
+#'                           cxn = <valid oracle connection>)
 #' quick_map(data=redfishresults, vms= redfishVMS)
 #'        }
 #' @family simpleproducts

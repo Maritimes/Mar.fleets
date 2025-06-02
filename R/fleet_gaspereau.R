@@ -14,14 +14,10 @@
 #' @examples \dontrun{
 #' db <- fleet_gaspereau(useLocal = F,
 #'                     year = 2018,
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fleet_gaspereau(year = 2018,
-#'                        useLocal = T,
-#'                        data.dir = "c:/data_folder"
+#'                        useLocal = T
 #'                       )
 #'                        }
 #' @family fleets

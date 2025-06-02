@@ -72,29 +72,12 @@
 #' Depending on your value for \code{useLocal}, different values become necessary.
 #' \itemize{
 #'  \item{useLocal=TRUE} This implies that you have local data you want to use.
-#'     \itemize{
-#'       \item param \code{data.dir} required.  This is the path to your local data
-#'     }
 #'  \item{useLocal=FALSE} This implies that you have will query Oracle for the necessary data.
-#'  Include all of the following:
+#'  Ensure you include:
 #'   \itemize{
-#'       \item param \code{oracle.username} required
-#'       \item param \code{oracle.password} required
-#'       \item param \code{oracle.dsn} required
-#'       \item param \code{usepkg} required
+#'       \item param \code{cxn} a valid oracle connection (e.g. an roracle, rodbc or dbi connection object)
 #'     }
 #' }
-#' @param data.dir default is \code{'file.path(getwd(), "data")'}. Necessary for useLocal == T.
-#' This is the path to a folder where your *.rdata files are stored.
-#' @param oracle.username default is \code{'_none_'}. This is your username for accessing oracle
-#' objects.
-#' @param oracle.password default is \code{'_none_'}. This is your password for accessing oracle
-#' objects.
-#' @param oracle.dsn default is \code{'_none_'}.  This is your dsn/ODBC identifier for accessing
-#' oracle objects.  Normally, the value should be "PTRAN"
-#' @param usepkg default is \code{'roracle'}. This indicates whether the connection to Oracle should
-#' use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc can
-#' be slightly easier to setup, but roracle will extract data faster.
 #' @param debug default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 #' debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
@@ -138,11 +121,9 @@ set_defaults <- function(lics = 'all',
                          dropUnmatchedISDB = TRUE,
                          manualMatch = FALSE,
                          socks =FALSE,
-                         data.dir = file.path(getwd(), 'data'),
-                         oracle.username = '_none_',
-                         oracle.password = '_none_',
-                         oracle.dsn = 'PTRAN',
-                         usepkg = 'roracle',
+                         data.dir = get_pesd_fl_dir(),
+                         cxn = NULL,
+                         thecmd = NULL,
                          useLocal = FALSE,
                          debugLics = NULL,
                          debugVRs = NULL,
@@ -159,12 +140,13 @@ set_defaults <- function(lics = 'all',
   argg <- Mar.utils::combine_lists(primary =  submittedArgs, ancilliary = defaults, quietly = T)
   if (argg$debug)    t27 <- Mar.utils::where_now(returnTime = T)
   # have all of our arguments - further process some of them ------------------------------------------------------------------------------------------------
+
+  argg$thecmd = Mar.utils::connectionCheck(argg$cxn)
   # convert year (if present to dateStart and dateEnd)
   dateArgs <- Mar.utils::vali_dates(dateStart = argg$dateStart, dateEnd = argg$dateEnd, year = argg$year, quietly = T)
   argg$dateStart <- dateArgs$dateStart
   argg$dateEnd <- dateArgs$dateEnd
   argg$year <- NULL
-
   #set the field to use for non-NAFO
   if (argg$areaFile !=  'NAFOSubunits_sf' && argg$areaFileField == 'NAFO_1'){
     if (argg$areaFile == 'Strata_Mar_sf') argg$areaFileField = 'StrataID'
@@ -188,11 +170,12 @@ set_defaults <- function(lics = 'all',
   if (length(jakes)>0){
     warning(paste0("This package does not understand the following parameter(s): ",paste0(jakes,collapse = ",")))
   }
-
   paramDf <- argg
   paramDf <- replace(paramDf, sapply(paramDf, is.data.frame), "see <results>$params$fleet$...")
   paramDf[lengths(paramDf)>1]<- paste0(paramDf[lengths(paramDf)>1])
   paramDf <- replace(paramDf, sapply(paramDf, is.null), "<NULL>")
+  paramDf <- paramDf[!names(paramDf) %in%  c("cxn", "thecmd")]
+
   paramDf <- data.frame(PARAMETER=names(paramDf), VALUE = unlist(paramDf), row.names = NULL)
   paramDf[paramDf$PARAMETER=="dateStart","VALUE"] <- format(as.Date(argg$dateStart, origin = "1970-01-01"), "%Y-%m-%d")
   paramDf[paramDf$PARAMETER=="dateEnd","VALUE"] <- format(as.Date(argg$dateEnd, origin = "1970-01-01"), "%Y-%m-%d")
@@ -211,7 +194,6 @@ set_defaults <- function(lics = 'all',
   paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"]<- paste0('"',paramDf[!grepl(paste(toMatch, collapse = '|'),paramDf$VALUE),"VALUE"],'"')
   paramDf <-  paramDf[with(paramDf,order(-rank(SOURCE), PARAMETER)),c( "SOURCE", "PARAMETER","VALUE")]
   paramDf$VALUE<- ifelse(nchar(paramDf$VALUE)>150,"<Too long to display>",paramDf$VALUE)
-  paramDf[paramDf$PARAMETER == "oracle.password","VALUE"]<- "*****"
   paramDf <- rbind(paramDf, c("metadata","Date Run", format(Sys.Date(), "%Y-%m-%d")))
   if(all(is.na(utils::packageDescription("Mar.fleets")))){
     paramDf <- rbind(paramDf, c("metadata","Mar.fleets not installed"))

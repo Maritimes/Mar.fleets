@@ -44,7 +44,7 @@ get_fleet<-function(...){
     args <- list(...)$args
     if (args$debug) t03<- Mar.utils::where_now(returnTime = T)
     if (!is.na(args$gearSpecs$MIN)){
-      #for fixed gear (CHPs), we need to keep all gillnet - don't sort as though they were hooks
+      #for fixed gear (CHPs) and Unit 2 redfish, we need to keep all gillnet - don't sort as though they were hooks
       #fsame for unit2 redfish
       if ((args$gearSpecs$FLEET == "CHP" &&  grepl(pattern = "_FIXED", x = args$gearSpecs$FLEET_GEARSPECS_ID))|
            (args$gearSpecs$FLEET == "REDFISH" &&  grepl(pattern = "UNIT2", x = args$gearSpecs$FLEET_GEARSPECS_ID))){
@@ -159,13 +159,12 @@ get_fleet<-function(...){
       WHERE
       COLUMN_DEFN_ID IN (",Mar.utils::SQL_in(grSpCols,apos=F),")
       AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field="MON_DOC_ID"))
-      MD_df <- args$cxn$thecmd(args$cxn$channel, RelevantQry_MD)
+      MD_df <- args$thecmd(args$cxn, RelevantQry_MD)
 
     }else{
       # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
-      Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir, tables = c("LOG_EFRT_ENTRD_DETS", "MON_DOC_ENTRD_DETS"),
-                                 usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password,
-                                 env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+      Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("LOG_EFRT_ENTRD_DETS", "MON_DOC_ENTRD_DETS"),data.dir = get_pesd_fl_dir(),
+                                 cxn= cxn, env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
       LE_df <- LOG_EFRT_ENTRD_DETS[which(LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% df$LOG_EFRT_STD_INFO_ID &
                                            LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols), c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE") ]
 
@@ -226,9 +225,10 @@ get_fleet<-function(...){
   get_fleetLicences_loc<-function(...){
     args <- list(...)
     if (args$debug) t06<- Mar.utils::where_now(returnTime = T)
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
+    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(),
+                               cxn= cxn,
                                tables = c("MARFLEETS_LIC"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC$LICENCE_ID, stepDesc = "flt_initial")
     if (all(is.na(args$lics$LIC_TYPE))){
       MARFLEETS_LIC_L <- MARFLEETS_LIC
@@ -288,9 +288,8 @@ get_fleet<-function(...){
       # message("To handle debugging, a lot of data must first be extracted, so that each step can be checked.  This step will take ~1 minute")
       MARFLEETS_LIC_Qry <- paste0("SELECT *
                             FROM MARFISSCI.MARFLEETS_LIC WHERE ",theseLicsOra)
-
       # AND ",Mar.utils::big_in(vec=unique(df$MON_DOC_ID), vec.field = "LOG_EFRT_STD_INFO.MON_DOC_ID"))
-      MARFLEETS_LIC <- args$cxn$thecmd(args$cxn$channel, MARFLEETS_LIC_Qry)
+      MARFLEETS_LIC <- args$thecmd(args$cxn, MARFLEETS_LIC_Qry)
       LICDETS<- unique(MARFLEETS_LIC[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
 
       # message("Completed big extraction.  To avoid this in the future, don't use debug, don't send debugLics or change to useLocal = T.")
@@ -346,7 +345,7 @@ get_fleet<-function(...){
                             FROM MARFISSCI.MARFLEETS_LIC
                                        WHERE (", theseLicsOra, ") ",where_dateFilt)
       #, where_gearFilt)
-      MARFLEETS_LIC_new <- args$cxn$thecmd(args$cxn$channel, MARFLEETS_LIC_new_Qry)
+      MARFLEETS_LIC_new <- args$thecmd(args$cxn, MARFLEETS_LIC_new_Qry)
     }
     LICDETS<- unique(MARFLEETS_LIC_new[,c("LICENCE_TYPE_ID", "LICENCE_TYPE", "LICENCE_SUBTYPE_ID", "LICENCE_SUBTYPE", "GEAR_CODE", "GEAR", "SPECIES_CODE", "SPECIES")])
     licDf <- unique(MARFLEETS_LIC_new[,c("LICENCE_ID","LICENCE_TYPE_ID", "LICENCE_SUBTYPE_ID", "GEAR_CODE", "SPECIES_CODE", "L_ORIGIN_DATE", "L_EXPIRY_DATE")])
@@ -364,9 +363,10 @@ get_fleet<-function(...){
     args <- list(...)$args
     if (args$debug) t08 <- Mar.utils::where_now(returnTime = T)
 
-    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = args$data.dir,
+    Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(),
+                               cxn= cxn,
                                tables = c("PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS", "VESSELS"),
-                               usepkg=args$usepkg, fn.oracle.username = args$oracle.username, fn.oracle.dsn=args$oracle.dsn, fn.oracle.password = args$oracle.password, env = environment(), quietly = TRUE, fuzzyMatch=FALSE)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
 
 # if ("GASP" %in% args$lics$FLEET){
 #   PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", "DATE_FISHED", "LANDED_DATE")]
@@ -477,7 +477,7 @@ AND PS.NAFO_UNIT_AREA_ID = N.AREA_ID "
 ,where_Area
     )
 
-    theFleet = args$cxn$thecmd(args$cxn$channel, fleetAct_qry)
+    theFleet = args$thecmd(args$cxn, fleetAct_qry)
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = theFleet$LICENCE_ID, stepDesc = "flt_PSDates")
     if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = theFleet$VR_NUMBER, stepDesc = "flt_PSDates")
     theFleet$NAFO <- NULL

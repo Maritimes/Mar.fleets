@@ -13,12 +13,10 @@ get_vmstracks(data = NULL, ...)
 It is likely that you will need to provide values for the following 4
 parameters to enable a connection to oracle:
 \itemize{
-  \item \code{oracle.username} This is your username for accessing oracle objects.
-  \item \code{oracle.password} This is your password for accessing oracle objects.
-  \item \code{oracle.dsn} This is your dsn/ODBC identifier for accessing oracle objects.
-  \item \code{usepkg} This indicates whether the connection to Oracle should
-  use \code{'rodbc'} or \code{'roracle'} to connect.  rodbc is slightly easier
-  to setup, but roracle will extract data more quickly.
+  \item \code{cxn} A valid Oracle connection object. This parameter allows you to
+pass an existing connection, reducing the need to establish a new connection
+within the function. If provided, it takes precedence over the connection-
+related parameters.
 }}
 }
 \value{
@@ -30,12 +28,9 @@ and extracts the relevant VMS tracks, and flags whether or not each was observed
 }
 \examples{
 \dontrun{
-redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T,data.dir="c:/data/")
+redfishresults <- fleet_redfish(unit=3, year = "2017", useLocal=T)
 redfishVMS<-get_vmstracks(data = redfishresults,
-                          oracle.username = "me",
-                          oracle.password = "mypassword",
-                          oracle.dsn="PTRAN",
-                          usepkg="roracle")
+                          cxn  = <valid Oracle Connection>)
                           }
 }
 \seealso{

@@ -16,15 +16,11 @@
 #' db <- fleet_flatfish(year = 2018,
 #'                     area = "4VW",
 #'                     useLocal = F,
-#'                     oracle.username = "<name>",
-#'                     oracle.password="<password>",
-#'                     oracle.dsn="PTRAN",
-#'                     usepkg = "roracle"
+#'                     cxn  = <valid Oracle Connection>
 #'                     )
 #' local <- fleet_flatfish(year = 2018,
 #'                        area = "4VWX",
-#'                        useLocal = T,
-#'                        data.dir = "c:/data_folder"
+#'                        useLocal = T
 #'                       )
 #'                        }
 #' @family fleets
