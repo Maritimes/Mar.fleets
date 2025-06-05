@@ -93,7 +93,6 @@ go <- function(){
 #' @noRd
 can_run <- function(...) {
   args = list(...)
-
   if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
 
   # Define table lists
@@ -153,7 +152,6 @@ can_run <- function(...) {
       t28_ <- proc.time() - t28
       message("\tExiting can_run() (", round(t28_[1], 0), "s elapsed)")
     }
-    stop()
     return(res)
   } else {
     message(paste0("Cannot proceed offline. Check that all of the following files are in ", get_pesd_fl_dir(), "):\n"))
