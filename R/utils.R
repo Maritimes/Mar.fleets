@@ -239,10 +239,9 @@ enable_local <- function(cxn= NULL,
   rdata_file <- file.path(get_pesd_fl_dir(), "ISSETPROFILE.RData")
   if (file.exists(rdata_file)) {
     tmp <- new.env()
-    Mar.utils::load_encrypted(rdata_file, env = tmp, extract_user = extract_user, extract_computer = extract_computer)
-    browser()
+    Mar.utils::load_encrypted(rdata_file, envir = tmp, extract_user = extract_user, extract_computer = extract_computer)
     #change to fully qualified
-    ISSETPROFILE  <- ISSETPROFILE_enwidener(tmp$ISSETPROFILE)
+    ISSETPROFILE  <- Mar.utils::ISSETPROFILE_enwidener(tmp$ISSETPROFILE)
     assign("ISSETPROFILE", ISSETPROFILE, envir = .GlobalEnv)
     Mar.utils::save_encrypted(ISSETPROFILE, file     = rdata_file, compress = TRUE)
     rm(ISSETPROFILE, envir = .GlobalEnv)
