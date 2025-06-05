@@ -4,7 +4,7 @@
 \alias{get_fleet}
 \title{get_fleet}
 \usage{
-get_fleet(...)
+get_fleet(extract_user = NULL, extract_computer = NULL, ...)
 }
 \arguments{
 \item{...}{other arguments passed to methods}

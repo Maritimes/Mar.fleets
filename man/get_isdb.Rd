@@ -10,6 +10,8 @@ get_isdb(
   keepSurveyTrips = NULL,
   dateStart = NULL,
   dateEnd = NULL,
+  extract_user = NULL,
+  extract_computer = NULL,
   ...
 )
 }
@@ -32,6 +34,14 @@ of the window of time you want to look at.}
 \item{dateEnd}{default is \code{NULL}. This is the end date (YYYY-MM-DD)
 of the window of time you want to look at.  If this is left blank, 1 year of
 data will be returned.}
+
+\item{extract_user}{default is \code{NULL}.  This parameter can be used with
+\code{extract_computer} to load encypted data files extracted by another user
+and/or computer}
+
+\item{extract_computer}{default is \code{NULL}.  This parameter can be used with
+\code{extract_user} to load encypted data files extracted by another user
+and/or computer}
 
 \item{...}{other arguments passed to methods}
 }

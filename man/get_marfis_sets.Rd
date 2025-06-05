@@ -10,6 +10,14 @@ get_marfis_sets(log_efrt = NULL, ...)
 \item{log_efrt}{default is \code{NULL}.}
 
 \item{...}{other arguments passed to methods}
+
+\item{extract_user}{default is \code{NULL}.  This parameter can be used with
+\code{extract_computer} to load encypted data files extracted by another user
+and/or computer}
+
+\item{extract_computer}{default is \code{NULL}.  This parameter can be used with
+\code{extract_user} to load encypted data files extracted by another user
+and/or computer}
 }
 \value{
 a dataframe

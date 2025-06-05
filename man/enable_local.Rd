@@ -4,7 +4,12 @@
 \alias{enable_local}
 \title{enable_local}
 \usage{
-enable_local(cxn = NULL, force.extract = FALSE, ...)
+enable_local(
+  cxn = NULL,
+  force.extract = FALSE,
+  extract_user = NULL,
+  extract_computer = NULL
+)
 }
 \arguments{
 \item{cxn}{A valid Oracle connection object. This parameter allows you to
@@ -14,6 +19,14 @@ related parameters.}
 
 \item{force.extract}{default is \code{FALSE}  This flag forces a re-extraction of all of the
 tables (rather than loading previously extracted versions from data.dir)}
+
+\item{extract_user}{default is \code{NULL}.  This parameter can be used with
+\code{extract_computer} to load encypted data files extracted by another user
+and/or computer}
+
+\item{extract_computer}{default is \code{NULL}.  This parameter can be used with
+\code{extract_user} to load encypted data files extracted by another user
+and/or computer}
 
 \item{...}{other arguments passed to methods}
 }

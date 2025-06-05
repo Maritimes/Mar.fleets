@@ -30,6 +30,8 @@ set_defaults(
   socks = FALSE,
   data.dir = get_pesd_fl_dir(),
   cxn = NULL,
+  extract_user = NULL,
+  extract_computer = NULL,
   thecmd = NULL,
   useLocal = FALSE,
   debugLics = NULL,

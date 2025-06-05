@@ -16,7 +16,7 @@
 #'   \item \code{VR_NUMBER}
 #'   }
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-get_fleet<-function(...){
+get_fleet<-function(extract_user = NULL, extract_computer = NULL, ...){
 
   args <-list(...)
 
@@ -99,6 +99,21 @@ get_fleet<-function(...){
   }
   chk_Gears <- function(df=NULL, ...){
 
+    calculate_mean_if_needed <- function(value) {
+      if (grepl("-", value)) {
+        # Split by hyphen and compute mean
+        parts <- strsplit(value, "-")[[1]]
+        return(mean(as.numeric(parts), na.rm = TRUE))
+      } else if (grepl("/", value)) {
+        # Split by slash and compute mean
+        parts <- strsplit(value, "/")[[1]]
+        return(mean(as.numeric(parts), na.rm = TRUE))
+      } else {
+        # Otherwise, just return the value as a number
+        return(as.numeric(value))
+      }
+    }
+
     #this function figures out what categories of gears we're dealing with, and will let us determine what filters might be possible
     args <- list(...)$args
     if (args$debug) t05<- Mar.utils::where_now(returnTime = T)
@@ -164,7 +179,8 @@ get_fleet<-function(...){
     }else{
       # Find all of the records that are related to the gear type (e.g. mesh/hook/trap) --------------------------------------------
       Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("LOG_EFRT_ENTRD_DETS", "MON_DOC_ENTRD_DETS"),data.dir = get_pesd_fl_dir(),
-                                 cxn= cxn, env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                                 env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                                 cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
       LE_df <- LOG_EFRT_ENTRD_DETS[which(LOG_EFRT_ENTRD_DETS$LOG_EFRT_STD_INFO_ID %in% df$LOG_EFRT_STD_INFO_ID &
                                            LOG_EFRT_ENTRD_DETS$COLUMN_DEFN_ID %in% grSpCols), c("LOG_EFRT_STD_INFO_ID", "COLUMN_DEFN_ID", "DATA_VALUE") ]
 
@@ -191,6 +207,7 @@ get_fleet<-function(...){
     }else{
       LE_df <- data.frame(ID_FLD=integer(0),GR_SIZE=integer(0),GR_TYPE=character(), GEAR_SRC=character())
     }
+
     if (nrow(MD_df)>0){
       #if need convert units, do now
       MD_df$COLUMN_DEFN_ID <- replace(MD_df$COLUMN_DEFN_ID, MD_df$COLUMN_DEFN_ID %in% sizeCols, "GR_SIZE")
@@ -199,7 +216,9 @@ get_fleet<-function(...){
       if (!"GR_SIZE" %in% names(MD_df)) {
         MD_df$GR_SIZE <- -999
       }else{
-        MD_df$GR_SIZE <- as.numeric(MD_df$GR_SIZE)
+        #MD_df$GR_SIZE <- as.numeric(MD_df$GR_SIZE)
+        MD_df$GR_SIZE <- sapply(MD_df$GR_SIZE, calculate_mean_if_needed)
+        MD_df$GR_SIZE[is.na(MD_df$GR_SIZE)] <- -999
       }
       if (!"GR_TYPE" %in% names(MD_df)) {
         MD_df$GR_TYPE <- -999
@@ -226,9 +245,9 @@ get_fleet<-function(...){
     args <- list(...)
     if (args$debug) t06<- Mar.utils::where_now(returnTime = T)
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(),
-                               cxn= cxn,
                                tables = c("MARFLEETS_LIC"),
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = MARFLEETS_LIC$LICENCE_ID, stepDesc = "flt_initial")
     if (all(is.na(args$lics$LIC_TYPE))){
       MARFLEETS_LIC_L <- MARFLEETS_LIC
@@ -364,12 +383,12 @@ get_fleet<-function(...){
     if (args$debug) t08 <- Mar.utils::where_now(returnTime = T)
 
     Mar.utils::get_data_tables(schema = "MARFISSCI", data.dir = get_pesd_fl_dir(),
-                               cxn= cxn,
                                tables = c("PRO_SPC_INFO","TRIPS","NAFO_UNIT_AREAS", "VESSELS"),
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
 
 # if ("GASP" %in% args$lics$FLEET){
-#   PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", "DATE_FISHED", "LANDED_DATE")]
+#   PRO_SPC_INFO= PRO_SPC_INFO[,c("LICENCE_ID","PRO_SPC_INFO_ID", "TRIP_ID", "LOG_EFRT_STD_INFO_ID","GEAR_CODE","MON_DOC_ID","NAFO_UNIT_AREA_ID", "DATE_FISHED", "LANDED_DATE")]pro
 #   TRIPS = PRO_SPC_INFO[,c("PRO_SPC_INFO_ID","DATE_FISHED", "LANDED_DATE")]
 #   colnames(TRIPS)[colnames(TRIPS)=="DATE_FISHED"] <- "T_DATE1"
 #   colnames(TRIPS)[colnames(TRIPS)=="LANDED_DATE"] <- "T_DATE2"

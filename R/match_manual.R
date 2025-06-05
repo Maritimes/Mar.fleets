@@ -8,11 +8,17 @@
 #' more ISDB TRIP_ID values you wish to attempt to find matches for in the MARFISSCI schema.
 #' Discrete values (i.e. not "ALL") can ONLY be provided to one of TRIP_ID_MARF OR TRIP_ID_ISDB -
 #' not both.
+#' @param extract_user default is \code{NULL}.  This parameter can be used with
+#' \code{extract_computer} to load encypted data files extracted by another user
+#' and/or computer
+#' @param extract_computer  default is \code{NULL}.  This parameter can be used with
+#' \code{extract_user} to load encypted data files extracted by another user
+#' and/or computer
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T,...){
+match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T, extract_user = NULL, extract_computer = NULL, ...){
 
   argsFn <- as.list(environment())
   argsFn$TRIP_ID_MARF <- argsFn$TRIP_ID_ISDB <- NULL
@@ -36,8 +42,8 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("PRO_SPC_INFO","VESSELS","TRIPS","MON_DOC_ENTRD_DETS",
                                                                                             "HAIL_IN_CALLS", "HAIL_OUTS"),
-                                 data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                                 env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                                 data.dir = get_pesd_fl_dir(), env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                                 cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
 
 
       if(any(TRIP_ID_MARF %in% "ALL")){

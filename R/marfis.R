@@ -35,7 +35,6 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
   allLogEff <-  unique(stats::na.omit(thisFleet$LOG_EFRT_STD_INFO))
   allProSpc <-  unique(stats::na.omit(thisFleet$PRO_SPC_INFO_ID))
   allMondocs <-  unique(stats::na.omit(thisFleet$MON_DOC_ID))
-
   ps <- do.call(getPS, list(allProSpc = allProSpc, args=args))
   if (nrow(ps)<1){
     message(paste0("\n","No MARFIS data meets criteria"))
@@ -160,15 +159,15 @@ get_marfis<-function(thisFleet = NULL, marfSpp='all',  nafoCode='all',  ...){
 #' @family coreFuncs
 #' @return a dataframe
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-getPS <- function(allProSpc = NULL, ...){
+getPS <- function(allProSpc = NULL,...){
   args <- list(...)$args
   if (args$debug) t17 <- Mar.utils::where_now(returnTime = T)
-  # theseGears = unique(thisFleet$GEAR_CODE)
-  # all_combos<- unique(paste0(thisFleet$LICENCE_ID,"_",thisFleet$VR_NUMBER,"_",thisFleet$GEAR_CODE))
+
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("PRO_SPC_INFO","VESSELS", "NAFO_UNIT_AREAS","TRIPS"),
-                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               data.dir = get_pesd_fl_dir(),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
     PS_df <- PRO_SPC_INFO[PRO_SPC_INFO$PRO_SPC_INFO_ID %in% allProSpc,
                           c('TRIP_ID','MON_DOC_ID','PRO_SPC_INFO_ID','LICENCE_ID','GEAR_CODE','VR_NUMBER_FISHING',
@@ -266,6 +265,12 @@ getPS <- function(allProSpc = NULL, ...){
 #' @title getED
 #' @description This function e
 #' @param mondocs default is \code{NULL}.
+#' @param extract_user default is \code{NULL}.  This parameter can be used with
+#' \code{extract_computer} to load encypted data files extracted by another user
+#' and/or computer
+#' @param extract_computer  default is \code{NULL}.  This parameter can be used with
+#' \code{extract_user} to load encypted data files extracted by another user
+#' and/or computer
 #' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @return a dataframe
@@ -274,10 +279,10 @@ getED <- function(mondocs = NULL, ...){
   args <- list(...)$args
   if (args$debug) t18 <- Mar.utils::where_now(returnTime = T)
   if(args$useLocal){
-
     Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("MON_DOC_ENTRD_DETS"),
-                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               data.dir = get_pesd_fl_dir(),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     ED_df <- MON_DOC_ENTRD_DETS[MON_DOC_ENTRD_DETS$MON_DOC_ID %in% mondocs & MON_DOC_ENTRD_DETS$COLUMN_DEFN_ID %in% c(21,741,835),c('MON_DOC_ID','COLUMN_DEFN_ID','DATA_VALUE')]
     if (nrow(ED_df)<1){
 
@@ -340,8 +345,9 @@ getHIC <- function(trips = NULL, ...){
   if(args$useLocal){
 
     Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("HAIL_IN_CALLS"),
-                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               data.dir = get_pesd_fl_dir(),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     HIC_df <- unique(HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID','HAIL_IN_TYPE_ID')]
 
   }else{
@@ -377,8 +383,9 @@ getHOC <- function(trips = NULL, ...){
 
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("HAIL_OUTS"),
-                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               data.dir = get_pesd_fl_dir(),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     HOC_df <- unique(HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% trips,c('TRIP_ID','CONF_NUMBER')]) #,'HAIL_OUT_ID')]
   }else{
     HOCQry<-paste0("SELECT DISTINCT
@@ -402,6 +409,12 @@ getHOC <- function(trips = NULL, ...){
 #' @title get_marfis_sets
 #' @description This function e
 #' @param log_efrt default is \code{NULL}.
+#' @param extract_user default is \code{NULL}.  This parameter can be used with
+#' \code{extract_computer} to load encypted data files extracted by another user
+#' and/or computer
+#' @param extract_computer  default is \code{NULL}.  This parameter can be used with
+#' \code{extract_user} to load encypted data files extracted by another user
+#' and/or computer
 #' @param ... other arguments passed to methods
 #' @family coreFuncs
 #' @return a dataframe
@@ -409,11 +422,11 @@ getHOC <- function(trips = NULL, ...){
 get_marfis_sets <- function(log_efrt = NULL, ...){
   args <- list(...)$args
   if (args$debug) t21 <- Mar.utils::where_now(returnTime = T)
-
   if (args$useLocal){
     Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("LOG_EFRT_STD_INFO", "NAFO_UNIT_AREAS"),
-                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               data.dir = get_pesd_fl_dir(),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     if (!"NAFO_AREA" %in% names(NAFO_UNIT_AREAS)) names(NAFO_UNIT_AREAS)[names(NAFO_UNIT_AREAS) == "AREA"] <- "NAFO_AREA"
     if ("CUSER" %in% names(LOG_EFRT_STD_INFO)){
       #do the appropriate tweaks if haven't been done

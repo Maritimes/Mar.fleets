@@ -91,117 +91,92 @@ go <- function(){
 #' @family setup
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @noRd
-can_run <- function(...){
-  args=list(...)
+can_run <- function(...) {
+  args = list(...)
+
   if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
 
-  tblAccess <- function(tables = NULL,...){
-    #tblAccess is T if has necess permiss
-    args=list(...)$args
-    thecmd = Mar.utils::connectionCheck(args$cxn)
-    if (args$debug) t30 <- Mar.utils::where_now(returnTime = T)
-    tables <- gsub("ISDB","OBSERVER", tables)
-    fails = 0
-    for (t in 1:length(tables)){
-      message(paste0("Checking access to ",tables[t],": "))
-      qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM<=1")
-      test = thecmd(args$cxn, qry, rows_at_time = 1)
-      if (is.character(test)) {
-        fails=fails+1
-        # if (quietly=FALSE)message(" failed","\n")
-      }else{
-        # if (quietly=FALSE)message(" success","\n")
-      }
-    }
-    if (fails>0){
-      if (args$debug){
-        t30_ <- proc.time() - t30
-        message("\tExiting tblAccess() (",round(t30_[1],0),"s elapsed) - missing access to some")
-      }
-      return(FALSE)
-    }else{
-      if (args$debug){
-        t30_ <- proc.time() - t30
-        message("\tExiting tblAccess() (",round(t30_[1],0),"s elapsed)")
-      }
-      return(TRUE)
-    }
-  }
+  # Define table lists
+  marfTabs = c("HAIL_IN_CALLS", "HAIL_OUTS", "LOG_EFRT_ENTRD_DETS", "LOG_EFRT_STD_INFO",
+               "MARFLEETS_LIC", "MON_DOC_ENTRD_DETS", "NAFO_UNIT_AREAS",
+               "PRO_SPC_INFO", "TRIPS", "VESSELS")
 
-  wantLocal <- function(tables = NULL, ...){
-    args<-list(...)$args
-    if (args$debug) t31 <- Mar.utils::where_now(returnTime = T)
-    tabs = paste0(args$data.dir,.Platform$file.sep,tables,".RData")
-    localDataCheck <- all(sapply(X =tabs, file.exists))
-    rm(tabs)
-    if (args$debug){
-      t31_ <- proc.time() - t31
-      message("\tExiting wantLocal() (",round(t31_[1],0),"s elapsed)")
-    }
-    return(localDataCheck)
-  }
-
-  marfTabs = c("HAIL_IN_CALLS",
-               "HAIL_OUTS",
-               "LOG_EFRT_ENTRD_DETS",
-               "LOG_EFRT_STD_INFO",
-               "MARFLEETS_LIC",
-               "MON_DOC_ENTRD_DETS",
-               "NAFO_UNIT_AREAS",
-               "PRO_SPC_INFO",
-               "TRIPS",
-               "VESSELS")
-
-  isdbTabs = c("ISFISHSETS",
-               "ISTRIPS",
-               "ISVESSELS",
-               "ISCATCHES",
-               "ISGEARS",
-               "ISSETPROFILE")
+  isdbTabs = c("ISFISHSETS", "ISTRIPS", "ISVESSELS", "ISCATCHES",
+               "ISGEARS", "ISSETPROFILE")
 
   args[["marfTabs"]] <- marfTabs
   args[["isdbTabs"]] <- isdbTabs
 
   ISDB = isdbTabs
-  MARFIS = paste0("MARFISSCI.",marfTabs)
+  MARFIS = paste0("MARFISSCI.", marfTabs)
 
-  if (args$useLocal){
-    if (do.call(wantLocal,list(MARFIS,args=args)) & do.call(wantLocal,list(ISDB,args=args))){
-      args[['cxn']] <- TRUE
-      res <- args
-      if (args$debug){
-        t28_ <- proc.time() - t28
-        message("\tExiting can_run() (",round(t28_[1],0),"s elapsed)")
-      }
-      return(res)
-    }else{
-      message(paste0("Cannot proceed offline. Check that all of the following files are in ", get_pesd_fl_dir(),"):\n"))
-      message(paste0(paste0(MARFIS,".RData"),collapse = "\n"))
-      message(paste0(paste0(ISDB,".RData"),collapse = "\n"))
-      stop()
-    }
-  }else{
-    args[['thecmd']] <- Mar.utils::connectionCheck(args$cxn)
-    res <- args
-
-    if (args$debug){
-      t28_ <- proc.time() - t28
-      message("\tExiting can_run() - db cxn established (", round(t28_[1],0),"s elapsed)")
-    }
-    return(res)
+  # Function to check local file existence
+  local_files_exist <- function(tables, args) {
+    tabs = paste0(args$data.dir, .Platform$file.sep, tables, ".RData")
+    return(all(sapply(X = tabs, file.exists)))
   }
-  if (all(do.call(tblAccess,list(MARFIS, args=args)) && do.call(tblAccess,list(ISDB, args=args)))){
-    message("\n","Connected to DB, and verified that account has sufficient permissions to proceed.","\n")
-    res <- args
-    if (args$debug){
-      t28_ <- proc.time() - t28
-      message("\tExiting can_run() - tbl access verified (", round(t28_[1],0),"s elapsed)")
-    }
 
-    return(res)
-  }else{
-    message("\n","Connected to DB, but account does not have sufficient permissions to proceed.","\n")
+  tblAccess <- function(tables = NULL, ...) {
+    args = list(...)$args
+    thecmd = Mar.utils::connectionCheck(args$cxn)
+    if (args$debug) t30 <- Mar.utils::where_now(returnTime = T)
+    tables <- gsub("ISDB", "OBSERVER", tables)
+    fails = 0
+    for (t in seq_along(tables)) {
+      #message(paste0("Checking access to ", tables[t], ": "))
+      qry = paste0("select '1' from ", tables[t], " WHERE ROWNUM <= 1")
+      test = thecmd(args$cxn, qry, rows_at_time = 1)
+      if (is.character(test)) {
+        fails = fails + 1
+      }
+    }
+    if (fails > 0) {
+      if (args$debug) {
+        t30_ <- proc.time() - t30
+        message("\tExiting tblAccess() (", round(t30_[1], 0), "s elapsed) - missing access to some")
+      }
+      return(FALSE)
+    } else {
+      if (args$debug) {
+        t30_ <- proc.time() - t30
+        message("\tExiting tblAccess() (", round(t30_[1], 0), "s elapsed)")
+      }
+      return(TRUE)
+    }
+  }
+
+  # Attempt to proceed with local files first by checking their existence
+  if (local_files_exist(MARFIS, args) & local_files_exist(ISDB, args)) {
+    #message("\nLocal files found. Attempting to use them with provided credentials.\n")
+    res <- args
+    if (args$debug) {
+      t28_ <- proc.time() - t28
+      message("\tExiting can_run() (", round(t28_[1], 0), "s elapsed)")
+    }
+    message("good")
     stop()
+    return(res)
+  } else {
+    message(paste0("Cannot proceed offline. Check that all of the following files are in ", get_pesd_fl_dir(), "):\n"))
+    message(paste0(paste0(MARFIS, ".RData"), collapse = "\n"))
+    message(paste0(paste0(ISDB, ".RData"), collapse = "\n"))
+    if (is.null(args$cxn)) {
+      stop("No valid DB connection and local files cannot be decrypted. Aborting process.")
+    }
+  }
+
+  # Require DB connection if can't proceed with local data
+  args[['thecmd']] <- Mar.utils::connectionCheck(args$cxn)
+  if (all(do.call(tblAccess, list(MARFIS, args = args)) && do.call(tblAccess, list(ISDB, args = args)))) {
+    message("\nConnected to DB, and verified that account has sufficient permissions to proceed.\n")
+    res <- args
+    if (args$debug) {
+      t28_ <- proc.time() - t28
+      message("\tExiting can_run() - tbl access verified (", round(t28_[1], 0), "s elapsed)")
+    }
+    return(res)
+  } else {
+    stop("\nConnected to DB, but account does not have sufficient permissions to proceed.\n")
   }
 }
 
@@ -217,13 +192,19 @@ can_run <- function(...){
 #' @param force.extract  default is \code{FALSE}  This flag forces a re-extraction of all of the
 #' tables (rather than loading previously extracted versions from data.dir)
 #' @param ... other arguments passed to methods
+#' @param extract_user default is \code{NULL}.  This parameter can be used with
+#' \code{extract_computer} to load encypted data files extracted by another user
+#' and/or computer
+#' @param extract_computer  default is \code{NULL}.  This parameter can be used with
+#' \code{extract_user} to load encypted data files extracted by another user
+#' and/or computer
 #' @family setup
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
 enable_local <- function(cxn= NULL,
                          force.extract= FALSE,
-                         ...){
-  if (is.null(cxn)) stop("Can't run as requested - a valid connection object (cxn) is required")
+                         extract_user = NULL, extract_computer = NULL){
+  #if (is.null(cxn)) stop("Can't run as requested - a valid connection object (cxn) is required")
 
   args <- list(
     data.dir = get_pesd_fl_dir(),
@@ -235,7 +216,6 @@ enable_local <- function(cxn= NULL,
 
   can_runCheck <- do.call(can_run, args)
   args <- can_runCheck
-
   message("\nChecking for and/or extracting MARFIS data...\n")
   Mar.utils::get_data_tables(data.dir = get_pesd_fl_dir(),
                              cxn = cxn,
@@ -244,7 +224,8 @@ enable_local <- function(cxn= NULL,
                              tables = args$marfTabs,
                              force.extract = force.extract,
                              env = environment(),
-                             quietly = FALSE, fuzzyMatch=FALSE, ...)
+                             quietly = FALSE, fuzzyMatch=FALSE,
+                             extract_user = extract_user, extract_computer = extract_computer)
 
   message("\nChecking for and/or extracting ISDB data...\n")
 
@@ -255,13 +236,16 @@ enable_local <- function(cxn= NULL,
                              tables = args$isdbTabs,
                              force.extract = force.extract,
                              env = environment(),
-                             quietly = FALSE, fuzzyMatch=FALSE, ...)
+                             quietly = FALSE, fuzzyMatch=FALSE,
+                             extract_user = extract_user, extract_computer = extract_computer)
 
   rdata_file <- file.path(get_pesd_fl_dir(), "ISSETPROFILE.RData")
   if (file.exists(rdata_file)) {
     tmp <- new.env()
-    Mar.utils::load_encrypted(rdata_file, env = tmp, ...)
-    ISSETPROFILE  <- Mar.utils::ISSETPROFILE_enwidener(tmp$ISSETPROFILE)
+    Mar.utils::load_encrypted(rdata_file, env = tmp, extract_user = extract_user, extract_computer = extract_computer)
+    browser()
+    #change to fully qualified
+    ISSETPROFILE  <- ISSETPROFILE_enwidener(tmp$ISSETPROFILE)
     assign("ISSETPROFILE", ISSETPROFILE, envir = .GlobalEnv)
     Mar.utils::save_encrypted(ISSETPROFILE, file     = rdata_file, compress = TRUE)
     rm(ISSETPROFILE, envir = .GlobalEnv)

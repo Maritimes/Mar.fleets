@@ -17,12 +17,18 @@
 #' @param dateEnd default is \code{NULL}. This is the end date (YYYY-MM-DD)
 #' of the window of time you want to look at.  If this is left blank, 1 year of
 #' data will be returned.
+#' @param extract_user default is \code{NULL}.  This parameter can be used with
+#' \code{extract_computer} to load encypted data files extracted by another user
+#' and/or computer
+#' @param extract_computer  default is \code{NULL}.  This parameter can be used with
+#' \code{extract_user} to load encypted data files extracted by another user
+#' and/or computer
 #' @family coreFuncs
 #' @return returns a list with 2 dataframes - "ISDB_TRIPS", and "ISDB_SETS".
 #' "ISDB_TRIPS" contains information for the ISDB trips, while "ISDB_SETS" contains information
 #' about the ISDB sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, ...){
+get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, extract_user = NULL, extract_computer = NULL,...){
   args <-list(...)$args
   if (args$debug) t13 <- Mar.utils::where_now(returnTime = T)
   ISTRIPS <- ISFISHSETS <- ISSETPROFILE <- ISCATCHES <- ISSPECIESCODES <- NA
@@ -119,9 +125,10 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
           isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
           if(!args$manualMatch){
             if(args$useLocal){
-              Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(), cxn  = cxn,
+              Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(),
                                          tables = c("ISFISHSETS","ISCATCHES"),
-                                         env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                                         env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                                         cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
               ISFISHSETS <- ISFISHSETS[ISFISHSETS$FISHSET_ID %in% isdb_SETS_all$FISHSET_ID,]
               catches <- ISCATCHES[ISCATCHES$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SPECCD_ID", "EST_NUM_CAUGHT", "EST_KEPT_WT", "EST_DISCARD_WT", "EST_COMBINED_WT")]
               catches <- merge(catches, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID")], all.x = T)
@@ -227,8 +234,9 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
 
   if(args$useLocal){
 
-    Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(), cxn  = cxn, tables = c("ISTRIPS"),
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+    Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(), tables = c("ISTRIPS"),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
     #NA dates are turned to 9999-01-01 so that they will not meet the criteria of being between our start and end dates
   }else{
     #in the SQL below, NA dates are turned to 9999-01-01 so that they will not meet
@@ -356,15 +364,16 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   badDate <- as.POSIXct(as.Date("2100-01-01"))
   if(args$useLocal){
     Mar.utils::get_data_tables(schema = "<NA>", tables = c("ISFISHSETS", "ISGEARS","ISSETPROFILE"),
-                               data.dir = get_pesd_fl_dir(), cxn  = cxn,
-                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
-    # Mar.utils::get_data_tables(schema = "OBSERVER", data.dir = get_pesd_fl_dir(), cxn  = cxn, tables = c("ISSETPROFILE"),
-    #                            env = environment(), quietly = TRUE, fuzzyMatch=FALSE, ...)
+                               data.dir = get_pesd_fl_dir(),
+                               env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
+                               cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
+
     ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID", "GEAR_ID")]
 
     colnames(ISFISHSETS)[colnames(ISFISHSETS)=="NAFAREA_ID"] <- "NAFO_ISDB_SETS"
 
     ISSETPROFILE<-ISSETPROFILE[ISSETPROFILE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
+    browser()
     ISSETPROFILE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE$DATE_TIME1 > badDate,
                                                      ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
                                                             ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),

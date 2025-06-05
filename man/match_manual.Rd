@@ -4,7 +4,14 @@
 \alias{match_manual}
 \title{match_manual}
 \usage{
-match_manual(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL, manualMatch = T, ...)
+match_manual(
+  TRIP_ID_MARF = NULL,
+  TRIP_ID_ISDB = NULL,
+  manualMatch = T,
+  extract_user = NULL,
+  extract_computer = NULL,
+  ...
+)
 }
 \arguments{
 \item{TRIP_ID_MARF}{The default is \code{NULL}. This can be \code{"ALL"}, or a vector of 1 or
@@ -19,6 +26,14 @@ not both.}
 \item{manualMatch}{default is \code{FALSE}. This parameter is only used when calling functions
 from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
 input format.}
+
+\item{extract_user}{default is \code{NULL}.  This parameter can be used with
+\code{extract_computer} to load encypted data files extracted by another user
+and/or computer}
+
+\item{extract_computer}{default is \code{NULL}.  This parameter can be used with
+\code{extract_user} to load encypted data files extracted by another user
+and/or computer}
 
 \item{...}{
   Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
