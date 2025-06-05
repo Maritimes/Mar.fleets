@@ -153,7 +153,6 @@ can_run <- function(...) {
       t28_ <- proc.time() - t28
       message("\tExiting can_run() (", round(t28_[1], 0), "s elapsed)")
     }
-    message("good")
     stop()
     return(res)
   } else {
