@@ -1,7 +1,24 @@
-Mar.fleets
-==============
+CHANGES IN Mar.fleets VERSION 2025.06.05
 
-Changes:
-2019.08.22
-* package created
+  BREAKING CHANGES:
 
+  o Removed username, password, dsn, and usepkg parameters from all fleet wrapper functions
+  o New requirement to pass existing Oracle connection via 'cxn' parameter
+  o Removed data.dir parameter - data now stored in standardized locations
+  o Protected B data is now encrypted when extracted
+  o Cannot easily share extraction files with other users
+  o All fleet wrapper functions now require valid cxn parameter
+
+  TECHNICAL DETAILS:
+
+  o Oracle connections must be established prior to calling wrapper functions, and submitted via the cxn parameter
+  o Data extractions are stored in user-specific encrypted format
+  o Fleet identification and data linking functionality remains unchanged
+
+CHANGES IN Mar.fleets VERSION 2019.08.22
+
+  NEW FEATURES:
+
+  o Package created with initial fleet wrapper functions
+  o Automated linking of MARFIS commercial data with ISDB observer data
+  o Pre-configured fleet definitions for major Maritimes fisheries
