@@ -68,29 +68,29 @@ summary(redfish_data$MARFIS_CATCHES)  # Commercial catch summary
 
 The package includes pre-configured wrappers for major Maritimes fleets:
 
-| Function | Target Fleet | Key Gear Types |
-|----------|--------------|----------------|
-| `fleet_halibut()` | Atlantic Halibut | Longline |
-| `fleet_redfish()` | Redfish | Bottom trawl |
-| `fleet_haddock()` | Haddock | Bottom trawl |
-| `fleet_cod()` | Atlantic Cod | Multiple gear types |
-| `fleet_pollock()` | Pollock | Bottom trawl |
-| `fleet_yellowtail()` | Yellowtail Flounder | Bottom trawl |
-| `fleet_plaice()` | American Plaice | Bottom trawl |
-| `fleet_witch()` | Witch Flounder | Bottom trawl |
-| `fleet_winter()` | Winter Flounder | Bottom trawl |
-| `fleet_mackerel()` | Atlantic Mackerel | Purse seine, gillnet |
-| `fleet_herring()` | Atlantic Herring | Purse seine, weir |
-| `fleet_scallop()` | Sea Scallop | Scallop dredge |
-| `fleet_lobster()` | American Lobster | Lobster trap |
-| `fleet_crab()` | Snow Crab | Crab trap |
-| `fleet_shrimp()` | Northern Shrimp | Shrimp trawl |
-| `fleet_monkfish()` | Monkfish | Gillnet, longline |
-| `fleet_skate()` | Skate | Bottom trawl |
-| `fleet_turbot()` | Greenland Halibut | Gillnet |
-| `fleet_urchin()` | Sea Urchin | Diving |
-| `fleet_whelk()` | Waved Whelk | Trap |
-| `fishin_CHPS()` | Combined Halibut/Pollock/Skate | Mixed groundfish |
+| Function | Target Fleet |
+|----------|--------------|
+| `fleet_halibut()` | Atlantic Halibut |
+| `fleet_redfish()` | Redfish |
+| `fleet_haddock()` | Haddock |
+| `fleet_cod()` | Atlantic Cod |
+| `fleet_pollock()` | Pollock |
+| `fleet_yellowtail()` | Yellowtail Flounder |
+| `fleet_plaice()` | American Plaice |
+| `fleet_witch()` | Witch Flounder |
+| `fleet_winter()` | Winter Flounder |
+| `fleet_mackerel()` | Atlantic Mackerel |
+| `fleet_herring()` | Atlantic Herring |
+| `fleet_scallop()` | Sea Scallop |
+| `fleet_lobster()` | American Lobster |
+| `fleet_crab()` | Snow Crab |
+| `fleet_shrimp()` | Northern Shrimp |
+| `fleet_monkfish()` | Monkfish |
+| `fleet_skate()` | Skate |
+| `fleet_turbot()` | Greenland Halibut |
+| `fleet_urchin()` | Sea Urchin |
+| `fleet_whelk()` | Waved Whelk |
+| `fishin_CHPS()` | Cod/Haddock/Pollock |
 
 ## What You Get Back
 
