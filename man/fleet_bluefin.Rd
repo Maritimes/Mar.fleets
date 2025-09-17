@@ -81,6 +81,8 @@ and date).  They may still match on confirmation codes and/or trip names.}
     \item{\code{manualMatch}}{default is \code{FALSE}. This parameter is only used when calling functions
 from \code{manual_matcher()}.  It ensures that the functions work properly with its reduced
 input format.}
+    \item{\code{extract_user}}{Optional username of original file creator}
+    \item{\code{extract_computer}}{Optional hostname of original file creator}
     \item{\code{debug}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will

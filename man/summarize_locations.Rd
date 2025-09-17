@@ -75,7 +75,6 @@ Other coreFuncs:
 
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
-\code{\link{quick_map}()},
 \code{\link{summarizer}()}
 }
 \author{

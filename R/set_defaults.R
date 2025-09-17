@@ -78,6 +78,8 @@
 #'       \item param \code{cxn} a valid oracle connection (e.g. an roracle, rodbc or dbi connection object)
 #'     }
 #' }
+#' @param extract_user Optional username of original file creator
+#' @param extract_computer Optional hostname of original file creator
 #' @param debug default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 #' debug mode, providing much extraneous information.
 #' @param debugLics default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will
@@ -133,6 +135,7 @@ set_defaults <- function(lics = 'all',
                          debugISDBTripIDs = NULL,
                          debugISDBTripNames = NULL,
                          debug=FALSE,
+                         filtYr=NULL,
                          ...){
   defaults <- as.list(environment())
   sentArgs <- list(...)

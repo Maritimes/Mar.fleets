@@ -23,4 +23,6 @@ utils::globalVariables(c("GEARS_MARFIS", "GEARS_ISDB","SPECIES_MARFIS","SPECIES_
                          "LIC_AREAS","LIC_CORE","LIC_GEAR_SPEC",
                          "LIC", "LICENCE_ID", "TRIP_ID_ISDB", "TRIP_ID_MARF",
                          "VESSELS","VR", "VR_NUMBER_FISHING", "MON_DOC_ENTRD_DETS",
-                         "HAIL_IN_CALLS","HAIL_OUTS", "PRO_SPC_INFO","TRIPS", "."))
+                         "HAIL_IN_CALLS","HAIL_OUTS", "PRO_SPC_INFO","TRIPS", ".",
+                         "getFromNamespace","NAFO_MARF_SETS","LOG_EFRT_STD_INFO_ID",
+                         "RND_WEIGHT_KGS","SPECIES_CODE","cxn"))

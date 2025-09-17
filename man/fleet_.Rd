@@ -88,6 +88,8 @@ Depending on your value for \code{useLocal}, different values become necessary.
       \item param \code{cxn} a valid oracle connection (e.g. an roracle, rodbc or dbi connection object)
     }
 }}
+    \item{\code{extract_user}}{Optional username of original file creator}
+    \item{\code{extract_computer}}{Optional hostname of original file creator}
     \item{\code{debug}}{default is \code{FALSE}. If TRUE, this parameter causes the package to run in
 debug mode, providing much extraneous information.}
     \item{\code{debugLics}}{default is \code{NULL}.  If a vector of LICENCE_IDs is provided, the script will

@@ -168,7 +168,7 @@ get_fleet<-function(extract_user = NULL, extract_computer = NULL, ...){
       WHERE
       COLUMN_DEFN_ID IN (",Mar.utils::SQL_in(grSpCols,apos=F),")
       AND ",Mar.utils::big_in(vec=unique(df$LOG_EFRT_STD_INFO_ID), vec.field="LOG_EFRT_STD_INFO_ID"))
-      LE_df <- args$cxn$thecmd(args$cxn$channel, RelevantQry_LE)
+      LE_df <- args$thecmd(args$cxn, RelevantQry_LE)
 
       RelevantQry_MD <- paste0("SELECT MON_DOC_ID, COLUMN_DEFN_ID, DATA_VALUE from MARFISSCI.MON_DOC_ENTRD_DETS
       WHERE
@@ -223,6 +223,7 @@ get_fleet<-function(extract_user = NULL, extract_computer = NULL, ...){
       if (!"GR_TYPE" %in% names(MD_df)) {
         MD_df$GR_TYPE <- -999
       }else{
+        MD_df[MD_df$GR_TYPE %in% "CIRCLE\xc7","GR_TYPE"] <- "CIRCLE"
         MD_df$GR_TYPE <- toupper(MD_df$GR_TYPE)
       }
       colnames(MD_df)[colnames(MD_df)=="MON_DOC_ID"] <- "ID_FLD"

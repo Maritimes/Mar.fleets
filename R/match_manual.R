@@ -18,30 +18,34 @@
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 #' @export
-match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T, extract_user = NULL, extract_computer = NULL, ...){
+match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T, extract_user = NULL, extract_computer = NULL, filtYr = NULL, ...){
 
   argsFn <- as.list(environment())
   argsFn$TRIP_ID_MARF <- argsFn$TRIP_ID_ISDB <- NULL
   argsUser <-list(...)
+  if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
+  args <- do.call(getFromNamespace("set_defaults", "Mar.fleets"), list(argsFn=argsFn, argsUser=argsUser))
+  args$args$params <- args$params
+  args <- args$args
+
   if (args$debug)  t25 <- Mar.utils::where_now(returnTime = T)
   # add remaining default args ------------------------------------------------------------------------------------------------------------------------------
 
-  if (!exists("dbEnv", envir = .GlobalEnv)) assign("dbEnv", new.env(), envir = .GlobalEnv)
-  args <- do.call(set_defaults, list(argsFn = argsFn, argsUser=argsUser))
-  params <- args$params
+
+  # args <- do.call(set_defaults, list(argsFn = argsFn, argsUser=argsUser))
+  # params <- args$params
   # Verify we have necessary data/permissions ---------------------------------------------------------------------------------------------------------------
-  args <- do.call(can_run, args$args)
+  args <- do.call(getFromNamespace("can_run", "Mar.fleets"), args)
 
-
-  if (!is.null(TRIP_ID_MARF) && class(TRIP_ID_MARF) == "character")TRIP_ID_MARF <- toupper(TRIP_ID_MARF)
-  if (!is.null(TRIP_ID_ISDB) && class(TRIP_ID_ISDB) == "character")TRIP_ID_ISDB <- toupper(TRIP_ID_ISDB)
+  if (!is.null(TRIP_ID_MARF) && inherits(TRIP_ID_MARF, "character")) TRIP_ID_MARF <- toupper(TRIP_ID_MARF)
+  if (!is.null(TRIP_ID_ISDB) && inherits(TRIP_ID_ISDB, "character")) TRIP_ID_ISDB <- toupper(TRIP_ID_ISDB)
 
   getMarfMatch <- function(...){
     args <- list(...)$args
     if (args$debug)  t26 <- Mar.utils::where_now(returnTime = T)
     if(args$useLocal){
       Mar.utils::get_data_tables(schema = "MARFISSCI", tables = c("PRO_SPC_INFO","VESSELS","TRIPS","MON_DOC_ENTRD_DETS",
-                                                                                            "HAIL_IN_CALLS", "HAIL_OUTS"),
+                                                                  "HAIL_IN_CALLS", "HAIL_OUTS"),
                                  data.dir = get_pesd_fl_dir(), env = environment(), quietly = TRUE, fuzzyMatch=FALSE,
                                  cxn  = args$cxn, extract_user = args$extract_user, extract_computer = args$extract_computer)
 
@@ -56,7 +60,23 @@ match_manual <- function(TRIP_ID_MARF = NULL, TRIP_ID_ISDB = NULL,manualMatch =T
                                      'VR_NUMBER_LANDING','LOG_EFRT_STD_INFO_ID','SPECIES_CODE', 'RND_WEIGHT_KGS')]
 
       }
+      if(!is.null(filtYr)){
+        message("Filter MARFIS to " ,filtYr," only")
+        LOOPAGAIN = T
+        tables_to_count <- c("HAIL_IN_CALLS","HAIL_OUTS","MARF_MATCH","MON_DOC_ENTRD_DETS", "PRO_SPC_INFO", "TRIPS")
+        while (LOOPAGAIN){
+          precnt = sum(sapply(mget(tables_to_count), nrow))
+          PRO_SPC_INFO <- PRO_SPC_INFO[which(lubridate::year(PRO_SPC_INFO$DATE_FISHED) == filtYr),]
+          HAIL_IN_CALLS <- HAIL_IN_CALLS[HAIL_IN_CALLS$TRIP_ID %in% TRIPS$TRIP_ID,]
+          HAIL_OUTS <- HAIL_OUTS[HAIL_OUTS$TRIP_ID %in% TRIPS$TRIP_ID,]
+          MARF_MATCH <- MARF_MATCH[MARF_MATCH$PRO_SPC_INFO_ID %in% unique(PRO_SPC_INFO$PRO_SPC_INFO_ID),]
+          MON_DOC_ENTRD_DETS <- MON_DOC_ENTRD_DETS[MON_DOC_ENTRD_DETS$MON_DOC_ID %in% PRO_SPC_INFO$MON_DOC_ID,]
+          TRIPS <- TRIPS[TRIPS$VR_NUMBER %in% unique(PRO_SPC_INFO$VR_NUMBER_FISHING),]
+          postcnt =  sum(sapply(mget(tables_to_count), nrow))
 
+          if(postcnt==precnt) LOOPAGAIN=FALSE
+        }
+      }
       TRIPS <- TRIPS[TRIPS$TRIP_ID %in% MARF_MATCH$TRIP_ID,c("TRIP_ID","VR_NUMBER", "EARLIEST_DATE_TIME","LATEST_DATE_TIME")]
       colnames(TRIPS)[colnames(TRIPS)=="EARLIEST_DATE_TIME"] <- "T_DATE1"
       colnames(TRIPS)[colnames(TRIPS)=="LATEST_DATE_TIME"] <- "T_DATE2"

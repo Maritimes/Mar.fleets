@@ -3,8 +3,7 @@
 #' and extracts the relevant VMS tracks, and flags whether or not each was observed
 #' @param data default is \code{NULL}. This is the entire output from any of the fleet wrappers.
 #' @param ... other arguments passed to methods
-#' It is likely that you will need to provide values for the following 4
-#' parameters to enable a connection to oracle:
+#' You will need to provide the following parameter to enable a connection to oracle:
 #' \itemize{
 #'   \item \code{cxn} A valid Oracle connection object. This parameter allows you to
 #' pass an existing connection, reducing the need to establish a new connection

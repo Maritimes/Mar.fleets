@@ -40,6 +40,7 @@ set_defaults(
   debugISDBTripIDs = NULL,
   debugISDBTripNames = NULL,
   debug = FALSE,
+  filtYr = NULL,
   ...
 )
 }
@@ -130,6 +131,10 @@ input format.}
 \item{socks}{default is \code{FALSE}. Normally, un-QC'd wrappers generate a prompt forcing the
 user to acknowledge that they are aware that the script needs further testing.  Setting this to
 TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
+
+\item{extract_user}{Optional username of original file creator}
+
+\item{extract_computer}{Optional hostname of original file creator}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).

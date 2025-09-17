@@ -181,7 +181,6 @@ getPS <- function(allProSpc = NULL,...){
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = PS_df$LICENCE_ID, stepDesc = "marf_PSSp")
     if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = unique(c(PS_df$VR_NUMBER_FISHING, PS_df$VR_NUMBER_LANDING)), stepDesc = "marf_PSSp")
     if (!is.null(dbEnv$debugMARFTripIDs)) dbEnv$debugMARFTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugMARFTripIDs, expected = dbEnv$debugMARFTripIDs, expectedID = "debugMARFTripIDs", known = PS_df$TRIP_ID, stepDesc = "marf_PSSp")
-
     if (nrow(args$area)>0 & any(args$area$AREA_TYPE =="NAFO")){
       # nafoCode <- gsub(pattern = "%", x=args$area$AREA, replacement = "",ignore.case = T)
       NAFO_UNIT_AREAS <- NAFO_UNIT_AREAS[grep(paste(args$area$AREA, collapse = '|'),NAFO_UNIT_AREAS$NAFO_AREA),]
@@ -475,16 +474,17 @@ get_marfis_sets <- function(log_efrt = NULL, ...){
     # PS_sets<-PS_sets[PS_sets$LOG_EFRT_STD_INFO_ID %in% log_efrt, ]
 
     PS_sets <- Mar.utils::DDMMx_to_DD(df=PS_sets, format = "DDMMMM", lat.field = "ENT_LATITUDE", lon.field = "ENT_LONGITUDE", WestHemisphere = T)
+    PS_sets$ENT_LATITUDE <- PS_sets$ENT_LONGITUDE <- NULL
     colnames(PS_sets)[colnames(PS_sets)=="LAT_DD"] <- "ENT_LATITUDE"
     colnames(PS_sets)[colnames(PS_sets)=="LON_DD"] <- "ENT_LONGITUDE"
     PS_sets <- Mar.utils::DDMMx_to_DD(df=PS_sets, format = "DDMMMM", lat.field = "DET_LATITUDE", lon.field = "DET_LONGITUDE", WestHemisphere = T)
+    PS_sets$DET_LATITUDE <- PS_sets$DET_LONGITUDE <- NULL
     colnames(PS_sets)[colnames(PS_sets)=="LAT_DD"] <- "DET_LATITUDE"
     colnames(PS_sets)[colnames(PS_sets)=="LON_DD"] <- "DET_LONGITUDE"
 
 
     PS_sets$LATITUDE <- ifelse(is.na(PS_sets$ENT_LATITUDE), PS_sets$DET_LATITUDE, PS_sets$ENT_LATITUDE)
     PS_sets$LONGITUDE <- ifelse(is.na(PS_sets$ENT_LONGITUDE), PS_sets$DET_LONGITUDE, PS_sets$ENT_LONGITUDE)
-
   }
   PS_sets$DET_LATITUDE<-PS_sets$DET_LONGITUDE<-PS_sets$ENT_LATITUDE<-PS_sets$ENT_LONGITUDE<-NULL
   PS_sets<-unique(PS_sets)

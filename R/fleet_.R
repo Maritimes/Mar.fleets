@@ -152,7 +152,7 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
     if (args$returnISDB){
       isdb <- do.call(get_isdb, list(thisFleet=fleet$FLEET_ACTIVITY,get_marfis = marf, args=args))
 
-      if (length(isdb)>1 && class(isdb$ISDB_TRIPS)=="data.frame"){
+      if (length(isdb)>1 && inherits(isdb$ISDB_TRIPS, "data.frame")){
 
         data[["isdb"]]<- isdb
         data$isdb$debug <-NULL
@@ -171,17 +171,17 @@ fleet_ <- function(fleet=NULL, area = NULL, gearSpecs = NULL, ...){
       }
     }
   }
-  if (!(class(dbEnv$debugLics) == "NULL" &&
-        class(dbEnv$debugVRs) == "NULL" &&
-        class(dbEnv$debugMARFTripIDs) == "NULL" &&
-        class(dbEnv$debugISDBTripIDs) == "NULL"  &&
-        class(dbEnv$debugISDBTripNames) == "NULL")){
+  if (!(is.null(dbEnv$debugLics) &&
+         is.null(dbEnv$debugVRs) &&
+         is.null(dbEnv$debugMARFTripIDs) &&
+         is.null(dbEnv$debugISDBTripIDs) &&
+         is.null(dbEnv$debugISDBTripNames))){
     data[["debug"]]<- list()
-    if (!class(dbEnv$debugLics) == "NULL") data$debug$debugLics <- dbEnv$debugLics
-    if (!class(dbEnv$debugVRs) == "NULL") data$debug$debugVRs <- dbEnv$debugVRs
-    if (!class(dbEnv$debugMARFTripIDs) == "NULL") data$debug$debugMARFTripIDs <- dbEnv$debugMARFTripIDs
-    if (!class(dbEnv$debugISDBTripIDs) == "NULL") data$debug$debugISDBTripIDs <- dbEnv$debugISDBTripIDs
-    if (!class(dbEnv$debugISDBTripNames) == "NULL") {
+    if (!is.null(dbEnv$debugLics)) data$debug$debugLics <- dbEnv$debugLics
+    if (!is.null(dbEnv$debugVRs)) data$debug$debugVRs <- dbEnv$debugVRs
+    if (!is.null(dbEnv$debugMARFTripIDs)) data$debug$debugMARFTripIDs <- dbEnv$debugMARFTripIDs
+    if (!is.null(dbEnv$debugISDBTripIDs)) data$debug$debugISDBTripIDs <- dbEnv$debugISDBTripIDs
+    if (!is.null(dbEnv$debugISDBTripNames)) {
       tmp <- merge(dbEnv$debugISDBTripNamesLookup, dbEnv$debugISDBTripNames, by.x = "ISDB_TRIP_CLN", by.y = "expected")
       tmp = tmp[,2:ncol(tmp)]
       data$debug$debugISDBTripNames <- tmp

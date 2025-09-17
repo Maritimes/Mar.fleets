@@ -86,7 +86,6 @@ summary <- summarizer(data = Halibut2017, byGr = TRUE)
 \seealso{
 Other simpleproducts: 
 \code{\link{get_vmstracks}()},
-\code{\link{quick_map}()},
 \code{\link{summarize_locations}()}
 }
 \author{

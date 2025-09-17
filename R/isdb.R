@@ -37,6 +37,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
     stop()
   }
   if (is.null(thisFleet) & args$manualMatch){
+
     marfMatch <- get_marfis$MARF_MATCH
     marfSets <- get_marfis$MARF_SETS
     VR_LIC_fleet_FISH <- unique(stats::na.omit(paste0(marfMatch$VR_NUMBER_FISHING,"_",marfMatch$LICENCE_ID)))
@@ -60,7 +61,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
   }
 
   if (!is.null(keepSurveyTrips)) args$keepSurveyTrips <- keepSurveyTrips
-
 
   isdb_TRIPS_all <- do.call(get_isdb_trips, list(mVR_LIC = VR_LIC_fleet, args = args))
   #these are all, potential isdb trips based on dates, licences, vrs, tripcd_ids, etc
@@ -118,7 +118,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
 
           isdb_SETS_all <- merge(isdb_SETS_all, sets$MAP_ISDB_MARFIS_SETS ,all.x = T)
           cat("**NEW 2024-07-30 - ISDB sets whose positions that do not fall within the areas specified within this fleet's LIC_AREAs are now dropped**")
-          isdb_SETS_all = isdb_SETS_all[grep(paste(args$area$AREA, collapse = '|'),isdb_SETS_all$NAFO_ISDB_SETS_CALC),]
+          if(is.null(args$filtYr)) isdb_SETS_all = isdb_SETS_all[grep(paste(args$area$AREA, collapse = '|'),isdb_SETS_all$NAFO_ISDB_SETS_CALC),]
 
           isdb_SETS_all$TRIP_ID_ISDB <- isdb_SETS_all$TRIP_ID_MARF <- NULL
 
@@ -142,9 +142,9 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
        SP.COMMON,
        SP.SCIENTIFIC
 FROM
-ISDB.ISCATCHES CA,
-ISDB.ISFISHSETS FS,
-ISDB.ISSPECIESCODES SP
+ISCATCHES CA,
+ISFISHSETS FS,
+ISSPECIESCODES SP
 WHERE
 CA.FISHSET_ID = FS.FISHSET_ID AND
 CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_SETS_all$FISHSET_ID), vec.field = "FS.FISHSET_ID"))
@@ -222,16 +222,15 @@ CA.SPECCD_ID = SP.SPECCD_ID AND ",Mar.utils::big_in(vec=unique(isdb_SETS_all$FIS
 #' @family coreFuncs
 #' @return a dataframe
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
-get_isdb_trips<-function(mVR_LIC = NULL,...){
+get_isdb_trips<-function(mVR_LIC = NULL, ...){
   args <- list(...)$args
   if (args$debug) t14<- Mar.utils::where_now(returnTime = T)
   # Sometimes ISDB does not have the correct MARFIS licenses - extract them from MARFIS,
   # merge them on to the ISDB data, and use them preferentially
   mLICS <- sub("\\_.*", "", mVR_LIC)
-  mLICS <- as.numeric(unique(mLICS[!is.na(mLICS)]))
+  mLICS <- as.numeric(unique(mLICS[!is.na(mLICS) & mLICS != "NA"]))
   mVRS <- sub(".*\\_", "", mVR_LIC)
-  mVRS <- as.numeric(unique(mVRS[!is.na(mVRS)]))
-
+  mVRS <- as.numeric(unique(mVRS[!is.na(mVRS)& mVRS != "NA"]))
   if(args$useLocal){
 
     Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(), tables = c("ISTRIPS"),
@@ -251,8 +250,7 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
                      NVL(LANDING_DATE, to_date('9999-01-01','YYYY-MM-DD')) LANDING_DATE,
                      MARFIS_LICENSE_NO,
                      MARFIS_CONF_NUMBER
-                     FROM ISDB.ISTRIPS
-                    ")
+                     FROM ISTRIPS")
     ISTRIPS<- args$thecmd(args$cxn, tripSQL)
   }
   if (!args$keepSurveyTrips){
@@ -265,6 +263,7 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
     if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Surveys")
 
   }
+
   ISTRIPS$LANDING_DATE <- as.Date(ISTRIPS$LANDING_DATE)
   ISTRIPS$BOARD_DATE <- as.Date(ISTRIPS$BOARD_DATE)
   ISTRIPS[is.na(ISTRIPS$LANDING_DATE),"LANDING_DATE"]<- '9999-01-01'
@@ -273,8 +272,17 @@ get_isdb_trips<-function(mVR_LIC = NULL,...){
   colnames(ISTRIPS)[colnames(ISTRIPS)=="MARFIS_LICENSE_NO"] <- "LIC"
   colnames(ISTRIPS)[colnames(ISTRIPS)=="LICENSE_NO"] <- "VR"
   colnames(ISTRIPS)[colnames(ISTRIPS)=="TRIP_ID"] <- "TRIP_ISDB"
-  ISTRIPS = ISTRIPS[(ISTRIPS$LANDING_DATE >= as.Date(args$dateStart) & ISTRIPS$LANDING_DATE <= as.Date(args$dateEnd)) |
-                      (ISTRIPS$BOARD_DATE >= as.Date(args$dateStart) & ISTRIPS$BOARD_DATE <= as.Date(args$dateEnd)) ,]
+  if(!is.null(args$filtYr)){
+    message("Filter ISDB to ",args$filtYr, " only")
+    print(nrow(ISTRIPS))
+    ISTRIPS <- ISTRIPS[lubridate::year(ISTRIPS$BOARD_DATE) ==args$filtYr | lubridate::year(ISTRIPS$LANDING_DATE)==args$filtYr,]
+    print(nrow(ISTRIPS))
+  }else{
+    ISTRIPS = ISTRIPS[(ISTRIPS$LANDING_DATE >= as.Date(args$dateStart) & ISTRIPS$LANDING_DATE <= as.Date(args$dateEnd)) |
+                        (ISTRIPS$BOARD_DATE >= as.Date(args$dateStart) & ISTRIPS$BOARD_DATE <= as.Date(args$dateEnd)) ,]
+  }
+
+
 
   if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = ISTRIPS$TRIP_ISDB, stepDesc = "isdb_Dates")
   if (!is.null(dbEnv$debugISDBTripNames)) dbEnv$debugISDBTripNames <- Mar.utils::updateExpected(quietly = TRUE, df=dbEnv$debugISDBTripNames, expected = dbEnv$debugISDBTripNames, expectedID = "debugISDBTripNames", known = clean_ISDB_Trip(ISTRIPS[, "TRIP", drop=F], "TRIP", "TRIP_cln")$TRIP_cln, stepDesc = "isdb_Dates")
@@ -373,38 +381,38 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
     ISSETPROFILE<-ISSETPROFILE[ISSETPROFILE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
 
     ISSETPROFILE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE$DATE_TIME1 > badDate,
-                                                     ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
-                                                            ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
-                                                            ISSETPROFILE$DATE_TIME2),
-                                                     ISSETPROFILE$DATE_TIME1),
-                                              origin = "1970-01-01")
+                                                ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
+                                                       ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
+                                                       ISSETPROFILE$DATE_TIME2),
+                                                ISSETPROFILE$DATE_TIME1),
+                                         origin = "1970-01-01")
     ISSETPROFILE <- merge(ISSETPROFILE, ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "GEAR_ID")], all.x=T)
     ISSETPROFILE <- merge(ISSETPROFILE, ISGEARS[,c("GEAR_ID", "GEARCD_ID" )], all.x=T)
 
   }else{
 
     FSSQL  <- paste0("SELECT distinct FS.TRIP_ID, FS.FISHSET_ID, FS.SOURCE, FS.SETCD_ID, FS.NAFAREA_ID AS NAFO_ISDB_SETS, FS.GEAR_ID
-                FROM OBSERVER.ISFISHSETS FS
+                FROM ISFISHSETS FS
                 WHERE ",Mar.utils::big_in(vec=unique(isdbTrips$TRIP_ISDB), vec.field = "FS.TRIP_ID"))
 
     ISFISHSETS<- args$thecmd(args$cxn, FSSQL)
 
-    SPSQL <- paste0("SELECT FISHSET_ID, SET_NO, DATE_TIME1, DATE_TIME2, DATE_TIME3, DATE_TIME4,
-                LAT1, LAT2, LAT3, LAT4,
-                LONG1, LONG2, LONG3, LONG4
-                FROM OBSERVER.ISSETPROFILE
+    SPSQL <- paste0("SELECT *
+                FROM ISSETPROFILE
                 WHERE ",Mar.utils::big_in(vec=unique(ISFISHSETS$FISHSET_ID), vec.field = "FISHSET_ID"))
-    ISSETPROFILE<- args$thecmd(args$cxn, SPSQL)
-
+    #FISHSET_ID, SET_NO, DATE_TIME1, DATE_TIME2, DATE_TIME3, DATE_TIME4, LAT1, LAT2, LAT3, LAT4, LONG1, LONG2, LONG3, LONG4
+    ISSETPROFILE_og<- args$thecmd(args$cxn, SPSQL)
+    ISSETPROFILE <- suppressMessages(Mar.utils::ISSETPROFILE_enwidener(ISSETPROFILE_og))
+    ISSETPROFILE<- ISSETPROFILE[,c("FISHSET_ID", "SET_NO", "DATE_TIME1", "DATE_TIME2", "DATE_TIME3", "DATE_TIME4", "LAT1", "LAT2", "LAT3", "LAT4", "LONG1", "LONG2", "LONG3", "LONG4")]
     ISSETPROFILE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE$DATE_TIME1 > badDate,
-                                                     ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
-                                                            ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
-                                                            ISSETPROFILE$DATE_TIME2),
-                                                     ISSETPROFILE$DATE_TIME1),
-                                              origin = "1970-01-01")
+                                                ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
+                                                       ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
+                                                       ISSETPROFILE$DATE_TIME2),
+                                                ISSETPROFILE$DATE_TIME1),
+                                         origin = "1970-01-01")
 
     GRSQL <- paste0("SELECT GEAR_ID, GEARCD_ID
-                FROM OBSERVER.ISGEARS
+                FROM ISGEARS
                 WHERE ",Mar.utils::big_in(vec=unique(ISFISHSETS$TRIP_ID), vec.field = "TRIP_ID"))
     ISGEARS<- args$thecmd(args$cxn, GRSQL)
     ISSETPROFILE <- merge(ISSETPROFILE, ISFISHSETS[,c("FISHSET_ID", "GEAR_ID")], all.x=T)

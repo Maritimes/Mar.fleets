@@ -258,7 +258,7 @@ quick_map <- function(data=NULL,
     iconSet$ISDB_Log_coord_issue <- NULL
   }
 
-  if ((plotMARF | plotMARFSurf)  & class(data$marf$MARF_SETS)=="data.frame"){
+  if ((plotMARF | plotMARFSurf)  & inherits(data$marf$MARF_SETS, "data.frame")){
     commSets <- Mar.utils::df_qc_spatial(data$marf$MARF_SETS)
     if (showAllMARFSets){
       theseCatM <- data$marf$MARF_CATCHES[,c("TRIP_ID_MARF", "LOG_EFRT_STD_INFO_ID", "SPECIES_CODE","RND_WEIGHT_KGS")]
@@ -339,7 +339,7 @@ quick_map <- function(data=NULL,
   }else{
     commSets <- NA
   }
-  if ((plotISDB | plotISDBSurf) & class(data$isdb$ISDB_SETS)=="data.frame"){
+  if ((plotISDB | plotISDBSurf) & inherits(data$isdb$ISDB_SETS,"data.frame")){
     isdbSets <- Mar.utils::df_qc_spatial(data$isdb$ISDB_SETS)
     message(nrow(data$isdb$ISDB_SETS)-nrow(isdbSets), " ISDB positions had bad coordinates and couldn't be used")
     if (showAllISDBSets) {
@@ -439,7 +439,7 @@ quick_map <- function(data=NULL,
     isdbSets <- NA
   }
 
-  if ("data.frame" %in% class(vms)){
+  if (inherits(vms,"data.frame")){
     vmsObs <- vms[vms$OBS==1,]
     vmsUnObs <- vms[vms$OBS!=1,]
 

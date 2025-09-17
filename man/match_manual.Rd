@@ -10,6 +10,7 @@ match_manual(
   manualMatch = T,
   extract_user = NULL,
   extract_computer = NULL,
+  filtYr = NULL,
   ...
 )
 }

@@ -1,7 +1,7 @@
 Package: Mar.fleets
 Type: Package
 Title: Facilitates Extraction and Linking of Commercial and Observed Fisheries Data for the Maritimes
-Version: 2025.06.05
+Version: 2025.09.17
 Authors@R: person("Mike", "McMahon", email = "mike.mcmahon@dfo-mpo.gc.ca", role = c("aut", "cre", "dnc"))
 Description: This package facilitates the identification and extraction of relevant commercial catch 
     data for a given commercial fleet (Maritimes), and the identification and extraction of the 
@@ -26,7 +26,6 @@ Suggests:
     leaflet,
     lubridate,
     raster,
-    rnaturalearth,
     RODBC,
     ROracle,
     sf,

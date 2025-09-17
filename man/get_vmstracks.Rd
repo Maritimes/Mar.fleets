@@ -10,8 +10,7 @@ get_vmstracks(data = NULL, ...)
 \item{data}{default is \code{NULL}. This is the entire output from any of the fleet wrappers.}
 
 \item{...}{other arguments passed to methods
-It is likely that you will need to provide values for the following 4
-parameters to enable a connection to oracle:
+You will need to provide the following parameter to enable a connection to oracle:
 \itemize{
   \item \code{cxn} A valid Oracle connection object. This parameter allows you to
 pass an existing connection, reducing the need to establish a new connection
@@ -35,7 +34,6 @@ redfishVMS<-get_vmstracks(data = redfishresults,
 }
 \seealso{
 Other simpleproducts: 
-\code{\link{quick_map}()},
 \code{\link{summarize_locations}()},
 \code{\link{summarizer}()}
 }
