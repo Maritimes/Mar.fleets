@@ -10,7 +10,7 @@
 #' known to have been used by this fleet. The default values can be replaced with a subset of these to
 #' only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
 #' the script will not run.
-#' @param type default is \code{NULL}. This is either "LL" (longline), "HARPOON", or "OTHER" (e.g. tended line. angling).
+#' @param type default is \code{NULL}. This is either "ALL", LL" (longline), "HARPOON", or "OTHER" (e.g. tended line. angling).
 #' @inherit set_defaults params
 #' @inheritDotParams set_defaults -lics -gearSpecs -area -useLocal
 #' @examples \dontrun{
@@ -21,7 +21,8 @@
 #'                     )
 #' local <- fleet_swordfishTunaShark(year = 2018,
 #'                        type = "LL",
-#'                        useLocal = T
+#'                        useLocal = T,
+#'                     cxn  = <valid Oracle Connection>
 #'                       )
 #'                        }
 #' @family fleets
@@ -43,7 +44,7 @@
 #' @export
 fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, useLocal = NULL, socks = FALSE, ...){
   if (!socks) isDraft()
-  valuesOK(valSent = NULL, valID = "type", valOK =   c("LL","HARPOON","OTHER"))
+  valuesOK(valSent = type, valID = "type", valOK =   c("ALL","sssLL","HARPOON","OTHER"))
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   if ((length(type)>0) && type=="LL"){
@@ -52,6 +53,8 @@ fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, u
     marfGear = c(81)
   }else if ((length(type)>0) && type == "OTHER"){
     marfGear = c(54,60)
+  }else if ((length(type)>0) && type == "ALL"){
+    marfGear = c(51, 54, 60, 81)
   }else{
     stop("'type' cannot be NULL")
   }

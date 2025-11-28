@@ -18,7 +18,7 @@ known to have been used by this fleet. The default values can be replaced with a
 only return a gear-specific subset of the fleet's fishing activity.  If other values are provided,
 the script will not run.}
 
-\item{type}{default is \code{NULL}. This is either "LL" (longline), "HARPOON", or "OTHER" (e.g. tended line. angling).}
+\item{type}{default is \code{NULL}. This is either "ALL", LL" (longline), "HARPOON", or "OTHER" (e.g. tended line. angling).}
 
 \item{useLocal}{default is \code{FALSE}. This specifies whether to run the script against local
 data or against Oracle (requires network or VPN).
@@ -225,7 +225,8 @@ db <- fleet_swordfishTunaShark(useLocal = F,
                     )
 local <- fleet_swordfishTunaShark(year = 2018,
                        type = "LL",
-                       useLocal = T
+                       useLocal = T,
+                    cxn  = <valid Oracle Connection>
                       )
                        }
 }
