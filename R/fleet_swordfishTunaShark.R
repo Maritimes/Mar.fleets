@@ -44,7 +44,7 @@
 #' @export
 fleet_swordfishTunaShark <- function(marfGear = c(51, 54, 60, 81), type= NULL, useLocal = NULL, socks = FALSE, ...){
   if (!socks) isDraft()
-  valuesOK(valSent = type, valID = "type", valOK =   c("ALL","sssLL","HARPOON","OTHER"))
+  valuesOK(valSent = type, valID = "type", valOK =   c("ALL","LL","HARPOON","OTHER"))
   if(!paramOK(useLocal = useLocal, p=list(...))) stop("Please provide additional parameters as directed above")
   type <- toupper(type)
   if ((length(type)>0) && type=="LL"){
