@@ -35,19 +35,19 @@ This function extracts all of the MARFIS records for vessels with
 particular combinations of VR_NUMBER and LICENCE_ID  for a given date range.
 }
 \seealso{
-Other coreFuncs: 
-\code{\link{fleet_}()},
-\code{\link{getED}()},
-\code{\link{getHIC}()},
-\code{\link{getHOC}()},
-\code{\link{getPS}()},
-\code{\link{get_fleet}()},
-\code{\link{get_isdb}()},
-\code{\link{get_isdb_sets}()},
-\code{\link{get_isdb_trips}()},
-\code{\link{get_marfis_sets}()},
-\code{\link{set_defaults}()},
-\code{\link{summarize_locations}()}
+Other coreFuncs:
+\code{\link[=fleet_]{fleet_()}},
+\code{\link[=getED]{getED()}},
+\code{\link[=getHIC]{getHIC()}},
+\code{\link[=getHOC]{getHOC()}},
+\code{\link[=getPS]{getPS()}},
+\code{\link[=get_fleet]{get_fleet()}},
+\code{\link[=get_isdb]{get_isdb()}},
+\code{\link[=get_isdb_sets]{get_isdb_sets()}},
+\code{\link[=get_isdb_trips]{get_isdb_trips()}},
+\code{\link[=get_marfis_sets]{get_marfis_sets()}},
+\code{\link[=set_defaults]{set_defaults()}},
+\code{\link[=summarize_locations]{summarize_locations()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

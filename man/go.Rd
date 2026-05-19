@@ -13,11 +13,11 @@ returns TRUE or FALSe, and informative messages
 This function prevents people from running the package until it's ready
 }
 \seealso{
-Other utils: 
-\code{\link{clean_ISDB_Trip}()},
-\code{\link{isDraft}()},
-\code{\link{paramOK}()},
-\code{\link{valuesOK}()}
+Other utils:
+\code{\link[=clean_ISDB_Trip]{clean_ISDB_Trip()}},
+\code{\link[=isDraft]{isDraft()}},
+\code{\link[=paramOK]{paramOK()}},
+\code{\link[=valuesOK]{valuesOK()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

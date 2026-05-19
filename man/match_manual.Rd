@@ -37,7 +37,7 @@ and/or computer}
 and/or computer}
 
 \item{...}{
-  Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
+  Arguments passed on to \code{\link{set_defaults}}
   \describe{
     \item{\code{year}}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an
 entire calendar year (i.e. Jan 1 --> Dec 31).  The format is

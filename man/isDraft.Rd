@@ -14,11 +14,11 @@ This function ensures that users are informed that the analytic is draft, and wi
 only run with their acknowledgment
 }
 \seealso{
-Other utils: 
-\code{\link{clean_ISDB_Trip}()},
-\code{\link{go}()},
-\code{\link{paramOK}()},
-\code{\link{valuesOK}()}
+Other utils:
+\code{\link[=clean_ISDB_Trip]{clean_ISDB_Trip()}},
+\code{\link[=go]{go()}},
+\code{\link[=paramOK]{paramOK()}},
+\code{\link[=valuesOK]{valuesOK()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

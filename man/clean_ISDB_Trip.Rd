@@ -25,11 +25,11 @@ locations, dates, durations, gear amount, etc..
 This function cleans ISDB trip names of spaces/odd characters to improve the potential for matching.
 }
 \seealso{
-Other utils: 
-\code{\link{go}()},
-\code{\link{isDraft}()},
-\code{\link{paramOK}()},
-\code{\link{valuesOK}()}
+Other utils:
+\code{\link[=go]{go()}},
+\code{\link[=isDraft]{isDraft()}},
+\code{\link[=paramOK]{paramOK()}},
+\code{\link[=valuesOK]{valuesOK()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

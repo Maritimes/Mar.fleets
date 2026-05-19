@@ -20,11 +20,11 @@ returns NULL
 This function ensures that the user has not tried to send unacceptable values
 }
 \seealso{
-Other utils: 
-\code{\link{clean_ISDB_Trip}()},
-\code{\link{go}()},
-\code{\link{isDraft}()},
-\code{\link{paramOK}()}
+Other utils:
+\code{\link[=clean_ISDB_Trip]{clean_ISDB_Trip()}},
+\code{\link[=go]{go()}},
+\code{\link[=isDraft]{isDraft()}},
+\code{\link[=paramOK]{paramOK()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

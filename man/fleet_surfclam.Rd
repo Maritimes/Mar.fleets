@@ -35,7 +35,7 @@ user to acknowledge that they are aware that the script needs further testing.  
 TRUE will prevent the prompt from showing up. Why 'socks'?  You had to be there.}
 
 \item{...}{
-  Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
+  Arguments passed on to \code{\link{set_defaults}}
   \describe{
     \item{\code{year}}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an
 entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
@@ -220,27 +220,27 @@ local <- fleet_surfclam(year = 2018,
                        }
 }
 \seealso{
-Other fleets: 
-\code{\link{fishin_CHPs}()},
-\code{\link{fleet_bluefin}()},
-\code{\link{fleet_cucumber}()},
-\code{\link{fleet_flatfish}()},
-\code{\link{fleet_gaspereau}()},
-\code{\link{fleet_hagfish}()},
-\code{\link{fleet_halibut}()},
-\code{\link{fleet_herring}()},
-\code{\link{fleet_jonah}()},
-\code{\link{fleet_redCrab}()},
-\code{\link{fleet_redfish}()},
-\code{\link{fleet_rockCrab}()},
-\code{\link{fleet_scallop}()},
-\code{\link{fleet_sculpin}()},
-\code{\link{fleet_shrimp}()},
-\code{\link{fleet_silverhake}()},
-\code{\link{fleet_snowcrab}()},
-\code{\link{fleet_swordfishTunaShark}()},
-\code{\link{fleet_urchin}()},
-\code{\link{fleet_whelk}()}
+Other fleets:
+\code{\link[=fishin_CHPs]{fishin_CHPs()}},
+\code{\link[=fleet_bluefin]{fleet_bluefin()}},
+\code{\link[=fleet_cucumber]{fleet_cucumber()}},
+\code{\link[=fleet_flatfish]{fleet_flatfish()}},
+\code{\link[=fleet_gaspereau]{fleet_gaspereau()}},
+\code{\link[=fleet_hagfish]{fleet_hagfish()}},
+\code{\link[=fleet_halibut]{fleet_halibut()}},
+\code{\link[=fleet_herring]{fleet_herring()}},
+\code{\link[=fleet_jonah]{fleet_jonah()}},
+\code{\link[=fleet_redCrab]{fleet_redCrab()}},
+\code{\link[=fleet_redfish]{fleet_redfish()}},
+\code{\link[=fleet_rockCrab]{fleet_rockCrab()}},
+\code{\link[=fleet_scallop]{fleet_scallop()}},
+\code{\link[=fleet_sculpin]{fleet_sculpin()}},
+\code{\link[=fleet_shrimp]{fleet_shrimp()}},
+\code{\link[=fleet_silverhake]{fleet_silverhake()}},
+\code{\link[=fleet_snowcrab]{fleet_snowcrab()}},
+\code{\link[=fleet_swordfishTunaShark]{fleet_swordfishTunaShark()}},
+\code{\link[=fleet_urchin]{fleet_urchin()}},
+\code{\link[=fleet_whelk]{fleet_whelk()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

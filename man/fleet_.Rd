@@ -17,7 +17,7 @@ any NAFO areas associated with the selected fleet}
 to select any gear parameters associated with the selected fleet}
 
 \item{...}{
-  Arguments passed on to \code{\link[=set_defaults]{set_defaults}}
+  Arguments passed on to \code{\link{set_defaults}}
   \describe{
     \item{\code{year}}{default is \code{NULL}.  \code{year} can be used if data should be extracted for an
 entire calendar year (i.e. Jan 1 --> Dec 31).  The format is
@@ -202,19 +202,19 @@ test <- fleet_(fleet="POLLOCK_MOBILE", area="WESTERN", gearSpecs="SMALL" )
  }
 }
 \seealso{
-Other coreFuncs: 
-\code{\link{getED}()},
-\code{\link{getHIC}()},
-\code{\link{getHOC}()},
-\code{\link{getPS}()},
-\code{\link{get_fleet}()},
-\code{\link{get_isdb}()},
-\code{\link{get_isdb_sets}()},
-\code{\link{get_isdb_trips}()},
-\code{\link{get_marfis}()},
-\code{\link{get_marfis_sets}()},
-\code{\link{set_defaults}()},
-\code{\link{summarize_locations}()}
+Other coreFuncs:
+\code{\link[=getED]{getED()}},
+\code{\link[=getHIC]{getHIC()}},
+\code{\link[=getHOC]{getHOC()}},
+\code{\link[=getPS]{getPS()}},
+\code{\link[=get_fleet]{get_fleet()}},
+\code{\link[=get_isdb]{get_isdb()}},
+\code{\link[=get_isdb_sets]{get_isdb_sets()}},
+\code{\link[=get_isdb_trips]{get_isdb_trips()}},
+\code{\link[=get_marfis]{get_marfis()}},
+\code{\link[=get_marfis_sets]{get_marfis_sets()}},
+\code{\link[=set_defaults]{set_defaults()}},
+\code{\link[=summarize_locations]{summarize_locations()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

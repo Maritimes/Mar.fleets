@@ -33,9 +33,9 @@ redfishVMS<-get_vmstracks(data = redfishresults,
                           }
 }
 \seealso{
-Other simpleproducts: 
-\code{\link{summarize_locations}()},
-\code{\link{summarizer}()}
+Other simpleproducts:
+\code{\link[=summarize_locations]{summarize_locations()}},
+\code{\link[=summarizer]{summarizer()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

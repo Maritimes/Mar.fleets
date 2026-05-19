@@ -84,9 +84,9 @@ summary <- summarizer(data = Halibut2017, byGr = TRUE)
        }
 }
 \seealso{
-Other simpleproducts: 
-\code{\link{get_vmstracks}()},
-\code{\link{summarize_locations}()}
+Other simpleproducts:
+\code{\link[=get_vmstracks]{get_vmstracks()}},
+\code{\link[=summarize_locations]{summarize_locations()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

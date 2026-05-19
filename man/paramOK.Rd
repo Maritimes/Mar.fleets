@@ -18,11 +18,11 @@ returns TRUE or FALSe, and informative messages
 This function looks for issues with sent parameters.
 }
 \seealso{
-Other utils: 
-\code{\link{clean_ISDB_Trip}()},
-\code{\link{go}()},
-\code{\link{isDraft}()},
-\code{\link{valuesOK}()}
+Other utils:
+\code{\link[=clean_ISDB_Trip]{clean_ISDB_Trip()}},
+\code{\link[=go]{go()}},
+\code{\link[=isDraft]{isDraft()}},
+\code{\link[=valuesOK]{valuesOK()}}
 }
 \author{
 Mike McMahon, \email{Mike.McMahon@dfo-mpo.gc.ca}

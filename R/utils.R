@@ -243,7 +243,7 @@ enable_local <- function(cxn= NULL,
     #change to fully qualified
     ISSETPROFILE  <- Mar.utils::ISSETPROFILE_enwidener(tmp$ISSETPROFILE)
     assign("ISSETPROFILE", ISSETPROFILE, envir = .GlobalEnv)
-    Mar.utils::save_encrypted(ISSETPROFILE, file     = rdata_file, compress = TRUE)
+    Mar.utils::save_encrypted(ISSETPROFILE, file     = rdata_file)
     rm(ISSETPROFILE, envir = .GlobalEnv)
   }
 
