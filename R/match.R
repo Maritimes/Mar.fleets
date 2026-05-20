@@ -29,7 +29,6 @@
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   args <- list(...)$args
-
   Obs_Trip_Name <- 0
   Hail_In_Conf_Code <- 0
   Hail_Out_Conf_Code <- 0
@@ -43,11 +42,11 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   matchNone <- NA
   Unmatchables <- 0
   MultiMatches <- 0
-
+  
   colnames(isdbTrips)[colnames(isdbTrips)=="TRIP_ISDB"] <- "TRIP_ID_ISDB"
   if (args$debug) t22 <- Mar.utils::where_now(returnTime = T)
   k <- TRIP_ID_MARF <- CLOSEST <- TRIP_ID_ISDB <- TRIP_ID_MARF_VRLICDATE <- CLOSEST1 <- PRIOR1 <- PRIOR2 <- NA
-
+  
   if(is.null(marfMatch) || is.null(isdbTrips) || !is.data.frame(isdbTrips) ){
     message(paste0("\n","No trips to try match against"))
     if (args$debug) {
@@ -60,13 +59,13 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   marfMatch <- clean_ISDB_Trip(df = marfMatch, field = "ISDB_TRIP", out_name = "ISDB_TRIP_M")
   isdbTrips <- clean_ISDB_Trip(df = isdbTrips, field = "TRIP", out_name = "ISDB_TRIP_O")
   isdbTrips$VR_LIC = paste0(isdbTrips$VR,"_",isdbTrips$LIC )
-
+  
   isdbTrips_tripcd_id <- isdbTrips
   # FOR EACH MATCH -----------------------------------------------------
   # 1 - identify fields which are in both marf and isdb
   # 2 - tick the appropriate column in isdb trips (indicating if matched)
   # 3 - add matches to df called matches
-
+  
   matchTripNames <- function(df = NULL){
     if (args$debug) t23 <- Mar.utils::where_now(returnTime = T)
     # MARFIS TRIP NAME ----------------------------------------------------------------------------
@@ -224,14 +223,14 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       return(thisMarfMatch)
     }
     match_LIC <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "LIC", by.y = "LICENCE_ID"))
-
+    
     if(nrow(match_LIC)>0){
       match_LIC$swapLIC <- F
     }else{
       match_LIC$swapLIC <- logical()
     }
     match_LIC_swap <- unique(merge(thisIsdbTrips, thisMarfMatch, by.x= "VR", by.y = "LICENCE_ID"))
-
+    
     if (nrow(match_LIC_swap)>0){
       match_LIC_swap$swapLIC <- T
       match_LIC <- rbind.data.frame(match_LIC, match_LIC_swap)
@@ -245,7 +244,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_LIC$TRIP_ID_ISDB, stepDesc = "matchTrips_LIC")
     if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_LIC$VR, stepDesc = "matchTrips_LIC")
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_LIC$LIC, stepDesc = "matchTrips_LIC")
-
+    
     if (args$debug) {
       t27_ <- proc.time() - t27
       message("\tExiting matchLIC() (",round(t27_[1],0),"s elapsed)")
@@ -254,7 +253,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
   }
   matchDate <- function(df = NULL){
     if (args$debug) t28 <- Mar.utils::where_now(returnTime = T)
-
+    
     #DATE RANGE --------------------------------------------------------
     thisIsdbTrips <- unique(df[!is.na(df$BOARD_DATE) & !is.na(df$LANDING_DATE), c("TRIP_ID_ISDB","BOARD_DATE","LANDING_DATE", "SRC", "VR", "LIC","TRIPCD_ID")])
     thisMarfMatch_F <- unique(marfMatch[, c("TRIP_ID_MARF", "T_DATE1","T_DATE2", "VR_NUMBER_FISHING", "LICENCE_ID")])
@@ -272,29 +271,29 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       }
       return(thisMarfMatch)
     }
-
+    
     #cross join of isdb and marf trips
     thisIsdbTripsDt<-data.table::setDT(thisIsdbTrips)
     thisMarfMatchDt<-data.table::setDT(thisMarfMatch)
-
+    
     xData<-data.table::setkey(thisIsdbTripsDt[,c(k=1,.SD)],k)[thisMarfMatchDt[,c(k=1,.SD)],allow.cartesian=TRUE][,k:=NULL]
-
+    
     xData[,"T1"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE1, units="days")))
     xData[,"T2"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE1, units="days")))
     xData[,"T3"]<- as.numeric(abs(difftime(xData$LANDING_DATE,xData$T_DATE2, units="days")))
     xData[,"T4"]<- as.numeric(abs(difftime(xData$BOARD_DATE,xData$T_DATE2, units="days")))
     xData$CLOSEST1 <- with(xData, pmin(T1, T2, T3, T4))
-
+    
     #below we first find the closest trips in time using the smallest difference of all calculated times
-  #  match_DateMin<- xData[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
+    #  match_DateMin<- xData[, {tmp <- CLOSEST1; .SD[tmp==min(tmp)] }, TRIP_ID_ISDB]
     match_DateMin <- xData[!is.na(CLOSEST1), .SD[which.min(CLOSEST1)], by = TRIP_ID_ISDB]
     match_DateMin <- as.data.frame(match_DateMin)
-
-
+    
+    
     #hard cutoff - anything more than maxTripDiff_Hr different is not a match, and is dropped here
     maxTripDiff_Day <- args$maxTripDiff_Hr/24
     match_DateMin <- match_DateMin[match_DateMin$CLOSEST1 <=maxTripDiff_Day,]
-
+    
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 >= 8,])>0) match_DateMin[match_DateMin$CLOSEST1 >= 8, "match_DATE_DETS"] <- "ISDB/MARF activity more than a week different"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 8,])>0) match_DateMin[match_DateMin$CLOSEST1 < 8, "match_DATE_DETS"] <- "ISDB/MARF activity within a week"
     if (nrow(match_DateMin[match_DateMin$CLOSEST1 < 3,])>0) match_DateMin[match_DateMin$CLOSEST1 < 3, "match_DATE_DETS"] <- "ISDB/MARF activity within 2 days"
@@ -303,57 +302,57 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
     # Subset match_DateMin based on date conditions
     withinners <- match_DateMin[(match_DateMin$T_DATE1 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE1 <= match_DateMin$LANDING_DATE) |
                                   (match_DateMin$T_DATE2 >= match_DateMin$BOARD_DATE & match_DateMin$T_DATE2 <= match_DateMin$LANDING_DATE), ]
-
-
+    
+    
     if (nrow(withinners) > 0) {
       match_DateMin <- match_DateMin[!(match_DateMin$TRIP_ID_ISDB %in% withinners$TRIP_ID_ISDB), ]
       withinners[,"match_DATE_DETS"] <- "ISDB/MARF activity overlap (i.e. ideal)"
     }
-
+    
     # Check if match_DateMin has rows
     if (nrow(match_DateMin) > 0) {
       match_DateMin <- data.table::as.data.table(match_DateMin)
       match_DateMin <- as.data.frame(match_DateMin[match_DateMin[, .I[CLOSEST1 == min(CLOSEST1)], by=TRIP_ID_MARF]$V1])
     }
-
+    
     # Combine withinners and match_DateMin if both have rows
     if (nrow(withinners) > 0 & nrow(match_DateMin) > 0) {
       match_DateMin <- rbind(withinners, match_DateMin)
     } else if (nrow(withinners) > 0) {
       match_DateMin <- withinners
     }
-
+    
     if (nrow(match_DateMin) > 0) {
       match_DateMin$T1 <- match_DateMin$T2 <- match_DateMin$T3 <- match_DateMin$T4 <- NULL
       match_DateMin$mVR <- match_DateMin$mLIC <- match_DateMin$mMix1 <- match_DateMin$mMix2 <- match_DateMin$mTripcd_id <- match_DateMin$match_Date <- FALSE
-
+      
       match_DateMin$mVR[match_DateMin$VR == match_DateMin$VR_NUMBER] <- TRUE
       match_DateMin$mLIC[match_DateMin$LIC == match_DateMin$LICENCE_ID] <- TRUE
       match_DateMin$mMix1[match_DateMin$VR == match_DateMin$LICENCE_ID] <- TRUE
       match_DateMin$mMix2[match_DateMin$VR_NUMBER == match_DateMin$LIC] <- TRUE
-
+      
       if (!is.null(args$tripcd_id)) {
         match_DateMin$mTripcd_id[match_DateMin$TRIPCD_ID %in% args$tripcd_id] <- TRUE
       }
-
+      
       match_DateMin$match_Date <- match_DateMin$mVR | match_DateMin$mLIC | match_DateMin$mMix1 | match_DateMin$mMix2 | match_DateMin$mTripcd_id
-
+      
       match_DateMin <- match_DateMin[match_DateMin$match_Date, ]
       match_DateMin$CLOSEST1 <- match_DateMin$SRC <- NULL
       colnames(match_DateMin)[colnames(match_DateMin) == "TRIP_ID_MARF"] <- "TRIP_ID_MARF_DATE"
     } else {
       match_DateMin$TRIP_ID_MARF_DATE <- numeric()
     }
-
+    
     if (!is.null(dbEnv$debugISDBTripIDs)) dbEnv$debugISDBTripIDs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugISDBTripIDs, expected = dbEnv$debugISDBTripIDs, expectedID = "debugISDBTripIDs", known = match_DateMin$TRIP_ID_ISDB, stepDesc = "matchTrips_date")
     if (!is.null(dbEnv$debugVRs)) dbEnv$debugVRs <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugVRs, expected = dbEnv$debugVRs, expectedID = "debugVRs", known = match_DateMin$VR, stepDesc = "matchTrips_date")
     if (!is.null(dbEnv$debugLics)) dbEnv$debugLics <- Mar.utils::updateExpected(quietly = T, df=dbEnv$debugLics, expected = dbEnv$debugLics, expectedID = "debugLics", known = match_DateMin$LIC, stepDesc = "matchTrips_date")
-
+    
     if (args$debug) {
       t28_ <- proc.time() - t28
       message("\tExiting matchDate() (",round(t28_[1],0),"s elapsed)")
     }
-
+    
     return(match_DateMin)
   }
   match_TripName <- matchTripNames(df = isdbTrips)
@@ -370,8 +369,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
                                          as.matrix(unique(match_Date[,c("TRIP_ID_ISDB","TRIP_ID_MARF_DATE")]))))
   colnames(knowncombos_all) <- c("TRIP_ID_ISDB", "TRIP_ID_MARF")
   if (nrow(knowncombos_all)>0){
-
-
+    
+    
     knowncombos_cnt  <- stats::aggregate(
       x = list(cnt = knowncombos_all$TRIP_ID_MARF),
       by = list(TRIP_ID_ISDB = knowncombos_all$TRIP_ID_ISDB,
@@ -432,7 +431,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       message("No matches found")
       matchGood <- matches
       matchNone <- marfMatch[!is.na(marfMatch$ISDB_TRIP) |!is.na(marfMatch$OBS_ID) | (!is.na(marfMatch$OBS_PRESENT) & marfMatch$OBS_PRESENT!="N") ,]
-
+      
       Unmatchables <- nrow(matchNone)
       if (nrow(matchNone)==0)matchNone <- NA
     }else{
@@ -442,7 +441,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       matches$PRIOR1 <- matches$match_TripName+matches$match_CONF_HI+matches$match_CONF_HO
       #PRIOR2 counts matches within acceptable date range with correct licence, vr and tripcd_id (if provided) - less specific
       matches$PRIOR2 <- (matches$match_Date & matches$match_LIC) + (matches$match_Date & matches$match_VR) + (matches$match_Date & matches$mTripcd_id)
-
+      
       matches <- data.table::setDT(matches)
       #Should multiple matches occur for a single ISDB trip, the following can break ties - favouring  :
       # 1) those matched on  trip name, Hail in code and hail out confirmation codes; followed by
@@ -458,7 +457,7 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
       }else{
         matches$mTripcd_id <- NULL
       }
-
+      
       matchNone <- matchNone[!(matchNone$TRIP_ID_MARF %in% matches$TRIP_ID_MARF),]
       if(nrow(matchNone)>0) {
         Unmatchables <- nrow(matchNone)
@@ -467,9 +466,9 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
         Unmatchables <- 0
         matchNone <- NA
       }
-
+      
       dups <- unique(matches[duplicated(matches[,"TRIP_ID_ISDB"]),"TRIP_ID_ISDB"])
-
+      
       if (length(dups)>0){
         dupRows <- unique(matches[matches$TRIP_ID_ISDB %in% dups,])
         dupRows[is.na(dupRows)] <- 0
@@ -481,8 +480,8 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
         MultiMatches <- 0
         dupRows <- NA
       }
-
-
+      
+      
       matchGood <- matches[!is.na(matches$TRIP_ID_MARF),]
       #not counting timeOverlap results as "matchNone" because there was really nothing to cause suspicion of a match.
       if (nrow(matchGood)>0){
@@ -545,33 +544,36 @@ match_trips <- function(isdbTrips = NULL, marfMatch = NULL, ...){
 #' Latitudes outside of 35:52 and Longitudes outside of -75:-45 are flagged and not used to match
 #' @noRd
 match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL, ...){
+  
   args <- list(...)$args
   if (args$debug) t23 <- Mar.utils::where_now(returnTime = T)
-
+  
   .I <- timeO <- timeM <- DATE_TIME<- EF_FISHED_DATETIME <-FISHSET_ID<- LOG_EFRT_STD_INFO_ID <- .SD <- NA
   `:=`<- function (x, value) value
   isdb_sets_o <- isdb_sets
   marf_sets_o <- marf_sets
   matchdf = matched_trips[!is.na(matched_trips$TRIP_ID_ISDB) & !is.na(matched_trips$TRIP_ID_MARF),c("TRIP_ID_ISDB","TRIP_ID_MARF")]
-
+  
   #only retain the sets from trips that we've matched
   #add marf trip id to isdb and isdb trip id to marf
-  isdb_sets <- unique(isdb_sets[isdb_sets$TRIP_ID %in% matchdf$TRIP_ID_ISDB,])
+
   colnames(isdb_sets)[colnames(isdb_sets)=="TRIP_ID"] <- "TRIP_ID_ISDB"
   colnames(isdb_sets)[colnames(isdb_sets)=="LATITUDE"] <- "LATITUDE_I"
   colnames(isdb_sets)[colnames(isdb_sets)=="LONGITUDE"] <- "LONGITUDE_I"
-  marf_sets <- unique(marf_sets[marf_sets$TRIP_ID %in% matchdf$TRIP_ID_MARF,c("LOG_EFRT_STD_INFO_ID", "TRIP_ID_MARF","EF_FISHED_DATETIME", "LATITUDE", "LONGITUDE" )])
-
+  isdb_sets <- unique(isdb_sets[isdb_sets$TRIP_ID_ISDB %in% matchdf$TRIP_ID_ISDB,])
+  
+  marf_sets <- unique(marf_sets[marf_sets$TRIP_ID_MARF %in% matchdf$TRIP_ID_MARF,c("LOG_EFRT_STD_INFO_ID", "TRIP_ID_MARF","EF_FISHED_DATETIME", "LATITUDE", "LONGITUDE" )])
+  
   #make lats and longs identifiable as marfis and add pseudo-set numbers to marfis data
   colnames(marf_sets)[colnames(marf_sets)=="LATITUDE"] <- "LATITUDE_M"
   colnames(marf_sets)[colnames(marf_sets)=="LONGITUDE"] <- "LONGITUDE_M"
-
+  
   qcer <- function(df=NULL, tripField = NULL,lat.field = "LATITUDE", lon.field = "LONGITUDE", timeField = NULL ){
     #this takes a df, and for each unique trip, it returns the number of unique values from the time field,
     #lat.field and lon.field (i.e. CNT_TIME, CNT_LAT and CNT_LON)
     #this is done to help assess whether or not times and/or positions are appropriate for differentiating
     #sets.  If they're all the same, no point trying to use them
-
+    
     if (args$debug) t24 <- Mar.utils::where_now(returnTime = T)
     df$BADTIM<- FALSE
     df$BADPOS<- FALSE
@@ -591,7 +593,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
       nsets_tim <- unique(nsets[,c(tripField), drop = F])
       nsets_tim$CNT_TIM <- 0
     }
-
+    
     if (nrow(nsets[nsets$BADPOS ==F,])>0){
       nsets_pos <- stats::aggregate(data=nsets[nsets$BADPOS ==F,],
                                     nsets[,lat.field]+nsets[,lon.field]~nsets[,tripField],
@@ -602,26 +604,33 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
       nsets_pos <- unique(nsets[,c(tripField), drop = F])
       nsets_pos$CNT_POS <- 0
     }
-
+    
     dets=merge(nsets_tim, nsets_pos, all=T)
     dets[is.na(dets)] <- 0
     dets$MAXMATCH <- pmax(dets$CNT_TIM, dets$CNT_POS, na.rm = T)
-
+    
     dets$CNT_TIM <- dets$CNT_POS <- NULL
     df<- merge(df, dets)
-
+    
     if (args$debug) {
       t24_ <- proc.time() - t24
       message("\tExiting qcer() (",round(t24_[1],0),"s elapsed)")
     }
     return(df)
   }
-  isdb_sets =qcer(df=isdb_sets, tripField = "TRIP_ID_ISDB", timeField = "DATE_TIME", lat.field = "LATITUDE_I", lon.field = "LONGITUDE_I")
-
-  colnames(isdb_sets)[colnames(isdb_sets)=="MAXMATCH"] <- "MAXMATCH_I"
-  colnames(isdb_sets)[colnames(isdb_sets)=="BADTIM"] <- "BADTIM_I"
-  colnames(isdb_sets)[colnames(isdb_sets)=="BADPOS"] <- "BADPOS_I"
-
+  if (nrow(isdb_sets)>0){
+  
+    isdb_sets =qcer(df=isdb_sets, tripField = "TRIP_ID_ISDB", timeField = "DATE_TIME", lat.field = "LATITUDE_I", lon.field = "LONGITUDE_I")
+    colnames(isdb_sets)[colnames(isdb_sets)=="MAXMATCH"] <- "MAXMATCH_I"
+    colnames(isdb_sets)[colnames(isdb_sets)=="BADTIM"] <- "BADTIM_I"
+    colnames(isdb_sets)[colnames(isdb_sets)=="BADPOS"] <- "BADPOS_I"
+  }else {
+    isdb_sets$MAXMATCH_I <- numeric()
+    isdb_sets$BADTIM_I <- logical()
+    isdb_sets$BADPOS_I <- logical()
+  }
+  
+  
   marf_sets =qcer(df=marf_sets, tripField = "TRIP_ID_MARF", timeField = "EF_FISHED_DATETIME", lat.field = "LATITUDE_M", lon.field = "LONGITUDE_M")
   colnames(marf_sets)[colnames(marf_sets)=="MAXMATCH"] <- "MAXMATCH_M"
   colnames(marf_sets)[colnames(marf_sets)=="BADTIM"] <- "BADTIM_M"
@@ -631,10 +640,10 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf <- merge(megadf, marf_sets, by.x="TRIP_ID_MARF", by.y="TRIP_ID_MARF", all = T)
   #if there are no marfis sets, drop the recs -- can't match
   megadf <- megadf[!is.na(megadf$LOG_EFRT_STD_INFO_ID),]
-
+  
   megadf$MAXMATCH <- pmin(megadf$MAXMATCH_I, megadf$MAXMATCH_M) #not sure if we'll get NAs here?
   megadf$MAXMATCH_I <- megadf$MAXMATCH_M <- NULL
-
+  
   # calc time between isdb and marfis and flag those that exceed tolerance (maxSetDiff_hr)
   megadf$DUR_DIFF <- NA
   megadf[,"DUR_DIFF"]<- as.numeric(abs(difftime(megadf$DATE_TIME,megadf$EF_FISHED_DATETIME, units="hours")))
@@ -651,10 +660,10 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   megadf$BADTIM_I <- megadf$BADTIM_M <- NULL
   # calc dist between isdb and marfis
   megadf$BADPOS <- FALSE
-
+  
   megadf[(megadf$BADPOS_I ==T | megadf$BADPOS_M ==T | is.na(megadf$LATITUDE_I)| is.na(megadf$LONGITUDE_I)| is.na(megadf$LATITUDE_M)| is.na(megadf$LONGITUDE_M)), "BADPOS"]<-TRUE
   megadf$BADPOS_I <- megadf$BADPOS_M <- NULL
-
+  
   megadf[,"DIST_DIFF"]<- round(geosphere::distGeo(p1 = megadf[,c("LONGITUDE_I","LATITUDE_I")],
                                                   p2 = megadf[,c("LONGITUDE_M","LATITUDE_M")]),0)
   megadf <- megadf[megadf$DIST_DIFF <= (args$maxSetDiff_Km*1000),]
@@ -699,8 +708,8 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
         #multiple best?  A tie?
         warning("Something weird happened while attempting to match sets.  Please let Mike.McMahon@dfo-mpo.gc.ca know what you were just doing - maybe send him the script you just ran?")
       }
-
-
+      
+      
       thisTrip <- thisTrip[!(thisTrip$FISHSET_ID %in% thisTrip_MATCHED$FISHSET_ID | thisTrip$LOG_EFRT_STD_INFO_ID %in% thisTrip_MATCHED$LOG_EFRT_STD_INFO_ID),]
       thisTrip_MATCHED_ALL <- rbind(thisTrip_MATCHED_ALL, thisTrip_MATCHED)
       if(nrow(thisTrip)==0)break
@@ -709,7 +718,7 @@ match_sets <- function(isdb_sets = NULL, matched_trips = NULL, marf_sets = NULL,
   }
   res= list()
   res[["MAP_ISDB_MARFIS_SETS"]] <- unique(as.data.frame(matches_all))
-
+  
   if (args$debug) {
     t23_ <- proc.time() - t23
     message("\tExiting match_sets() (",round(t23_[1],0),"s elapsed)")

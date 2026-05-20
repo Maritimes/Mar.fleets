@@ -29,7 +29,7 @@
 #' about the ISDB sets.
 #' @author  Mike McMahon, \email{Mike.McMahon@@dfo-mpo.gc.ca}
 get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL, dateStart = NULL, dateEnd = NULL, extract_user = NULL, extract_computer = NULL,...){
-  args <-list(...)$args
+    args <-list(...)$args
   if (args$debug) t13 <- Mar.utils::where_now(returnTime = T)
   ISTRIPS <- ISFISHSETS <- ISSETPROFILE <- ISCATCHES <- ISSPECIESCODES <- NA
   if (is.null(get_marfis)){
@@ -112,7 +112,6 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
         isdb_TRIPIDs_all <- isdb_TRIPIDs_all[isdb_TRIPIDs_all$TRIP_ISDB %in% isdb_TRIPS_all$TRIP_ID_ISDB,]
         isdb_SETS_all <- do.call(get_isdb_sets, list(isdbTrips = isdb_TRIPIDs_all, args = args))
         sets <- do.call(match_sets, list(isdb_sets = isdb_SETS_all, matched_trips = isdb_TRIPS_all, marf_sets = marfSets, args = args))
-
         if (!all(is.na(sets))) {
           # if (args$debug) { message("\tDEBUG: Matched ", nrow(sets$MAP_ISDB_MARFIS_SETS), " ISDB sets","\n")
 
@@ -123,6 +122,7 @@ get_isdb <- function(thisFleet = NULL, get_marfis = NULL, keepSurveyTrips = NULL
           isdb_SETS_all$TRIP_ID_ISDB <- isdb_SETS_all$TRIP_ID_MARF <- NULL
 
           isdb_SETS_all <- merge(isdb_SETS_all,unique(isdb_TRIPS_all[,c("TRIP_ID_ISDB", "TRIP_ID_MARF")]), all.x=T, by.x="TRIP_ID", by.y="TRIP_ID_ISDB")
+          
           if(!args$manualMatch){
             if(args$useLocal){
               Mar.utils::get_data_tables(schema = "<NA>", data.dir = get_pesd_fl_dir(),
@@ -378,8 +378,12 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
 
     ISFISHSETS<- ISFISHSETS[ISFISHSETS$TRIP_ID %in% isdbTrips$TRIP_ISDB,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFAREA_ID", "GEAR_ID")]
     colnames(ISFISHSETS)[colnames(ISFISHSETS)=="NAFAREA_ID"] <- "NAFO_ISDB_SETS"
-    ISSETPROFILE<-ISSETPROFILE[ISSETPROFILE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
 
+    # ISSETPROFILE<-ISSETPROFILE[ISSETPROFILE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,c("FISHSET_ID","SET_NO","DATE_TIME1","DATE_TIME2","DATE_TIME3","DATE_TIME4","LAT1","LONG1","LAT2","LONG2","LAT3","LONG3","LONG4","LAT4")]
+    ISSETPROFILE<-ISSETPROFILE[ISSETPROFILE$FISHSET_ID %in% ISFISHSETS$FISHSET_ID,]
+    
+    ISSETPROFILE <- Mar.utils::ISSETPROFILE_enwidener(ISSETPROFILE)
+    
     ISSETPROFILE$DATE_TIME <- as.POSIXct(ifelse(ISSETPROFILE$DATE_TIME1 > badDate,
                                                 ifelse(ISSETPROFILE$DATE_TIME2 > badDate,
                                                        ifelse(ISSETPROFILE$DATE_TIME3 > badDate, ISSETPROFILE$DATE_TIME4, ISSETPROFILE$DATE_TIME3),
@@ -439,8 +443,9 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   ISSETPROFILE = cbind(ISSETPROFILE,coords)
 
   ISFISHSETS <- unique(ISFISHSETS[,c("TRIP_ID", "FISHSET_ID", "SOURCE", "SETCD_ID", "NAFO_ISDB_SETS")])
-  ISSETPROFILE <- unique(ISSETPROFILE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE","GEARCD_ID")])
 
+  ISSETPROFILE <- unique(ISSETPROFILE[,c("FISHSET_ID", "SET_NO", "DATE_TIME", "LATITUDE","LONGITUDE","GEARCD_ID")])
+  # 
   ISSETPROFILE[,c("LATITUDE","LONGITUDE")] <- as.numeric(as.character(unlist(ISSETPROFILE[,c("LATITUDE","LONGITUDE")])))
 
   if (nrow(ISSETPROFILE)==0){
@@ -472,7 +477,7 @@ get_isdb_sets<-function(isdbTrips=NULL,...){
   if (args$debug) {
     t15_ <- proc.time() - t15
     message("\tExiting get_isdb_sets() (",round(t15_[1],0),"s elapsed)")
-  }
+  }  
   return(ISSETPROFILE)
 }
 
